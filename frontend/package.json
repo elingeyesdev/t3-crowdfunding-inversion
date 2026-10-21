@@ -1,0 +1,11 @@
+{
+  "name": "unifundme-ui",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npm --prefix .. run dev",
+    "build": "npm --prefix .. run build",
+    "lint": "eslint ."
+  }
+}

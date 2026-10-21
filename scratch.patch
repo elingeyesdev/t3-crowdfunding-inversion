@@ -1,0 +1,30 @@
+--- backend/src/modules/reward-tiers/services/reward-tier.service.ts
++++ backend/src/modules/reward-tiers/services/reward-tier.service.ts
+@@ -46,8 +46,12 @@
+     if (tier.campaignId !== campaignId) throw new BadRequestException('El nivel de recompensa no pertenece a esta campaña');
+ 
+     // Validar propiedad de la campaña
+-    const campaign = await this.pool.query(`SELECT creator_id FROM campaigns WHERE id = $1`, [campaignId]);
++    const campaign = await this.pool.query(`SELECT creator_id, status FROM campaigns WHERE id = $1`, [campaignId]);
+     if (campaign.rows[0].creator_id !== userId) throw new ForbiddenException('No tienes permiso');
++    
++    if (campaign.rows[0].status !== 'draft' && campaign.rows[0].status !== 'pending_review' && campaign.rows[0].status !== 'in_review') {
++      throw new BadRequestException('No se pueden modificar recompensas de una campaña que ya está activa o finalizada.');
++    }
+ 
+     return this.repository.update(rewardId, dto);
+   }
+@@ -58,8 +62,12 @@
+     if (!tier) throw new NotFoundException('Nivel de recompensa no encontrado');
+     
+     // Validar propiedad
+-    const campaign = await this.pool.query(`SELECT creator_id FROM campaigns WHERE id = $1`, [campaignId]);
++    const campaign = await this.pool.query(`SELECT creator_id, status FROM campaigns WHERE id = $1`, [campaignId]);
+     if (campaign.rows[0].creator_id !== userId) throw new ForbiddenException('No tienes permiso');
++
++    if (campaign.rows[0].status !== 'draft' && campaign.rows[0].status !== 'pending_review' && campaign.rows[0].status !== 'in_review') {
++      throw new BadRequestException('No se pueden eliminar recompensas de una campaña que ya está activa o finalizada.');
++    }
+ 
+     // No permitir borrar si ya hay inversores asociados
+     if (tier.currentClaims > 0) {

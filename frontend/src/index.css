@@ -1,0 +1,124 @@
+﻿@import "tailwindcss";
+
+@source "./**/*.{ts,tsx}";
+
+/* 
+   Plus Jakarta Sans — Design System
+   Inspired by GoFundMe's clean, human visual language
+*/
+
+:root {
+  /* Core brand palette — brighter, friendlier green */
+  --primary:        #72B626;
+  --primary-dark:   #4a7f1a;
+  --primary-light:  #f5fce8;
+  --primary-mid:    #4a7f1a;
+
+  /* Neutrals */
+  --text-heading:   #111827;
+  --text-body:      #374151;
+  --text-muted:     #6B7280;
+  --text-subtle:    #9CA3AF;
+
+  /* Backgrounds */
+  --bg-app:         #F9FAFB;
+  --bg-white:       #FFFFFF;
+  --bg-surface:     #F3F4F6;
+
+  /* Borders */
+  --border:         #E5E7EB;
+  --border-light:   #F3F4F6;
+
+  /* Alerts */
+  --alert-amber:    #D97706;
+  --alert-red:      #DC2626;
+  --alert-red-bg:   #FEF2F2;
+
+  /* Font */
+  --font-main: 'Plus Jakarta Sans', sans-serif;
+}
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+
+  --color-primary:       var(--primary);
+  --color-primary-dark:  var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+  --color-bg-app:        var(--bg-app);
+  --color-border:        var(--border);
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-main);
+    background-color: var(--bg-app);
+    color: var(--text-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  a {
+    color: var(--primary);
+    transition: color 0.15s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-heading);
+    font-weight: 700;
+  }
+}
+
+/* Scrollbar — subtle */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
+/* Stories avatar bar — hide scrollbar while keeping scroll behaviour */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Skeleton pulse animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+/* Gentle fade-up for cards */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fadeUp 0.35s ease forwards;
+}
