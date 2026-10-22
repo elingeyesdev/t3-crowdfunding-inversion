@@ -76,6 +76,20 @@ class MigrationTest extends TestCase
         $this->assertDatabaseMissing('users', ['email' => 'bad@example.test']);
     }
 
+    public function test_registration_normalizes_email_before_checking_uniqueness(): void
+    {
+        $this->postJson('/api/v1/users/register', ['email' => 'New@Example.test', 'password' => 'Password123'])->assertCreated()->assertJsonPath('data.email', 'new@example.test');
+        $this->postJson('/api/v1/users/register', ['email' => 'NEW@EXAMPLE.TEST', 'password' => 'Password123'])->assertUnprocessable()->assertJsonValidationErrors('email');
+        $this->assertDatabaseCount('users', 1);
+    }
+
+    public function test_protected_api_returns_json_unauthorized_without_accept_header(): void
+    {
+        foreach (['/api/v1/auth/me', '/api/v1/admin/users', '/api/v1/chat/conversations'] as $path) {
+            $this->get($path)->assertUnauthorized()->assertHeader('Content-Type', 'application/json');
+        }
+    }
+
     public function test_inactive_user_cannot_login_or_use_existing_token(): void
     {
         $u = $this->account();

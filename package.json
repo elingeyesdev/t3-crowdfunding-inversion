@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b frontend/tsconfig.json && vite build",
+    "postbuild": "node -e \"require('node:fs').rmSync('public/hot', { force: true })\"",
     "lint": "npm --prefix frontend run lint",
     "legacy:export": "node scripts/export-legacy.cjs"
   },

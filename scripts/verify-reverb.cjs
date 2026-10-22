@@ -7,8 +7,8 @@ const legacyRequire = createRequire(resolve(__dirname, '../backend/package.json'
 const WebSocket = legacyRequire('ws');
 const env = legacyRequire('dotenv').parse(fs.readFileSync(resolve(__dirname, '../.env')));
 const channel = 'private-migration-verification';
-const port = env.REVERB_PORT || '9000';
-const ws = new WebSocket(`ws://127.0.0.1:${port}/app/${env.REVERB_APP_KEY}?protocol=7&client=js&version=8.4.0`, { origin: 'http://localhost:8000' });
+const port = process.env.REVERB_PORT || env.REVERB_PORT || '9091';
+const ws = new WebSocket(`ws://127.0.0.1:${port}/app/${env.REVERB_APP_KEY}?protocol=7&client=js&version=8.4.0`, { origin: env.APP_URL || 'http://localhost:8765' });
 let verified = false;
 const timeout = setTimeout(() => { console.error('Reverb no respondió a tiempo.'); process.exitCode = 1; ws.close(); }, 10000);
 ws.on('message', async raw => {

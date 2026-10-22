@@ -9,5 +9,5 @@ export default defineConfig({
     { find: /^es-toolkit\/compat$/, replacement: 'lodash' },
     { find: /^es-toolkit\/compat\/(.*)/, replacement: 'lodash/$1' },
   ] },
-  server: { host: '127.0.0.1', port: 5173, strictPort: true },
+  server: { host: '127.0.0.1', port: 8766, strictPort: true },
 });

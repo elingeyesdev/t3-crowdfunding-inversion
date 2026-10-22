@@ -10,12 +10,14 @@ La configuración local ya apunta a `database/migrated.sqlite`, que contiene la 
 composer dev
 ```
 
-Abre **http://localhost:8000**. El comando inicia Laravel, Vite y Reverb. Para usar los archivos ya compilados bastan dos terminales:
+Abre **http://localhost:8765**. El comando inicia Laravel, Vite y Reverb. Para usar los archivos ya compilados bastan dos terminales:
 
 ```powershell
-php artisan serve
+php artisan serve --port=8765
 php artisan reverb:start
 ```
+
+En este equipo se usan los puertos 8765 (Laravel), 8766 (Vite) y 9091 (Reverb), porque los puertos anteriores no respondían. `npm run build` elimina el marcador temporal `public/hot` para que Laravel sirva la compilación y no intente conectarse a un Vite detenido.
 
 No hace falta iniciar NestJS. `backend/` conserva el código anterior y los archivos originales como referencia para verificar la migración.
 
@@ -86,7 +88,7 @@ Copia `backend/uploads` a `public/uploads` para conservar las URL anteriores. Lo
 
 ## Configuración externa y despliegue
 
-Google necesita el callback `http://localhost:8000/api/v1/auth/google/callback` autorizado en la consola de Google (o el dominio HTTPS definitivo). Las credenciales existentes de Google y DeepSeek se trasladaron al `.env` local sin incluirlas en archivos versionados. La autenticación externa y las respuestas reales de IA requieren credenciales válidas; las pruebas no consumen esos servicios.
+Google necesita el callback `http://localhost:8765/api/v1/auth/google/callback` autorizado en la consola de Google (o el dominio HTTPS definitivo). Las credenciales existentes de Google y DeepSeek se trasladaron al `.env` local sin incluirlas en archivos versionados. La autenticación externa y las respuestas reales de IA requieren credenciales válidas; las pruebas no consumen esos servicios.
 
 En producción configura `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL`, las credenciales de base de datos y secretos propios. El document root debe ser **`public/`**. Ejecuta `composer install --no-dev`, `npm ci`, `npm run build`, `php artisan migrate --force`, `php artisan storage:link` y `php artisan optimize`. Ejecuta Reverb como servicio con HTTPS/WebSocket y configura su host público, puerto y `REVERB_ALLOWED_ORIGINS`. Los cambios `VITE_REVERB_*` requieren recompilar React. Los datos financieros siguen usando saldo simulado, como en el proyecto original.
 
@@ -100,6 +102,8 @@ composer validate --strict
 
 Las pruebas usan SQLite en memoria: verifican autenticación, compatibilidad de contraseñas, contratos de API, roles, propiedad de recursos, aportes, precisión decimal, reembolsos, recompensas, PDF/CSV, KYC privado, comentarios, chat e importación reversible. La concurrencia con bloqueo de filas debe comprobarse también en el motor elegido para producción; SQLite serializa escrituras y no reproduce el comportamiento de MySQL/PostgreSQL.
 
-Resultado de la verificación local: **27 pruebas y 151 aserciones correctas**, compilación TypeScript/Vite completa, manifiestos de dependencias válidos y rutas cacheables. El bundle principal conserva el tamaño de la interfaz original y Vite avisa que supera 500 kB; no impide compilar ni ejecutar la aplicación.
+Resultado de la verificación local: **29 pruebas y 166 aserciones correctas**, compilación TypeScript/Vite completa, manifiestos de dependencias válidos y rutas cacheables. El bundle principal conserva el tamaño de la interfaz original y Vite avisa que supera 500 kB; no impide compilar ni ejecutar la aplicación.
 
-La conexión WebSocket, la suscripción privada y la publicación de un evento se comprobaron contra Reverb local en el puerto 9000 (8080 está bloqueado en este equipo). El script `node scripts/verify-reverb.cjs` repite esa comprobación sin crear registros; utiliza `ws` del backend anterior como dependencia de verificación.
+ESLint todavía reporta deuda previa de tipado y reglas de React; `npm run lint` no pasa. Se corrigió el orden condicional de hooks del panel de estadísticas y se añadieron regresiones para correos duplicados con mayúsculas y solicitudes a la API sin sesión ni cabecera Accept. La comparación con la exportación histórica detecta un cambio en `users.last_login_ip`; una base que ya recibe sesiones puede diferir de esa instantánea.
+
+La conexión WebSocket, la suscripción privada y la publicación de un evento se comprobaron contra Reverb local en el puerto 9091 (8000, 8080 y 9000 no responden en este equipo). El script `node scripts/verify-reverb.cjs` repite esa comprobación sin crear registros; utiliza `ws` del backend anterior como dependencia de verificación.

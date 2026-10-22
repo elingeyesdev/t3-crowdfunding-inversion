@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -44,6 +44,11 @@ export function CampaignAnalyticsDashboard({ finance, startDate, createdAt }: Pr
     );
   }
 
+  return <CampaignAnalyticsContent finance={finance} startDate={startDate} createdAt={createdAt} />;
+}
+
+function CampaignAnalyticsContent({ finance, startDate, createdAt }: Props & { finance: CampaignFinancialProgress }) {
+  const [now] = useState(Date.now);
   const {
     currentAmount,
     goalAmount,
@@ -59,9 +64,9 @@ export function CampaignAnalyticsDashboard({ finance, startDate, createdAt }: Pr
       return { status: 'success', text: '¡Meta 100% alcanzada exitosamente!', days: 0 };
     }
 
-    const startVal = startDate || createdAt || new Date();
+    const startVal = startDate || createdAt || now;
     const startMs = new Date(startVal).getTime();
-    const elapsedMs = Date.now() - startMs;
+    const elapsedMs = now - startMs;
     const daysElapsed = Math.max(1, Math.ceil(elapsedMs / (1000 * 60 * 60 * 24)));
 
     // Tasa de recaudación diaria promedio
@@ -84,13 +89,13 @@ export function CampaignAnalyticsDashboard({ finance, startDate, createdAt }: Pr
       days: projectedDays,
       dailyRate
     };
-  }, [currentAmount, goalAmount, startDate, createdAt]);
+  }, [currentAmount, goalAmount, startDate, createdAt, now]);
 
   // 2. Gráfico de Evolución Temporal (acumulado diario)
   const chartData = useMemo(() => {
     if (dailyProgress.length === 0) {
       // Si no hay aportes, mostrar un punto inicial en 0
-      const initialDate = startDate ? new Date(startDate) : new Date();
+      const initialDate = new Date(startDate || now);
       const formattedDate = initialDate.toLocaleDateString('es', { day: 'numeric', month: 'short' });
       return [{ date: formattedDate, accumulated: 0 }];
     }
@@ -105,7 +110,7 @@ export function CampaignAnalyticsDashboard({ finance, startDate, createdAt }: Pr
         accumulated: p.accumulatedAmount
       };
     });
-  }, [dailyProgress, startDate]);
+  }, [dailyProgress, startDate, now]);
 
   // 3. Desglose de Fuentes de Financiamiento (Donut Chart)
   const pieData = useMemo(() => {

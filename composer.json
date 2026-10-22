@@ -46,7 +46,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently \"php artisan serve\" \"php artisan reverb:start\" \"npm run dev\" --names=laravel,reverb,vite --kill-others"
+            "npx concurrently \"php artisan serve --port=8765\" \"php artisan reverb:start\" \"npm run dev\" --names=laravel,reverb,vite --kill-others"
         ],
         "test": [
             "@php artisan config:clear --ansi",
