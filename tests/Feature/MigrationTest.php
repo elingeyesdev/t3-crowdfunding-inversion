@@ -227,6 +227,74 @@ class MigrationTest extends TestCase
             ->assertJsonPath('data.fundingPlan.0.percentage', 60);
     }
 
+    public function test_campaign_financial_traceability_ledger_and_movements(): void
+    {
+        $u = $this->account('entrepreneur');
+        $c = $this->campaign($u, ['goal_amount' => 1000, 'status' => 'published']);
+
+        // An investor makes a contribution of 500 BOB
+        $investor = $this->account('investor');
+        $this->asUser($investor)->postJson('/api/v1/investments', [
+            'campaignId' => $c->id,
+            'amount' => 500,
+        ])->assertCreated();
+
+        // The entrepreneur records an expense movement with receipt
+        $response = $this->asUser($u)->post('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/financial-movements', [
+            'type' => 'expense',
+            'concept' => 'Compra de Servidor y Licencias Cloud',
+            'category' => 'Equipamiento',
+            'amount' => 150,
+            'movementDate' => '2026-10-26',
+            'referenceNumber' => 'FAC-9988',
+            'notes' => 'Servidor de base de datos para el prototipo',
+            'receipt' => UploadedFile::fake()->create('factura_servidor.pdf', 15, 'application/pdf'),
+        ], ['Accept' => 'application/json'])->assertCreated();
+
+        $movementId = $response->json('data.id');
+        $this->assertDatabaseHas('campaign_financial_movements', [
+            'id' => $movementId,
+            'campaign_id' => $c->id,
+            'type' => 'expense',
+            'amount' => 150,
+            'reference_number' => 'FAC-9988',
+        ]);
+        $this->assertNotNull($response->json('data.receiptUrl'));
+
+        // Public consultation of the financial traceability ledger
+        $ledger = $this->getJson('/api/v1/campaigns/'.$c->id.'/financial-ledger')
+            ->assertOk()
+            ->json('data');
+
+        $this->assertEquals(500, $ledger['summary']['totalIncome']);
+        $this->assertEquals(150, $ledger['summary']['totalExpense']);
+        $this->assertEquals(350, $ledger['summary']['balance']);
+        $this->assertEquals(30, $ledger['summary']['executionPercentage']); // 150 / 500 * 100
+        $this->assertCount(1, $ledger['expensesByCategory']);
+        $this->assertEquals('Equipamiento', $ledger['expensesByCategory'][0]['category']);
+
+        // Another entrepreneur cannot add movements to this campaign
+        $other = $this->account('entrepreneur');
+        $this->asUser($other)->postJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/financial-movements', [
+            'type' => 'expense',
+            'concept' => 'Intento de gasto no autorizado',
+            'category' => 'Fraude',
+            'amount' => 100,
+            'movementDate' => '2026-10-26',
+        ])->assertForbidden();
+
+        // Entrepreneur can update notes
+        $this->asUser($u)->patchJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/financial-movements/'.$movementId, [
+            'notes' => 'Notas corregidas y auditadas',
+        ])->assertOk()->assertJsonPath('data.notes', 'Notas corregidas y auditadas');
+
+        // Entrepreneur can delete manual expense
+        $this->asUser($u)->deleteJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/financial-movements/'.$movementId)
+            ->assertOk();
+
+        $this->assertDatabaseMissing('campaign_financial_movements', ['id' => $movementId]);
+    }
+
     public function test_investment_updates_balances_rewards_ledger_and_notifications_once(): void
     {
         $c = $this->campaign();

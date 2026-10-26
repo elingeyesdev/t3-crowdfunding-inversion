@@ -39,4 +39,56 @@ class CampaignFinance
 
         return [...$progress, 'grossAmount' => $c->current_amount, 'platformFeePercentage' => 5, 'platformFee' => $fee, 'netAmount' => round($c->current_amount - $fee, 2), 'daysElapsed' => $days, 'dailyRate' => round($rate, 2), 'projectedRemainingDays' => $rate > 0 ? (int) ceil(max(0, $c->goal_amount - $c->current_amount) / $rate) : null];
     }
+
+    public function ledger(Campaign $campaign): array
+    {
+        $movements = $campaign->financialMovements()->with('creator')->get();
+        $incomes = $movements->where('type', 'income');
+        $expenses = $movements->where('type', 'expense');
+
+        $totalIncome = (float) $incomes->sum('amount');
+        $totalExpense = (float) $expenses->sum('amount');
+        $balance = round($totalIncome - $totalExpense, 2);
+
+        $expensesByCategory = $expenses->groupBy('category')->map(function ($items, $cat) use ($totalExpense) {
+            $sum = (float) $items->sum('amount');
+
+            return [
+                'category' => $cat,
+                'totalAmount' => $sum,
+                'count' => $items->count(),
+                'percentage' => $totalExpense > 0 ? round(($sum / $totalExpense) * 100, 2) : 0,
+            ];
+        })->values()->all();
+
+        return [
+            'campaignId' => $campaign->id,
+            'campaignTitle' => $campaign->title,
+            'currency' => $campaign->currency,
+            'summary' => [
+                'totalIncome' => $totalIncome,
+                'totalExpense' => $totalExpense,
+                'balance' => $balance,
+                'executionPercentage' => $totalIncome > 0 ? round(($totalExpense / $totalIncome) * 100, 2) : 0,
+                'movementCount' => $movements->count(),
+                'incomeCount' => $incomes->count(),
+                'expenseCount' => $expenses->count(),
+            ],
+            'expensesByCategory' => $expensesByCategory,
+            'movements' => $movements->map(fn ($m) => [
+                'id' => $m->id,
+                'type' => $m->type,
+                'concept' => $m->concept,
+                'category' => $m->category,
+                'amount' => $m->amount,
+                'currency' => $m->currency,
+                'movementDate' => $m->movement_date?->format('Y-m-d'),
+                'referenceNumber' => $m->reference_number,
+                'receiptUrl' => $m->receipt_url,
+                'notes' => $m->notes,
+                'status' => $m->status,
+                'createdAt' => $m->created_at,
+            ])->values()->all(),
+        ];
+    }
 }
