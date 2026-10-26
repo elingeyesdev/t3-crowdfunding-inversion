@@ -1,4 +1,4 @@
-﻿import axios from 'axios';
+import axios from 'axios';
 import type {
   EntrepreneurCampaign,
   CreateCampaignDto,
@@ -289,5 +289,41 @@ export async function createCampaignUpdate(
     );
     return data.data;
   }
+}
+
+export async function getCampaignFundingPlan(campaignId: string): Promise<any[]> {
+  const { data } = await api.get<ApiSuccessResponse<any[]>>(
+    `/campaigns/${campaignId}/funding-plan`
+  );
+  return data.data;
+}
+
+export async function updateCampaignFundingPlan(
+  campaignId: string,
+  fundingPlan: any[]
+): Promise<any[]> {
+  const { data } = await api.put<ApiSuccessResponse<any[]>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/funding-plan`,
+    { fundingPlan }
+  );
+  return data.data;
+}
+
+export async function addCampaignFundingPlanItem(
+  campaignId: string,
+  item: any
+): Promise<any> {
+  const { data } = await api.post<ApiSuccessResponse<any>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/funding-plan`,
+    item
+  );
+  return data.data;
+}
+
+export async function deleteCampaignFundingPlanItem(
+  campaignId: string,
+  itemId: string
+): Promise<void> {
+  await api.delete(`/entrepreneurs/me/campaigns/${campaignId}/funding-plan/${itemId}`);
 }
 

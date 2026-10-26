@@ -24,6 +24,7 @@ Route::get('campaigns/public/{campaign}/financial-progress', [CampaignController
 Route::post('campaigns/public/{campaign}/view', [CampaignController::class, 'view'])->middleware('throttle:60,1');
 Route::get('campaigns/{campaign}/comments', [CommunityController::class, 'comments']);
 Route::get('campaigns/{campaign}/rewards', [RewardController::class, 'index']);
+Route::get('campaigns/{campaign}/funding-plan', [CampaignController::class, 'fundingPlan']);
 Route::post('ai-support/chat', [AiController::class, 'chat'])->middleware('throttle:20,1');
 Route::get('private-files/{path}', [FileController::class, 'show'])->where('path', '.*')->name('private.file')->middleware('signed');
 
@@ -66,6 +67,10 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::post('campaigns/{campaign}/documents', [CampaignController::class, 'uploadDocument']);
         Route::delete('campaigns/{campaign}/documents/{document}', [CampaignController::class, 'deleteDocument']);
         Route::post('campaigns/{campaign}/updates', [CampaignController::class, 'update']);
+        Route::get('campaigns/{campaign}/funding-plan', [CampaignController::class, 'fundingPlan']);
+        Route::put('campaigns/{campaign}/funding-plan', [CampaignController::class, 'saveFundingPlan']);
+        Route::post('campaigns/{campaign}/funding-plan', [CampaignController::class, 'addFundingPlanItem']);
+        Route::delete('campaigns/{campaign}/funding-plan/{item}', [CampaignController::class, 'deleteFundingPlanItem']);
     });
     Route::prefix('investments')->middleware('roles:investor')->group(function () {
         Route::get('me', [InvestmentController::class, 'index']);

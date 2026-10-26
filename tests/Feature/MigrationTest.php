@@ -116,6 +116,32 @@ class MigrationTest extends TestCase
         $this->getJson('/api/v1/campaigns/public/'.$draft->id)->assertNotFound();
     }
 
+    public function test_public_catalog_categories_and_filtering(): void
+    {
+        $categories = Category::where('is_active', true)->get();
+        $response = $this->getJson('/api/v1/categories')->assertOk();
+        $response->assertJsonPath('data.0.isActive', true);
+        $this->assertGreaterThanOrEqual(1, count($response->json('data')));
+
+        $catA = $categories[0];
+        $catB = $categories[1];
+
+        $campA = $this->campaign(attrs: ['category_id' => $catA->id, 'title' => 'Proyecto Tech Alpha', 'status' => 'published']);
+        $campB = $this->campaign(attrs: ['category_id' => $catB->id, 'title' => 'Proyecto Arte Beta', 'status' => 'published']);
+
+        // Filter by category A
+        $this->getJson('/api/v1/campaigns/public?categoryId='.$catA->id)
+            ->assertOk()
+            ->assertJsonPath('data.meta.totalItems', 1)
+            ->assertJsonPath('data.data.0.id', $campA->id);
+
+        // Search by title keyword
+        $this->getJson('/api/v1/campaigns/public?q=Alpha')
+            ->assertOk()
+            ->assertJsonPath('data.meta.totalItems', 1)
+            ->assertJsonPath('data.data.0.id', $campA->id);
+    }
+
     public function test_profile_fields_cannot_change_kyc_or_invested_total(): void
     {
         $u = $this->account();
@@ -148,6 +174,57 @@ class MigrationTest extends TestCase
         $this->asUser($other)->getJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id)->assertForbidden();
         $this->patchJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id, ['title' => 'Intento de edición'])->assertForbidden();
         $this->postJson('/api/v1/campaigns/'.$c->id.'/rewards', ['title' => 'Recompensa', 'minPercentage' => 0, 'maxPercentage' => 100])->assertForbidden();
+    }
+
+    public function test_campaign_funding_plan_management_and_public_visibility(): void
+    {
+        $u = $this->account('entrepreneur');
+        $c = $this->campaign($u, ['goal_amount' => 1000, 'status' => 'draft']);
+
+        // Entrepreneur creates a funding plan with categories and amounts
+        $this->asUser($u)->putJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/funding-plan', [
+            'fundingPlan' => [
+                ['category' => 'Desarrollo de Software', 'description' => 'Servidores y backend', 'amount' => 600],
+                ['category' => 'Marketing Digital', 'description' => 'Anuncios y difusión', 'amount' => 300],
+                ['category' => 'Costos Operativos', 'description' => 'Trámites legales', 'amount' => 100],
+            ],
+        ])->assertOk()->assertJsonCount(3, 'data');
+
+        $this->assertDatabaseHas('campaign_funding_plans', [
+            'campaign_id' => $c->id,
+            'category' => 'Desarrollo de Software',
+            'amount' => 600,
+            'percentage' => 60,
+        ]);
+
+        // Add an extra item
+        $newItem = $this->asUser($u)->postJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/funding-plan', [
+            'category' => 'Reserva de Emergencia',
+            'amount' => 50,
+        ])->assertCreated()->json('data');
+
+        // Delete the item
+        $this->asUser($u)->deleteJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/funding-plan/'.$newItem['id'])
+            ->assertOk();
+
+        $this->assertDatabaseMissing('campaign_funding_plans', ['id' => $newItem['id']]);
+
+        // Another entrepreneur cannot modify this campaign's funding plan
+        $other = $this->account('entrepreneur');
+        $this->asUser($other)->putJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/funding-plan', [
+            'fundingPlan' => [['category' => 'Hack', 'amount' => 100]],
+        ])->assertForbidden();
+
+        // Public consultation
+        $c->update(['status' => 'published']);
+        $this->getJson('/api/v1/campaigns/'.$c->id.'/funding-plan')
+            ->assertOk()
+            ->assertJsonCount(3, 'data');
+
+        $this->getJson('/api/v1/campaigns/public/'.$c->id)
+            ->assertOk()
+            ->assertJsonPath('data.fundingPlan.0.category', 'Desarrollo de Software')
+            ->assertJsonPath('data.fundingPlan.0.percentage', 60);
     }
 
     public function test_investment_updates_balances_rewards_ledger_and_notifications_once(): void

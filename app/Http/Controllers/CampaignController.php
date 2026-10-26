@@ -34,7 +34,7 @@ class CampaignController extends Controller
 
     private function listing(Request $r, bool $public)
     {
-        $query = Campaign::with(['creator.entrepreneur', 'category', 'categories', 'rewards']);
+        $query = Campaign::with(['creator.entrepreneur', 'category', 'categories', 'rewards', 'fundingPlan']);
         if ($public) {
             $query->whereIn('status', Campaign::PUBLIC_STATUSES);
         } else {
@@ -115,14 +115,14 @@ class CampaignController extends Controller
             abort_unless(in_array($campaign->status, ['draft', 'rejected']), 422, 'Solo se pueden editar campañas en borrador o rechazadas.');
         }
         $required = $creating ? 'required' : 'sometimes';
-        $data = $r->validate(['title' => "$required|string|min:5|max:200", 'description' => "$required|string|min:30|max:100000", 'shortDescription' => 'nullable|string|max:1000', 'goalAmount' => "$required|numeric|min:1|max:9999999999999.99|decimal:0,2", 'categoryId' => 'sometimes|uuid|exists:categories,id', 'categoryIds' => 'sometimes|array|max:10', 'categoryIds.*' => 'uuid|exists:categories,id', 'endDate' => 'nullable|date|after:now', 'videoUrl' => 'nullable|url:http,https|max:2048', 'campaignType' => 'sometimes|in:donation,reward,equity', 'location' => 'nullable|string|max:255', 'rewards' => 'sometimes|array|max:30', 'rewards.*.title' => 'required|string|max:255', 'rewards.*.description' => 'nullable|string|max:5000', 'rewards.*.minPercentage' => 'required|numeric|min:0|max:100', 'rewards.*.maxPercentage' => 'required|numeric|min:0|max:100|gte:rewards.*.minPercentage']);
+        $data = $r->validate(['title' => "$required|string|min:5|max:200", 'description' => "$required|string|min:30|max:100000", 'shortDescription' => 'nullable|string|max:1000', 'goalAmount' => "$required|numeric|min:1|max:9999999999999.99|decimal:0,2", 'categoryId' => 'sometimes|uuid|exists:categories,id', 'categoryIds' => 'sometimes|array|max:10', 'categoryIds.*' => 'uuid|exists:categories,id', 'endDate' => 'nullable|date|after:now', 'videoUrl' => 'nullable|url:http,https|max:2048', 'campaignType' => 'sometimes|in:donation,reward,equity', 'location' => 'nullable|string|max:255', 'rewards' => 'sometimes|array|max:30', 'rewards.*.title' => 'required|string|max:255', 'rewards.*.description' => 'nullable|string|max:5000', 'rewards.*.minPercentage' => 'required|numeric|min:0|max:100', 'rewards.*.maxPercentage' => 'required|numeric|min:0|max:100|gte:rewards.*.minPercentage', 'fundingPlan' => 'sometimes|array|max:30', 'fundingPlan.*.category' => 'required|string|max:150', 'fundingPlan.*.description' => 'nullable|string|max:2000', 'fundingPlan.*.amount' => 'required|numeric|min:0.01|max:9999999999999.99|decimal:0,2', 'fundingPlan.*.percentage' => 'nullable|numeric|min:0|max:100', 'fundingPlan.*.sortOrder' => 'nullable|integer|min:0']);
 
         return DB::transaction(function () use ($r, $data, $campaign, $creating) {
             if (! $creating) {
                 $campaign = Campaign::whereKey($campaign->id)->lockForUpdate()->firstOrFail();
                 abort_unless(in_array($campaign->status, ['draft', 'rejected']), 422, 'Solo se pueden editar campañas en borrador o rechazadas.');
             }
-            $attrs = Api::snake(collect($data)->except(['categoryIds', 'rewards'])->all());
+            $attrs = Api::snake(collect($data)->except(['categoryIds', 'rewards', 'fundingPlan'])->all());
             $categoryIds = $data['categoryIds'] ?? (isset($data['categoryId']) ? [$data['categoryId']] : null);
             if ($creating || $categoryIds !== null) {
                 $attrs['category_id'] = $categoryIds[0] ?? Category::where('is_active', true)->value('id');
@@ -143,6 +143,21 @@ class CampaignController extends Controller
                 $campaign->rewards()->delete();
                 foreach ($data['rewards'] as $tier) {
                     $campaign->rewards()->create(Api::snake($tier));
+                }
+            }
+            if (isset($data['fundingPlan'])) {
+                $campaign->fundingPlan()->delete();
+                $goal = (float) $campaign->goal_amount;
+                foreach ($data['fundingPlan'] as $idx => $item) {
+                    $amount = (float) $item['amount'];
+                    $percentage = isset($item['percentage']) ? (float) $item['percentage'] : ($goal > 0 ? round(($amount / $goal) * 100, 2) : 0);
+                    $campaign->fundingPlan()->create([
+                        'category' => $item['category'],
+                        'description' => $item['description'] ?? null,
+                        'amount' => $amount,
+                        'percentage' => $percentage,
+                        'sort_order' => $item['sortOrder'] ?? $idx,
+                    ]);
                 }
             }
 
@@ -305,5 +320,77 @@ class CampaignController extends Controller
 
             return ['campaignId' => $c->id, 'campaignTitle' => $c->title, 'campaignCoverImageUrl' => $c->cover_image_url, 'entrepreneurName' => $p?->display_name ?? trim(($p?->first_name ?? '').' '.($p?->last_name ?? '')), 'entrepreneurAvatar' => $p?->avatar_url, 'stories' => $items->map(fn ($u) => $u->only(['id', 'title', 'content', 'attachments', 'created_at']))->values()->all()];
         })->values());
+    }
+
+    public function fundingPlan(Campaign $campaign)
+    {
+        return Api::ok($campaign->fundingPlan);
+    }
+
+    public function saveFundingPlan(Request $r, Campaign $campaign)
+    {
+        self::authorizeOwner($r, $campaign);
+        abort_unless(in_array($campaign->status, ['draft', 'rejected']), 422, 'Solo se pueden editar campañas en borrador o rechazadas.');
+        $data = $r->validate([
+            'fundingPlan' => 'required|array|max:30',
+            'fundingPlan.*.category' => 'required|string|max:150',
+            'fundingPlan.*.description' => 'nullable|string|max:2000',
+            'fundingPlan.*.amount' => 'required|numeric|min:0.01|max:9999999999999.99|decimal:0,2',
+            'fundingPlan.*.percentage' => 'nullable|numeric|min:0|max:100',
+            'fundingPlan.*.sortOrder' => 'nullable|integer|min:0',
+        ]);
+
+        return DB::transaction(function () use ($campaign, $data) {
+            $campaign->fundingPlan()->delete();
+            $goal = (float) $campaign->goal_amount;
+            foreach ($data['fundingPlan'] as $idx => $item) {
+                $amount = (float) $item['amount'];
+                $percentage = isset($item['percentage']) ? (float) $item['percentage'] : ($goal > 0 ? round(($amount / $goal) * 100, 2) : 0);
+                $campaign->fundingPlan()->create([
+                    'category' => $item['category'],
+                    'description' => $item['description'] ?? null,
+                    'amount' => $amount,
+                    'percentage' => $percentage,
+                    'sort_order' => $item['sortOrder'] ?? $idx,
+                ]);
+            }
+
+            return Api::ok($campaign->fresh()->fundingPlan);
+        });
+    }
+
+    public function addFundingPlanItem(Request $r, Campaign $campaign)
+    {
+        self::authorizeOwner($r, $campaign);
+        abort_unless(in_array($campaign->status, ['draft', 'rejected']), 422, 'Solo se pueden editar campañas en borrador o rechazadas.');
+        $data = $r->validate([
+            'category' => 'required|string|max:150',
+            'description' => 'nullable|string|max:2000',
+            'amount' => 'required|numeric|min:0.01|max:9999999999999.99|decimal:0,2',
+            'percentage' => 'nullable|numeric|min:0|max:100',
+            'sortOrder' => 'nullable|integer|min:0',
+        ]);
+        $goal = (float) $campaign->goal_amount;
+        $amount = (float) $data['amount'];
+        $percentage = isset($data['percentage']) ? (float) $data['percentage'] : ($goal > 0 ? round(($amount / $goal) * 100, 2) : 0);
+        $item = $campaign->fundingPlan()->create([
+            'category' => $data['category'],
+            'description' => $data['description'] ?? null,
+            'amount' => $amount,
+            'percentage' => $percentage,
+            'sort_order' => $data['sortOrder'] ?? ($campaign->fundingPlan()->max('sort_order') + 1),
+        ]);
+
+        return Api::ok($item, 201);
+    }
+
+    public function deleteFundingPlanItem(Request $r, Campaign $campaign, string $itemId)
+    {
+        self::authorizeOwner($r, $campaign);
+        abort_unless(in_array($campaign->status, ['draft', 'rejected']), 422, 'Solo se pueden editar campañas en borrador o rechazadas.');
+        $item = $campaign->fundingPlan()->findOrFail($itemId);
+        $item->delete();
+
+        return Api::ok();
     }
 }
