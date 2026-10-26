@@ -1,4 +1,4 @@
-﻿export type CampaignStatus =
+export type CampaignStatus =
   | 'draft'
   | 'pending_review'
   | 'in_review'
@@ -42,7 +42,28 @@ export interface EntrepreneurCampaign {
   publishedAt: string | null;
   videoUrl?: string | null;
   rewardTiers?: RewardTier[];
+  fundingPlan?: FundingPlanItem[];
   campaignType: CampaignType;
+}
+
+export interface FundingPlanItem {
+  id: string;
+  campaignId: string;
+  category: string;
+  description: string | null;
+  amount: number;
+  percentage: number | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateFundingPlanItemDto {
+  category: string;
+  description?: string;
+  amount: number;
+  percentage?: number;
+  sortOrder?: number;
 }
 
 export interface CreateCampaignDto {
@@ -53,6 +74,7 @@ export interface CreateCampaignDto {
   endDate?: string;
   categoryIds?: string[];
   rewards?: CreateRewardTierDto[];
+  fundingPlan?: CreateFundingPlanItemDto[];
   videoUrl?: string;
 }
 

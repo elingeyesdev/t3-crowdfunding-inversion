@@ -46,10 +46,15 @@ class Campaign extends Record
         return $this->hasMany(CampaignDocument::class);
     }
 
+    public function fundingPlan()
+    {
+        return $this->hasMany(CampaignFundingPlan::class)->orderBy('sort_order');
+    }
+
     public function apiData(): array
     {
         $profile = $this->creator?->entrepreneur;
 
-        return [...$this->attributesToArray(), 'category_name' => $this->category?->display_name, 'category_slug' => $this->category?->slug, 'category_ids' => $this->categories->modelKeys(), 'categories' => $this->categories->toArray(), 'reward_tiers' => $this->rewards->toArray(), 'entrepreneur_user_id' => $this->creator_id, 'entrepreneur_name' => trim(($profile?->first_name ?? '').' '.($profile?->last_name ?? '')), 'entrepreneur_display_name' => $profile?->display_name, 'entrepreneur_avatar' => $profile?->avatar_url, 'entrepreneur_bio' => $profile?->bio];
+        return [...$this->attributesToArray(), 'category_name' => $this->category?->display_name, 'category_slug' => $this->category?->slug, 'category_ids' => $this->categories->modelKeys(), 'categories' => $this->categories->toArray(), 'reward_tiers' => $this->rewards->toArray(), 'funding_plan' => $this->fundingPlan->toArray(), 'entrepreneur_user_id' => $this->creator_id, 'entrepreneur_name' => trim(($profile?->first_name ?? '').' '.($profile?->last_name ?? '')), 'entrepreneur_display_name' => $profile?->display_name, 'entrepreneur_avatar' => $profile?->avatar_url, 'entrepreneur_bio' => $profile?->bio];
     }
 }
