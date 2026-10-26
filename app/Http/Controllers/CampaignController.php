@@ -393,4 +393,108 @@ class CampaignController extends Controller
 
         return Api::ok();
     }
+
+    public function financialLedger(Campaign $campaign, CampaignFinance $finance)
+    {
+        return Api::ok($finance->ledger($campaign));
+    }
+
+    public function financialMovements(Request $r, Campaign $campaign)
+    {
+        self::authorizeOwner($r, $campaign, true);
+        $query = $campaign->financialMovements()->with('creator');
+
+        if ($r->filled('type')) {
+            $query->where('type', $r->input('type'));
+        }
+        if ($r->filled('category')) {
+            $query->where('category', $r->input('category'));
+        }
+        if ($r->filled('dateFrom')) {
+            $query->whereDate('movement_date', '>=', $r->input('dateFrom'));
+        }
+        if ($r->filled('dateTo')) {
+            $query->whereDate('movement_date', '<=', $r->input('dateTo'));
+        }
+
+        return Api::ok(Api::page($query, $r));
+    }
+
+    public function addFinancialMovement(Request $r, Campaign $campaign)
+    {
+        self::authorizeOwner($r, $campaign);
+        $data = $r->validate([
+            'type' => 'required|in:income,expense',
+            'concept' => 'required|string|min:3|max:200',
+            'category' => 'required|string|min:2|max:150',
+            'amount' => 'required|numeric|min:0.01|max:9999999999999.99|decimal:0,2',
+            'movementDate' => 'required|date',
+            'referenceNumber' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:2000',
+            'receipt' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:10240',
+        ]);
+
+        $receiptUrl = null;
+        if ($r->hasFile('receipt')) {
+            $file = $r->file('receipt');
+            $path = $file->store('receipts', 'public');
+            $receiptUrl = '/storage/'.$path;
+        }
+
+        $movement = $campaign->financialMovements()->create([
+            'created_by' => $r->user()->id,
+            'type' => $data['type'],
+            'concept' => $data['concept'],
+            'category' => $data['category'],
+            'amount' => $data['amount'],
+            'currency' => $campaign->currency,
+            'movement_date' => $data['movementDate'],
+            'reference_number' => $data['referenceNumber'] ?? null,
+            'receipt_url' => $receiptUrl,
+            'notes' => $data['notes'] ?? null,
+            'status' => 'verified',
+        ]);
+
+        return Api::ok($movement, 201);
+    }
+
+    public function updateFinancialMovement(Request $r, Campaign $campaign, string $movementId)
+    {
+        self::authorizeOwner($r, $campaign);
+        $movement = $campaign->financialMovements()->findOrFail($movementId);
+        $data = $r->validate([
+            'concept' => 'sometimes|string|min:3|max:200',
+            'category' => 'sometimes|string|min:2|max:150',
+            'referenceNumber' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:2000',
+        ]);
+
+        $movement->update(Api::snake($data));
+
+        return Api::ok($movement->fresh());
+    }
+
+    public function deleteFinancialMovement(Request $r, Campaign $campaign, string $movementId)
+    {
+        self::authorizeOwner($r, $campaign);
+        $movement = $campaign->financialMovements()->findOrFail($movementId);
+        abort_if($movement->type === 'income' && ! empty($movement->reference_number), 422, 'No puedes eliminar un ingreso vinculado a un aporte de sistema.');
+        $movement->delete();
+
+        return Api::ok();
+    }
+
+    public function uploadMovementReceipt(Request $r, Campaign $campaign, string $movementId)
+    {
+        self::authorizeOwner($r, $campaign);
+        $movement = $campaign->financialMovements()->findOrFail($movementId);
+        $r->validate([
+            'receipt' => 'required|file|mimes:pdf,jpg,jpeg,png,webp|max:10240',
+        ]);
+
+        $path = $r->file('receipt')->store('receipts', 'public');
+        $movement->update(['receipt_url' => '/storage/'.$path]);
+
+        return Api::ok($movement->fresh());
+    }
 }

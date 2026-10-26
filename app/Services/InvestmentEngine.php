@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Campaign;
+use App\Models\CampaignFinancialMovement;
 use App\Models\CampaignStatusHistory;
 use App\Models\Investment;
 use App\Models\InvestorProfile;
@@ -47,6 +48,7 @@ class InvestmentEngine
             $funded = bccomp($newTotal, $this->money($c->goal_amount), 2) >= 0;
             $ticket = Investment::create(['campaign_id' => $c->id, 'investor_id' => $userId, 'reward_tier_id' => $tier?->id, 'amount' => $amount, 'currency' => $c->currency]);
             Transaction::create(['investment_id' => $ticket->id, 'user_id' => $userId, 'transaction_type' => 'payment', 'amount' => $amount, 'currency' => $c->currency]);
+            CampaignFinancialMovement::create(['campaign_id' => $c->id, 'created_by' => $userId, 'type' => 'income', 'concept' => 'Aporte de financiamiento', 'category' => 'Recaudación', 'amount' => $amount, 'currency' => $c->currency, 'movement_date' => now()->toDateString(), 'reference_number' => $ticket->id, 'status' => 'verified']);
             if ($tier) {
                 $tier->increment('current_claims');
                 RewardClaim::create(['investment_id' => $ticket->id]);
@@ -81,6 +83,7 @@ class InvestmentEngine
                     $p->update(['total_invested' => bcsub($this->money($p->total_invested), $amount, 2)]);
                     $i->update(['status' => 'refunded', 'refunded_amount' => $amount, 'refunded_at' => now(), 'refund_reason' => 'Campaña finalizada sin alcanzar meta']);
                     Transaction::create(['investment_id' => $i->id, 'user_id' => $i->investor_id, 'transaction_type' => 'refund', 'amount' => $amount, 'currency' => $c->currency]);
+                    CampaignFinancialMovement::create(['campaign_id' => $c->id, 'created_by' => $i->investor_id, 'type' => 'expense', 'concept' => 'Reembolso por meta no alcanzada', 'category' => 'Reembolsos', 'amount' => $amount, 'currency' => $c->currency, 'movement_date' => now()->toDateString(), 'reference_number' => $i->id, 'status' => 'verified']);
                     if ($i->reward_tier_id) {
                         RewardTier::whereKey($i->reward_tier_id)->where('current_claims', '>', 0)->decrement('current_claims');
                     }

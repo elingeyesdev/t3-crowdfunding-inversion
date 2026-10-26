@@ -66,6 +66,60 @@ export interface CreateFundingPlanItemDto {
   sortOrder?: number;
 }
 
+export type MovementType = 'income' | 'expense';
+
+export interface CampaignFinancialMovement {
+  id: string;
+  campaignId: string;
+  createdBy?: string;
+  type: MovementType;
+  concept: string;
+  category: string;
+  amount: number;
+  currency: string;
+  movementDate: string;
+  referenceNumber?: string | null;
+  receiptUrl?: string | null;
+  notes?: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateFinancialMovementDto {
+  type: MovementType;
+  concept: string;
+  category: string;
+  amount: number;
+  movementDate: string;
+  referenceNumber?: string;
+  notes?: string;
+}
+
+export interface FinancialLedgerSummary {
+  totalIncome: number;
+  totalExpense: number;
+  balance: number;
+  executionPercentage: number;
+  movementCount: number;
+  incomeCount: number;
+  expenseCount: number;
+}
+
+export interface FinancialLedgerResponse {
+  campaignId: string;
+  campaignTitle: string;
+  currency: string;
+  summary: FinancialLedgerSummary;
+  expensesByCategory: Array<{
+    category: string;
+    totalAmount: number;
+    count: number;
+    percentage: number;
+  }>;
+  movements: CampaignFinancialMovement[];
+}
+
 export interface CreateCampaignDto {
   title: string;
   description: string;

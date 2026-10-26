@@ -327,3 +327,83 @@ export async function deleteCampaignFundingPlanItem(
   await api.delete(`/entrepreneurs/me/campaigns/${campaignId}/funding-plan/${itemId}`);
 }
 
+export async function getCampaignFinancialLedger(campaignId: string): Promise<any> {
+  const { data } = await api.get<ApiSuccessResponse<any>>(
+    `/campaigns/${campaignId}/financial-ledger`
+  );
+  return data.data;
+}
+
+export async function getCampaignFinancialMovements(
+  campaignId: string,
+  params?: Record<string, any>
+): Promise<any> {
+  const { data } = await api.get<ApiSuccessResponse<any>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/financial-movements`,
+    { params }
+  );
+  return data.data;
+}
+
+export async function addCampaignFinancialMovement(
+  campaignId: string,
+  dto: Record<string, any>,
+  receiptFile?: File
+): Promise<any> {
+  if (receiptFile) {
+    const formData = new FormData();
+    Object.entries(dto).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) formData.append(k, String(v));
+    });
+    formData.append('receipt', receiptFile);
+    const { data } = await api.post<ApiSuccessResponse<any>>(
+      `/entrepreneurs/me/campaigns/${campaignId}/financial-movements`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return data.data;
+  }
+
+  const { data } = await api.post<ApiSuccessResponse<any>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/financial-movements`,
+    dto
+  );
+  return data.data;
+}
+
+export async function updateCampaignFinancialMovement(
+  campaignId: string,
+  movementId: string,
+  dto: Record<string, any>
+): Promise<any> {
+  const { data } = await api.patch<ApiSuccessResponse<any>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/financial-movements/${movementId}`,
+    dto
+  );
+  return data.data;
+}
+
+export async function deleteCampaignFinancialMovement(
+  campaignId: string,
+  movementId: string
+): Promise<void> {
+  await api.delete(
+    `/entrepreneurs/me/campaigns/${campaignId}/financial-movements/${movementId}`
+  );
+}
+
+export async function uploadMovementReceipt(
+  campaignId: string,
+  movementId: string,
+  receiptFile: File
+): Promise<any> {
+  const formData = new FormData();
+  formData.append('receipt', receiptFile);
+  const { data } = await api.post<ApiSuccessResponse<any>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/financial-movements/${movementId}/receipt`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  );
+  return data.data;
+}
+

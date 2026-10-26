@@ -51,6 +51,11 @@ class Campaign extends Record
         return $this->hasMany(CampaignFundingPlan::class)->orderBy('sort_order');
     }
 
+    public function financialMovements()
+    {
+        return $this->hasMany(CampaignFinancialMovement::class)->orderByDesc('movement_date')->orderByDesc('created_at');
+    }
+
     public function apiData(): array
     {
         $profile = $this->creator?->entrepreneur;
