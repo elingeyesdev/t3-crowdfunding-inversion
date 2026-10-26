@@ -13,6 +13,9 @@ class AuthController extends Controller
 {
     public function register(Request $r)
     {
+        if (is_string($r->input('email'))) {
+            $r->merge(['email' => strtolower($r->input('email'))]);
+        }
         $data = $r->validate(['email' => 'required|email|max:255|unique:users,email', 'password' => ['required', 'string', 'min:8', 'max:128', 'regex:/^(?=.*[A-Z])(?=.*\d).+$/'], 'phone' => 'nullable|string|max:20', 'preferredLanguage' => 'sometimes|in:es,en', 'signupRole' => 'sometimes|in:investor,entrepreneur']);
         $user = DB::transaction(function () use ($data) {
             $user = User::create(['email' => strtolower($data['email']), 'password_hash' => Hash::make($data['password']), 'phone' => $data['phone'] ?? null, 'preferred_language' => $data['preferredLanguage'] ?? 'es']);

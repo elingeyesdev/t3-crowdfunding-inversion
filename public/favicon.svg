@@ -1,0 +1,23 @@
+<svg width="64" height="64" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gear teeth: 10 teeth at 36° intervals -->
+  <rect x="45" y="2" width="10" height="20" rx="3" fill="#72B626" transform="rotate(0 50 50)"/>
+  <rect x="45" y="2" width="10" height="20" rx="3" fill="#72B626" transform="rotate(36 50 50)"/>
+  <rect x="45" y="2" width="10" height="20" rx="3" fill="#72B626" transform="rotate(72 50 50)"/>
+  <rect x="45" y="2" width="10" height="20" rx="3" fill="#72B626" transform="rotate(108 50 50)"/>
+  <rect x="45" y="2" width="10" height="20" rx="3" fill="#72B626" transform="rotate(144 50 50)"/>
+  <rect x="45" y="2" width="10" height="20" rx="3" fill="#72B626" transform="rotate(180 50 50)"/>
+  <rect x="45" y="2" width="10" height="20" rx="3" fill="#72B626" transform="rotate(216 50 50)"/>
+  <rect x="45" y="2" width="10" height="20" rx="3" fill="#72B626" transform="rotate(252 50 50)"/>
+  <rect x="45" y="2" width="10" height="20" rx="3" fill="#72B626" transform="rotate(288 50 50)"/>
+  <rect x="45" y="2" width="10" height="20" rx="3" fill="#72B626" transform="rotate(324 50 50)"/>
+  <!-- Gear body -->
+  <circle cx="50" cy="50" r="34" fill="#72B626"/>
+  <!-- Inner white circle -->
+  <circle cx="50" cy="50" r="23" fill="white"/>
+  <!-- Person head -->
+  <circle cx="50" cy="35" r="5.5" fill="#8B1938"/>
+  <!-- Arms raised -->
+  <path d="M37 46 Q50 40 63 46" stroke="#8B1938" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <!-- Smile -->
+  <path d="M38 54 Q50 65 62 54" stroke="#8B1938" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+</svg>

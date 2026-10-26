@@ -1,0 +1,6 @@
+<!doctype html><html lang="es"><head><meta charset="UTF-8"><style>body{font-family:DejaVu Sans,sans-serif;font-size:9px;color:#1f2937}h1,h2{color:#064e3b}table{width:100%;border-collapse:collapse}th{background:#064e3b;color:white}td,th{padding:7px;border-bottom:1px solid #ddd}tr{page-break-inside:avoid}thead{display:table-header-group}</style></head><body>
+<h1>UniFundMe · Reporte financiero</h1><h2>{{ $campaign->title }}</h2><p>Generado: {{ now()->format('d/m/Y H:i') }}</p>
+<p>Recaudado: {{ $campaign->currency }} {{ number_format($finance['grossAmount'],2) }} · Comisión (5%): {{ number_format($finance['platformFee'],2) }} · Neto estimado: {{ number_format($finance['netAmount'],2) }}</p>
+<table><thead><tr><th>Fecha</th><th>Inversor</th><th>Correo</th><th>Monto</th><th>Recompensa</th><th>Estado</th></tr></thead><tbody>
+@forelse($investments as $i)<tr><td>{{ $i->created_at->format('d/m/Y') }}</td><td>{{ $i->investor?->investor?->first_name }} {{ $i->investor?->investor?->last_name }}</td><td>{{ $i->investor?->email }}</td><td>{{ number_format($i->amount,2) }} {{ $i->currency }}</td><td>{{ $i->reward?->title ?? '—' }}</td><td>{{ $i->status }}</td></tr>@empty<tr><td colspan="6">No hay aportes registrados.</td></tr>@endforelse
+</tbody></table></body></html>
