@@ -255,6 +255,38 @@ export class UserRepository extends BaseRepository {
   }
 
   /**
+   * Actualiza el hash de contraseña del usuario.
+   * Solo para uso interno en UserService (cambio de contraseña).
+   */
+  async updatePassword(id: string, passwordHash: string): Promise<void> {
+    await this.query(
+      `UPDATE users SET password_hash = ?, updated_at = NOW() WHERE id = ?`,
+      [passwordHash, id],
+    );
+  }
+
+  /**
+   * Busca un usuario por ID e incluye el password_hash.
+   * Solo para uso interno en UserService (cambio de contraseña).
+   */
+  async findByIdWithPassword(
+    id: string,
+  ): Promise<{ user: User; passwordHash: string } | null> {
+    const row = await this.queryOne(
+      `SELECT u.*, a.access_level as admin_access_level
+       FROM users u
+       LEFT JOIN admin_profiles a ON a.user_id = u.id
+       WHERE u.id = ? AND u.is_active = true`,
+      [id],
+    );
+    if (!row) return null;
+    return {
+      user: mapRowToUser(row),
+      passwordHash: row.password_hash as string,
+    };
+  }
+
+  /**
    * TEMPORAL: Crea o actualiza el usuario superadmin por defecto (acceso directo a db).
    */
   async seedSuperAdmin(passwordHash: string) {
