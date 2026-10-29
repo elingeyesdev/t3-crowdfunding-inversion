@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePublicCampaigns } from '../hooks/usePublicCampaigns';
 import { Navbar } from '../components/Navbar';
+import { Footer } from '../components/Footer';
 import { getImageUrl } from '../utils/image.utils';
 import { StoriesAvatarBar } from '../components/StoriesAvatarBar';
 import { getCategories } from '../api/categories.api';
@@ -694,6 +695,7 @@ export function ExploreCampaignsPage() {
           </>
         )}
       </div>
+      <Footer />
     </div>
   );
 }
