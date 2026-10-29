@@ -8,6 +8,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\InvestmentController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RewardController;
 use Illuminate\Http\Request;
@@ -108,9 +109,16 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get($prefix.'/{campaign}/report', [InvestmentController::class, 'report']);
         Route::get($prefix.'/{campaign}/reporte', [InvestmentController::class, 'report']);
     }
-    Route::get('notifications/me', [CommunityController::class, 'notifications']);
-    Route::patch('notifications/read-all', [CommunityController::class, 'readAll']);
-    Route::patch('notifications/{notification}/read', [CommunityController::class, 'read']);
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::get('notifications/me', [NotificationController::class, 'index']);
+    Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::get('notifications/preferences', [NotificationController::class, 'preferences']);
+    Route::put('notifications/preferences', [NotificationController::class, 'updatePreferences']);
+    Route::patch('notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::delete('notifications/clear-read', [NotificationController::class, 'clearRead']);
+    Route::get('notifications/{notification}', [NotificationController::class, 'show']);
+    Route::patch('notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
+    Route::delete('notifications/{notification}', [NotificationController::class, 'destroy']);
     Route::get('chat/conversations', [ChatController::class, 'index']);
     Route::post('chat/conversations', [ChatController::class, 'store']);
     Route::get('chat/conversations/{conversation}/messages', [ChatController::class, 'messages']);

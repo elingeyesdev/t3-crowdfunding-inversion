@@ -1,13 +1,16 @@
-﻿import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Bell, BellRing, Check, CheckCheck, ExternalLink, Loader2,
-  TrendingUp, MessageCircle, CheckCircle2, XCircle, Rocket, Star, Info
+  TrendingUp, MessageCircle, CheckCircle2, XCircle, Rocket, Star, Info,
+  Trash2, FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   getMyNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
+  deleteNotification,
+  clearReadNotifications,
   type AppNotification,
 } from '../api/notifications.api';
 
@@ -35,14 +38,17 @@ function NotifIcon({ typeCode }: { typeCode?: string }) {
   if (typeCode === 'investment_received' || typeCode === 'investment_confirmed') return (
     <div className={`${base} bg-[#f0f9e0]`}><TrendingUp size={16} className="text-[#72B626]" /></div>
   );
-  if (typeCode === 'new_message') return (
+  if (typeCode === 'new_message' || typeCode === 'new_comment') return (
     <div className={`${base} bg-blue-100`}><MessageCircle size={16} className="text-blue-600" /></div>
   );
-  if (typeCode === 'campaign_approved') return (
+  if (typeCode === 'campaign_approved' || typeCode === 'milestone_completed' || typeCode === 'financial_movement_verified') return (
     <div className={`${base} bg-green-100`}><CheckCircle2 size={16} className="text-green-600" /></div>
   );
-  if (typeCode === 'campaign_rejected') return (
+  if (typeCode === 'campaign_rejected' || typeCode === 'financial_movement_rejected' || typeCode === 'document_rejected') return (
     <div className={`${base} bg-red-100`}><XCircle size={16} className="text-red-500" /></div>
+  );
+  if (typeCode === 'financial_movement_flagged') return (
+    <div className={`${base} bg-amber-100`}><FileText size={16} className="text-amber-600" /></div>
   );
   if (typeCode === 'campaign_funded') return (
     <div className={`${base} bg-amber-100`}><Star size={16} className="text-amber-500" /></div>
@@ -61,6 +67,7 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [filterUnreadOnly, setFilterUnreadOnly] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const prevUnreadRef = useRef(0);
   const [shake, setShake] = useState(false);
@@ -69,7 +76,6 @@ export function NotificationBell() {
     try {
       const res = await getMyNotifications();
       setNotifications(res.notifications);
-      // Animar la campana si llegaron notificaciones nuevas
       if (res.unreadCount > prevUnreadRef.current) {
         setShake(true);
         setTimeout(() => setShake(false), 800);
@@ -124,7 +130,32 @@ export function NotificationBell() {
     }
   }
 
+  async function handleDelete(e: React.MouseEvent, id: string, wasRead: boolean) {
+    e.stopPropagation();
+    try {
+      await deleteNotification(id);
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+      if (!wasRead) {
+        setUnreadCount((c) => Math.max(0, c - 1));
+      }
+    } catch (err) {
+      console.error('Error al eliminar notificación:', err);
+    }
+  }
+
+  async function handleClearRead() {
+    try {
+      await clearReadNotifications();
+      setNotifications((prev) => prev.filter((n) => !n.isRead));
+    } catch (err) {
+      console.error('Error al limpiar notificaciones leídas:', err);
+    }
+  }
+
   const hasUnread = unreadCount > 0;
+  const displayedNotifications = filterUnreadOnly
+    ? notifications.filter((n) => !n.isRead)
+    : notifications;
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -150,11 +181,11 @@ export function NotificationBell() {
       {/* Dropdown */}
       {open && (
         <div
-          className="fixed sm:absolute top-[72px] sm:top-[calc(100%+8px)] left-4 right-4 sm:left-auto sm:right-0 sm:w-[380px] max-h-[70vh] sm:max-h-[500px] flex flex-col bg-white rounded-2xl border border-slate-200 shadow-2xl z-50 overflow-hidden"
+          className="fixed sm:absolute top-[72px] sm:top-[calc(100%+8px)] left-4 right-4 sm:left-auto sm:right-0 sm:w-[400px] max-h-[70vh] sm:max-h-[520px] flex flex-col bg-white rounded-2xl border border-slate-200 shadow-2xl z-50 overflow-hidden"
           style={{ animation: 'slideDownFade 0.18s ease-out' }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/60">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/70">
             <div className="flex items-center gap-2">
               <Bell size={15} className="text-[#72B626]" strokeWidth={2.5} />
               <span className="text-[14px] font-black text-slate-800">Notificaciones</span>
@@ -164,40 +195,81 @@ export function NotificationBell() {
                 </span>
               )}
             </div>
-            {hasUnread && (
+            <div className="flex items-center gap-2">
+              {hasUnread && (
+                <button
+                  onClick={handleMarkAll}
+                  disabled={loading}
+                  className="flex items-center gap-1 text-[11px] font-bold text-[#72B626] hover:text-[#4a7f1a] transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {loading
+                    ? <Loader2 size={11} className="animate-spin" />
+                    : <CheckCheck size={12} strokeWidth={2.5} />
+                  }
+                  Marcar todas
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Filter tabs */}
+          <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100 bg-white text-xs">
+            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
               <button
-                onClick={handleMarkAll}
-                disabled={loading}
-                className="flex items-center gap-1.5 text-[12px] font-bold text-[#72B626] hover:text-[#1c2b1e] transition-colors cursor-pointer disabled:opacity-50"
+                type="button"
+                onClick={() => setFilterUnreadOnly(false)}
+                className={`px-2.5 py-1 rounded-md font-semibold text-[11px] transition-all ${
+                  !filterUnreadOnly ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                }`}
               >
-                {loading
-                  ? <Loader2 size={12} className="animate-spin" />
-                  : <CheckCheck size={13} strokeWidth={2.5} />
-                }
-                Marcar todas
+                Todas ({notifications.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterUnreadOnly(true)}
+                className={`px-2.5 py-1 rounded-md font-semibold text-[11px] transition-all ${
+                  filterUnreadOnly ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                No leídas ({unreadCount})
+              </button>
+            </div>
+
+            {notifications.some((n) => n.isRead) && (
+              <button
+                type="button"
+                onClick={handleClearRead}
+                className="text-[11px] text-slate-400 hover:text-rose-600 transition-colors"
+                title="Limpiar leídas"
+              >
+                Limpiar leídas
               </button>
             )}
           </div>
 
           {/* List */}
           <div className="overflow-y-auto flex-1">
-            {notifications.length === 0 ? (
+            {displayedNotifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-14 gap-3 text-slate-400">
                 <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center">
                   <Bell size={22} strokeWidth={1.5} />
                 </div>
-                <span className="text-[13px] font-semibold">Sin notificaciones</span>
-                <span className="text-[11px] text-slate-300">Cuando recibas actividad aparecerá aquí</span>
+                <span className="text-[13px] font-semibold">
+                  {filterUnreadOnly ? 'No tienes notificaciones pendientes' : 'Sin notificaciones'}
+                </span>
+                <span className="text-[11px] text-slate-300">
+                  {filterUnreadOnly ? '¡Estás al día con tus actividades!' : 'Cuando recibas actividad aparecerá aquí'}
+                </span>
               </div>
             ) : (
-              notifications.map((notif) => (
-                <button
+              displayedNotifications.map((notif) => (
+                <div
                   key={notif.id}
                   onClick={() => handleMarkOne(notif)}
                   className={`w-full text-left px-4 py-3 flex items-start gap-3 border-b border-slate-50 last:border-0 transition-colors cursor-pointer group ${
                     notif.isRead
                       ? 'bg-white hover:bg-slate-50'
-                      : 'bg-[#f0f9e0]/50 hover:bg-[#f0f9e0]'
+                      : 'bg-[#f0f9e0]/40 hover:bg-[#f0f9e0]/80'
                   }`}
                 >
                   {/* Ícono por tipo */}
@@ -206,7 +278,7 @@ export function NotificationBell() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <p className={`text-[13px] leading-snug ${notif.isRead ? 'font-medium text-slate-600' : 'font-bold text-slate-800'}`}>
+                      <p className={`text-[13px] leading-snug ${notif.isRead ? 'font-medium text-slate-600' : 'font-bold text-slate-900'}`}>
                         {notif.title}
                       </p>
                       {/* Dot no leído */}
@@ -217,9 +289,21 @@ export function NotificationBell() {
                     <p className="text-[12px] text-slate-500 leading-relaxed line-clamp-2 mt-0.5">
                       {notif.body}
                     </p>
-                    <p className="text-[11px] text-slate-400 mt-1 font-medium">
-                      {timeAgo(notif.createdAt)}
-                    </p>
+                    <div className="flex items-center justify-between mt-1.5">
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        {timeAgo(notif.createdAt)}
+                      </span>
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={(e) => handleDelete(e, notif.id, notif.isRead)}
+                          className="text-slate-400 hover:text-rose-600 p-0.5"
+                          title="Eliminar notificación"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Action icon */}
@@ -229,7 +313,7 @@ export function NotificationBell() {
                   {notif.isRead && !notif.actionUrl && (
                     <Check size={13} className="flex-shrink-0 text-slate-300 mt-1" strokeWidth={2.5} />
                   )}
-                </button>
+                </div>
               ))
             )}
           </div>

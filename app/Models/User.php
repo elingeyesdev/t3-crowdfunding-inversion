@@ -17,7 +17,13 @@ class User extends Authenticatable
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean', 'email_verified' => 'boolean', 'phone_verified' => 'boolean', 'last_login_at' => 'datetime'];
+        return [
+            'is_active' => 'boolean',
+            'email_verified' => 'boolean',
+            'phone_verified' => 'boolean',
+            'last_login_at' => 'datetime',
+            'notification_preferences' => 'array',
+        ];
     }
 
     public function getAuthPasswordName(): string

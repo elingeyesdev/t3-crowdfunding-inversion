@@ -141,11 +141,22 @@ class AdminController extends Controller
         return Api::ok($profile->fresh(), 200, false);
     }
 
-    public function reviewDocument(Request $r, Campaign $campaign, CampaignDocument $document)
+    public function reviewDocument(Request $r, Campaign $campaign, CampaignDocument $document, Notifier $notifier)
     {
         abort_unless($document->campaign_id === $campaign->id, 404);
         $data = $r->validate(['status' => 'required|in:approved,rejected', 'reviewerNotes' => 'nullable|string|max:5000']);
         $document->update([...Api::snake($data), 'reviewed_by' => $r->user()->id, 'reviewed_at' => now()]);
+
+        if ($campaign->creator_id) {
+            $statusLabel = $data['status'] === 'approved' ? 'aprobado' : 'rechazado';
+            $notifier->send(
+                $campaign->creator_id,
+                'document_'.$data['status'],
+                "Documento {$statusLabel}: {$campaign->title}",
+                "El documento '{$document->title}' de tu campaña fue {$statusLabel} por la administración.".(! empty($data['reviewerNotes']) ? ' Observaciones: '.$data['reviewerNotes'] : ''),
+                $campaign->id
+            );
+        }
 
         return Api::ok($document->fresh(), 200, false);
     }
