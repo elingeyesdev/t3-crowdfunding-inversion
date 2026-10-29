@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   Param,
   UseGuards,
@@ -19,7 +20,7 @@ import { Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 
 import { UserService } from '../services';
-import { CreateUserDto } from '../dto';
+import { CreateUserDto, ChangePasswordDto } from '../dto';
 import { ApiSuccessResponse } from '../../../common/dto';
 import { User } from '../models';
 
@@ -30,14 +31,14 @@ export class UserController {
 
   /**
    * POST /users/register
-   * Registra un nuevo usuario. No requiere autenticación.
+   * Registra un nuevo usuario. No requiere autenticacion.
    */
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar nuevo usuario' })
   @ApiResponse({ status: 201, description: 'Usuario creado exitosamente.' })
-  @ApiResponse({ status: 409, description: 'El email ya está registrado.' })
-  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos.' })
+  @ApiResponse({ status: 409, description: 'El email ya esta registrado.' })
+  @ApiResponse({ status: 400, description: 'Datos de entrada invalidos.' })
   async register(
     @Body() dto: CreateUserDto,
   ): Promise<ApiSuccessResponse<User>> {
@@ -59,6 +60,27 @@ export class UserController {
     const userId = (req as any).user.id;
     const user = await this.userService.getMe(userId);
     return new ApiSuccessResponse(user);
+  }
+
+  /**
+   * PATCH /users/me/password
+   * Cambia la contrasena del usuario autenticado (requiere JWT).
+   */
+  @Patch('me/password')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cambiar contrasena del usuario autenticado' })
+  @ApiResponse({ status: 200, description: 'Contrasena actualizada exitosamente.' })
+  @ApiResponse({ status: 400, description: 'Contrasena actual incorrecta o cuenta OAuth.' })
+  @ApiResponse({ status: 401, description: 'No autenticado.' })
+  async changePassword(
+    @Req() req: Request,
+    @Body() dto: ChangePasswordDto,
+  ): Promise<ApiSuccessResponse<null>> {
+    const userId = (req as any).user.id;
+    await this.userService.changePassword(userId, dto.currentPassword, dto.newPassword);
+    return new ApiSuccessResponse(null, 'Contrasena actualizada exitosamente');
   }
 
   /**

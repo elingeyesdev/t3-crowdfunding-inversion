@@ -18,6 +18,7 @@ import { AdminExpensesAuditPage } from './pages/admin/AdminExpensesAuditPage';
 import { PitchFeedPage } from './pages/PitchFeedPage';
 import { LandingPage } from './pages/LandingPage';
 import { OAuthCallbackPage } from './pages/OAuthCallbackPage';
+import { AccountSettingsPage } from './pages/AccountSettingsPage';
 
 // Guard simple: si no hay token, redirige a login con la ruta previa en el estado
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -137,6 +138,14 @@ function App() {
           element={
             <PrivateRoute>
               <SuperAdminDashboardPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/account-settings"
+          element={
+            <PrivateRoute>
+              <AccountSettingsPage />
             </PrivateRoute>
           }
         />

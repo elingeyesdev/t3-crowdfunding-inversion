@@ -1,12 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { ConflictException, NotFoundException } from '../../../common/exceptions';
 import { UserRepository } from '../repositories';
 import { CreateUserDto } from '../dto';
 import { User } from '../models';
+import * as bcrypt from 'bcrypt';
 
 /**
  * Service: Usuarios
- * Lógica de negocio para gestión de usuarios.
+ * Logica de negocio para gestion de usuarios.
  */
 @Injectable()
 export class UserService {
@@ -17,7 +18,7 @@ export class UserService {
   /**
    * Registra un nuevo usuario.
    * Reglas:
-   *  - El email debe ser único.
+   *  - El email debe ser unico.
    *  - El password se hashea con bcrypt (salt 12) en el repository.
    */
   async register(dto: CreateUserDto): Promise<User> {
@@ -26,7 +27,7 @@ export class UserService {
     const exists = await this.userRepo.existsByEmail(dto.email);
     if (exists) {
       throw new ConflictException(
-        `El email '${dto.email}' ya está registrado`,
+        `El email '${dto.email}' ya esta registrado`,
       );
     }
 
@@ -35,7 +36,7 @@ export class UserService {
 
     if (dto.signupRole === 'entrepreneur' || dto.signupRole === 'investor') {
       await this.userRepo.assignRoleByName(user.id, dto.signupRole);
-      this.logger.log(`Rol asignado: ${dto.signupRole} → ${user.id}`);
+      this.logger.log(`Rol asignado: ${dto.signupRole} -> ${user.id}`);
     }
 
     const withRoles = await this.userRepo.findByIdWithRoles(user.id);
@@ -59,5 +60,37 @@ export class UserService {
    */
   async getMe(userId: string): Promise<User> {
     return this.findById(userId);
+  }
+
+  /**
+   * Cambia la contrasena del usuario autenticado.
+   * Verifica la contrasena actual antes de actualizar.
+   */
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    this.logger.log(`Cambio de contrasena solicitado por usuario: ${userId}`);
+
+    const result = await this.userRepo.findByIdWithPassword(userId);
+    if (!result) {
+      throw new NotFoundException('Usuario', userId);
+    }
+
+    if (!result.passwordHash) {
+      throw new BadRequestException(
+        'Esta cuenta usa autenticacion con Google. No es posible cambiar la contrasena.',
+      );
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, result.passwordHash);
+    if (!isMatch) {
+      throw new UnauthorizedException('La contrasena actual es incorrecta');
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 12);
+    await this.userRepo.updatePassword(userId, newHash);
+    this.logger.log(`Contrasena actualizada para usuario: ${userId}`);
   }
 }
