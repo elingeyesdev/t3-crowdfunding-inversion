@@ -156,7 +156,7 @@ export function EntrepreneurProfilePage() {
   const handleOpenModal = (type: ModalType) => {
     if (type === 'new-campaign') {
       if (!profile || !profile.identityVerified) {
-        alert('Primero debes completar todo tu perfil con KYC');
+        setModalType('kyc');
         return;
       }
     }
