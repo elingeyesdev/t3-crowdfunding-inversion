@@ -461,7 +461,7 @@ class CampaignController extends Controller
             'reference_number' => $data['referenceNumber'] ?? null,
             'receipt_url' => $receiptUrl,
             'notes' => $data['notes'] ?? null,
-            'status' => 'verified',
+            'status' => $data['type'] === 'expense' ? 'pending' : 'verified',
         ]);
 
         return Api::ok($movement, 201);

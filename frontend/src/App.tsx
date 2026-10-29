@@ -14,6 +14,7 @@ import { CampaignReviewPage } from './pages/admin/CampaignReviewPage';
 import { AdminUsersPage } from './pages/admin/AdminUsersPage';
 import { AdminCampaignsPage } from './pages/admin/AdminCampaignsPage';
 import { AdminKycPage } from './pages/admin/AdminKycPage';
+import { AdminExpensesAuditPage } from './pages/admin/AdminExpensesAuditPage';
 import { PitchFeedPage } from './pages/PitchFeedPage';
 import { LandingPage } from './pages/LandingPage';
 import { OAuthCallbackPage } from './pages/OAuthCallbackPage';
@@ -120,6 +121,14 @@ function App() {
           element={
             <PrivateRoute>
               <CampaignReviewPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/expenses"
+          element={
+            <PrivateRoute>
+              <AdminExpensesAuditPage />
             </PrivateRoute>
           }
         />

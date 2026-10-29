@@ -10,7 +10,8 @@ import {
   Menu,
   UserCheck,
   FileCheck,
-  Shield
+  Shield,
+  Receipt
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -96,6 +97,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <NavLink to="/admin/campaigns/review" className={navItemClass} style={{ textDecoration: 'none' }}>
              <FileCheck size={18} />
              {sidebarOpen && <span>Revisión de Campañas</span>}
+          </NavLink>
+          <NavLink to="/admin/expenses" className={navItemClass} style={{ textDecoration: 'none' }}>
+             <Receipt size={18} />
+             {sidebarOpen && <span>Auditoría de Gastos</span>}
           </NavLink>
 
           {role === 'super_admin' && (

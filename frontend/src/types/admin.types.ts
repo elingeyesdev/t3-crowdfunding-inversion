@@ -1,4 +1,4 @@
-﻿export interface DashboardStats {
+export interface DashboardStats {
   totalUsers: number;
   totalCampaigns: number;
   totalFunded: number;
@@ -96,4 +96,59 @@ export interface CampaignHistoryItem {
   created_at: string;
   changed_by_email: string;
   changed_by_name: string;
+}
+
+export interface FinancialMovementAuditItem {
+  id: string;
+  campaignId: string;
+  campaignTitle: string;
+  campaignStatus: string;
+  campaignCurrency: string;
+  campaignGoal: number;
+  campaignCurrentAmount: number;
+  createdBy: string;
+  creatorEmail: string;
+  creatorName: string;
+  type: 'income' | 'expense';
+  concept: string;
+  category: string;
+  amount: number;
+  currency: string;
+  movementDate: string;
+  referenceNumber: string | null;
+  receiptUrl: string | null;
+  hasReceipt: boolean;
+  notes: string | null;
+  status: 'pending' | 'verified' | 'flagged' | 'rejected';
+  reviewedBy: string | null;
+  reviewerEmail: string | null;
+  reviewerName: string | null;
+  reviewedAt: string | null;
+  reviewNotes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  consistencyFlags?: Array<{
+    code: string;
+    severity: 'info' | 'warning' | 'danger';
+    message: string;
+  }>;
+}
+
+export interface FinancialAuditSummary {
+  totalMovements: number;
+  totalExpenses: number;
+  totalIncomes: number;
+  pendingCount: number;
+  flaggedCount: number;
+  verifiedCount: number;
+  rejectedCount: number;
+  expensesWithoutReceiptCount: number;
+  campaignsWithIrregularitiesCount: number;
+  topFlaggedCategories: Array<{
+    category: string;
+    count: number;
+    total_amount: number;
+  }>;
+  recentPending: FinancialMovementAuditItem[];
+  recentFlagged: FinancialMovementAuditItem[];
 }
