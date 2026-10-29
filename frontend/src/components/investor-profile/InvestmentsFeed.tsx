@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { CapitalOverview } from '../../types/investor.types';
-import { getMyInvestments } from '../../api/investor.api';
+import { getMyInvestments, downloadInvestmentReceipt } from '../../api/investor.api';
 import { getImageUrl } from '../../utils/image.utils';
 import type { InvestmentHistoryItem } from '../../api/investor.api';
 import { 
@@ -16,6 +16,7 @@ import {
   DollarSign,
   Gift,
   Loader2,
+  FileText,
 } from 'lucide-react';
 
 interface Props {
@@ -40,6 +41,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
   const navigate = useNavigate();
   const [investments, setInvestments] = useState<InvestmentHistoryItem[]>([]);
   const [investmentsLoading, setInvestmentsLoading] = useState(true);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchInvestments = async () => {
@@ -200,8 +202,8 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
                       </div>
                     </div>
 
-                    {/* Amount & Date */}
-                    <div className="text-right shrink-0">
+                    {/* Amount & Date & Receipt */}
+                    <div className="text-right shrink-0 flex flex-col items-end">
                       <p className="text-[13px] sm:text-[15px] font-black text-[#1c2b1e] tracking-tighter">
                         Bs. {inv.amount.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
@@ -212,6 +214,33 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
                           year: 'numeric',
                         })}
                       </p>
+                      {inv.investmentStatus === 'completed' && (
+                        <button
+                          type="button"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            try {
+                              setDownloadingId(inv.id);
+                              await downloadInvestmentReceipt(inv.id);
+                            } catch (err) {
+                              console.error('Error al descargar comprobante:', err);
+                              alert('Error al generar el comprobante. Por favor intenta de nuevo.');
+                            } finally {
+                              setDownloadingId(null);
+                            }
+                          }}
+                          disabled={downloadingId === inv.id}
+                          className="mt-1.5 text-[9px] sm:text-[10px] font-black text-[#72B626] bg-[#f0f9e0] hover:bg-[#72B626] hover:text-white px-2 py-1 rounded-md border-none cursor-pointer inline-flex items-center gap-1 transition-all active:scale-95 disabled:opacity-50"
+                          title="Descargar Comprobante en PDF"
+                        >
+                          {downloadingId === inv.id ? (
+                            <Loader2 size={11} className="animate-spin" />
+                          ) : (
+                            <FileText size={11} strokeWidth={2.5} />
+                          )}
+                          <span>Comprobante</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
