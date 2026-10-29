@@ -673,4 +673,125 @@ class MigrationTest extends TestCase
         $this->assertEquals(1, $campAudit['inconsistencies']['missingReceiptsCount']);
         $this->assertEquals(1, $campAudit['inconsistencies']['unbudgetedExpensesCount']);
     }
+
+    public function test_centralized_notification_system_events_and_endpoints(): void
+    {
+        $creator = $this->account('entrepreneur');
+        $investor = $this->account('investor');
+        $other = $this->account();
+        $camp = $this->campaign($creator, ['goal_amount' => 5000, 'current_amount' => 0, 'status' => 'published']);
+
+        // 1. Comment triggers notification to campaign creator
+        $this->asUser($other)->postJson('/api/v1/campaigns/'.$camp->id.'/comments', [
+            'content' => 'Excelente proyecto de crowdfunding!',
+        ])->assertCreated();
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $creator->id,
+            'type_code' => 'new_comment',
+        ]);
+
+        // 2. Investment triggers notifications to both investor and creator
+        $investor->investor->update(['max_investment' => 2000]);
+        $this->asUser($investor)->postJson('/api/v1/investments', [
+            'campaignId' => $camp->id,
+            'amount' => 500,
+        ])->assertCreated();
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $investor->id,
+            'type_code' => 'investment_confirmed',
+        ]);
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $creator->id,
+            'type_code' => 'investment_received',
+        ]);
+
+        // 3. Campaign update triggers notification to campaign backers
+        $this->asUser($creator)->postJson('/api/v1/entrepreneurs/me/campaigns/'.$camp->id.'/updates', [
+            'title' => 'Primer informe de avances',
+            'content' => 'Completamos la fase de especificaciones técnicas con el equipo.',
+        ])->assertCreated();
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $investor->id,
+            'type_code' => 'campaign_update',
+        ]);
+
+        // 4. Querying notifications via API
+        // Unread count endpoint
+        $countResp = $this->asUser($creator)->getJson('/api/v1/notifications/unread-count')
+            ->assertOk()
+            ->json('data.unreadCount');
+        $this->assertGreaterThanOrEqual(2, $countResp);
+
+        // Paginated list
+        $listResp = $this->asUser($creator)->getJson('/api/v1/notifications')
+            ->assertOk()
+            ->json('data');
+
+        $this->assertArrayHasKey('notifications', $listResp);
+        $this->assertArrayHasKey('unreadCount', $listResp);
+        $this->assertArrayHasKey('total', $listResp);
+        $this->assertNotEmpty($listResp['notifications']);
+
+        $firstNotif = $listResp['notifications'][0];
+        $notifId = $firstNotif['id'];
+
+        // Filter by typeCode
+        $typeList = $this->asUser($creator)->getJson('/api/v1/notifications?typeCode=new_comment')
+            ->assertOk()
+            ->json('data.notifications');
+        $this->assertTrue(collect($typeList)->every(fn ($n) => $n['typeCode'] === 'new_comment'));
+
+        // 5. Single notification inspection
+        $single = $this->asUser($creator)->getJson('/api/v1/notifications/'.$notifId)
+            ->assertOk()
+            ->json('data');
+        $this->assertEquals($notifId, $single['id']);
+
+        // 6. Cross-user security check: another user cannot view, mark read, or delete creator's notification
+        $this->asUser($other)->getJson('/api/v1/notifications/'.$notifId)->assertNotFound();
+        $this->asUser($other)->patchJson('/api/v1/notifications/'.$notifId.'/read')->assertNotFound();
+        $this->asUser($other)->deleteJson('/api/v1/notifications/'.$notifId)->assertNotFound();
+
+        // 7. Mark single notification as read
+        $this->asUser($creator)->patchJson('/api/v1/notifications/'.$notifId.'/read')
+            ->assertOk()
+            ->assertJsonPath('data.isRead', true);
+
+        $this->assertDatabaseHas('notifications', [
+            'id' => $notifId,
+            'is_read' => true,
+        ]);
+
+        // 8. Mark all notifications as read
+        $this->asUser($creator)->patchJson('/api/v1/notifications/read-all')
+            ->assertOk()
+            ->assertJsonPath('data.unreadCount', 0);
+
+        $this->assertEquals(0, $this->asUser($creator)->getJson('/api/v1/notifications/unread-count')->json('data.unreadCount'));
+
+        // 9. Clear read notifications
+        $this->asUser($creator)->deleteJson('/api/v1/notifications/clear-read')
+            ->assertOk();
+
+        // 10. User notification preferences
+        $prefs = $this->asUser($creator)->getJson('/api/v1/notifications/preferences')
+            ->assertOk()
+            ->json('data');
+        $this->assertTrue($prefs['inAppEnabled']);
+
+        // Update preferences to disable inAppEnabled
+        $this->asUser($creator)->putJson('/api/v1/notifications/preferences', [
+            'inAppEnabled' => false,
+            'investmentAlerts' => false,
+        ])->assertOk()
+          ->assertJsonPath('data.inAppEnabled', false);
+
+        // Notifier respects preferences and suppresses when disabled
+        $notifier = app(\App\Services\Notifier::class);
+        $result = $notifier->send($creator->id, 'investment_received', 'Silenciado', 'Este mensaje no debe guardarse');
+        $this->assertNull($result);
+    }
 }

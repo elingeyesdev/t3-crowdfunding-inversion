@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Campaign;
 use App\Models\Comment;
 use App\Models\Notification;
+use App\Services\Notifier;
 use App\Support\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,11 +28,13 @@ class CommunityController extends Controller
         return Api::ok(Comment::with(['author.entrepreneur', 'author.investor'])->where('campaign_id', $campaign->id)->latest()->limit(200)->get()->map(fn ($c) => $this->commentData($c, $userId)));
     }
 
-    public function postComment(Request $r, Campaign $campaign)
+    public function postComment(Request $r, Campaign $campaign, Notifier $notifier)
     {
         abort_unless(in_array($campaign->status, Campaign::PUBLIC_STATUSES), 404);
         $data = $r->validate(['content' => 'required|string|min:1|max:5000']);
         $comment = Comment::create(['campaign_id' => $campaign->id, 'author_id' => $r->user()->id, 'content' => $data['content']]);
+
+        $notifier->commentPosted($campaign, $comment, $r->user());
 
         return Api::ok($this->commentData($comment, $r->user()->id), 201);
     }
