@@ -7,11 +7,12 @@ import { CampaignCard } from '../components/CampaignCard';
 import { CampaignPreviewModal } from '../components/CampaignPreviewModal';
 import { CampaignForm } from '../components/CampaignForm';
 import { PublishUpdateModal } from '../components/PublishUpdateModal';
+import { KYCUploadModal } from '../components/KYCUploadModal';
 import type { EntrepreneurCampaign } from '../types/campaign.types';
 import { getMyCampaignById } from '../api/campaign.api';
 import {
   Rocket, Plus, Search, AlertCircle, Loader2,
-  LayoutGrid, List,
+  LayoutGrid, List, ShieldAlert,
 } from 'lucide-react';
 
 /* ─── Small Summary Card ─── */
@@ -46,6 +47,15 @@ export function MyCampaignsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [updateModalCampaign, setUpdateModalCampaign] = useState<{ id: string; title: string } | null>(null);
+  const [showKycModal, setShowKycModal] = useState(false);
+
+  const handleLaunchClick = () => {
+    if (profile && !profile.identityVerified) {
+      setShowKycModal(true);
+      return;
+    }
+    setEditingCampaign({} as any);
+  };
 
   const handleModalPreview = useCallback((c: EntrepreneurCampaign) => setPreviewCampaign(c), []);
 
@@ -93,7 +103,7 @@ export function MyCampaignsPage() {
             {/* CTA principal */}
             <button
               id="btn-launch-campaign"
-              onClick={() => setEditingCampaign({} as any)}
+              onClick={handleLaunchClick}
               className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-[14px] text-white border-none cursor-pointer transition-all active:scale-95"
               style={{
                 background: '#72B626',
@@ -111,6 +121,61 @@ export function MyCampaignsPage() {
 
       {/* Main Container */}
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 pt-8">
+        {/* Banner de Verificación KYC si no está verificada */}
+        {profile && !profile.identityVerified && (
+          <div className="mb-6 animate-in fade-in duration-300">
+            {profile.kycStatus === 'rejected' ? (
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-red-700 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <AlertCircle size={22} className="shrink-0 text-red-500 mt-0.5" />
+                  <div>
+                    <h4 className="text-[15px] font-bold">Verificación KYC Rechazada</h4>
+                    <p className="text-[13px] text-red-600 mt-0.5 leading-relaxed">
+                      {profile.kycRejectionReason || 'Tus documentos no cumplieron con los criterios de validación. Vuelve a intentarlo con imágenes claras y vigentes.'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowKycModal(true)}
+                  className="shrink-0 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all border-none cursor-pointer active:scale-95 shadow-md shadow-red-500/20"
+                >
+                  Reintentar KYC
+                </button>
+              </div>
+            ) : profile.kycStatus === 'pending' ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 text-amber-800 shadow-sm">
+                <ShieldAlert size={22} className="shrink-0 text-amber-500" />
+                <div>
+                  <h4 className="text-[15px] font-bold">Verificación KYC en Proceso</h4>
+                  <p className="text-[13px] text-amber-700 mt-0.5 leading-relaxed">
+                    Tus documentos de identidad han sido enviados y están siendo evaluados por nuestro equipo. Podrás publicar campañas una vez aprobada.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-[#f5fce8] border border-[#a8d97c]/50 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-[#1c2b1e] shadow-sm">
+                <div className="flex items-start gap-3">
+                  <ShieldAlert size={22} className="shrink-0 text-[#72B626] mt-0.5" />
+                  <div>
+                    <h4 className="text-[15px] font-bold">Verificación de Identidad (KYC) Requerida</h4>
+                    <p className="text-[13px] text-slate-600 mt-0.5 leading-relaxed">
+                      Para garantizar la transparencia ante donantes y publicar campañas, es necesario completar la validación KYC.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowKycModal(true)}
+                  className="shrink-0 px-5 py-2.5 bg-[#72B626] hover:bg-[#4a7f1a] text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all border-none cursor-pointer active:scale-95 shadow-md shadow-green-500/20"
+                >
+                  Verificar Identidad
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="bg-white rounded-xl border border-gray-200 mb-6 overflow-hidden shadow-sm">
           {/* Status tabs */}
           <div className="flex overflow-x-auto border-b border-gray-100 px-4 gap-0 scrollbar-hide">
@@ -304,6 +369,16 @@ export function MyCampaignsPage() {
           onClose={() => setUpdateModalCampaign(null)}
           onSuccess={() => {
             // Can reload campaigns if needed, but stories are loaded on investor feed
+          }}
+        />
+      )}
+
+      {showKycModal && (
+        <KYCUploadModal
+          onClose={() => setShowKycModal(false)}
+          onSuccess={() => {
+            setShowKycModal(false);
+            window.location.reload();
           }}
         />
       )}

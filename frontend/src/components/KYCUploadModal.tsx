@@ -112,7 +112,7 @@ export function KYCUploadModal({ onClose, onSuccess }: KYCUploadModalProps) {
           )}
           {step === 2 && (
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">Selfie con documento <InfoHint text="Toma la foto en vivo con tu cámara." /></label>
+              <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">Selfie con documento <InfoHint text="Toma la foto en vivo con tu cámara o sube un archivo." /></label>
               {!faceVideo ? (
                 <div className="border-2 border-dashed rounded-xl p-4 bg-gray-50">
                   <div className="rounded-lg overflow-hidden bg-black mb-3 min-h-[220px] relative">
@@ -120,11 +120,31 @@ export function KYCUploadModal({ onClose, onSuccess }: KYCUploadModalProps) {
                     {!isCameraActive && <div className="absolute inset-0 flex items-center justify-center text-gray-200 bg-black/50 text-center p-4">Activa tu cámara para tomar la foto</div>}
                   </div>
                   {cameraError && <p className="text-sm text-red-600 font-medium mb-3">{cameraError}</p>}
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mb-3">
                     <button type="button" onClick={startCamera} disabled={isStartingCamera || isSubmitting} className="flex-1 px-4 py-2 text-[13px] md:text-sm font-bold text-white bg-blue-600 rounded-lg disabled:opacity-50">{isStartingCamera ? 'Iniciando...' : 'Activar cámara'}</button>
                     <button type="button" onClick={captureFromCamera} disabled={!isCameraActive || isSubmitting} className="flex-1 px-4 py-2 text-[13px] md:text-sm font-bold text-white bg-[#72B626] rounded-lg disabled:opacity-50">Tomar foto</button>
                   </div>
                   <canvas ref={canvasRef} className="hidden" />
+
+                  <div className="pt-3 border-t border-gray-200 text-center">
+                    <p className="text-xs text-gray-500 mb-2">¿Sin cámara o problemas de permisos?</p>
+                    <label className="inline-block px-3 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                      Subir foto desde archivo
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setFaceVideo(file);
+                            setCapturedPreview(URL.createObjectURL(file));
+                            stopCamera();
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
               ) : (
                 <div className="border-2 border-green-400 bg-green-50 rounded-xl p-4 text-green-700">
