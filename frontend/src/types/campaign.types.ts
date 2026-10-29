@@ -43,7 +43,55 @@ export interface EntrepreneurCampaign {
   videoUrl?: string | null;
   rewardTiers?: RewardTier[];
   fundingPlan?: FundingPlanItem[];
+  milestones?: CampaignMilestone[];
   campaignType: CampaignType;
+}
+
+export type MilestoneStatus = 'pending' | 'in_progress' | 'completed' | 'delayed';
+
+export interface MilestoneEvidence {
+  id: string;
+  title: string;
+  description?: string | null;
+  url: string;
+  type: 'image' | 'video' | 'document';
+  fileName?: string;
+  uploadedAt: string;
+}
+
+export interface CampaignMilestone {
+  id: string;
+  campaignId: string;
+  title: string;
+  description: string | null;
+  targetDate: string | null;
+  completedDate: string | null;
+  status: MilestoneStatus;
+  progressPercentage: number;
+  sortOrder: number;
+  evidenceUrls?: MilestoneEvidence[];
+  updates?: any[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCampaignMilestoneDto {
+  title: string;
+  description?: string;
+  targetDate?: string;
+  status?: MilestoneStatus;
+  progressPercentage?: number;
+  sortOrder?: number;
+}
+
+export interface UpdateCampaignMilestoneDto {
+  title?: string;
+  description?: string;
+  targetDate?: string;
+  completedDate?: string;
+  status?: MilestoneStatus;
+  progressPercentage?: number;
+  sortOrder?: number;
 }
 
 export interface FundingPlanItem {

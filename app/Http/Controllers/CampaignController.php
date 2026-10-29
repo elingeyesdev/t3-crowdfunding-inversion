@@ -34,7 +34,7 @@ class CampaignController extends Controller
 
     private function listing(Request $r, bool $public)
     {
-        $query = Campaign::with(['creator.entrepreneur', 'category', 'categories', 'rewards', 'fundingPlan']);
+        $query = Campaign::with(['creator.entrepreneur', 'category', 'categories', 'rewards', 'fundingPlan', 'milestones']);
         if ($public) {
             $query->whereIn('status', Campaign::PUBLIC_STATUSES);
         } else {
@@ -296,18 +296,27 @@ class CampaignController extends Controller
         return Api::ok();
     }
 
-    public function update(Request $r, Campaign $campaign)
+    public function update(Request $r, Campaign $campaign, Notifier $notifier)
     {
         self::authorizeOwner($r, $campaign);
         $r->merge(['isPublic' => $r->has('isPublic') ? $r->boolean('isPublic') : true]);
-        $data = $r->validate(['title' => 'required|string|max:200', 'content' => 'required|string|max:20000', 'isPublic' => 'boolean', 'attachments' => 'sometimes|array|max:10', 'file' => 'nullable|file|mimes:jpg,jpeg,png,webp,avif,mp4,webm,pdf|max:51200']);
+        $data = $r->validate(['title' => 'required|string|max:200', 'content' => 'required|string|max:20000', 'isPublic' => 'boolean', 'milestoneId' => 'nullable|uuid|exists:campaign_milestones,id', 'attachments' => 'sometimes|array|max:10', 'file' => 'nullable|file|mimes:jpg,jpeg,png,webp,avif,mp4,webm,pdf|max:51200']);
         $attachments = $data['attachments'] ?? [];
         if ($r->hasFile('file')) {
             $file = $r->file('file');
-            $attachments[] = ['url' => '/storage/'.$file->store('updates', 'public'), 'type' => str_starts_with($file->getMimeType(), 'video/') ? 'video' : 'image'];
+            $mime = $file->getMimeType();
+            $type = str_starts_with($mime, 'video/') ? 'video' : (str_contains($mime, 'pdf') ? 'document' : 'image');
+            $attachments[] = ['name' => $file->getClientOriginalName(), 'url' => '/storage/'.$file->store('updates', 'public'), 'type' => $type];
         }
 
-        return Api::ok($campaign->updates()->create(['author_id' => $r->user()->id, 'title' => $data['title'], 'content' => $data['content'], 'is_public' => $data['isPublic'], 'attachments' => $attachments]), 201);
+        $update = $campaign->updates()->create(['author_id' => $r->user()->id, 'milestone_id' => $data['milestoneId'] ?? null, 'title' => $data['title'], 'content' => $data['content'], 'is_public' => $data['isPublic'], 'attachments' => $attachments]);
+
+        $investorIds = $campaign->investments()->where('status', 'completed')->pluck('investor_id')->unique();
+        foreach ($investorIds as $invId) {
+            $notifier->send($invId, 'campaign_update', 'Nuevo avance de campaña', $campaign->title.': '.$data['title'], $campaign->id);
+        }
+
+        return Api::ok($update->load('milestone'), 201);
     }
 
     public function stories()
@@ -496,5 +505,117 @@ class CampaignController extends Controller
         $movement->update(['receipt_url' => '/storage/'.$path]);
 
         return Api::ok($movement->fresh());
+    }
+
+    public function milestones(Campaign $campaign)
+    {
+        return Api::ok($campaign->milestones()->with('updates')->get());
+    }
+
+    public function showMilestone(Campaign $campaign, string $milestoneId)
+    {
+        $milestone = $campaign->milestones()->with('updates')->findOrFail($milestoneId);
+
+        return Api::ok($milestone);
+    }
+
+    public function addMilestone(Request $r, Campaign $campaign)
+    {
+        self::authorizeOwner($r, $campaign);
+        $data = $r->validate([
+            'title' => 'required|string|min:3|max:200',
+            'description' => 'nullable|string|max:5000',
+            'targetDate' => 'nullable|date',
+            'status' => 'sometimes|in:pending,in_progress,completed,delayed',
+            'progressPercentage' => 'sometimes|integer|min:0|max:100',
+            'sortOrder' => 'nullable|integer|min:0',
+        ]);
+
+        $milestone = $campaign->milestones()->create([
+            'title' => $data['title'],
+            'description' => $data['description'] ?? null,
+            'target_date' => $data['targetDate'] ?? null,
+            'status' => $data['status'] ?? 'pending',
+            'progress_percentage' => $data['progressPercentage'] ?? 0,
+            'sort_order' => $data['sortOrder'] ?? ($campaign->milestones()->max('sort_order') + 1),
+            'evidence_urls' => [],
+        ]);
+
+        return Api::ok($milestone, 201);
+    }
+
+    public function updateMilestone(Request $r, Campaign $campaign, string $milestoneId, Notifier $notifier)
+    {
+        self::authorizeOwner($r, $campaign);
+        $milestone = $campaign->milestones()->findOrFail($milestoneId);
+        $data = $r->validate([
+            'title' => 'sometimes|string|min:3|max:200',
+            'description' => 'nullable|string|max:5000',
+            'targetDate' => 'nullable|date',
+            'completedDate' => 'nullable|date',
+            'status' => 'sometimes|in:pending,in_progress,completed,delayed',
+            'progressPercentage' => 'sometimes|integer|min:0|max:100',
+            'sortOrder' => 'nullable|integer|min:0',
+        ]);
+
+        $attrs = Api::snake($data);
+        if (isset($attrs['status']) && $attrs['status'] === 'completed' && $milestone->status !== 'completed') {
+            $attrs['completed_date'] = $attrs['completed_date'] ?? now()->toDateString();
+            $attrs['progress_percentage'] = 100;
+
+            $investorIds = $campaign->investments()->where('status', 'completed')->pluck('investor_id')->unique();
+            foreach ($investorIds as $invId) {
+                $notifier->send($invId, 'milestone_completed', 'Hito de campaña completado', $campaign->title.': '.$milestone->title, $campaign->id);
+            }
+        }
+
+        $milestone->update($attrs);
+
+        return Api::ok($milestone->fresh()->load('updates'));
+    }
+
+    public function deleteMilestone(Request $r, Campaign $campaign, string $milestoneId)
+    {
+        self::authorizeOwner($r, $campaign);
+        $milestone = $campaign->milestones()->findOrFail($milestoneId);
+        $milestone->delete();
+
+        return Api::ok();
+    }
+
+    public function uploadMilestoneEvidence(Request $r, Campaign $campaign, string $milestoneId)
+    {
+        self::authorizeOwner($r, $campaign);
+        $milestone = $campaign->milestones()->findOrFail($milestoneId);
+        $data = $r->validate([
+            'file' => 'required|file|mimes:pdf,jpg,jpeg,png,webp,mp4,webm,doc,docx|max:51200',
+            'title' => 'required|string|max:200',
+            'description' => 'nullable|string|max:2000',
+        ]);
+
+        $file = $r->file('file');
+        $path = $file->store('milestones', 'public');
+        $mime = $file->getMimeType();
+        $type = str_starts_with($mime, 'video/') ? 'video' : (str_contains($mime, 'pdf') ? 'document' : 'image');
+
+        $evidence = $milestone->evidence_urls ?? [];
+        $evidence[] = [
+            'id' => (string) Str::uuid(),
+            'title' => $data['title'],
+            'description' => $data['description'] ?? null,
+            'url' => '/storage/'.$path,
+            'type' => $type,
+            'fileName' => $file->getClientOriginalName(),
+            'uploadedAt' => now()->toIso8601String(),
+        ];
+
+        $milestone->update(['evidence_urls' => $evidence]);
+
+        return Api::ok($milestone->fresh());
+    }
+
+    public function campaignUpdates(Campaign $campaign)
+    {
+        return Api::ok($campaign->updates()->where('is_public', true)->with(['author', 'milestone'])->latest()->get());
     }
 }

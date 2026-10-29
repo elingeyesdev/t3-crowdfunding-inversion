@@ -13,4 +13,14 @@ class CampaignUpdate extends Record
     {
         return $this->belongsTo(Campaign::class);
     }
+
+    public function milestone()
+    {
+        return $this->belongsTo(CampaignMilestone::class, 'milestone_id');
+    }
+
+    public function author()
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
 }

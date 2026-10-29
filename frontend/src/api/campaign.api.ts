@@ -407,3 +407,79 @@ export async function uploadMovementReceipt(
   return data.data;
 }
 
+export async function getCampaignMilestones(campaignId: string): Promise<any[]> {
+  const { data } = await api.get<ApiSuccessResponse<any[]>>(
+    `/campaigns/${campaignId}/milestones`
+  );
+  return data.data;
+}
+
+export async function getCampaignMilestoneById(
+  campaignId: string,
+  milestoneId: string
+): Promise<any> {
+  const { data } = await api.get<ApiSuccessResponse<any>>(
+    `/campaigns/${campaignId}/milestones/${milestoneId}`
+  );
+  return data.data;
+}
+
+export async function addCampaignMilestone(
+  campaignId: string,
+  dto: Record<string, any>
+): Promise<any> {
+  const { data } = await api.post<ApiSuccessResponse<any>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/milestones`,
+    dto
+  );
+  return data.data;
+}
+
+export async function updateCampaignMilestone(
+  campaignId: string,
+  milestoneId: string,
+  dto: Record<string, any>
+): Promise<any> {
+  const { data } = await api.patch<ApiSuccessResponse<any>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/milestones/${milestoneId}`,
+    dto
+  );
+  return data.data;
+}
+
+export async function deleteCampaignMilestone(
+  campaignId: string,
+  milestoneId: string
+): Promise<void> {
+  await api.delete(
+    `/entrepreneurs/me/campaigns/${campaignId}/milestones/${milestoneId}`
+  );
+}
+
+export async function uploadMilestoneEvidence(
+  campaignId: string,
+  milestoneId: string,
+  file: File,
+  title: string,
+  description?: string
+): Promise<any> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('title', title);
+  if (description) formData.append('description', description);
+
+  const { data } = await api.post<ApiSuccessResponse<any>>(
+    `/entrepreneurs/me/campaigns/${campaignId}/milestones/${milestoneId}/evidence`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  );
+  return data.data;
+}
+
+export async function getCampaignUpdates(campaignId: string): Promise<any[]> {
+  const { data } = await api.get<ApiSuccessResponse<any[]>>(
+    `/campaigns/${campaignId}/updates`
+  );
+  return data.data;
+}
+
