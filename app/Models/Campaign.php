@@ -56,10 +56,15 @@ class Campaign extends Record
         return $this->hasMany(CampaignFinancialMovement::class)->orderByDesc('movement_date')->orderByDesc('created_at');
     }
 
+    public function milestones()
+    {
+        return $this->hasMany(CampaignMilestone::class)->orderBy('sort_order')->orderBy('target_date');
+    }
+
     public function apiData(): array
     {
         $profile = $this->creator?->entrepreneur;
 
-        return [...$this->attributesToArray(), 'category_name' => $this->category?->display_name, 'category_slug' => $this->category?->slug, 'category_ids' => $this->categories->modelKeys(), 'categories' => $this->categories->toArray(), 'reward_tiers' => $this->rewards->toArray(), 'funding_plan' => $this->fundingPlan->toArray(), 'entrepreneur_user_id' => $this->creator_id, 'entrepreneur_name' => trim(($profile?->first_name ?? '').' '.($profile?->last_name ?? '')), 'entrepreneur_display_name' => $profile?->display_name, 'entrepreneur_avatar' => $profile?->avatar_url, 'entrepreneur_bio' => $profile?->bio];
+        return [...$this->attributesToArray(), 'category_name' => $this->category?->display_name, 'category_slug' => $this->category?->slug, 'category_ids' => $this->categories->modelKeys(), 'categories' => $this->categories->toArray(), 'reward_tiers' => $this->rewards->toArray(), 'funding_plan' => $this->fundingPlan->toArray(), 'milestones' => $this->milestones->toArray(), 'entrepreneur_user_id' => $this->creator_id, 'entrepreneur_name' => trim(($profile?->first_name ?? '').' '.($profile?->last_name ?? '')), 'entrepreneur_display_name' => $profile?->display_name, 'entrepreneur_avatar' => $profile?->avatar_url, 'entrepreneur_bio' => $profile?->bio];
     }
 }

@@ -26,6 +26,9 @@ Route::get('campaigns/{campaign}/comments', [CommunityController::class, 'commen
 Route::get('campaigns/{campaign}/rewards', [RewardController::class, 'index']);
 Route::get('campaigns/{campaign}/funding-plan', [CampaignController::class, 'fundingPlan']);
 Route::get('campaigns/{campaign}/financial-ledger', [CampaignController::class, 'financialLedger']);
+Route::get('campaigns/{campaign}/milestones', [CampaignController::class, 'milestones']);
+Route::get('campaigns/{campaign}/milestones/{milestone}', [CampaignController::class, 'showMilestone']);
+Route::get('campaigns/{campaign}/updates', [CampaignController::class, 'campaignUpdates']);
 Route::post('ai-support/chat', [AiController::class, 'chat'])->middleware('throttle:20,1');
 Route::get('private-files/{path}', [FileController::class, 'show'])->where('path', '.*')->name('private.file')->middleware('signed');
 
@@ -78,6 +81,11 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::patch('campaigns/{campaign}/financial-movements/{movement}', [CampaignController::class, 'updateFinancialMovement']);
         Route::delete('campaigns/{campaign}/financial-movements/{movement}', [CampaignController::class, 'deleteFinancialMovement']);
         Route::post('campaigns/{campaign}/financial-movements/{movement}/receipt', [CampaignController::class, 'uploadMovementReceipt']);
+        Route::get('campaigns/{campaign}/milestones', [CampaignController::class, 'milestones']);
+        Route::post('campaigns/{campaign}/milestones', [CampaignController::class, 'addMilestone']);
+        Route::patch('campaigns/{campaign}/milestones/{milestone}', [CampaignController::class, 'updateMilestone']);
+        Route::delete('campaigns/{campaign}/milestones/{milestone}', [CampaignController::class, 'deleteMilestone']);
+        Route::post('campaigns/{campaign}/milestones/{milestone}/evidence', [CampaignController::class, 'uploadMilestoneEvidence']);
     });
     Route::prefix('investments')->middleware('roles:investor')->group(function () {
         Route::get('me', [InvestmentController::class, 'index']);

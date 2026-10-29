@@ -295,6 +295,77 @@ class MigrationTest extends TestCase
         $this->assertDatabaseMissing('campaign_financial_movements', ['id' => $movementId]);
     }
 
+    public function test_campaign_milestones_updates_and_evidence_system(): void
+    {
+        $u = $this->account('entrepreneur');
+        $c = $this->campaign($u, ['goal_amount' => 1000, 'status' => 'published']);
+
+        // Entrepreneur creates a milestone
+        $response = $this->asUser($u)->postJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/milestones', [
+            'title' => 'Fase 1: Prototipo y Pruebas Iniciales',
+            'description' => 'Desarrollo del MVP y validación con usuarios de prueba.',
+            'targetDate' => now()->addMonth()->toDateString(),
+            'status' => 'in_progress',
+            'progressPercentage' => 25,
+        ])->assertCreated();
+
+        $milestoneId = $response->json('data.id');
+        $this->assertDatabaseHas('campaign_milestones', [
+            'id' => $milestoneId,
+            'campaign_id' => $c->id,
+            'title' => 'Fase 1: Prototipo y Pruebas Iniciales',
+            'progress_percentage' => 25,
+        ]);
+
+        // Upload evidence for this milestone
+        $this->asUser($u)->post('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/milestones/'.$milestoneId.'/evidence', [
+            'title' => 'Fotografía del prototipo funcional',
+            'description' => 'Módulo electrónico ensamblado en laboratorio',
+            'file' => UploadedFile::fake()->create('prototipo.jpg', 20, 'image/jpeg'),
+        ], ['Accept' => 'application/json'])->assertOk()->assertJsonPath('data.evidenceUrls.0.title', 'Fotografía del prototipo funcional');
+
+        // An investor backs the project
+        $investor = $this->account('investor');
+        $this->asUser($investor)->postJson('/api/v1/investments', [
+            'campaignId' => $c->id,
+            'amount' => 300,
+        ])->assertCreated();
+
+        // Entrepreneur posts an update linked to the milestone
+        $this->asUser($u)->post('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/updates', [
+            'title' => 'Avance semanal: Pruebas concluidas con éxito',
+            'content' => 'Se terminaron las pruebas de esfuerzo con excelentes resultados.',
+            'milestoneId' => $milestoneId,
+            'file' => UploadedFile::fake()->create('reporte_pruebas.pdf', 30, 'application/pdf'),
+        ], ['Accept' => 'application/json'])->assertCreated()->assertJsonPath('data.milestoneId', $milestoneId);
+
+        // Mark the milestone as completed
+        $this->asUser($u)->patchJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/milestones/'.$milestoneId, [
+            'status' => 'completed',
+        ])->assertOk()->assertJsonPath('data.status', 'completed')->assertJsonPath('data.progressPercentage', 100);
+
+        // Public consultation of milestones and updates by donors
+        $this->getJson('/api/v1/campaigns/'.$c->id.'/milestones')
+            ->assertOk()
+            ->assertJsonPath('data.0.id', $milestoneId)
+            ->assertJsonPath('data.0.status', 'completed')
+            ->assertJsonCount(1, 'data.0.evidenceUrls');
+
+        $this->getJson('/api/v1/campaigns/'.$c->id.'/updates')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.milestone.title', 'Fase 1: Prototipo y Pruebas Iniciales');
+
+        // Another entrepreneur cannot modify or delete this milestone
+        $other = $this->account('entrepreneur');
+        $this->asUser($other)->patchJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/milestones/'.$milestoneId, [
+            'title' => 'Intento no autorizado',
+        ])->assertForbidden();
+
+        $this->asUser($other)->deleteJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/milestones/'.$milestoneId)
+            ->assertForbidden();
+    }
+
     public function test_investment_updates_balances_rewards_ledger_and_notifications_once(): void
     {
         $c = $this->campaign();
