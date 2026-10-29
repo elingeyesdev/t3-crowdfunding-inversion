@@ -532,4 +532,145 @@ class MigrationTest extends TestCase
         $this->asUser($one)->postJson('/api/v1/broadcasting/auth', ['socket_id' => '123.456', 'channel_name' => 'private-users.'.$one->id])->assertOk()->assertJsonStructure(['auth']);
         $this->postJson('/api/v1/broadcasting/auth', ['socket_id' => '123.456', 'channel_name' => 'private-users.'.$two->id])->assertForbidden();
     }
+
+    public function test_administrative_review_of_expenses_and_financial_movements(): void
+    {
+        $u = $this->account('entrepreneur');
+        $admin = $this->account('admin');
+        $c = $this->campaign($u, ['goal_amount' => 10000, 'current_amount' => 5000, 'status' => 'draft']);
+
+        // Set funding plan
+        $this->asUser($u)->putJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/funding-plan', [
+            'fundingPlan' => [
+                ['category' => 'Equipamiento', 'percentage' => 30, 'amount' => 3000, 'description' => 'Servidores y licencias'],
+                ['category' => 'Desarrollo', 'percentage' => 70, 'amount' => 7000, 'description' => 'Personal técnico'],
+            ],
+        ])->assertOk();
+
+        $c->update(['status' => 'published']);
+
+        // 1. Entrepreneur records an expense with a valid receipt (starts as pending)
+        $resp1 = $this->asUser($u)->post('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/financial-movements', [
+            'type' => 'expense',
+            'concept' => 'Servidor Dell PowerEdge Cloud',
+            'category' => 'Equipamiento',
+            'amount' => 1500,
+            'movementDate' => '2026-10-28',
+            'referenceNumber' => 'FAC-778899',
+            'notes' => 'Servidor para cluster de producción',
+            'receipt' => UploadedFile::fake()->create('factura_dell.pdf', 20, 'application/pdf'),
+        ], ['Accept' => 'application/json'])->assertCreated();
+
+        $movementId1 = $resp1->json('data.id');
+        $this->assertEquals('pending', $resp1->json('data.status'));
+
+        // 2. Entrepreneur records an unbudgeted expense without receipt
+        $resp2 = $this->asUser($u)->post('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/financial-movements', [
+            'type' => 'expense',
+            'concept' => 'Publicidad en Redes Sociales',
+            'category' => 'Marketing',
+            'amount' => 800,
+            'movementDate' => '2026-10-28',
+            'notes' => 'Campaña en redes no contemplada',
+        ], ['Accept' => 'application/json'])->assertCreated();
+
+        $movementId2 = $resp2->json('data.id');
+
+        // 3. Security: Non-admin users are forbidden from accessing admin financial review endpoints
+        $this->asUser($u)->getJson('/api/v1/admin/financial-movements')->assertForbidden();
+        $this->asUser($u)->getJson('/api/v1/admin/financial-audit/summary')->assertForbidden();
+        $this->asUser($u)->postJson('/api/v1/admin/financial-movements/'.$movementId1.'/review', [
+            'action' => 'approve',
+        ])->assertForbidden();
+
+        // 4. Admin audits summary metrics
+        $summary = $this->asUser($admin)->getJson('/api/v1/admin/financial-audit/summary')
+            ->assertOk()
+            ->json('data');
+
+        $this->assertGreaterThanOrEqual(2, $summary['totalMovements']);
+        $this->assertGreaterThanOrEqual(2300, $summary['totalExpenses']);
+        $this->assertGreaterThanOrEqual(2, $summary['pendingCount']);
+        $this->assertGreaterThanOrEqual(1, $summary['expensesWithoutReceiptCount']);
+
+        // 5. Admin lists financial movements with filtering
+        $listAll = $this->asUser($admin)->getJson('/api/v1/admin/financial-movements')
+            ->assertOk()
+            ->json('data.data');
+        $this->assertNotEmpty($listAll);
+
+        // Filter by hasReceipt=false
+        $noReceiptList = $this->asUser($admin)->getJson('/api/v1/admin/financial-movements?hasReceipt=false')
+            ->assertOk()
+            ->json('data.data');
+        $this->assertTrue(collect($noReceiptList)->contains('id', $movementId2));
+        $this->assertFalse(collect($noReceiptList)->contains('id', $movementId1));
+
+        // Filter by search query
+        $searchList = $this->asUser($admin)->getJson('/api/v1/admin/financial-movements?q=Dell')
+            ->assertOk()
+            ->json('data.data');
+        $this->assertTrue(collect($searchList)->contains('id', $movementId1));
+
+        // 6. Admin inspects movement detail and consistency checks
+        $detail2 = $this->asUser($admin)->getJson('/api/v1/admin/financial-movements/'.$movementId2)
+            ->assertOk()
+            ->json('data');
+
+        $this->assertNotEmpty($detail2['consistencyFlags']);
+        $flagCodes = collect($detail2['consistencyFlags'])->pluck('code')->all();
+        $this->assertContains('MISSING_RECEIPT', $flagCodes);
+        $this->assertContains('UNBUDGETED_CATEGORY', $flagCodes);
+
+        // 7. Admin approves legitimate expense #1
+        $this->asUser($admin)->postJson('/api/v1/admin/financial-movements/'.$movementId1.'/review', [
+            'action' => 'approve',
+            'notes' => 'Comprobante revisado y validado contra equipamiento.',
+        ])->assertOk()
+          ->assertJsonPath('data.status', 'verified')
+          ->assertJsonPath('data.reviewedBy', $admin->id);
+
+        $this->assertDatabaseHas('campaign_financial_movements', [
+            'id' => $movementId1,
+            'status' => 'verified',
+            'reviewed_by' => $admin->id,
+        ]);
+
+        // 8. Admin flags movement #2 as irregular / observed
+        // Validation: flag requires notes
+        $this->asUser($admin)->postJson('/api/v1/admin/financial-movements/'.$movementId2.'/review', [
+            'action' => 'flag',
+        ])->assertUnprocessable();
+
+        // Flagging with explanatory notes
+        $this->asUser($admin)->postJson('/api/v1/admin/financial-movements/'.$movementId2.'/review', [
+            'action' => 'flag',
+            'notes' => 'Falta comprobante fiscal y la categoría Marketing no fue aprobada en el plan de uso de fondos.',
+        ])->assertOk()
+          ->assertJsonPath('data.status', 'flagged')
+          ->assertJsonPath('data.reviewedBy', $admin->id);
+
+        $this->assertDatabaseHas('campaign_financial_movements', [
+            'id' => $movementId2,
+            'status' => 'flagged',
+            'review_notes' => 'Falta comprobante fiscal y la categoría Marketing no fue aprobada en el plan de uso de fondos.',
+        ]);
+
+        // Verify notification sent to entrepreneur
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $u->id,
+            'type_code' => 'financial_movement_flagged',
+        ]);
+
+        // 9. Admin performs campaign-level financial audit deep dive
+        $campAudit = $this->asUser($admin)->getJson('/api/v1/admin/campaigns/'.$c->id.'/financial-audit')
+            ->assertOk()
+            ->json('data');
+
+        $this->assertEquals($c->id, $campAudit['campaign']['id']);
+        $this->assertNotEmpty($campAudit['fundingPlanComparison']);
+        $this->assertEquals(1, $campAudit['inconsistencies']['flaggedCount']);
+        $this->assertEquals(1, $campAudit['inconsistencies']['missingReceiptsCount']);
+        $this->assertEquals(1, $campAudit['inconsistencies']['unbudgetedExpensesCount']);
+    }
 }

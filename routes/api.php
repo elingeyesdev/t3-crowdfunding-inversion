@@ -134,6 +134,11 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::patch('campaigns/{campaign}/documents/{document}/review', [AdminController::class, 'reviewDocument']);
         Route::get('kyc/pending', [AdminController::class, 'kyc']);
         Route::post('kyc/{profile}/review', [AdminController::class, 'reviewKyc']);
+        Route::get('financial-movements', [AdminController::class, 'financialMovements']);
+        Route::get('financial-movements/{movement}', [AdminController::class, 'showFinancialMovement']);
+        Route::post('financial-movements/{movement}/review', [AdminController::class, 'reviewFinancialMovement']);
+        Route::get('financial-audit/summary', [AdminController::class, 'financialAuditSummary']);
+        Route::get('campaigns/{campaign}/financial-audit', [AdminController::class, 'campaignFinancialAudit']);
     });
     Route::prefix('superadmin')->middleware('roles:super_admin')->group(function () {
         Route::get('admins',[AdminController::class, 'admins']);

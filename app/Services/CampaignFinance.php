@@ -42,7 +42,7 @@ class CampaignFinance
 
     public function ledger(Campaign $campaign): array
     {
-        $movements = $campaign->financialMovements()->with('creator')->get();
+        $movements = $campaign->financialMovements()->with(['creator', 'reviewer'])->get();
         $incomes = $movements->where('type', 'income');
         $expenses = $movements->where('type', 'expense');
 
@@ -73,6 +73,10 @@ class CampaignFinance
                 'movementCount' => $movements->count(),
                 'incomeCount' => $incomes->count(),
                 'expenseCount' => $expenses->count(),
+                'pendingCount' => $movements->where('status', 'pending')->count(),
+                'flaggedCount' => $movements->where('status', 'flagged')->count(),
+                'verifiedCount' => $movements->where('status', 'verified')->count(),
+                'rejectedCount' => $movements->where('status', 'rejected')->count(),
             ],
             'expensesByCategory' => $expensesByCategory,
             'movements' => $movements->map(fn ($m) => [
@@ -87,6 +91,9 @@ class CampaignFinance
                 'receiptUrl' => $m->receipt_url,
                 'notes' => $m->notes,
                 'status' => $m->status,
+                'reviewedBy' => $m->reviewed_by,
+                'reviewedAt' => $m->reviewed_at?->toIso8601String(),
+                'reviewNotes' => $m->review_notes,
                 'createdAt' => $m->created_at,
             ])->values()->all(),
         ];

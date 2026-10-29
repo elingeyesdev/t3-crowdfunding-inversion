@@ -7,6 +7,8 @@ import type {
   PendingCampaign,
   PendingCampaignDetail,
   CampaignHistoryItem,
+  FinancialMovementAuditItem,
+  FinancialAuditSummary,
 } from '../types/admin.types';
 
 interface ApiSuccessResponse<T> {
@@ -225,3 +227,52 @@ export async function reviewKyc(entrepreneurId: string, action: 'approve' | 'rej
   const { data } = await api.post<ApiSuccessResponse<any>>(`/admin/kyc/${entrepreneurId}/review`, { action, reason });
   return data.data;
 }
+
+export async function getAdminFinancialMovements(params: {
+  page?: number;
+  limit?: number;
+  campaignId?: string;
+  type?: string;
+  status?: string;
+  category?: string;
+  hasReceipt?: boolean;
+  flagged?: boolean;
+  q?: string;
+  sortBy?: string;
+  sortOrder?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}): Promise<{ data: FinancialMovementAuditItem[]; total: number; page: number; perPage: number }> {
+  const { data } = await api.get<ApiSuccessResponse<any>>('/admin/financial-movements', {
+    params,
+  });
+  return data.data;
+}
+
+export async function getAdminFinancialMovement(id: string): Promise<FinancialMovementAuditItem> {
+  const { data } = await api.get<ApiSuccessResponse<FinancialMovementAuditItem>>(`/admin/financial-movements/${id}`);
+  return data.data;
+}
+
+export async function reviewAdminFinancialMovement(
+  id: string,
+  action: 'approve' | 'flag' | 'reject' | 'reset',
+  notes?: string
+): Promise<FinancialMovementAuditItem> {
+  const { data } = await api.post<ApiSuccessResponse<FinancialMovementAuditItem>>(
+    `/admin/financial-movements/${id}/review`,
+    { action, notes }
+  );
+  return data.data;
+}
+
+export async function getAdminFinancialAuditSummary(): Promise<FinancialAuditSummary> {
+  const { data } = await api.get<ApiSuccessResponse<FinancialAuditSummary>>('/admin/financial-audit/summary');
+  return data.data;
+}
+
+export async function getAdminCampaignFinancialAudit(campaignId: string): Promise<any> {
+  const { data } = await api.get<ApiSuccessResponse<any>>(`/admin/campaigns/${campaignId}/financial-audit`);
+  return data.data;
+}
+
