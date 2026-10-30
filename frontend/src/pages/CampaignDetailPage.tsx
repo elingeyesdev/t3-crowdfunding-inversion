@@ -10,7 +10,7 @@ import { ContributionConfirmModal } from '../components/campaign-detail/Contribu
 import { CampaignComments } from '../components/campaign-detail/CampaignComments';
 import { ProgressBar } from '../components/ProgressBar';
 
-import { createInvestment } from '../api/investor.api';
+import { createInvestment, downloadInvestmentReceipt } from '../api/investor.api';
 import { getOrCreateConversation } from '../api/chat.api';
 
 import {
@@ -33,6 +33,7 @@ import {
   Flame,
   MessageCircle,
   Share2,
+  FileText,
 } from 'lucide-react';
 import { ShareModal } from '../components/ShareModal';
 
@@ -132,6 +133,8 @@ export function CampaignDetailPage() {
   const [investmentSuccess, setInvestmentSuccess] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [lastInvestmentId, setLastInvestmentId] = useState<string | null>(null);
+  const [downloadingReceipt, setDownloadingReceipt] = useState(false);
 
   // ── Related campaigns state ──
   const [relatedCampaigns, setRelatedCampaigns] = useState<PublicCampaign[]>([]);
@@ -667,11 +670,41 @@ export function CampaignDetailPage() {
                   </div>
                 )}
 
-                {/* ── Success Message ── */}
+                {/* ── Success Message & Comprobante ── */}
                 {investmentSuccess && (
-                  <div className="bg-green-50 text-[#72B626] p-4 rounded-xl text-[13px] font-bold border border-green-100 mb-4 flex items-center gap-2">
-                    <CheckCircle2 size={18} strokeWidth={2.5} />
-                    ¡Donación realizada exitosamente!
+                  <div className="bg-[#f0f9e0] border border-[#a8d97c]/60 p-4 sm:p-5 rounded-2xl mb-4 text-[#1c2b1e]">
+                    <div className="flex items-center gap-2 mb-1.5 font-black text-[#4a7f1a] text-[14px]">
+                      <CheckCircle2 size={18} strokeWidth={2.5} className="text-[#72B626]" />
+                      <span>¡Aporte confirmado con éxito!</span>
+                    </div>
+                    <p className="text-xs text-slate-600 mb-3.5 leading-relaxed">
+                      Muchas gracias por tu contribución a este proyecto.
+                    </p>
+                    {lastInvestmentId && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            setDownloadingReceipt(true);
+                            await downloadInvestmentReceipt(lastInvestmentId);
+                          } catch (err) {
+                            console.error('Error al descargar comprobante:', err);
+                            alert('No se pudo generar el comprobante. Puedes descargarlo desde tu panel de donaciones.');
+                          } finally {
+                            setDownloadingReceipt(false);
+                          }
+                        }}
+                        disabled={downloadingReceipt}
+                        className="w-full py-2.5 px-3 rounded-xl bg-white hover:bg-slate-50 text-[#1c2b1e] border border-gray-200 text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-95 disabled:opacity-50"
+                      >
+                        {downloadingReceipt ? (
+                          <Loader2 size={14} className="animate-spin text-[#72B626]" />
+                        ) : (
+                          <FileText size={14} className="text-[#72B626]" strokeWidth={2.5} />
+                        )}
+                        <span>Descargar Comprobante PDF</span>
+                      </button>
+                    )}
                   </div>
                 )}
 
@@ -965,11 +998,13 @@ export function CampaignDetailPage() {
             setInvestmentLoading(true);
             setInvestmentError(null);
             try {
-              await createInvestment({
+              const res = await createInvestment({
                 campaignId: campaign.id,
                 amount: parseFloat(customAmount),
                 rewardTierId: selectedTierId || undefined,
               });
+              const invId = (res as any)?.ticket?.id || (res as any)?.id || null;
+              if (invId) setLastInvestmentId(invId);
               setShowConfirmModal(false);
               setInvestmentSuccess(true);
               // Recargar datos de la campaña en tiempo real
