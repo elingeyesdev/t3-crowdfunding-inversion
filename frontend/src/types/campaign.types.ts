@@ -226,6 +226,24 @@ export interface CampaignFinancialProgress {
   recentInvestments: RecentInvestment[];
   dailyProgress?: { date: string; accumulatedAmount: number }[];
   fundingBreakdown?: { rewardTierId: string | null; rewardTitle: string; totalAmount: number }[];
+  averageInvestment?: number;
+  largestInvestment?: number;
+  smallestInvestment?: number;
+  investments?: {
+    total: number;
+    completed: number;
+    pending: number;
+    failed: number;
+    refunded: number;
+  };
+  amounts?: {
+    confirmed: number;
+    pending: number;
+    refunded: number;
+  };
+  startDate?: string | Date | null;
+  endDate?: string | Date | null;
+  daysRemaining?: number | null;
 }
 
 export interface CampaignInvestor {

@@ -1,14 +1,22 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { PitchVideoPlayer } from '../components/campaigns/PitchVideoPlayer';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { getImageUrl } from '../utils/image.utils';
 import { useCampaignDetail } from '../hooks/useCampaignDetail';
-import { fetchPublicCampaigns, type PublicCampaign } from '../api/public-campaigns.api';
+import {
+  fetchPublicCampaigns,
+  fetchPublicCampaignUpdates,
+  type PublicCampaign,
+  type PublicCampaignUpdate,
+} from '../api/public-campaigns.api';
 import { Navbar } from '../components/Navbar';
 import { RewardTierCards } from '../components/campaign-detail/RewardTierCards';
 import { ContributionConfirmModal } from '../components/campaign-detail/ContributionConfirmModal';
 import { CampaignComments } from '../components/campaign-detail/CampaignComments';
 import { ProgressBar } from '../components/ProgressBar';
+import { CampaignTransparencySection } from '../components/campaign-detail/CampaignTransparencySection';
+import { ProjectMilestones } from '../components/campaign-detail/transparency/ProjectMilestones';
+import { CampaignUpdatesTimeline } from '../components/campaign-detail/transparency/CampaignUpdatesTimeline';
 
 import { createInvestment, downloadInvestmentReceipt } from '../api/investor.api';
 import { getOrCreateConversation } from '../api/chat.api';
@@ -34,6 +42,9 @@ import {
   MessageCircle,
   Share2,
   FileText,
+  ShieldCheck,
+  PieChart as PieIcon,
+  Layers,
 } from 'lucide-react';
 import { ShareModal } from '../components/ShareModal';
 
@@ -116,8 +127,37 @@ export function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const { campaign, loading, error, retry, refetch } = useCampaignDetail(id);
+
+  // ── Tab Navigation state ──
+  const initialTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<'historia' | 'transparencia' | 'actualizaciones' | 'comentarios'>(
+    initialTab === 'transparencia' || initialTab === 'actualizaciones' || initialTab === 'comentarios'
+      ? initialTab
+      : 'historia'
+  );
+  const [publicUpdates, setPublicUpdates] = useState<PublicCampaignUpdate[]>([]);
+  const [updatesLoading, setUpdatesLoading] = useState(false);
+
+  // Sync tab with URL query parameter
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['historia', 'transparencia', 'actualizaciones', 'comentarios'].includes(tabParam)) {
+      setActiveTab(tabParam as any);
+    }
+  }, [searchParams]);
+
+  // Fetch campaign updates for badge counters & timeline
+  useEffect(() => {
+    if (!id) return;
+    setUpdatesLoading(true);
+    fetchPublicCampaignUpdates(id)
+      .then((data) => setPublicUpdates(data || []))
+      .catch((err) => console.error('Error cargando actualizaciones públicas:', err))
+      .finally(() => setUpdatesLoading(false));
+  }, [id]);
 
   // ── Pitch video state ──
   const [showPitch, setShowPitch] = useState(false);
@@ -415,110 +455,254 @@ export function CampaignDetailPage() {
               </div>
             </div>
 
-            {/* Description — Campaign Story */}
-            <div className="bg-white rounded-[24px] sm:rounded-[28px] shadow-sm border border-green-50 p-5 sm:p-8 md:p-10 mb-6 sm:mb-8">
-              <h2 className="text-lg sm:text-xl font-black text-[#1c2b1e] tracking-tight mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-green-50 flex items-center justify-center">
-                  <Target size={18} strokeWidth={2.5} className="text-[#72B626] sm:w-[20px] sm:h-[20px]" />
-                </div>
-                Historia del Proyecto
-              </h2>
-              <div className="text-[14px] sm:text-[15px] text-slate-600 leading-[1.8] sm:leading-[1.9] whitespace-pre-wrap break-words">
-                {campaign.description || 'Este emprendedor aún no ha agregado una descripción detallada de su campaña.'}
-              </div>
+            {/* ── Main Navigation Tabs ── */}
+            <div id="campaign-tabs-navigation" className="flex items-center gap-2 border-b border-slate-200/80 mb-6 overflow-x-auto scrollbar-none pb-1">
+              <button
+                onClick={() => {
+                  setActiveTab('historia');
+                  setSearchParams({ tab: 'historia' });
+                }}
+                className={`flex items-center gap-2 py-3 px-4 rounded-xl text-[12px] sm:text-[13px] font-black uppercase tracking-wider transition-all border-none cursor-pointer shrink-0 ${
+                  activeTab === 'historia'
+                    ? 'bg-[#1c2b1e] text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/60 bg-transparent'
+                }`}
+              >
+                <Target size={16} className={activeTab === 'historia' ? 'text-[#72B626]' : 'text-slate-400'} />
+                <span>Historia y Proyecto</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveTab('transparencia');
+                  setSearchParams({ tab: 'transparencia' });
+                }}
+                className={`flex items-center gap-2 py-3 px-4 rounded-xl text-[12px] sm:text-[13px] font-black uppercase tracking-wider transition-all border-none cursor-pointer shrink-0 ${
+                  activeTab === 'transparencia'
+                    ? 'bg-[#1c2b1e] text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/60 bg-transparent'
+                }`}
+              >
+                <ShieldCheck size={16} className={activeTab === 'transparencia' ? 'text-[#72B626]' : 'text-slate-400'} />
+                <span>Transparencia y Fondos</span>
+                <span className="px-1.5 py-0.5 rounded-full bg-[#72B626] text-white text-[9px] font-black">
+                  Auditoría
+                </span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveTab('actualizaciones');
+                  setSearchParams({ tab: 'actualizaciones' });
+                }}
+                className={`flex items-center gap-2 py-3 px-4 rounded-xl text-[12px] sm:text-[13px] font-black uppercase tracking-wider transition-all border-none cursor-pointer shrink-0 ${
+                  activeTab === 'actualizaciones'
+                    ? 'bg-[#1c2b1e] text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/60 bg-transparent'
+                }`}
+              >
+                <Rocket size={16} className={activeTab === 'actualizaciones' ? 'text-[#72B626]' : 'text-slate-400'} />
+                <span>Hitos y Avances</span>
+                {publicUpdates.length > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-slate-200 text-slate-700 text-[9px] font-black">
+                    {publicUpdates.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveTab('comentarios');
+                  setSearchParams({ tab: 'comentarios' });
+                }}
+                className={`flex items-center gap-2 py-3 px-4 rounded-xl text-[12px] sm:text-[13px] font-black uppercase tracking-wider transition-all border-none cursor-pointer shrink-0 ${
+                  activeTab === 'comentarios'
+                    ? 'bg-[#1c2b1e] text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/60 bg-transparent'
+                }`}
+              >
+                <MessageCircle size={16} className={activeTab === 'comentarios' ? 'text-[#72B626]' : 'text-slate-400'} />
+                <span>Comentarios</span>
+              </button>
             </div>
 
+            {/* ── Tab 1: Historia y Proyecto ── */}
+            {activeTab === 'historia' && (
+              <>
+                {/* Description — Campaign Story */}
+                <div className="bg-white rounded-[24px] sm:rounded-[28px] shadow-sm border border-green-50 p-5 sm:p-8 md:p-10 mb-6 sm:mb-8">
+                  <h2 className="text-lg sm:text-xl font-black text-[#1c2b1e] tracking-tight mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                      <Target size={18} strokeWidth={2.5} className="text-[#72B626] sm:w-[20px] sm:h-[20px]" />
+                    </div>
+                    Historia del Proyecto
+                  </h2>
+                  <div className="text-[14px] sm:text-[15px] text-slate-600 leading-[1.8] sm:leading-[1.9] whitespace-pre-wrap break-words">
+                    {campaign.description || 'Este emprendedor aún no ha agregado una descripción detallada de su campaña.'}
+                  </div>
+                </div>
 
+                {/* Transparency Guarantee Highlight Banner */}
+                <div className="bg-gradient-to-r from-[#f0f9e0] to-white rounded-[24px] p-6 border border-[#72B626]/30 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-12 h-12 rounded-2xl bg-[#72B626] text-white flex items-center justify-center shrink-0 shadow-md shadow-green-500/20">
+                      <ShieldCheck size={26} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h4 className="text-[15px] font-black text-[#1c2b1e]">
+                          Campaña con Transparencia y Trazabilidad Verificada
+                        </h4>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+                          Auditable
+                        </span>
+                      </div>
+                      <p className="text-[12px] text-slate-600 font-medium leading-snug">
+                        Consulta el plan de uso de fondos, movimientos financieros, evidencias de gastos y cronograma de hitos.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setActiveTab('transparencia');
+                      setSearchParams({ tab: 'transparencia' });
+                      const el = document.getElementById('campaign-tabs-navigation');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="px-5 py-2.5 rounded-xl bg-[#1c2b1e] hover:bg-black text-white text-[12px] font-black uppercase tracking-wider transition-all border-none cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
+                  >
+                    <span>Ver Transparencia</span>
+                    <ArrowUpRight size={14} strokeWidth={2.5} />
+                  </button>
+                </div>
 
-            {/* ── Reward Tiers ── */}
-            {campaign.rewardTiers && campaign.rewardTiers.length > 0 && (
-              <RewardTierCards
-                tiers={campaign.rewardTiers}
-                selectedTierId={selectedTierId}
-                onSelect={(tierId) => {
-                  setInvestmentError(null);
-                  setInvestmentSuccess(false);
-                  if (selectedTierId === tierId) {
-                    setSelectedTierId(null);
-                    setCustomAmount('');
-                  } else {
-                    setSelectedTierId(tierId);
-                    const tier = campaign.rewardTiers.find((t) => t.id === tierId);
-                    if (tier) setCustomAmount(String(tier.amount));
-                  }
-                }}
-                disabled={investmentLoading || investmentSuccess || (daysRemaining !== null && daysRemaining <= 0)}
-              />
+                {/* ── Reward Tiers ── */}
+                {campaign.rewardTiers && campaign.rewardTiers.length > 0 && (
+                  <RewardTierCards
+                    tiers={campaign.rewardTiers}
+                    selectedTierId={selectedTierId}
+                    onSelect={(tierId) => {
+                      setInvestmentError(null);
+                      setInvestmentSuccess(false);
+                      if (selectedTierId === tierId) {
+                        setSelectedTierId(null);
+                        setCustomAmount('');
+                      } else {
+                        setSelectedTierId(tierId);
+                        const tier = campaign.rewardTiers.find((t) => t.id === tierId);
+                        if (tier) setCustomAmount(String(tier.amount));
+                      }
+                    }}
+                    disabled={investmentLoading || investmentSuccess || (daysRemaining !== null && daysRemaining <= 0)}
+                  />
+                )}
+
+                {/* Entrepreneur Bio Section */}
+                <div className="bg-white rounded-[24px] sm:rounded-[28px] shadow-sm border border-green-50 p-5 sm:p-8 md:p-10 mb-8">
+                  <h2 className="text-lg sm:text-xl font-black text-[#1c2b1e] tracking-tight mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                      <User size={18} strokeWidth={2.5} className="text-[#72B626] sm:w-[20px] sm:h-[20px]" />
+                    </div>
+                    Sobre el Emprendedor
+                  </h2>
+
+                  <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
+                    {/* Avatar */}
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center text-white text-xl sm:text-2xl font-black overflow-hidden shrink-0 shadow-lg shadow-green-500/10">
+                      {getImageUrl(campaign.entrepreneurAvatar) ? (
+                        <img src={getImageUrl(campaign.entrepreneurAvatar)} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        campaign.entrepreneurName?.charAt(0)?.toUpperCase() || '?'
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-[16px] sm:text-[17px] font-black text-[#1c2b1e] mb-0.5 sm:mb-1 tracking-tight">
+                        {campaign.entrepreneurName}
+                      </h3>
+                      {campaign.entrepreneurDisplayName && (
+                        <p className="text-[12px] sm:text-[13px] text-[#72B626] font-bold mb-3 sm:mb-4">
+                          @{campaign.entrepreneurDisplayName}
+                        </p>
+                      )}
+                      <p className="text-[14px] sm:text-[15px] text-slate-500 leading-[1.7] sm:leading-[1.8] whitespace-pre-wrap">
+                        {campaign.entrepreneurBio || 'Este emprendedor aún no ha agregado su biografía.'}
+                      </p>
+
+                      {/* Botón para iniciar chat */}
+                      {localStorage.getItem('userId') !== campaign.entrepreneurUserId && (
+                        <button
+                          onClick={async () => {
+                            const token = localStorage.getItem('accessToken');
+                            if (!token) {
+                              navigate('/login', { state: { from: location.pathname } });
+                              return;
+                            }
+                            try {
+                              const result = await getOrCreateConversation(
+                                campaign.entrepreneurUserId,
+                                campaign.id,
+                                `Consulta sobre: ${campaign.title}`
+                              );
+                              navigate(`/chat/${result.id}`);
+                            } catch (err) {
+                              console.error('Error al iniciar conversación:', err);
+                            }
+                          }}
+                          className="mt-5 flex items-center gap-2 px-5 py-3 rounded-xl bg-green-50 hover:bg-green-100 text-[#72B626] font-black text-[13px] uppercase tracking-wider border-none transition-all active:scale-95 cursor-pointer shadow-sm"
+                        >
+                          <MessageCircle size={16} strokeWidth={2.5} />
+                          Contactar Emprendedor
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
 
-
-
-            {/* Entrepreneur Bio Section */}
-            <div className="bg-white rounded-[24px] sm:rounded-[28px] shadow-sm border border-green-50 p-5 sm:p-8 md:p-10">
-              <h2 className="text-lg sm:text-xl font-black text-[#1c2b1e] tracking-tight mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-green-50 flex items-center justify-center">
-                  <User size={18} strokeWidth={2.5} className="text-[#72B626] sm:w-[20px] sm:h-[20px]" />
-                </div>
-                Sobre el Emprendedor
-              </h2>
-
-              <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
-                {/* Avatar */}
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center text-white text-xl sm:text-2xl font-black overflow-hidden shrink-0 shadow-lg shadow-green-500/10">
-                  {getImageUrl(campaign.entrepreneurAvatar) ? (
-                    <img src={getImageUrl(campaign.entrepreneurAvatar)} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    campaign.entrepreneurName?.charAt(0)?.toUpperCase() || '?'
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-[16px] sm:text-[17px] font-black text-[#1c2b1e] mb-0.5 sm:mb-1 tracking-tight">
-                    {campaign.entrepreneurName}
-                  </h3>
-                  {campaign.entrepreneurDisplayName && (
-                    <p className="text-[12px] sm:text-[13px] text-[#72B626] font-bold mb-3 sm:mb-4">
-                      @{campaign.entrepreneurDisplayName}
-                    </p>
-                  )}
-                  <p className="text-[14px] sm:text-[15px] text-slate-500 leading-[1.7] sm:leading-[1.8] whitespace-pre-wrap">
-                    {campaign.entrepreneurBio || 'Este emprendedor aún no ha agregado su biografía.'}
-                  </p>
-
-                  {/* Botón para iniciar chat */}
-                  {localStorage.getItem('userId') !== campaign.entrepreneurUserId && (
-                    <button
-                      onClick={async () => {
-                        const token = localStorage.getItem('accessToken');
-                        if (!token) {
-                          navigate('/login', { state: { from: location.pathname } });
-                          return;
-                        }
-                        try {
-                          const result = await getOrCreateConversation(
-                            campaign.entrepreneurUserId,
-                            campaign.id,
-                            `Consulta sobre: ${campaign.title}`
-                          );
-                          navigate(`/chat/${result.id}`);
-                        } catch (err) {
-                          console.error('Error al iniciar conversación:', err);
-                        }
-                      }}
-                      className="mt-5 flex items-center gap-2 px-5 py-3 rounded-xl bg-green-50 hover:bg-green-100 text-[#72B626] font-black text-[13px] uppercase tracking-wider border-none transition-all active:scale-95 cursor-pointer shadow-sm"
-                    >
-                      <MessageCircle size={16} strokeWidth={2.5} />
-                      Contactar Emprendedor
-                    </button>
-                  )}
-                </div>
+            {/* ── Tab 2: Transparencia y Fondos ── */}
+            {activeTab === 'transparencia' && (
+              <div className="mb-8">
+                <CampaignTransparencySection
+                  campaignId={campaign.id}
+                  goalAmount={campaign.goalAmount}
+                  currentAmount={campaign.currentAmount}
+                  currency={campaign.currency}
+                  startDate={campaign.startDate}
+                  createdAt={campaign.createdAt}
+                  entrepreneurName={campaign.entrepreneurName}
+                  entrepreneurAvatar={campaign.entrepreneurAvatar}
+                  customBudgetPlan={(campaign as any).metadata?.budget_plan || (campaign as any).metadata?.use_of_funds}
+                  customMilestones={(campaign as any).metadata?.milestones}
+                />
               </div>
-            </div>
+            )}
 
-            {/* ── Comments section (below bio, inside flex-1 column) ── */}
-            <div className="mt-8">
-              <CampaignComments campaignId={campaign.id} />
-            </div>
+            {/* ── Tab 3: Hitos y Avances ── */}
+            {activeTab === 'actualizaciones' && (
+              <div className="space-y-8 mb-8">
+                <ProjectMilestones
+                  goalAmount={campaign.goalAmount}
+                  currentAmount={campaign.currentAmount}
+                  currency={campaign.currency}
+                  customMilestones={(campaign as any).metadata?.milestones}
+                />
+                <CampaignUpdatesTimeline
+                  updates={publicUpdates}
+                  loading={updatesLoading}
+                  entrepreneurName={campaign.entrepreneurName}
+                  entrepreneurAvatar={campaign.entrepreneurAvatar}
+                />
+              </div>
+            )}
+
+            {/* ── Tab 4: Comentarios ── */}
+            {activeTab === 'comentarios' && (
+              <div className="mb-8">
+                <CampaignComments campaignId={campaign.id} />
+              </div>
+            )}
           </div>
           {/* end flex-1 main column */}
 
@@ -580,6 +764,36 @@ export function CampaignDetailPage() {
                     </p>
                   </div>
                 </div>
+
+                {/* ── Transparency Shortcut Button ── */}
+                <button
+                  onClick={() => {
+                    setActiveTab('transparencia');
+                    setSearchParams({ tab: 'transparencia' });
+                    const el = document.getElementById('campaign-tabs-navigation');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="w-full flex items-center justify-between p-3.5 mb-6 rounded-2xl bg-[#f0f9e0]/80 hover:bg-[#f0f9e0] border border-[#72B626]/30 text-[#4a7f1a] transition-all cursor-pointer group shadow-sm text-left"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[#72B626] text-white flex items-center justify-center shadow-sm shrink-0">
+                      <ShieldCheck size={16} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-black uppercase tracking-wider text-[#1c2b1e]">
+                        Transparencia Verificada
+                      </p>
+                      <p className="text-[10px] text-slate-500 font-medium">
+                        Plan de fondos, auditoría y evidencias
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowUpRight
+                    size={15}
+                    strokeWidth={2.5}
+                    className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-[#72B626]"
+                  />
+                </button>
 
                 {/* Investment details */}
                 <div className="space-y-4 mb-8">

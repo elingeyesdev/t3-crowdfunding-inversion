@@ -94,6 +94,14 @@ export class CampaignService {
     return await this.campaignRepo.getRecentPublicUpdatesGroupedByCampaign();
   }
 
+  async getPublicCampaignDocuments(campaignId: string): Promise<any[]> {
+    return await this.campaignRepo.getPublicCampaignDocuments(campaignId);
+  }
+
+  async getPublicCampaignUpdates(campaignId: string): Promise<any[]> {
+    return await this.campaignRepo.getPublicCampaignUpdates(campaignId);
+  }
+
   async getAdvancedAnalytics(campaignId: string): Promise<AdvancedAnalyticsDto> {
     const progress = await this.campaignRepo.getFinancialProgress(campaignId);
     if (!progress) {
