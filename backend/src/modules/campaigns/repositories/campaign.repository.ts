@@ -585,4 +585,47 @@ export class CampaignRepository {
       investorName: row.investor_name || 'Inversor Anónimo',
     }));
   }
+
+  async getPublicCampaignDocuments(campaignId: string): Promise<any[]> {
+    const query = `
+      SELECT
+        id,
+        campaign_id AS "campaignId",
+        file_url AS "fileUrl",
+        original_name AS "originalName",
+        mime_type AS "mimeType",
+        file_size_bytes AS "fileSizeBytes",
+        justification,
+        status,
+        reviewer_notes AS "reviewerNotes",
+        created_at AS "createdAt"
+      FROM campaign_documents
+      WHERE campaign_id = $1
+      ORDER BY created_at DESC;
+    `;
+    const { rows } = await this.pool.query(query, [campaignId]);
+    return rows;
+  }
+
+  async getPublicCampaignUpdates(campaignId: string): Promise<any[]> {
+    const query = `
+      SELECT
+        cu.id,
+        cu.campaign_id AS "campaignId",
+        cu.title,
+        cu.content,
+        cu.attachments,
+        cu.created_at AS "createdAt",
+        cu.updated_at AS "updatedAt",
+        ep.first_name || ' ' || ep.last_name AS "authorName",
+        ep.display_name AS "authorDisplayName",
+        ep.avatar_url AS "authorAvatar"
+      FROM campaign_updates cu
+      LEFT JOIN entrepreneur_profiles ep ON cu.author_id = ep.user_id
+      WHERE cu.campaign_id = $1 AND cu.is_public = true
+      ORDER BY cu.created_at DESC;
+    `;
+    const { rows } = await this.pool.query(query, [campaignId]);
+    return rows;
+  }
 }

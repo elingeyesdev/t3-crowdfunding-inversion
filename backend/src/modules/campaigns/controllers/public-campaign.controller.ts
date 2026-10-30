@@ -135,6 +135,32 @@ export class PublicCampaignController {
     };
   }
 
+  @Get(':id/documents')
+  @ApiOperation({ summary: 'Get public campaign backing documents and evidence. No auth required.' })
+  @ApiParam({ name: 'id', description: 'Campaign UUID' })
+  async getPublicCampaignDocuments(@Param('id') id: string) {
+    const documents = await this.campaignService.getPublicCampaignDocuments(id);
+    return {
+      statusCode: 200,
+      message: 'Campaign public documents retrieved successfully',
+      data: documents,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  @Get(':id/updates')
+  @ApiOperation({ summary: 'Get public campaign updates and stories. No auth required.' })
+  @ApiParam({ name: 'id', description: 'Campaign UUID' })
+  async getPublicCampaignUpdates(@Param('id') id: string) {
+    const updates = await this.campaignService.getPublicCampaignUpdates(id);
+    return {
+      statusCode: 200,
+      message: 'Campaign public updates retrieved successfully',
+      data: updates,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
   @Post(':id/view')
   @HttpCode(200)
   @ApiOperation({ summary: 'Increment video view count for a campaign. No auth required.' })

@@ -1,4 +1,5 @@
-﻿import axios from 'axios';
+import axios from 'axios';
+import type { CampaignFinancialProgress } from '../types/campaign.types';
 
 const API = axios.create({ baseURL: '/api/v1' });
 
@@ -119,5 +120,52 @@ export async function getRecentStories(): Promise<CampaignStoryGroup[]> {
 export async function seedTestStories(): Promise<any> {
   const res = await API.post('/campaigns/public/updates/seed-test');
   return res.data;
+}
+
+export interface PublicCampaignDocument {
+  id: string;
+  campaignId: string;
+  fileUrl: string;
+  originalName: string;
+  mimeType: string;
+  fileSizeBytes: number;
+  justification: string;
+  status: 'pending' | 'approved' | 'rejected' | string;
+  reviewerNotes?: string | null;
+  createdAt: string;
+}
+
+export interface PublicCampaignUpdate {
+  id: string;
+  campaignId: string;
+  title: string;
+  content: string;
+  attachments?: any[];
+  authorName?: string;
+  authorDisplayName?: string | null;
+  authorAvatar?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export async function fetchPublicCampaignFinancialProgress(
+  campaignId: string,
+): Promise<CampaignFinancialProgress> {
+  const res = await API.get(`/campaigns/public/${campaignId}/financial-progress`);
+  return res.data.data;
+}
+
+export async function fetchPublicCampaignDocuments(
+  campaignId: string,
+): Promise<PublicCampaignDocument[]> {
+  const res = await API.get(`/campaigns/public/${campaignId}/documents`);
+  return res.data.data;
+}
+
+export async function fetchPublicCampaignUpdates(
+  campaignId: string,
+): Promise<PublicCampaignUpdate[]> {
+  const res = await API.get(`/campaigns/public/${campaignId}/updates`);
+  return res.data.data;
 }
 
