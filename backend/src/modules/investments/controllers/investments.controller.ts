@@ -57,6 +57,23 @@ export class InvestmentsController {
   }
 
   /**
+   * GET /investments/backed-campaigns/updates
+   * Obtiene las novedades y avances de las campañas financiadas por el donante
+   */
+  @Get('backed-campaigns/updates')
+  @Roles('investor')
+  @ApiOperation({ summary: 'Obtener novedades de campañas apoyadas por el donante' })
+  @ApiResponse({ status: 200, description: 'Novedades recuperadas exitosamente.' })
+  async getBackedCampaignUpdates(
+    @Req() req: Request,
+  ): Promise<ApiSuccessResponse<any[]>> {
+    const userId = (req as any).user.id;
+    const updates = await this.investmentsService.getBackedCampaignUpdates(userId);
+
+    return new ApiSuccessResponse(updates, 'Novedades de proyectos apoyados recuperadas.');
+  }
+
+  /**
    * GET /investments/:id/receipt
    * Genera y descarga el comprobante en PDF
    */

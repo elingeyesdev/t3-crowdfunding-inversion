@@ -1,4 +1,4 @@
-﻿import axios from 'axios';
+import axios from 'axios';
 import type {
   ApiSuccessResponse,
   CapitalOverview,
@@ -118,20 +118,55 @@ export async function createInvestment(dto: CreateInvestmentDto): Promise<any> {
 export interface InvestmentHistoryItem {
   id: string;
   amount: number;
+  currency?: string;
   investmentStatus: string;
   createdAt: string;
   campaignId: string;
   campaignTitle: string;
   campaignType: string;
   campaignGoal: number;
+  campaignCurrentAmount?: number;
   campaignCoverImage: string | null;
   campaignStatus: string;
+  rewardTierId?: string | null;
   rewardTitle: string | null;
+  rewardDescription?: string | null;
+  rewardEstimatedDelivery?: string | null;
+  rewardImageUrl?: string | null;
+  rewardClaimStatus?: string | null;
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
+  shippedAt?: string | null;
+  deliveredAt?: string | null;
+}
+
+export interface BackedCampaignUpdate {
+  id: string;
+  campaignId: string;
+  title: string;
+  content: string;
+  attachments: any[];
+  createdAt: string;
+  updatedAt: string;
+  campaignTitle: string;
+  campaignCoverImage: string | null;
+  campaignCurrentAmount: number;
+  campaignGoalAmount: number;
+  entrepreneurName: string;
+  entrepreneurDisplayName: string | null;
+  entrepreneurAvatar: string | null;
 }
 
 export async function getMyInvestments(): Promise<InvestmentHistoryItem[]> {
   const { data } = await api.get<ApiSuccessResponse<InvestmentHistoryItem[]>>(
     '/investments/me',
+  );
+  return data.data;
+}
+
+export async function getBackedCampaignUpdates(): Promise<BackedCampaignUpdate[]> {
+  const { data } = await api.get<ApiSuccessResponse<BackedCampaignUpdate[]>>(
+    '/investments/backed-campaigns/updates',
   );
   return data.data;
 }

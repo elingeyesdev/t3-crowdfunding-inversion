@@ -196,7 +196,12 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
                         {inv.rewardTitle && (
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-amber-50 text-amber-700">
                             <Gift size={8} strokeWidth={3} />
-                            {inv.rewardTitle}
+                            <span>{inv.rewardTitle}</span>
+                            {inv.rewardClaimStatus && (
+                              <span className="opacity-75 font-bold">
+                                • {inv.rewardClaimStatus === 'delivered' ? 'Entregada' : inv.rewardClaimStatus === 'shipped' ? 'En camino' : 'En preparación'}
+                              </span>
+                            )}
                           </span>
                         )}
                       </div>

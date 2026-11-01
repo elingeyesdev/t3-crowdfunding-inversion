@@ -63,6 +63,13 @@ export class InvestmentsService {
   }
 
   /**
+   * Obtiene las novedades y actualizaciones de las campañas respaldadas por el inversor
+   */
+  async getBackedCampaignUpdates(userId: string): Promise<any[]> {
+    return this.investmentsRepository.getBackedCampaignUpdates(userId);
+  }
+
+  /**
    * Genera el PDF del comprobante de inversión
    */
   async generateReceiptPdf(userId: string, investmentId: string): Promise<PassThrough> {

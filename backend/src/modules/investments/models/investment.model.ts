@@ -54,29 +54,68 @@ export interface InvestmentResult {
 export interface InvestmentHistoryItem {
   id: string;
   amount: number;
+  currency?: string;
   investmentStatus: string;
   createdAt: Date;
   campaignId: string;
   campaignTitle: string;
   campaignType: string;
   campaignGoal: number;
+  campaignCurrentAmount?: number;
   campaignCoverImage: string | null;
   campaignStatus: string;
+  rewardTierId?: string | null;
   rewardTitle: string | null;
+  rewardDescription?: string | null;
+  rewardEstimatedDelivery?: string | null;
+  rewardImageUrl?: string | null;
+  rewardClaimStatus?: string | null;
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
+  shippedAt?: Date | null;
+  deliveredAt?: Date | null;
+}
+
+export interface BackedCampaignUpdate {
+  id: string;
+  campaignId: string;
+  title: string;
+  content: string;
+  attachments: any[];
+  createdAt: Date;
+  updatedAt: Date;
+  campaignTitle: string;
+  campaignCoverImage: string | null;
+  campaignCurrentAmount: number;
+  campaignGoalAmount: number;
+  entrepreneurName: string;
+  entrepreneurDisplayName: string | null;
+  entrepreneurAvatar: string | null;
 }
 
 export function mapRowToInvestmentHistoryItem(row: any): InvestmentHistoryItem {
   return {
     id: row.id,
     amount: Number(row.amount),
-    investmentStatus: row.investment_status,
+    currency: row.currency || 'BOB',
+    investmentStatus: row.investment_status || row.status,
     createdAt: row.created_at,
     campaignId: row.campaign_id,
     campaignTitle: row.campaign_title,
     campaignType: row.campaign_type,
     campaignGoal: Number(row.campaign_goal) || 0,
-    campaignCoverImage: row.campaign_cover_image,
+    campaignCurrentAmount: Number(row.campaign_current_amount) || 0,
+    campaignCoverImage: row.campaign_cover_image || row.campaign_cover,
     campaignStatus: row.campaign_status,
+    rewardTierId: row.reward_tier_id ?? null,
     rewardTitle: row.reward_title ?? null,
+    rewardDescription: row.reward_description ?? null,
+    rewardEstimatedDelivery: row.reward_estimated_delivery ?? null,
+    rewardImageUrl: row.reward_image_url ?? null,
+    rewardClaimStatus: row.reward_claim_status ?? null,
+    trackingNumber: row.tracking_number ?? null,
+    trackingUrl: row.tracking_url ?? null,
+    shippedAt: row.shipped_at ?? null,
+    deliveredAt: row.delivered_at ?? null,
   };
 }

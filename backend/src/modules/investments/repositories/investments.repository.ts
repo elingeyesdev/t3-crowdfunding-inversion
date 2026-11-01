@@ -252,13 +252,22 @@ export class InvestmentsRepository extends BaseRepository {
          c.title AS campaign_title,
          c.campaign_type,
          c.goal_amount AS campaign_goal,
+         c.current_amount AS campaign_current_amount,
          c.cover_image_url AS campaign_cover,
          c.status AS campaign_status,
          rt.title AS reward_title,
-         rt.description AS reward_description
+         rt.description AS reward_description,
+         rt.estimated_delivery AS reward_estimated_delivery,
+         rt.image_url AS reward_image_url,
+         rc.status AS reward_claim_status,
+         rc.tracking_number,
+         rc.tracking_url,
+         rc.shipped_at,
+         rc.delivered_at
        FROM investments i
        JOIN campaigns c ON c.id = i.campaign_id
        LEFT JOIN reward_tiers rt ON rt.id = i.reward_tier_id
+       LEFT JOIN reward_claims rc ON rc.investment_id = i.id
        WHERE i.investor_id = $1
        ORDER BY i.created_at DESC
        LIMIT $2 OFFSET $3`,
@@ -268,16 +277,63 @@ export class InvestmentsRepository extends BaseRepository {
     return result.rows.map((row: any) => ({
       id: row.id,
       amount: Number(row.amount),
+      currency: row.currency || 'BOB',
       investmentStatus: row.status,
       createdAt: row.created_at,
       campaignId: row.campaign_id,
       campaignTitle: row.campaign_title,
       campaignType: row.campaign_type,
       campaignGoal: Number(row.campaign_goal),
+      campaignCurrentAmount: Number(row.campaign_current_amount || 0),
       campaignCoverImage: row.campaign_cover,
       campaignStatus: row.campaign_status,
+      rewardTierId: row.reward_tier_id,
       rewardTitle: row.reward_title,
+      rewardDescription: row.reward_description,
+      rewardEstimatedDelivery: row.reward_estimated_delivery,
+      rewardImageUrl: row.reward_image_url,
+      rewardClaimStatus: row.reward_claim_status,
+      trackingNumber: row.tracking_number,
+      trackingUrl: row.tracking_url,
+      shippedAt: row.shipped_at,
+      deliveredAt: row.delivered_at,
     }));
+  }
+
+  /**
+   * Obtiene las novedades y actualizaciones publicadas para las campañas que el usuario ha apoyado
+   */
+  async getBackedCampaignUpdates(userId: string): Promise<any[]> {
+    const result = await this.query(
+      `SELECT
+         cu.id,
+         cu.campaign_id AS "campaignId",
+         cu.title,
+         cu.content,
+         cu.attachments,
+         cu.created_at AS "createdAt",
+         cu.updated_at AS "updatedAt",
+         c.title AS "campaignTitle",
+         c.cover_image_url AS "campaignCoverImage",
+         c.current_amount AS "campaignCurrentAmount",
+         c.goal_amount AS "campaignGoalAmount",
+         ep.first_name || ' ' || ep.last_name AS "entrepreneurName",
+         ep.display_name AS "entrepreneurDisplayName",
+         ep.avatar_url AS "entrepreneurAvatar"
+       FROM campaign_updates cu
+       JOIN campaigns c ON cu.campaign_id = c.id
+       LEFT JOIN entrepreneur_profiles ep ON c.creator_id = ep.user_id
+       WHERE cu.is_public = true
+         AND cu.campaign_id IN (
+           SELECT DISTINCT campaign_id
+           FROM investments
+           WHERE investor_id = $1
+         )
+       ORDER BY cu.created_at DESC`,
+      [userId]
+    );
+
+    return result.rows;
   }
   /**
    * Obtiene los detalles completos de una inversión para generar el recibo
