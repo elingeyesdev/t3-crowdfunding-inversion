@@ -18,6 +18,8 @@ export function Navbar({ socket }: NavbarProps) {
 
   const userRole = localStorage.getItem('userRole');
   const userEmail = localStorage.getItem('userEmail');
+  const adminAccessLevel = localStorage.getItem('adminAccessLevel');
+  const isAdmin = userRole === 'admin' || userRole === 'super_admin' || Boolean(adminAccessLevel);
 
   useEffect(() => {
     if (!userEmail) return;
@@ -66,7 +68,7 @@ export function Navbar({ socket }: NavbarProps) {
         : 'text-gray-600 hover:text-gray-900'
     }`;
 
-  const profilePath = userRole === 'entrepreneur' ? '/entrepreneur-profile' : '/profile';
+  const profilePath = isAdmin ? '/admin' : (userRole === 'entrepreneur' ? '/entrepreneur-profile' : '/profile');
 
   return (
     <>
@@ -102,7 +104,27 @@ export function Navbar({ socket }: NavbarProps) {
             >
               DonaTok
             </Link>
-            {userRole === 'entrepreneur' ? (
+            {isAdmin ? (
+              <>
+                <Link to="/admin" className={navLinkClass('/admin')} style={{ textDecoration: 'none' }}>
+                  Panel Admin
+                </Link>
+                <Link to="/profile" className={navLinkClass('/profile')} style={{ textDecoration: 'none' }}>
+                  Mi Perfil
+                </Link>
+                <Link to="/chat" className={`${navLinkClass('/chat')} relative`} style={{ textDecoration: 'none' }}>
+                  <span className="flex items-center gap-1.5">
+                    <MessageCircle size={15} strokeWidth={2} />
+                    Mensajes
+                  </span>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] bg-[#72B626] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </Link>
+              </>
+            ) : userRole === 'entrepreneur' ? (
               <>
                 <Link to="/entrepreneur-campaigns" className={navLinkClass('/entrepreneur-campaigns')} style={{ textDecoration: 'none' }}>
                   Mis Campañas
@@ -229,7 +251,42 @@ export function Navbar({ socket }: NavbarProps) {
             DonaTok
           </Link>
 
-          {userRole === 'entrepreneur' ? (
+          {isAdmin ? (
+            <>
+              <Link
+                to="/admin"
+                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/admin') ? 'bg-[#f5fce8] text-[#72B626] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                onClick={() => setIsMenuOpen(false)}
+                style={{ textDecoration: 'none' }}
+              >
+                Panel Admin
+              </Link>
+              <Link
+                to="/profile"
+                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors ${isActive('/profile') ? 'bg-[#f5fce8] text-[#72B626] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                onClick={() => setIsMenuOpen(false)}
+                style={{ textDecoration: 'none' }}
+              >
+                Mi Perfil
+              </Link>
+              <Link
+                to="/chat"
+                className={`text-[15px] font-medium p-2.5 rounded-lg transition-colors flex items-center justify-between ${isActive('/chat') ? 'bg-[#f5fce8] text-[#72B626] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                onClick={() => setIsMenuOpen(false)}
+                style={{ textDecoration: 'none' }}
+              >
+                <span className="flex items-center gap-2">
+                  <MessageCircle size={17} strokeWidth={2} />
+                  Mensajes
+                </span>
+                {unreadCount > 0 && (
+                  <span className="min-w-[18px] h-[18px] bg-[#72B626] text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                    {unreadCount}
+                  </span>
+                )}
+              </Link>
+            </>
+          ) : userRole === 'entrepreneur' ? (
             <>
               <Link
                 to="/entrepreneur-campaigns"

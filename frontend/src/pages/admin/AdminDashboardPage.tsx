@@ -4,7 +4,8 @@ import { AdminLayout } from '../../components/admin/AdminLayout';
 import { 
   getDashboardStats, 
   getPendingCampaigns,
-  getPendingKyc
+  getPendingKyc,
+  getAdminFinancialAuditSummary
 } from '../../api/admin.api';
 import type { DashboardStats } from '../../types/admin.types';
 import { 
@@ -15,7 +16,9 @@ import {
   ChevronRight,
   UserCheck,
   AlertCircle,
-  FileCheck
+  FileCheck,
+  Receipt,
+  Shield
 } from 'lucide-react';
 
 export function AdminDashboardPage() {
@@ -23,8 +26,10 @@ export function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [pendingCampaignsCount, setPendingCampaignsCount] = useState(0);
   const [pendingKycCount, setPendingKycCount] = useState(0);
+  const [pendingExpensesCount, setPendingExpensesCount] = useState(0);
   const [recentPending, setRecentPending] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const adminAccessLevel = localStorage.getItem('adminAccessLevel');
 
   useEffect(() => {
     loadDashboardData();
@@ -33,15 +38,19 @@ export function AdminDashboardPage() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const [statsData, campaignsData, kycData] = await Promise.all([
+      const [statsData, campaignsData, kycData, auditSummary] = await Promise.all([
         getDashboardStats(),
         getPendingCampaigns({ page: 1, limit: 3, status: 'pending_review' }),
-        getPendingKyc()
+        getPendingKyc(),
+        getAdminFinancialAuditSummary().catch(() => null)
       ]);
       setStats(statsData);
       setPendingCampaignsCount(campaignsData.total);
       setRecentPending(campaignsData.campaigns);
       setPendingKycCount(kycData.length);
+      if (auditSummary) {
+        setPendingExpensesCount((auditSummary.pendingCount || 0) + (auditSummary.flaggedCount || 0));
+      }
     } catch (error) {
       console.error('Error loading dashboard stats:', error);
     } finally {
@@ -116,6 +125,72 @@ export function AdminDashboardPage() {
           </div>
         </div>
 
+        {/* Quick Access Tools Grid */}
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+              <span>Módulos de Gestión Administrativa</span>
+            </h2>
+            <span className="text-xs text-gray-400 font-medium">Herramientas Centralizadas</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+            <button
+              onClick={() => navigate('/admin/users')}
+              className="p-4 rounded-xl border border-gray-100 hover:border-[#72B626]/40 hover:bg-[#f5fce8]/40 bg-gray-50/50 text-left transition-all duration-200 group cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+                <Users size={18} />
+              </div>
+              <div className="text-xs font-bold text-gray-900 group-hover:text-[#4a7f1a]">Usuarios</div>
+              <div className="text-[11px] text-gray-500 mt-0.5">Supervisión y estados</div>
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/campaigns')}
+              className="p-4 rounded-xl border border-gray-100 hover:border-[#72B626]/40 hover:bg-[#f5fce8]/40 bg-gray-50/50 text-left transition-all duration-200 group cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+                <Rocket size={18} />
+              </div>
+              <div className="text-xs font-bold text-gray-900 group-hover:text-[#4a7f1a]">Campañas</div>
+              <div className="text-[11px] text-gray-500 mt-0.5">Catálogo y seguimiento</div>
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/kyc')}
+              className="p-4 rounded-xl border border-gray-100 hover:border-[#72B626]/40 hover:bg-[#f5fce8]/40 bg-gray-50/50 text-left transition-all duration-200 group cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+                <UserCheck size={18} />
+              </div>
+              <div className="text-xs font-bold text-gray-900 group-hover:text-[#4a7f1a]">Verificación KYC</div>
+              <div className="text-[11px] text-gray-500 mt-0.5">Validación de identidad</div>
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/campaigns/review')}
+              className="p-4 rounded-xl border border-gray-100 hover:border-[#72B626]/40 hover:bg-[#f5fce8]/40 bg-gray-50/50 text-left transition-all duration-200 group cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+                <FileCheck size={18} />
+              </div>
+              <div className="text-xs font-bold text-gray-900 group-hover:text-[#4a7f1a]">Revisión</div>
+              <div className="text-[11px] text-gray-500 mt-0.5">Aprobación de campañas</div>
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/expenses')}
+              className="p-4 rounded-xl border border-gray-100 hover:border-[#72B626]/40 hover:bg-[#f5fce8]/40 bg-gray-50/50 text-left transition-all duration-200 group cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+                <Receipt size={18} />
+              </div>
+              <div className="text-xs font-bold text-gray-900 group-hover:text-[#4a7f1a]">Auditoría Gastos</div>
+              <div className="text-[11px] text-gray-500 mt-0.5">Facturas y evidencias</div>
+            </button>
+          </div>
+        </div>
+
         {/* Dashboard split layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
@@ -163,6 +238,27 @@ export function AdminDashboardPage() {
                     className="w-full py-2 bg-[#72B626] hover:bg-[#4a7f1a] text-white text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-98 border-none"
                   >
                     Ir a Verificar <ChevronRight size={14} />
+                  </button>
+                </div>
+
+                {/* Pending Expenses & Evidence Audit Alert */}
+                <div className="p-4 rounded-xl border border-rose-100 bg-rose-50/50 flex flex-col gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center text-rose-600 shrink-0">
+                      <Receipt size={16} />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-rose-900">Auditoría de Gastos y Evidencias</h4>
+                      <p className="text-xs text-rose-700/80 mt-0.5">
+                        Hay <span className="font-bold">{pendingExpensesCount}</span> movimientos financieros y comprobantes con revisión pendiente u observación.
+                      </p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => navigate('/admin/expenses')}
+                    className="w-full py-2 bg-[#72B626] hover:bg-[#4a7f1a] text-white text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-98 border-none"
+                  >
+                    Auditar Gastos <ChevronRight size={14} />
                   </button>
                 </div>
               </div>
