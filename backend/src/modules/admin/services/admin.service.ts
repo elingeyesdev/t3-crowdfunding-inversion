@@ -204,6 +204,21 @@ export class AdminService {
     if (!updated) {
       throw new NotFoundException('Movimiento financiero no encontrado');
     }
+
+    try {
+      if (updated.createdBy) {
+        await this.notificationsService.notifyFinancialMovementReviewed({
+          entrepreneurUserId: updated.createdBy,
+          concept: updated.concept,
+          campaignTitle: updated.campaignTitle,
+          action,
+          notes,
+        });
+      }
+    } catch (notifErr) {
+      console.warn('Could not dispatch notification for financial movement review:', notifErr);
+    }
+
     return updated;
   }
 

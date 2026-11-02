@@ -16,6 +16,29 @@ function normalizeNotificationCurrencyBody(body: string): string {
 export class NotificationsService {
   constructor(private readonly notificationsRepository: NotificationsRepository) {}
 
+  async getNotifications(
+    userId: string,
+    options?: {
+      page?: number;
+      limit?: number;
+      unread?: boolean;
+      typeCode?: string;
+      q?: string;
+    }
+  ) {
+    const res = await this.notificationsRepository.getNotifications(userId, options);
+    return {
+      ...res,
+      notifications: res.notifications.map((notification) => ({
+        ...notification,
+        body: normalizeNotificationCurrencyBody(notification.body),
+        data: notification.data?.currency
+          ? { ...notification.data, currency: NOTIFICATION_CURRENCY }
+          : notification.data,
+      })),
+    };
+  }
+
   async getMyNotifications(userId: string): Promise<Notification[]> {
     const notifications = await this.notificationsRepository.getNotificationsByUserId(userId);
     return notifications.map((notification) => ({
@@ -36,9 +59,69 @@ export class NotificationsService {
     return { updated };
   }
 
-  async markAllAsRead(userId: string): Promise<{ updated: number }> {
-    const updated = await this.notificationsRepository.markAllAsRead(userId);
+  async markAllAsRead(userId: string, typeCode?: string): Promise<{ updated: number }> {
+    const updated = await this.notificationsRepository.markAllAsRead(userId, typeCode);
     return { updated };
+  }
+
+  async deleteNotification(notificationId: string, userId: string): Promise<{ deleted: boolean }> {
+    const deleted = await this.notificationsRepository.deleteNotification(notificationId, userId);
+    return { deleted };
+  }
+
+  async clearReadNotifications(userId: string): Promise<{ deletedCount: number }> {
+    const deletedCount = await this.notificationsRepository.clearReadNotifications(userId);
+    return { deletedCount };
+  }
+
+  async getPreferences(userId: string) {
+    return this.notificationsRepository.getPreferences(userId);
+  }
+
+  async updatePreferences(userId: string, preferences: any) {
+    return this.notificationsRepository.updatePreferences(userId, preferences);
+  }
+
+  async notifyFinancialMovementReviewed(params: {
+    entrepreneurUserId: string;
+    concept: string;
+    campaignTitle: string;
+    action: 'approve' | 'flag' | 'reject' | 'reset';
+    notes?: string;
+  }): Promise<void> {
+    const typeCodeMap: Record<string, string> = {
+      approve: 'financial_movement_verified',
+      flag: 'financial_movement_flagged',
+      reject: 'financial_movement_rejected',
+      reset: 'financial_movement_pending',
+    };
+    const titleMap: Record<string, string> = {
+      approve: 'Movimiento financiero aprobado',
+      flag: 'Movimiento financiero observado',
+      reject: 'Movimiento financiero rechazado',
+      reset: 'Movimiento financiero restablecido',
+    };
+    const bodyMap: Record<string, string> = {
+      approve: `Tu gasto/comprobante "${params.concept}" en "${params.campaignTitle}" fue verificado por auditoría.`,
+      flag: `Tu gasto "${params.concept}" fue observado: ${params.notes || 'Se requiere documentación o factura válida'}.`,
+      reject: `Tu gasto "${params.concept}" fue rechazado: ${params.notes || 'Comprobante no válido o inconsistente'}.`,
+      reset: `El movimiento "${params.concept}" volvió a estado pendiente de revisión.`,
+    };
+
+    await this.notificationsRepository.createNotification({
+      userId: params.entrepreneurUserId,
+      typeCode: typeCodeMap[params.action] || 'financial_movement_verified',
+      title: titleMap[params.action] || 'Auditoría de gasto',
+      body: bodyMap[params.action] || `Se actualizó el estado de "${params.concept}".`,
+      referenceType: 'financial_movement',
+      actionUrl: '/entrepreneur-campaigns',
+      data: {
+        concept: params.concept,
+        campaign_title: params.campaignTitle,
+        action: params.action,
+        notes: params.notes,
+      },
+    });
   }
 
   /**

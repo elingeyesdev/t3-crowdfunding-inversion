@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Patch, Param, Req,
+  Controller, Get, Patch, Delete, Put, Param, Query, Body, Req,
   UseGuards, HttpCode, HttpStatus, ParseUUIDPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
@@ -17,17 +17,69 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   /**
+   * GET /notifications
+   * Devuelve notificaciones con paginación, búsqueda y filtros
+   */
+  @Get()
+  @ApiOperation({ summary: 'Obtener notificaciones con paginación y filtros' })
+  @ApiResponse({ status: 200, description: 'Lista paginada de notificaciones.' })
+  async getNotifications(
+    @Req() req: Request,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('unread') unread?: string,
+    @Query('typeCode') typeCode?: string,
+    @Query('q') q?: string,
+  ) {
+    const userId = (req as any).user.id;
+    const isUnread = unread === 'true' ? true : unread === 'false' ? false : undefined;
+    const result = await this.notificationsService.getNotifications(userId, {
+      page: page ? Number(page) : 1,
+      limit: limit ? Number(limit) : 20,
+      unread: isUnread,
+      typeCode,
+      q,
+    });
+    return new ApiSuccessResponse(result, 'Notificaciones obtenidas con éxito.');
+  }
+
+  /**
    * GET /notifications/me
-   * Devuelve las notificaciones del usuario actual (máx. 30)
+   * Devuelve las notificaciones del usuario actual con soporte para filtros
    */
   @Get('me')
   @ApiOperation({ summary: 'Obtener notificaciones del usuario actual' })
   @ApiResponse({ status: 200, description: 'Lista de notificaciones.' })
-  async getMyNotifications(@Req() req: Request) {
+  async getMyNotifications(
+    @Req() req: Request,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('unread') unread?: string,
+    @Query('typeCode') typeCode?: string,
+    @Query('q') q?: string,
+  ) {
     const userId = (req as any).user.id;
-    const notifications = await this.notificationsService.getMyNotifications(userId);
+    const isUnread = unread === 'true' ? true : unread === 'false' ? false : undefined;
+    const result = await this.notificationsService.getNotifications(userId, {
+      page: page ? Number(page) : 1,
+      limit: limit ? Number(limit) : 30,
+      unread: isUnread,
+      typeCode,
+      q,
+    });
+    return new ApiSuccessResponse(result, 'Notificaciones obtenidas.');
+  }
+
+  /**
+   * GET /notifications/unread-count
+   * Devuelve la cantidad de notificaciones pendientes/no leídas
+   */
+  @Get('unread-count')
+  @ApiOperation({ summary: 'Obtener contador de notificaciones no leídas' })
+  async getUnreadCount(@Req() req: Request) {
+    const userId = (req as any).user.id;
     const unreadCount = await this.notificationsService.getUnreadCount(userId);
-    return new ApiSuccessResponse({ notifications, unreadCount }, 'Notificaciones obtenidas.');
+    return new ApiSuccessResponse({ unreadCount }, 'Contador de no leídas obtenido.');
   }
 
   /**
@@ -37,10 +89,48 @@ export class NotificationsController {
   @Patch('read-all')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Marcar todas las notificaciones como leídas' })
-  async markAllAsRead(@Req() req: Request) {
+  async markAllAsRead(@Req() req: Request, @Body('typeCode') typeCode?: string) {
     const userId = (req as any).user.id;
-    const result = await this.notificationsService.markAllAsRead(userId);
-    return new ApiSuccessResponse(result, `${result.updated} notificaciones marcadas como leídas.`);
+    const result = await this.notificationsService.markAllAsRead(userId, typeCode);
+    const unreadCount = await this.notificationsService.getUnreadCount(userId);
+    return new ApiSuccessResponse({ updatedCount: result.updated, unreadCount }, `${result.updated} notificaciones marcadas como leídas.`);
+  }
+
+  /**
+   * DELETE /notifications/clear-read
+   * Limpia o elimina todas las notificaciones leídas
+   */
+  @Delete('clear-read')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Eliminar todas las notificaciones leídas' })
+  async clearReadNotifications(@Req() req: Request) {
+    const userId = (req as any).user.id;
+    const result = await this.notificationsService.clearReadNotifications(userId);
+    return new ApiSuccessResponse(result, 'Notificaciones leídas eliminadas.');
+  }
+
+  /**
+   * GET /notifications/preferences
+   * Consulta las preferencias de notificación del usuario
+   */
+  @Get('preferences')
+  @ApiOperation({ summary: 'Obtener preferencias de notificación' })
+  async getPreferences(@Req() req: Request) {
+    const userId = (req as any).user.id;
+    const preferences = await this.notificationsService.getPreferences(userId);
+    return new ApiSuccessResponse(preferences, 'Preferencias de notificación obtenidas.');
+  }
+
+  /**
+   * PUT /notifications/preferences
+   * Actualiza las preferencias de notificación del usuario
+   */
+  @Put('preferences')
+  @ApiOperation({ summary: 'Actualizar preferencias de notificación' })
+  async updatePreferences(@Req() req: Request, @Body() preferences: any) {
+    const userId = (req as any).user.id;
+    const updated = await this.notificationsService.updatePreferences(userId, preferences);
+    return new ApiSuccessResponse(updated, 'Preferencias de notificación actualizadas.');
   }
 
   /**
@@ -58,5 +148,21 @@ export class NotificationsController {
     const userId = (req as any).user.id;
     const result = await this.notificationsService.markAsRead(id, userId);
     return new ApiSuccessResponse(result, 'Notificación actualizada.');
+  }
+
+  /**
+   * DELETE /notifications/:id
+   * Elimina una notificación específica
+   */
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Eliminar una notificación' })
+  async deleteNotification(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Req() req: Request,
+  ) {
+    const userId = (req as any).user.id;
+    const result = await this.notificationsService.deleteNotification(id, userId);
+    return new ApiSuccessResponse(result, 'Notificación eliminada.');
   }
 }
