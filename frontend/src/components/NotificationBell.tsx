@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Bell, BellRing, Check, CheckCheck, ExternalLink, Loader2,
   TrendingUp, MessageCircle, CheckCircle2, XCircle, Rocket, Star, Info,
-  Trash2, FileText
+  Trash2, FileText, ChevronRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -316,6 +316,23 @@ export function NotificationBell() {
                 </div>
               ))
             )}
+          </div>
+
+          {/* Footer with link to full notification center */}
+          <div className="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-[11px] text-slate-400">
+              {unreadCount > 0 ? `${unreadCount} pendientes de lectura` : 'Al día'}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                navigate('/notifications');
+              }}
+              className="font-bold text-[#72B626] hover:text-[#4a7f1a] transition-colors inline-flex items-center gap-1 cursor-pointer bg-transparent border-none text-[12px]"
+            >
+              Ver todo el historial <ChevronRight size={14} />
+            </button>
           </div>
         </div>
       )}

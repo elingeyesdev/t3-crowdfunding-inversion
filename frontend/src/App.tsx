@@ -19,6 +19,7 @@ import { PitchFeedPage } from './pages/PitchFeedPage';
 import { LandingPage } from './pages/LandingPage';
 import { OAuthCallbackPage } from './pages/OAuthCallbackPage';
 import { AccountSettingsPage } from './pages/AccountSettingsPage';
+import { NotificationsPage } from './pages/NotificationsPage';
 
 // Guard simple: si no hay token, redirige a login con la ruta previa en el estado
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -146,6 +147,14 @@ function App() {
           element={
             <PrivateRoute>
               <AccountSettingsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <PrivateRoute>
+              <NotificationsPage />
             </PrivateRoute>
           }
         />

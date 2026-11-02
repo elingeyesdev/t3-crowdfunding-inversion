@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, User, MessageCircle, Settings } from 'lucide-react';
+import { Menu, X, LogOut, User, MessageCircle, Settings, Bell } from 'lucide-react';
 import { NotificationBell } from './NotificationBell';
 import { getMyConversations } from '../api/chat.api';
 import { logout } from '../api/auth.api';
@@ -364,6 +364,15 @@ export function Navbar({ socket }: NavbarProps) {
                 <User size={16} className="text-gray-400" />
                 <span className="text-[13px] text-gray-500 truncate">{userEmail}</span>
               </div>
+              <Link
+                to="/notifications"
+                className={`flex items-center gap-2 p-2.5 rounded-lg transition-colors text-[15px] font-medium ${isActive('/notifications') ? 'bg-[#f5fce8] text-[#72B626] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                onClick={() => setIsMenuOpen(false)}
+                style={{ textDecoration: 'none' }}
+              >
+                <Bell size={16} strokeWidth={2} />
+                Notificaciones
+              </Link>
               <Link
                 to="/account-settings"
                 className={`flex items-center gap-2 p-2.5 rounded-lg transition-colors text-[15px] font-medium ${isActive('/account-settings') ? 'bg-[#f5fce8] text-[#72B626] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
