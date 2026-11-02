@@ -168,4 +168,58 @@ export class AdminController {
     const updated = await this.adminService.reviewKyc(entrepreneurId, action, reviewerId, reason);
     return new ApiSuccessResponse(updated, `KYC ${action === 'approve' ? 'aprobado' : 'rechazado'}`);
   }
+
+  @Get('financial-movements')
+  @Roles('admin', 'super_admin')
+  @ApiOperation({ summary: 'Listar movimientos financieros para auditoría de gastos' })
+  async getFinancialMovements(@Query() query: any) {
+    const hasReceipt = query.hasReceipt === 'true' ? true : query.hasReceipt === 'false' ? false : undefined;
+    const flagged = query.flagged === 'true' ? true : query.flagged === 'false' ? false : undefined;
+    const result = await this.adminService.getFinancialMovements({
+      ...query,
+      page: query.page ? Number(query.page) : 1,
+      limit: query.limit ? Number(query.limit) : 10,
+      hasReceipt,
+      flagged,
+    });
+    return new ApiSuccessResponse(result, 'Movimientos financieros obtenidos para auditoría');
+  }
+
+  @Get('financial-audit/summary')
+  @Roles('admin', 'super_admin')
+  @ApiOperation({ summary: 'Obtener métricas y resumen de auditoría financiera' })
+  async getFinancialAuditSummary() {
+    const summary = await this.adminService.getFinancialAuditSummary();
+    return new ApiSuccessResponse(summary, 'Resumen de auditoría obtenido');
+  }
+
+  @Get('financial-movements/:id')
+  @Roles('admin', 'super_admin')
+  @ApiOperation({ summary: 'Obtener detalle de un movimiento financiero' })
+  async getFinancialMovementById(@Param('id') id: string) {
+    const movement = await this.adminService.getFinancialMovementById(id);
+    return new ApiSuccessResponse(movement, 'Detalle de movimiento financiero obtenido');
+  }
+
+  @Post('financial-movements/:id/review')
+  @Roles('admin', 'super_admin')
+  @ApiOperation({ summary: 'Auditar/revisar un movimiento financiero (aprobar, observar, rechazar, reiniciar)' })
+  async reviewFinancialMovement(
+    @Param('id') id: string,
+    @Body('action') action: 'approve' | 'flag' | 'reject' | 'reset',
+    @Body('notes') notes: string | undefined,
+    @Req() req: any,
+  ) {
+    const reviewerId = req.user.id;
+    const updated = await this.adminService.reviewFinancialMovement(id, action, reviewerId, notes);
+    return new ApiSuccessResponse(updated, 'Movimiento auditado con éxito');
+  }
+
+  @Get('campaigns/:id/financial-audit')
+  @Roles('admin', 'super_admin')
+  @ApiOperation({ summary: 'Auditoría detallada de fondos de una campaña' })
+  async getCampaignFinancialAudit(@Param('id') id: string) {
+    const audit = await this.adminService.getCampaignFinancialAudit(id);
+    return new ApiSuccessResponse(audit, 'Auditoría financiera de la campaña obtenida');
+  }
 }

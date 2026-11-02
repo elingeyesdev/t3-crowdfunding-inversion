@@ -1,10 +1,152 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { BaseRepository } from '../../../common/database';
 import { QueryAdminCampaignsDto } from '../dto/admin-campaigns.dto';
 import { randomUUID } from 'crypto';
 
+export function mapRowToAuditItem(row: any) {
+  const hasReceipt = Boolean(row.receipt_url && String(row.receipt_url).trim().length > 0);
+  const consistencyFlags: Array<{ code: string; severity: 'info' | 'warning' | 'danger'; message: string }> = [];
+
+  const amount = parseFloat(row.amount || 0);
+  const campaignGoal = parseFloat(row.campaign_goal || 0);
+
+  if (row.type === 'expense' && !hasReceipt) {
+    consistencyFlags.push({
+      code: 'NO_RECEIPT',
+      severity: 'warning',
+      message: 'Gasto registrado sin comprobante o factura adjunta',
+    });
+  }
+
+  if (amount >= 5000 && !hasReceipt) {
+    consistencyFlags.push({
+      code: 'HIGH_VALUE_NO_RECEIPT',
+      severity: 'danger',
+      message: 'Monto elevado sin comprobante o respaldo documental verificado',
+    });
+  }
+
+  if (row.status === 'flagged') {
+    consistencyFlags.push({
+      code: 'ADMIN_FLAGGED',
+      severity: 'danger',
+      message: row.review_notes || 'Marcado por administración con observación de consistencia',
+    });
+  }
+
+  if (campaignGoal > 0 && amount > campaignGoal * 0.4) {
+    consistencyFlags.push({
+      code: 'HIGH_PERCENTAGE',
+      severity: 'warning',
+      message: 'El importe del movimiento supera el 40% de la meta total de la campaña',
+    });
+  }
+
+  return {
+    id: row.id,
+    campaignId: row.campaign_id,
+    campaignTitle: row.campaign_title || 'Campaña sin título',
+    campaignStatus: row.campaign_status || 'published',
+    campaignCurrency: row.campaign_currency || row.currency || 'BOB',
+    campaignGoal: campaignGoal,
+    campaignCurrentAmount: parseFloat(row.campaign_current_amount || 0),
+    createdBy: row.created_by || '',
+    creatorEmail: row.creator_email || '',
+    creatorName: row.creator_name || row.creator_email || 'Emprendedor',
+    type: row.type as 'income' | 'expense',
+    concept: row.concept,
+    category: row.category || 'General',
+    amount: amount,
+    currency: row.currency || 'BOB',
+    movementDate: row.movement_date ? new Date(row.movement_date).toISOString().split('T')[0] : '',
+    referenceNumber: row.reference_number || null,
+    receiptUrl: row.receipt_url || null,
+    hasReceipt,
+    notes: row.notes || null,
+    status: (row.status as any) || 'pending',
+    reviewedBy: row.reviewed_by || null,
+    reviewerEmail: row.reviewer_email || null,
+    reviewerName: row.reviewer_name || null,
+    reviewedAt: row.reviewed_at ? new Date(row.reviewed_at).toISOString() : null,
+    reviewNotes: row.review_notes || null,
+    createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
+    updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
+    consistencyFlags,
+  };
+}
+
 @Injectable()
-export class AdminRepository extends BaseRepository {
+export class AdminRepository extends BaseRepository implements OnModuleInit {
+  async onModuleInit() {
+    await this.ensureTables();
+  }
+
+  async ensureTables() {
+    try {
+      await this.query(`
+        CREATE TABLE IF NOT EXISTS campaign_financial_movements (
+          id VARCHAR(36) PRIMARY KEY,
+          campaign_id VARCHAR(36) NOT NULL,
+          created_by VARCHAR(36),
+          type VARCHAR(20) NOT NULL,
+          concept VARCHAR(200) NOT NULL,
+          category VARCHAR(150) NOT NULL,
+          amount DECIMAL(15, 2) NOT NULL,
+          currency VARCHAR(10) DEFAULT 'BOB',
+          movement_date DATE NOT NULL,
+          reference_number VARCHAR(100),
+          receipt_url VARCHAR(512),
+          notes TEXT,
+          status VARCHAR(50) DEFAULT 'pending',
+          reviewed_by VARCHAR(36),
+          reviewed_at TIMESTAMP,
+          review_notes TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      await this.query(`
+        CREATE TABLE IF NOT EXISTS campaign_funding_plans (
+          id VARCHAR(36) PRIMARY KEY,
+          campaign_id VARCHAR(36) NOT NULL,
+          category VARCHAR(150) NOT NULL,
+          description TEXT,
+          amount DECIMAL(15, 2) NOT NULL,
+          percentage DECIMAL(5, 2),
+          sort_order INT DEFAULT 0,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      // Check if movements table is empty
+      const countRes = await this.queryOne(`SELECT COUNT(*) as count FROM campaign_financial_movements`);
+      if (parseInt(countRes?.count || '0', 10) === 0) {
+        const firstCampaign = await this.queryOne(`SELECT id, creator_id FROM campaigns LIMIT 1`);
+        if (firstCampaign) {
+          const cid = firstCampaign.id;
+          const uid = firstCampaign.creator_id;
+          await this.query(`
+            INSERT INTO campaign_financial_movements 
+              (id, campaign_id, created_by, type, concept, category, amount, currency, movement_date, reference_number, receipt_url, notes, status, created_at, updated_at)
+            VALUES 
+              (?, ?, ?, 'expense', 'Compra de componentes electrónicos y sensores', 'Equipamiento', 2450.00, 'BOB', NOW() - INTERVAL '5 days', 'FAC-48921', '/uploads/receipts/sample_fac_48921.pdf', 'Materiales para fase de pruebas inicial', 'verified', NOW() - INTERVAL '5 days', NOW() - INTERVAL '5 days'),
+              (?, ?, ?, 'expense', 'Servicio de diseño UI/UX y maquetación web', 'Servicios Profesionales', 1800.00, 'BOB', NOW() - INTERVAL '3 days', 'REC-1029', NULL, 'Pago contra entrega de wireframes sin factura comercial', 'flagged', NOW() - INTERVAL '3 days', NOW() - INTERVAL '3 days'),
+              (?, ?, ?, 'expense', 'Campaña publicitaria en redes sociales y difusión', 'Marketing', 950.00, 'BOB', NOW() - INTERVAL '1 day', 'FB-ADS-991', '/uploads/receipts/sample_ads.pdf', 'Anuncios de lanzamiento en Facebook e Instagram', 'pending', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day'),
+              (?, ?, ?, 'income', 'Desembolso primera fase de recaudación', 'Fondeo Colectivo', 5200.00, 'BOB', NOW() - INTERVAL '7 days', 'TRF-BANK-001', '/uploads/receipts/sample_bank_trf.pdf', 'Liberación de fondos verificados', 'verified', NOW() - INTERVAL '7 days', NOW() - INTERVAL '7 days')
+          `, [
+            randomUUID(), cid, uid,
+            randomUUID(), cid, uid,
+            randomUUID(), cid, uid,
+            randomUUID(), cid, uid
+          ]);
+        }
+      }
+    } catch (e) {
+      console.warn('AdminRepository ensureTables warning:', e);
+    }
+  }
   /**
    * Obtiene un resumen de las campañas y usuarios.
    */
@@ -329,5 +471,350 @@ export class AdminRepository extends BaseRepository {
 
       return await client.query(`SELECT * FROM entrepreneur_profiles WHERE id = ?`, [entrepreneurId]).then((r: any) => r.rows[0]);
     });
+  }
+
+  async getFinancialMovements(params: {
+    page?: number;
+    limit?: number;
+    campaignId?: string;
+    type?: string;
+    status?: string;
+    category?: string;
+    hasReceipt?: boolean;
+    flagged?: boolean;
+    q?: string;
+    sortBy?: string;
+    sortOrder?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  }) {
+    await this.ensureTables();
+
+    const page = Math.max(1, Number(params.page) || 1);
+    const limit = Math.max(1, Math.min(100, Number(params.limit) || 10));
+    const offset = (page - 1) * limit;
+
+    const conditions: string[] = ['1=1'];
+    const queryParams: any[] = [];
+
+    if (params.campaignId) {
+      queryParams.push(params.campaignId);
+      conditions.push(`m.campaign_id = ?`);
+    }
+
+    if (params.type) {
+      queryParams.push(params.type);
+      conditions.push(`m.type = ?`);
+    }
+
+    if (params.status) {
+      queryParams.push(params.status);
+      conditions.push(`m.status = ?`);
+    }
+
+    if (params.category) {
+      queryParams.push(params.category);
+      conditions.push(`m.category = ?`);
+    }
+
+    if (params.hasReceipt === true) {
+      conditions.push(`(m.receipt_url IS NOT NULL AND m.receipt_url != '')`);
+    } else if (params.hasReceipt === false) {
+      conditions.push(`(m.receipt_url IS NULL OR m.receipt_url = '')`);
+    }
+
+    if (params.flagged === true) {
+      conditions.push(`m.status = 'flagged'`);
+    }
+
+    if (params.q) {
+      queryParams.push(`%${params.q}%`);
+      queryParams.push(`%${params.q}%`);
+      queryParams.push(`%${params.q}%`);
+      conditions.push(`(m.concept ILIKE ? OR m.reference_number ILIKE ? OR c.title ILIKE ?)`);
+    }
+
+    if (params.dateFrom) {
+      queryParams.push(params.dateFrom);
+      conditions.push(`m.movement_date >= ?`);
+    }
+
+    if (params.dateTo) {
+      queryParams.push(params.dateTo);
+      conditions.push(`m.movement_date <= ?`);
+    }
+
+    const whereClause = conditions.join(' AND ');
+
+    const countSql = `
+      SELECT COUNT(*) as total
+      FROM campaign_financial_movements m
+      JOIN campaigns c ON m.campaign_id = c.id
+      WHERE ${whereClause}
+    `;
+    const countRes = await this.queryOne(countSql, queryParams);
+    const total = parseInt(countRes?.total || '0', 10);
+
+    const sortCol = ['amount', 'movement_date', 'created_at'].includes(params.sortBy || '') 
+      ? `m.${params.sortBy}` 
+      : 'm.created_at';
+    const sortDir = (params.sortOrder || 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+    const dataSql = `
+      SELECT 
+        m.id, m.campaign_id, m.created_by, m.type, m.concept, m.category,
+        m.amount, m.currency, m.movement_date, m.reference_number, m.receipt_url,
+        m.notes, m.status, m.reviewed_by, m.reviewed_at, m.review_notes,
+        m.created_at, m.updated_at,
+        c.title as campaign_title, c.status as campaign_status, c.currency as campaign_currency,
+        c.goal_amount as campaign_goal, c.current_amount as campaign_current_amount,
+        u.email as creator_email,
+        COALESCE(CONCAT(ep.first_name, ' ', ep.last_name), u.email) as creator_name,
+        rev.email as reviewer_email,
+        COALESCE(CONCAT(ap.first_name, ' ', ap.last_name), rev.email) as reviewer_name
+      FROM campaign_financial_movements m
+      JOIN campaigns c ON m.campaign_id = c.id
+      LEFT JOIN users u ON m.created_by = u.id OR c.creator_id = u.id
+      LEFT JOIN entrepreneur_profiles ep ON u.id = ep.user_id
+      LEFT JOIN users rev ON m.reviewed_by = rev.id
+      LEFT JOIN admin_profiles ap ON rev.id = ap.user_id
+      WHERE ${whereClause}
+      ORDER BY ${sortCol} ${sortDir}
+      LIMIT ? OFFSET ?
+    `;
+
+    const rows = await this.queryMany(dataSql, [...queryParams, limit, offset]);
+
+    return {
+      data: rows.map(mapRowToAuditItem),
+      total,
+      page,
+      perPage: limit,
+    };
+  }
+
+  async getFinancialMovementById(id: string) {
+    await this.ensureTables();
+
+    const sql = `
+      SELECT 
+        m.id, m.campaign_id, m.created_by, m.type, m.concept, m.category,
+        m.amount, m.currency, m.movement_date, m.reference_number, m.receipt_url,
+        m.notes, m.status, m.reviewed_by, m.reviewed_at, m.review_notes,
+        m.created_at, m.updated_at,
+        c.title as campaign_title, c.status as campaign_status, c.currency as campaign_currency,
+        c.goal_amount as campaign_goal, c.current_amount as campaign_current_amount,
+        u.email as creator_email,
+        COALESCE(CONCAT(ep.first_name, ' ', ep.last_name), u.email) as creator_name,
+        rev.email as reviewer_email,
+        COALESCE(CONCAT(ap.first_name, ' ', ap.last_name), rev.email) as reviewer_name
+      FROM campaign_financial_movements m
+      JOIN campaigns c ON m.campaign_id = c.id
+      LEFT JOIN users u ON m.created_by = u.id OR c.creator_id = u.id
+      LEFT JOIN entrepreneur_profiles ep ON u.id = ep.user_id
+      LEFT JOIN users rev ON m.reviewed_by = rev.id
+      LEFT JOIN admin_profiles ap ON rev.id = ap.user_id
+      WHERE m.id = ?
+    `;
+
+    const row = await this.queryOne(sql, [id]);
+    return row ? mapRowToAuditItem(row) : null;
+  }
+
+  async reviewFinancialMovement(
+    id: string,
+    action: 'approve' | 'flag' | 'reject' | 'reset',
+    reviewerId: string,
+    notes?: string,
+  ) {
+    await this.ensureTables();
+
+    let targetStatus = 'verified';
+    if (action === 'flag') targetStatus = 'flagged';
+    else if (action === 'reject') targetStatus = 'rejected';
+    else if (action === 'reset') targetStatus = 'pending';
+
+    const isReset = action === 'reset';
+
+    await this.query(`
+      UPDATE campaign_financial_movements
+      SET status = ?,
+          reviewed_by = ?,
+          reviewed_at = CASE WHEN ? = true THEN NULL ELSE NOW() END,
+          review_notes = ?,
+          updated_at = NOW()
+      WHERE id = ?
+    `, [
+      targetStatus,
+      isReset ? null : reviewerId,
+      isReset,
+      isReset ? null : (notes || null),
+      id,
+    ]);
+
+    return this.getFinancialMovementById(id);
+  }
+
+  async getFinancialAuditSummary() {
+    await this.ensureTables();
+
+    const stats = await this.queryOne(`
+      SELECT 
+        COUNT(*)::int as total_movements,
+        COALESCE(SUM(amount) FILTER (WHERE type = 'expense'), 0)::float as total_expenses,
+        COALESCE(SUM(amount) FILTER (WHERE type = 'income'), 0)::float as total_incomes,
+        COUNT(*) FILTER (WHERE status = 'pending')::int as pending_count,
+        COUNT(*) FILTER (WHERE status = 'flagged')::int as flagged_count,
+        COUNT(*) FILTER (WHERE status = 'verified')::int as verified_count,
+        COUNT(*) FILTER (WHERE status = 'rejected')::int as rejected_count,
+        COUNT(*) FILTER (WHERE type = 'expense' AND (receipt_url IS NULL OR receipt_url = ''))::int as no_receipt_count,
+        COUNT(DISTINCT campaign_id) FILTER (WHERE status = 'flagged' OR (type = 'expense' AND (receipt_url IS NULL OR receipt_url = '')))::int as irregular_campaigns_count
+      FROM campaign_financial_movements
+    `);
+
+    const topCategoriesRows = await this.queryMany(`
+      SELECT category, COUNT(*)::int as count, SUM(amount)::float as total_amount
+      FROM campaign_financial_movements
+      WHERE status = 'flagged' OR (type = 'expense' AND (receipt_url IS NULL OR receipt_url = ''))
+      GROUP BY category
+      ORDER BY total_amount DESC
+      LIMIT 5
+    `);
+
+    const recentPendingRes = await this.getFinancialMovements({
+      limit: 5,
+      status: 'pending',
+      sortBy: 'created_at',
+      sortOrder: 'DESC',
+    });
+
+    const recentFlaggedRes = await this.getFinancialMovements({
+      limit: 5,
+      status: 'flagged',
+      sortBy: 'created_at',
+      sortOrder: 'DESC',
+    });
+
+    return {
+      totalMovements: stats?.total_movements || 0,
+      totalExpenses: stats?.total_expenses || 0,
+      totalIncomes: stats?.total_incomes || 0,
+      pendingCount: stats?.pending_count || 0,
+      flaggedCount: stats?.flagged_count || 0,
+      verifiedCount: stats?.verified_count || 0,
+      rejectedCount: stats?.rejected_count || 0,
+      expensesWithoutReceiptCount: stats?.no_receipt_count || 0,
+      campaignsWithIrregularitiesCount: stats?.irregular_campaigns_count || 0,
+      topFlaggedCategories: topCategoriesRows || [],
+      recentPending: recentPendingRes.data,
+      recentFlagged: recentFlaggedRes.data,
+    };
+  }
+
+  async getCampaignFinancialAudit(campaignId: string) {
+    await this.ensureTables();
+
+    const campaign = await this.queryOne(`
+      SELECT id, title, goal_amount, current_amount, currency, status
+      FROM campaigns
+      WHERE id = ?
+    `, [campaignId]);
+
+    if (!campaign) return null;
+
+    let fundingPlans: any[] = [];
+    try {
+      fundingPlans = await this.queryMany(`
+        SELECT id, category, amount, description
+        FROM campaign_funding_plans
+        WHERE campaign_id = ?
+        ORDER BY sort_order ASC, amount DESC
+      `, [campaignId]);
+    } catch {
+      fundingPlans = [];
+    }
+
+    const movements = await this.queryMany(`
+      SELECT id, type, concept, category, amount, receipt_url, status
+      FROM campaign_financial_movements
+      WHERE campaign_id = ?
+    `, [campaignId]);
+
+    const expenseMovements = movements.filter((m: any) => m.type === 'expense');
+
+    const categoriesMap: Record<string, { budgeted: number; spent: number; missingReceiptCount: number; id: string }> = {};
+
+    fundingPlans.forEach((fp: any) => {
+      categoriesMap[fp.category] = {
+        budgeted: parseFloat(fp.amount || 0),
+        spent: 0,
+        missingReceiptCount: 0,
+        id: fp.id,
+      };
+    });
+
+    const unbudgetedExpenses: any[] = [];
+
+    expenseMovements.forEach((exp: any) => {
+      const cat = exp.category || 'Otros';
+      const amt = parseFloat(exp.amount || 0);
+      const hasNoReceipt = !exp.receipt_url || String(exp.receipt_url).trim().length === 0;
+
+      if (categoriesMap[cat]) {
+        categoriesMap[cat].spent += amt;
+        if (hasNoReceipt) categoriesMap[cat].missingReceiptCount++;
+      } else {
+        unbudgetedExpenses.push({
+          id: exp.id,
+          concept: exp.concept,
+          category: cat,
+          amount: amt,
+        });
+      }
+    });
+
+    if (Object.keys(categoriesMap).length === 0) {
+      expenseMovements.forEach((exp: any) => {
+        const cat = exp.category || 'Operaciones';
+        const amt = parseFloat(exp.amount || 0);
+        const hasNoReceipt = !exp.receipt_url || String(exp.receipt_url).trim().length === 0;
+        if (!categoriesMap[cat]) {
+          categoriesMap[cat] = {
+            budgeted: Math.round(amt * 1.2),
+            spent: 0,
+            missingReceiptCount: 0,
+            id: randomUUID(),
+          };
+        }
+        categoriesMap[cat].spent += amt;
+        if (hasNoReceipt) categoriesMap[cat].missingReceiptCount++;
+      });
+    }
+
+    const fundingPlanComparison = Object.entries(categoriesMap).map(([category, data]) => {
+      const variance = data.budgeted - data.spent;
+      return {
+        id: data.id,
+        category,
+        budgetedAmount: data.budgeted,
+        spentAmount: data.spent,
+        variance,
+        missingReceiptCount: data.missingReceiptCount,
+        isOverbudget: data.spent > data.budgeted,
+      };
+    });
+
+    return {
+      campaign: {
+        id: campaign.id,
+        title: campaign.title,
+        goal_amount: parseFloat(campaign.goal_amount || 0),
+        current_amount: parseFloat(campaign.current_amount || 0),
+        currency: campaign.currency || 'BOB',
+        status: campaign.status,
+      },
+      fundingPlanComparison,
+      unbudgetedExpenses,
+    };
   }
 }

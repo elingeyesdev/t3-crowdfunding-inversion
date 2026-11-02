@@ -186,4 +186,36 @@ export class AdminService {
     }
     return updated;
   }
+
+  async getFinancialMovements(params: any) {
+    return this.adminRepo.getFinancialMovements(params);
+  }
+
+  async getFinancialMovementById(id: string) {
+    const movement = await this.adminRepo.getFinancialMovementById(id);
+    if (!movement) {
+      throw new NotFoundException('Movimiento financiero no encontrado');
+    }
+    return movement;
+  }
+
+  async reviewFinancialMovement(id: string, action: 'approve' | 'flag' | 'reject' | 'reset', reviewerId: string, notes?: string) {
+    const updated = await this.adminRepo.reviewFinancialMovement(id, action, reviewerId, notes);
+    if (!updated) {
+      throw new NotFoundException('Movimiento financiero no encontrado');
+    }
+    return updated;
+  }
+
+  async getFinancialAuditSummary() {
+    return this.adminRepo.getFinancialAuditSummary();
+  }
+
+  async getCampaignFinancialAudit(campaignId: string) {
+    const audit = await this.adminRepo.getCampaignFinancialAudit(campaignId);
+    if (!audit) {
+      throw new NotFoundException('Campaña no encontrada');
+    }
+    return audit;
+  }
 }
