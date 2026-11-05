@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getMe, logout, AuthUser } from '../api/auth.api';
+import { getMe, logout } from '../api/auth.api';
+import type { AuthUser } from '../api/auth.api';
 
 interface UseAuthReturn {
   user: AuthUser | null;
