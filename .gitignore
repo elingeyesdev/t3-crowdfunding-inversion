@@ -96,3 +96,14 @@ temp/
 /movil/android/captures/
 /movil/ios/Flutter/Generated.xcconfig
 /movil/ios/Flutter/flutter_export_environment.sh
+
+# Restos locales de la estructura anterior
+/bootstrap/
+/database/*.sqlite
+/database/*.sqlite-*
+/public/build/
+/public/storage/
+/public/uploads/
+/storage/
+/vendor/
+/.phpunit.result.cache
