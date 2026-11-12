@@ -1,0 +1,3 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- INTERNET se hereda del manifiesto principal, también para hot reload. -->
+</manifest>
