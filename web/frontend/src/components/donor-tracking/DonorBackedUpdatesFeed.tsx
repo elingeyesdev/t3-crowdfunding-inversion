@@ -114,7 +114,7 @@ export function DonorBackedUpdatesFeed() {
       ) : (
         <div className="space-y-6">
           {filteredUpdates.map((update) => {
-            const author = update.authorName || update.entrepreneurName || 'Emprendedor';
+            const author = update.entrepreneurName || 'Emprendedor';
             const progress = update.campaignGoalAmount > 0
               ? Math.min(100, Math.round((update.campaignCurrentAmount / update.campaignGoalAmount) * 100))
               : 0;
