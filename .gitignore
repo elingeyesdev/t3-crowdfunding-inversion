@@ -69,17 +69,30 @@ temp/
 .env.test.local
 .env.production.local
 
-# Laravel
-/vendor/
-/public/build/
-/public/hot
-/public/storage
-/public/uploads/
-/storage/*.key
-/storage/app/private/*
-!/storage/app/private/.gitignore
-/database/*.sqlite*
-/bootstrap/cache/*.php
-/.phpunit.cache/
-/.phpunit.result.cache
-/laravel/
+# Laravel - web
+/web/vendor/
+/web/public/build/
+/web/public/hot
+/web/public/storage
+/web/public/uploads/
+/web/storage/*.key
+/web/storage/app/private/*
+!/web/storage/app/private/.gitignore
+/web/database/*.sqlite*
+/web/bootstrap/cache/*.php
+/web/.phpunit.cache/
+/web/.phpunit.result.cache/
+
+# Flutter - movil
+/movil/.dart_tool/
+/movil/.flutter-plugins
+/movil/.flutter-plugins-dependencies
+/movil/.packages
+/movil/.pub-cache/
+/movil/.pub/
+/movil/build/
+/movil/android/local.properties
+/movil/android/key.properties
+/movil/android/captures/
+/movil/ios/Flutter/Generated.xcconfig
+/movil/ios/Flutter/flutter_export_environment.sh
