@@ -116,7 +116,7 @@ class ImportLegacy extends Command
             }
             $this->table(['Tabla', 'Filas'], collect($prepared)->map(fn ($rows, $table) => [$table, count($rows)])->values()->all());
             $this->info($this->option('dry-run') ? 'Validación correcta. No se guardaron datos.' : 'Importación completada. Se conservaron los hashes de contraseña y los UUID.');
-            $this->warn('Conserva el JSON original: incluye tablas y campos históricos fuera del modelo activo. Copia también los archivos de backend/uploads.');
+            $this->warn('Conserva el JSON original en almacenamiento privado. Copia a public/uploads solo archivos públicos; nunca kyc/. Antes de habilitar accesos, ejecuta legacy:secure-kyc --dry-run y legacy:secure-kyc.');
 
             return self::SUCCESS;
         } catch (\Throwable $e) {

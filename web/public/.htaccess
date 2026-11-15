@@ -5,6 +5,9 @@
 
     RewriteEngine On
 
+    # Never serve legacy KYC copies as static files, even before migration.
+    RewriteRule ^(?:uploads/kyc|storage/(?:uploads/)?kyc)(?:/|$) - [F,L,NC]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
