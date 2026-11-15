@@ -81,7 +81,7 @@ temp/
 /web/database/*.sqlite*
 /web/bootstrap/cache/*.php
 /web/.phpunit.cache/
-/web/.phpunit.result.cache/
+/web/.phpunit.result.cache
 
 # Flutter - movil
 /movil/.dart_tool/

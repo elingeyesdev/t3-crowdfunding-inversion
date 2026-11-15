@@ -1,12 +1,13 @@
 # UniFundMe — Laravel + React
 
-La aplicación se ejecuta desde esta raíz con Laravel 13, PHP 8.3 o superior y React 19. La interfaz original permanece en `frontend/src`; Laravel sirve las páginas, la API y los archivos. Vite compila React y Tailwind desde `vite.config.ts`.
+La aplicación se ejecuta desde `web/` con Laravel 13, PHP 8.3 o superior y React 19. La interfaz original permanece en `web/frontend/src`; Laravel sirve las páginas, la API y los archivos. Vite compila React y Tailwind desde `web/vite.config.ts`. Los comandos y rutas del resto de esta guía son relativos a `web/`.
 
 ## Arranque en este equipo
 
 La configuración local ya apunta a `database/migrated.sqlite`, que contiene la importación de PostgreSQL. No ejecutes `migrate:fresh` sobre esa base.
 
 ```powershell
+cd web
 composer dev
 ```
 
@@ -94,6 +95,8 @@ En producción configura `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL`, las
 
 ## Verificación
 
+La auditoría funcional del 14 de noviembre de 2026 y el plan de correcciones del milestone 4 están en [docs/AUDITORIA_FUNCIONAL_2026-11-14.md](docs/AUDITORIA_FUNCIONAL_2026-11-14.md). Los diagnósticos allí documentados reproducen defectos conocidos y se ejecutan por separado de la suite de regresión.
+
 ```powershell
 php artisan test
 npm run build
@@ -102,7 +105,7 @@ composer validate --strict
 
 Las pruebas usan SQLite en memoria: verifican autenticación, compatibilidad de contraseñas, contratos de API, roles, propiedad de recursos, aportes, precisión decimal, reembolsos, recompensas, PDF/CSV, KYC privado, comentarios, chat e importación reversible. La concurrencia con bloqueo de filas debe comprobarse también en el motor elegido para producción; SQLite serializa escrituras y no reproduce el comportamiento de MySQL/PostgreSQL.
 
-Resultado de la verificación local: **29 pruebas y 166 aserciones correctas**, compilación TypeScript/Vite completa, manifiestos de dependencias válidos y rutas cacheables. El bundle principal conserva el tamaño de la interfaz original y Vite avisa que supera 500 kB; no impide compilar ni ejecutar la aplicación.
+Verificación de arranque del **12 de noviembre de 2026**: **36 pruebas y 326 aserciones correctas**, compilación TypeScript/Vite completa y requisitos PHP satisfechos. Se comprobó `composer dev` desde `web/`, la portada y el catálogo en el navegador sin errores de consola, HTTP 200 en las rutas públicas y HTTP 401 en las rutas protegidas sin sesión. Las migraciones locales están aplicadas. Vite avisa que el bundle principal supera 500 kB; no impide compilar ni ejecutar la aplicación. Esta comprobación no valida Google OAuth ni llamadas reales al proveedor de IA.
 
 ESLint todavía reporta deuda previa de tipado y reglas de React; `npm run lint` no pasa. Se corrigió el orden condicional de hooks del panel de estadísticas y se añadieron regresiones para correos duplicados con mayúsculas y solicitudes a la API sin sesión ni cabecera Accept. La comparación con la exportación histórica detecta un cambio en `users.last_login_ip`; una base que ya recibe sesiones puede diferir de esa instantánea.
 
