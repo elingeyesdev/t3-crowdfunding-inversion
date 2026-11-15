@@ -2,7 +2,7 @@
 
 namespace Tests\Audit;
 
-use App\Models\{Campaign, CampaignFinancialMovement, CampaignMilestone, CampaignUpdate, Category, EntrepreneurProfile, InvestorProfile, Notification, RewardClaim, RewardTier, User};
+use App\Models\{Campaign, CampaignFinancialMovement, CampaignMilestone, Category, EntrepreneurProfile, InvestorProfile, Notification, RewardClaim, RewardTier, User};
 use App\Services\Notifier;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\{Auth, DB, Hash};
@@ -69,16 +69,6 @@ class AuditDiagnosticsTest extends TestCase
         foreach (['/campaigns/public/'.$c->id.'/documents', '/campaigns/public/'.$c->id.'/updates', '/investments/backed-campaigns/updates'] as $path) {
             $this->getJson('/api/v1'.$path)->assertNotFound();
         }
-    }
-
-    public function test_observed_private_campaign_finances_and_private_updates_are_public(): void
-    {
-        $c = $this->campaign($this->user());
-        $m = CampaignMilestone::create(['campaign_id' => $c->id, 'title' => 'Private milestone']);
-        CampaignUpdate::create(['campaign_id' => $c->id, 'author_id' => $c->creator_id, 'milestone_id' => $m->id, 'title' => 'Private update', 'content' => 'PRIVATE AUDIT CONTENT', 'is_public' => false]);
-        CampaignFinancialMovement::create(['campaign_id' => $c->id, 'created_by' => $c->creator_id, 'type' => 'expense', 'concept' => 'Internal expense', 'category' => 'Internal', 'amount' => 10, 'movement_date' => now()->toDateString(), 'notes' => 'Internal notes']);
-        $this->getJson('/api/v1/campaigns/'.$c->id.'/financial-ledger')->assertOk()->assertJsonPath('data.movements.0.notes', 'Internal notes');
-        $this->getJson('/api/v1/campaigns/'.$c->id.'/milestones')->assertOk()->assertJsonPath('data.0.updates.0.content', 'PRIVATE AUDIT CONTENT');
     }
 
     public function test_observed_update_can_attach_to_another_campaigns_milestone(): void
