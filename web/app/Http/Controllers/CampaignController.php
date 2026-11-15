@@ -311,9 +311,11 @@ class CampaignController extends Controller
 
         $update = $campaign->updates()->create(['author_id' => $r->user()->id, 'milestone_id' => $data['milestoneId'] ?? null, 'title' => $data['title'], 'content' => $data['content'], 'is_public' => $data['isPublic'], 'attachments' => $attachments]);
 
-        $investorIds = $campaign->investments()->where('status', 'completed')->pluck('investor_id')->unique();
-        foreach ($investorIds as $invId) {
-            $notifier->send($invId, 'campaign_update', 'Nuevo avance de campaña', $campaign->title.': '.$data['title'], $campaign->id);
+        if ($data['isPublic'] && in_array($campaign->status, Campaign::PUBLIC_STATUSES, true)) {
+            $investorIds = $campaign->investments()->where('status', 'completed')->pluck('investor_id')->unique();
+            foreach ($investorIds as $invId) {
+                $notifier->send($invId, 'campaign_update', 'Nuevo avance de campaña', $campaign->title.': '.$data['title'], $campaign->id);
+            }
         }
 
         return Api::ok($update->load('milestone'), 201);
@@ -329,11 +331,6 @@ class CampaignController extends Controller
 
             return ['campaignId' => $c->id, 'campaignTitle' => $c->title, 'campaignCoverImageUrl' => $c->cover_image_url, 'entrepreneurName' => $p?->display_name ?? trim(($p?->first_name ?? '').' '.($p?->last_name ?? '')), 'entrepreneurAvatar' => $p?->avatar_url, 'stories' => $items->map(fn ($u) => $u->only(['id', 'title', 'content', 'attachments', 'created_at']))->values()->all()];
         })->values());
-    }
-
-    public function fundingPlan(Campaign $campaign)
-    {
-        return Api::ok($campaign->fundingPlan);
     }
 
     public function saveFundingPlan(Request $r, Campaign $campaign)
@@ -401,11 +398,6 @@ class CampaignController extends Controller
         $item->delete();
 
         return Api::ok();
-    }
-
-    public function financialLedger(Campaign $campaign, CampaignFinance $finance)
-    {
-        return Api::ok($finance->ledger($campaign));
     }
 
     public function financialMovements(Request $r, Campaign $campaign)
@@ -507,18 +499,6 @@ class CampaignController extends Controller
         return Api::ok($movement->fresh());
     }
 
-    public function milestones(Campaign $campaign)
-    {
-        return Api::ok($campaign->milestones()->with('updates')->get());
-    }
-
-    public function showMilestone(Campaign $campaign, string $milestoneId)
-    {
-        $milestone = $campaign->milestones()->with('updates')->findOrFail($milestoneId);
-
-        return Api::ok($milestone);
-    }
-
     public function addMilestone(Request $r, Campaign $campaign)
     {
         self::authorizeOwner($r, $campaign);
@@ -612,10 +592,5 @@ class CampaignController extends Controller
         $milestone->update(['evidence_urls' => $evidence]);
 
         return Api::ok($milestone->fresh());
-    }
-
-    public function campaignUpdates(Campaign $campaign)
-    {
-        return Api::ok($campaign->updates()->where('is_public', true)->with(['author', 'milestone'])->latest()->get());
     }
 }

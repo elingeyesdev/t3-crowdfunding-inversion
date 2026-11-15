@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Campaign;
+use Illuminate\Support\Arr;
 
 class CampaignFinance
 {
@@ -40,7 +41,7 @@ class CampaignFinance
         return [...$progress, 'grossAmount' => $c->current_amount, 'platformFeePercentage' => 5, 'platformFee' => $fee, 'netAmount' => round($c->current_amount - $fee, 2), 'daysElapsed' => $days, 'dailyRate' => round($rate, 2), 'projectedRemainingDays' => $rate > 0 ? (int) ceil(max(0, $c->goal_amount - $c->current_amount) / $rate) : null];
     }
 
-    public function ledger(Campaign $campaign): array
+    public function ledger(Campaign $campaign, bool $public = false): array
     {
         $movements = $campaign->financialMovements()->with(['creator', 'reviewer'])->get();
         $incomes = $movements->where('type', 'income');
@@ -79,23 +80,27 @@ class CampaignFinance
                 'rejectedCount' => $movements->where('status', 'rejected')->count(),
             ],
             'expensesByCategory' => $expensesByCategory,
-            'movements' => $movements->map(fn ($m) => [
-                'id' => $m->id,
-                'type' => $m->type,
-                'concept' => $m->concept,
-                'category' => $m->category,
-                'amount' => $m->amount,
-                'currency' => $m->currency,
-                'movementDate' => $m->movement_date?->format('Y-m-d'),
-                'referenceNumber' => $m->reference_number,
-                'receiptUrl' => $m->receipt_url,
-                'notes' => $m->notes,
-                'status' => $m->status,
-                'reviewedBy' => $m->reviewed_by,
-                'reviewedAt' => $m->reviewed_at?->toIso8601String(),
-                'reviewNotes' => $m->review_notes,
-                'createdAt' => $m->created_at,
-            ])->values()->all(),
+            'movements' => $movements->map(function ($m) use ($public) {
+                $data = [
+                    'id' => $m->id,
+                    'type' => $m->type,
+                    'concept' => $m->concept,
+                    'category' => $m->category,
+                    'amount' => $m->amount,
+                    'currency' => $m->currency,
+                    'movementDate' => $m->movement_date?->format('Y-m-d'),
+                    'referenceNumber' => $m->reference_number,
+                    'receiptUrl' => $m->receipt_url,
+                    'notes' => $m->notes,
+                    'status' => $m->status,
+                    'reviewedBy' => $m->reviewed_by,
+                    'reviewedAt' => $m->reviewed_at?->toIso8601String(),
+                    'reviewNotes' => $m->review_notes,
+                    'createdAt' => $m->created_at,
+                ];
+
+                return $public ? Arr::only($data, ['id', 'type', 'concept', 'category', 'amount', 'currency', 'movementDate', 'status', 'createdAt']) : $data;
+            })->values()->all(),
         ];
     }
 }
