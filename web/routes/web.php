@@ -3,6 +3,10 @@
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
+Route::any('/uploads/kyc/{path?}', fn () => abort(403))->where('path', '.*');
+Route::any('/storage/kyc/{path?}', fn () => abort(403))->where('path', '.*');
+Route::any('/storage/uploads/kyc/{path?}', fn () => abort(403))->where('path', '.*');
+
 Route::get('/api/v1/auth/google', [AuthController::class, 'google']);
 Route::get('/api/v1/auth/google/callback', [AuthController::class, 'googleCallback']);
 Route::view('/{path?}', 'app')->where('path', '^(?!api(?:/|$)|storage(?:/|$)|uploads(?:/|$)|build(?:/|$)).*');

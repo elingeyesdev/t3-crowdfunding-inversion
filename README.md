@@ -85,7 +85,16 @@ El importador exige tablas de negocio vacías y revierte todo si falla una restr
 
 `legacy:verify` comprueba los registros activos y la copia histórica íntegra sin escribir en la base. La exportación inicial de este equipo contiene 383 filas y fue verificada después de importarla.
 
-Copia `backend/uploads` a `public/uploads` para conservar las URL anteriores. Los archivos nuevos se almacenan en `storage/app/public` y los documentos privados en `storage/app/private`. Conserva el JSON original para auditoría. Una copia anterior a la migración puede restaurarse apuntando nuevamente al backend NestJS y su base original.
+Copia a `public/uploads` únicamente recursos públicos, como imágenes de perfiles y campañas. **No copies `backend/uploads/kyc` ni documentos privados al directorio público.** Los KYC heredados se protegen mediante el procedimiento de la [issue 4.1](docs/4.1-kyc-heredado.md):
+
+```powershell
+php artisan legacy:secure-kyc --dry-run
+php artisan legacy:secure-kyc
+```
+
+El segundo comando debe ejecutarse con las escrituras detenidas. Verifica los archivos mediante SHA-256, conserva un respaldo privado de referencias, actualiza las rutas de los perfiles y retira únicamente copias con respaldo verificado. También conserva archivos sin referencias activas. Puede repetirse después de un fallo; si falta un archivo o hay contenido diferente con el mismo nombre, se detiene sin retirar los originales. Ejecuta `legacy:verify` de nuevo tras la migración: admite las rutas KYC privadas equivalentes y sigue comprobando íntegra la copia histórica del JSON.
+
+Los archivos nuevos se almacenan en `storage/app/public` y los documentos privados en `storage/app/private`. Conserva el JSON original para auditoría. Antes de actualizar un checkout que todavía versione KYC, respalda esos documentos fuera del repositorio: la corrección los retira del árbol versionado. Consulta la guía 4.1 para las reglas de Apache/Nginx y la revisión del historial de Git.
 
 ## Configuración externa y despliegue
 

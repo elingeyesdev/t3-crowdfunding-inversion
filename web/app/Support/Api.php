@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Services\LegacyKycFiles;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -50,8 +51,21 @@ class Api
         if (is_array($data)) {
             return array_map([self::class, 'privateUrls'], $data);
         }
-        if (is_string($data) && str_starts_with($data, '/api/v1/private-files/')) {
-            return URL::temporarySignedRoute('private.file', now()->addMinutes(15), ['path' => substr($data, 22)]);
+        if (is_string($data)) {
+            $kycUrl = LegacyKycFiles::privateUrl($data);
+            if ($kycUrl !== null) {
+                // Serialization must not mint KYC credentials from user-controlled
+                // text such as a bio containing another profile's document path.
+                if (! LegacyKycFiles::maySign($kycUrl)) {
+                    return $data;
+                }
+                $data = $kycUrl;
+            }
+            // Only canonical paths are signed; encoded separators or traversal
+            // must not bypass the KYC ownership check above.
+            if (preg_match('#^/api/v1/private-files/(?:kyc|documents)/[a-zA-Z0-9._-]+$#', $data) && ! str_contains($data, '..')) {
+                return URL::temporarySignedRoute('private.file', now()->addMinutes(15), ['path' => substr($data, 22)]);
+            }
         }
 
         return $data;

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\LegacyKycFiles;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -47,6 +48,10 @@ class VerifyLegacy extends Command
                         $actual = $record->$field;
                         if (is_array($expected)) {
                             $actual = json_decode($actual ?? 'null', true);
+                            if ($field === 'verification_documents' && in_array($active, ['entrepreneur_profiles', 'investor_profiles'], true)) {
+                                $actual = LegacyKycFiles::normalizeDocuments($actual);
+                                $expected = LegacyKycFiles::normalizeDocuments($expected);
+                            }
                         }
                         if ($actual != $expected) {
                             $this->error('Diferencia en '.$active.'.'.$field);
@@ -58,7 +63,7 @@ class VerifyLegacy extends Command
                 $count++;
             }
         }
-        $this->info($count.' filas verificadas. Coinciden UUID, contraseñas, campos activos y copia histórica completa.');
+        $this->info($count.' filas verificadas. Coinciden UUID, contraseñas, campos activos (con rutas KYC privadas equivalentes) y copia histórica completa.');
 
         return self::SUCCESS;
     }

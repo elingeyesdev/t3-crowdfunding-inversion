@@ -57,8 +57,9 @@ pids/
 tmp/
 temp/
 
-# Local uploads (optional - uncomment if you want to exclude)
-# backend/uploads/
+# KYC documents must never be versioned (including the legacy backend).
+/backend/uploads/kyc/
+/web/backend/uploads/kyc/
 
 # IDE
 .vscode/
