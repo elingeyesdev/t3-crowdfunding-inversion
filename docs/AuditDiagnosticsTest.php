@@ -2,7 +2,7 @@
 
 namespace Tests\Audit;
 
-use App\Models\{Campaign, CampaignMilestone, Category, EntrepreneurProfile, InvestorProfile, Notification, RewardClaim, RewardTier, User};
+use App\Models\{Campaign, Category, EntrepreneurProfile, InvestorProfile, Notification, RewardClaim, RewardTier, User};
 use App\Services\Notifier;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\{Auth, DB, Hash};
@@ -69,16 +69,6 @@ class AuditDiagnosticsTest extends TestCase
         foreach (['/campaigns/public/'.$c->id.'/documents', '/campaigns/public/'.$c->id.'/updates', '/investments/backed-campaigns/updates'] as $path) {
             $this->getJson('/api/v1'.$path)->assertNotFound();
         }
-    }
-
-    public function test_observed_update_can_attach_to_another_campaigns_milestone(): void
-    {
-        $u = $this->user();
-        $own = $this->campaign($u);
-        $foreign = $this->campaign($this->user());
-        $m = CampaignMilestone::create(['campaign_id' => $foreign->id, 'title' => 'Foreign milestone']);
-        $this->login($u)->postJson('/api/v1/entrepreneurs/me/campaigns/'.$own->id.'/updates', ['title' => 'Incorrectly linked', 'content' => 'This belongs to a different campaign.', 'milestoneId' => $m->id])->assertCreated();
-        $this->assertDatabaseHas('campaign_updates', ['campaign_id' => $own->id, 'milestone_id' => $m->id]);
     }
 
     public function test_observed_category_preference_does_not_suppress_notification(): void

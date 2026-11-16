@@ -14,7 +14,10 @@ use App\Services\ProfileReadiness;
 use App\Support\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class CampaignController extends Controller
 {
@@ -302,25 +305,51 @@ class CampaignController extends Controller
     {
         self::authorizeOwner($r, $campaign);
         $r->merge(['isPublic' => $r->has('isPublic') ? $r->boolean('isPublic') : true]);
-        $data = $r->validate(['title' => 'required|string|max:200', 'content' => 'required|string|max:20000', 'isPublic' => 'boolean', 'milestoneId' => 'nullable|uuid|exists:campaign_milestones,id', 'attachments' => 'sometimes|array|max:10', 'file' => 'nullable|file|mimes:jpg,jpeg,png,webp,avif,mp4,webm,pdf|max:51200']);
-        $attachments = $data['attachments'] ?? [];
-        if ($r->hasFile('file')) {
-            $file = $r->file('file');
-            $mime = $file->getMimeType();
-            $type = str_starts_with($mime, 'video/') ? 'video' : (str_contains($mime, 'pdf') ? 'document' : 'image');
-            $attachments[] = ['name' => $file->getClientOriginalName(), 'url' => '/storage/'.$file->store('updates', 'public'), 'type' => $type];
-        }
+        $data = $r->validate([
+            'title' => 'required|string|max:200',
+            'content' => 'required|string|max:20000',
+            'isPublic' => 'boolean',
+            'milestoneId' => ['bail', 'nullable', 'uuid', Rule::exists('campaign_milestones', 'id')->where('campaign_id', $campaign->id)],
+            'attachments' => 'sometimes|array|max:10',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,webp,avif,mp4,webm,pdf|max:51200',
+        ], [
+            'milestoneId.exists' => 'El hito seleccionado no pertenece a esta campaña o ya no está disponible.',
+            'milestoneId.uuid' => 'El identificador del hito no es válido.',
+        ]);
 
-        $update = $campaign->updates()->create(['author_id' => $r->user()->id, 'milestone_id' => $data['milestoneId'] ?? null, 'title' => $data['title'], 'content' => $data['content'], 'is_public' => $data['isPublic'], 'attachments' => $attachments]);
+        $storedPath = null;
+        try {
+            return DB::transaction(function () use ($r, $campaign, $data, $notifier, &$storedPath) {
+                $current = Campaign::whereKey($campaign->id)->lockForUpdate()->firstOrFail();
+                self::authorizeOwner($r, $current);
+                if (isset($data['milestoneId']) && ! $current->milestones()->whereKey($data['milestoneId'])->lockForUpdate()->first()) {
+                    throw ValidationException::withMessages(['milestoneId' => 'El hito seleccionado no pertenece a esta campaña o ya no está disponible.']);
+                }
+                $attachments = $data['attachments'] ?? [];
+                if ($r->hasFile('file')) {
+                    $file = $r->file('file');
+                    $mime = $file->getMimeType();
+                    $type = str_starts_with($mime, 'video/') ? 'video' : (str_contains($mime, 'pdf') ? 'document' : 'image');
+                    $storedPath = $file->store('updates', 'public');
+                    abort_unless($storedPath, 500, 'No se pudo guardar el archivo de la actualización.');
+                    $attachments[] = ['name' => $file->getClientOriginalName(), 'url' => '/storage/'.$storedPath, 'type' => $type];
+                }
+                $update = $current->updates()->create(['author_id' => $r->user()->id, 'milestone_id' => $data['milestoneId'] ?? null, 'title' => $data['title'], 'content' => $data['content'], 'is_public' => $data['isPublic'], 'attachments' => $attachments]);
+                if ($data['isPublic'] && in_array($current->status, Campaign::PUBLIC_STATUSES, true)) {
+                    $investorIds = $current->investments()->where('status', 'completed')->pluck('investor_id')->unique();
+                    foreach ($investorIds as $invId) {
+                        $notifier->send($invId, 'campaign_update', 'Nuevo avance de campaña', $current->title.': '.$data['title'], $current->id);
+                    }
+                }
 
-        if ($data['isPublic'] && in_array($campaign->status, Campaign::PUBLIC_STATUSES, true)) {
-            $investorIds = $campaign->investments()->where('status', 'completed')->pluck('investor_id')->unique();
-            foreach ($investorIds as $invId) {
-                $notifier->send($invId, 'campaign_update', 'Nuevo avance de campaña', $campaign->title.': '.$data['title'], $campaign->id);
+                return Api::ok($update->load('milestone'), 201);
+            });
+        } catch (\Throwable $e) {
+            if ($storedPath) {
+                Storage::disk('public')->delete($storedPath);
             }
+            throw $e;
         }
-
-        return Api::ok($update->load('milestone'), 201);
     }
 
     public function stories()
