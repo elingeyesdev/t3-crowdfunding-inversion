@@ -7,6 +7,7 @@ use App\Models\CampaignStatusHistory;
 use App\Models\CampaignUpdate;
 use App\Models\Category;
 use App\Services\CampaignFinance;
+use App\Services\CampaignPublication;
 use App\Services\FinancialMovementAudit;
 use App\Services\InvestmentEngine;
 use App\Services\Notifier;
@@ -169,15 +170,19 @@ class CampaignController extends Controller
         });
     }
 
-    public function transition(Request $r, Campaign $campaign, Notifier $notifier)
+    public function transition(Request $r, Campaign $campaign, Notifier $notifier, CampaignPublication $publication)
     {
         self::authorizeOwner($r, $campaign);
 
-        return DB::transaction(function () use ($r, $campaign, $notifier) {
+        return DB::transaction(function () use ($r, $campaign, $notifier, $publication) {
             $campaign = Campaign::whereKey($campaign->id)->lockForUpdate()->firstOrFail();
+            self::authorizeOwner($r, $campaign);
             $publish = str_ends_with($r->path(), '/publish');
-            $allowed = $publish ? ['draft', 'approved'] : ['draft', 'rejected'];
+            $allowed = $publish ? ['approved'] : ['draft', 'rejected'];
             abort_unless(in_array($campaign->status, $allowed), 422, 'La campaña no permite esta transición de estado.');
+            if ($publish) {
+                $publication->validate($campaign);
+            }
             $old = $campaign->status;
             $next = $publish ? 'published' : 'pending_review';
             $campaign->update(['status' => $next, ...($publish ? ['published_at' => $campaign->published_at ?? now()] : [])]);

@@ -44,14 +44,6 @@ class AuditDiagnosticsTest extends TestCase
         return Campaign::create(['creator_id' => $owner->id, 'category_id' => Category::first()->id, 'title' => 'Audit campaign', 'slug' => uniqid('audit-'), 'goal_amount' => 1000, 'status' => 'draft', ...$attrs]);
     }
 
-    public function test_observed_unverified_owner_can_publish_draft_without_review(): void
-    {
-        $u = $this->user();
-        $c = $this->campaign($u);
-        $this->login($u)->postJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/publish')->assertOk()->assertJsonPath('data.status', 'published');
-        $this->assertDatabaseCount('campaign_reviews', 0);
-    }
-
     public function test_observed_finalization_removes_public_detail(): void
     {
         $u = $this->user();

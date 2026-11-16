@@ -156,15 +156,16 @@ class MigrationTest extends TestCase
         $this->postJson('/api/v1/entrepreneurs/me/campaigns', ['title' => 'Campaña válida', 'description' => str_repeat('Descripción. ', 5), 'goalAmount' => 500])->assertUnprocessable();
     }
 
-    public function test_campaign_crud_review_and_admin_publication(): void
+    public function test_campaign_crud_admin_approval_and_owner_publication(): void
     {
         $u = $this->account('entrepreneur');
         $id = $this->asUser($u)->postJson('/api/v1/entrepreneurs/me/campaigns', ['title' => 'Campaña de educación', 'description' => str_repeat('Descripción completa. ', 5), 'goalAmount' => 500, 'categoryIds' => [Category::first()->id], 'rewards' => [['title' => 'Gracias', 'minPercentage' => 0, 'maxPercentage' => 100]]])->assertCreated()->assertJsonPath('data.status', 'draft')->json('data.id');
-        $this->patchJson('/api/v1/entrepreneurs/me/campaigns/'.$id, ['title' => 'Nuevo título de campaña'])->assertOk();
+        $this->patchJson('/api/v1/entrepreneurs/me/campaigns/'.$id, ['title' => 'Nuevo título de campaña', 'endDate' => now()->addDays(30)->toIso8601String()])->assertOk();
         $this->postJson('/api/v1/entrepreneurs/me/campaigns/'.$id.'/submit-for-review')->assertOk()->assertJsonPath('data.status', 'pending_review');
         $admin = $this->account('admin');
-        $this->asUser($admin)->patchJson('/api/v1/admin/campaigns/'.$id.'/status', ['status' => 'published'])->assertOk()->assertJsonPath('data.status', 'published');
-        $this->getJson('/api/v1/admin/campaigns/'.$id.'/history')->assertOk()->assertJsonCount(2, 'data');
+        $this->asUser($admin)->patchJson('/api/v1/admin/campaigns/'.$id.'/status', ['status' => 'approved'])->assertOk()->assertJsonPath('data.status', 'approved');
+        $this->asUser($u)->postJson('/api/v1/entrepreneurs/me/campaigns/'.$id.'/publish')->assertOk()->assertJsonPath('data.status', 'published');
+        $this->asUser($admin)->getJson('/api/v1/admin/campaigns/'.$id.'/history')->assertOk()->assertJsonCount(3, 'data');
     }
 
     public function test_ownership_blocks_other_entrepreneurs_from_campaign_and_reward_edits(): void
