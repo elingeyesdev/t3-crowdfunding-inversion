@@ -2,7 +2,7 @@
 
 namespace Tests\Audit;
 
-use App\Models\{Campaign, CampaignFinancialMovement, CampaignMilestone, Category, EntrepreneurProfile, InvestorProfile, Notification, RewardClaim, RewardTier, User};
+use App\Models\{Campaign, CampaignMilestone, Category, EntrepreneurProfile, InvestorProfile, Notification, RewardClaim, RewardTier, User};
 use App\Services\Notifier;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\{Auth, DB, Hash};
@@ -79,17 +79,6 @@ class AuditDiagnosticsTest extends TestCase
         $m = CampaignMilestone::create(['campaign_id' => $foreign->id, 'title' => 'Foreign milestone']);
         $this->login($u)->postJson('/api/v1/entrepreneurs/me/campaigns/'.$own->id.'/updates', ['title' => 'Incorrectly linked', 'content' => 'This belongs to a different campaign.', 'milestoneId' => $m->id])->assertCreated();
         $this->assertDatabaseHas('campaign_updates', ['campaign_id' => $own->id, 'milestone_id' => $m->id]);
-    }
-
-    public function test_observed_verified_expense_can_be_changed_and_deleted_by_owner(): void
-    {
-        $u = $this->user();
-        $c = $this->campaign($u);
-        $m = CampaignFinancialMovement::create(['campaign_id' => $c->id, 'created_by' => $u->id, 'type' => 'expense', 'concept' => 'Approved equipment', 'category' => 'Equipment', 'amount' => 100, 'movement_date' => now()->toDateString(), 'status' => 'verified', 'reviewed_at' => now()]);
-        $base = '/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/financial-movements/'.$m->id;
-        $this->login($u)->patchJson($base, ['concept' => 'Changed after approval'])->assertOk()->assertJsonPath('data.status', 'verified');
-        $this->deleteJson($base)->assertOk();
-        $this->assertDatabaseMissing('campaign_financial_movements', ['id' => $m->id]);
     }
 
     public function test_observed_category_preference_does_not_suppress_notification(): void

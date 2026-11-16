@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
+import { FinancialMovementHistory } from '../../components/admin/FinancialMovementHistory';
 import {
   getAdminFinancialMovements,
   getAdminFinancialMovement,
@@ -111,12 +112,13 @@ export function AdminExpensesAuditPage() {
       setReviewNotes(fullDetail.reviewNotes || '');
       setReviewError(null);
     } catch (err) {
-      setSelectedMovement(movement);
+      setSelectedMovement({ ...movement, canReview: false });
+      setReviewError('No se pudo cargar el detalle actual. Vuelve a cargarlo antes de revisar.');
     }
   };
 
   const handleSubmitReview = async () => {
-    if (!selectedMovement) return;
+    if (!selectedMovement?.canReview) return;
     if ((reviewAction === 'flag' || reviewAction === 'reject') && !reviewNotes.trim()) {
       setReviewError('Debes ingresar notas de auditoría explicando la observación o motivo de rechazo.');
       return;
@@ -125,7 +127,7 @@ export function AdminExpensesAuditPage() {
     try {
       setSubmittingReview(true);
       setReviewError(null);
-      await reviewAdminFinancialMovement(selectedMovement.id, reviewAction, reviewNotes);
+      await reviewAdminFinancialMovement(selectedMovement.id, reviewAction, selectedMovement.version, reviewNotes);
       setSelectedMovement(null);
       await Promise.all([loadMovements(), loadSummary()]);
     } catch (err: any) {
@@ -596,74 +598,89 @@ export function AdminExpensesAuditPage() {
               )}
 
               {/* Action selection */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">
-                  Decisión de Auditoría
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setReviewAction('approve')}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all ${
-                      reviewAction === 'approve'
-                        ? 'bg-emerald-50 border-emerald-500 text-emerald-800 shadow-sm ring-2 ring-emerald-500/20'
-                        : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    <CheckCircle size={16} className={reviewAction === 'approve' ? 'text-emerald-600' : 'text-gray-400'} />
-                    Aprobar / Verificado
-                  </button>
+              <FinancialMovementHistory entries={selectedMovement.history || []} />
 
-                  <button
-                    type="button"
-                    onClick={() => setReviewAction('flag')}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all ${
-                      reviewAction === 'flag'
-                        ? 'bg-amber-50 border-amber-500 text-amber-800 shadow-sm ring-2 ring-amber-500/20'
-                        : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    <AlertTriangle size={16} className={reviewAction === 'flag' ? 'text-amber-600' : 'text-gray-400'} />
-                    Marcar Observado
-                  </button>
+              {!selectedMovement.canReview && !reviewError && (
+                <p className="p-3 bg-blue-50 text-blue-900 rounded-xl text-xs">
+                  {selectedMovement.source === 'legacy'
+                    ? 'Este registro heredado conserva su información, pero su origen debe confirmarse antes de habilitar cambios.'
+                    : 'Este movimiento corresponde a un aporte o reembolso automático y no admite modificaciones ni revisiones manuales.'}
+                </p>
+              )}
 
-                  <button
-                    type="button"
-                    onClick={() => setReviewAction('reject')}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all ${
-                      reviewAction === 'reject'
-                        ? 'bg-rose-50 border-rose-500 text-rose-800 shadow-sm ring-2 ring-rose-500/20'
-                        : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    <XCircle size={16} className={reviewAction === 'reject' ? 'text-rose-600' : 'text-gray-400'} />
-                    Rechazar
-                  </button>
-                </div>
-              </div>
+              {selectedMovement.canReview && (
+                <>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">
+                      Decisión de Auditoría
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setReviewAction('approve')}
+                        className={`py-2 px-3 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all ${
+                          reviewAction === 'approve'
+                            ? 'bg-emerald-50 border-emerald-500 text-emerald-800 shadow-sm ring-2 ring-emerald-500/20'
+                            : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        <CheckCircle size={16} className={reviewAction === 'approve' ? 'text-emerald-600' : 'text-gray-400'} />
+                        Aprobar / Verificado
+                      </button>
 
-              {/* Review Notes */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">
-                  Notas de Auditoría y Observaciones {reviewAction !== 'approve' && <span className="text-rose-500">*</span>}
-                </label>
-                <textarea
-                  value={reviewNotes}
-                  onChange={(e) => setReviewNotes(e.target.value)}
-                  rows={3}
-                  placeholder={
-                    reviewAction === 'approve'
-                      ? 'Notas opcionales de auditoría...'
-                      : 'Explica la inconsistencia detectada o motivo de rechazo para el emprendedor...'
-                  }
-                  className="w-full p-3 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#72B626]/40"
-                />
-              </div>
+                      <button
+                        type="button"
+                        onClick={() => setReviewAction('flag')}
+                        className={`py-2 px-3 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all ${
+                          reviewAction === 'flag'
+                            ? 'bg-amber-50 border-amber-500 text-amber-800 shadow-sm ring-2 ring-amber-500/20'
+                            : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        <AlertTriangle size={16} className={reviewAction === 'flag' ? 'text-amber-600' : 'text-gray-400'} />
+                        Marcar Observado
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setReviewAction('reject')}
+                        className={`py-2 px-3 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all ${
+                          reviewAction === 'reject'
+                            ? 'bg-rose-50 border-rose-500 text-rose-800 shadow-sm ring-2 ring-rose-500/20'
+                            : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        <XCircle size={16} className={reviewAction === 'reject' ? 'text-rose-600' : 'text-gray-400'} />
+                        Rechazar
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Review Notes */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">
+                      Notas de Auditoría y Observaciones {reviewAction !== 'approve' && <span className="text-rose-500">*</span>}
+                    </label>
+                    <textarea
+                      value={reviewNotes}
+                      onChange={(e) => setReviewNotes(e.target.value)}
+                      rows={3}
+                      placeholder={
+                        reviewAction === 'approve'
+                          ? 'Notas opcionales de auditoría...'
+                          : 'Explica la inconsistencia detectada o motivo de rechazo para el emprendedor...'
+                      }
+                      className="w-full p-3 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#72B626]/40"
+                    />
+                  </div>
+                </>
+              )}
 
               {reviewError && (
                 <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
                   <AlertCircle size={15} />
                   {reviewError}
+                  <button type="button" onClick={() => handleOpenReview(selectedMovement)} className="underline font-semibold shrink-0">Volver a cargar</button>
                 </div>
               )}
 
@@ -675,14 +692,14 @@ export function AdminExpensesAuditPage() {
                 >
                   Cancelar
                 </button>
-                <button
+                {selectedMovement.canReview && <button
                   type="button"
                   onClick={handleSubmitReview}
                   disabled={submittingReview}
                   className="px-5 py-2 bg-[#72B626] text-white text-xs font-bold rounded-xl hover:bg-[#5e9620] shadow-sm disabled:opacity-50"
                 >
                   {submittingReview ? 'Guardando...' : 'Confirmar Dictamen'}
-                </button>
+                </button>}
               </div>
             </div>
           </div>

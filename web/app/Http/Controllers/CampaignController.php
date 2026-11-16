@@ -7,6 +7,7 @@ use App\Models\CampaignStatusHistory;
 use App\Models\CampaignUpdate;
 use App\Models\Category;
 use App\Services\CampaignFinance;
+use App\Services\FinancialMovementAudit;
 use App\Services\InvestmentEngine;
 use App\Services\Notifier;
 use App\Services\ProfileReadiness;
@@ -198,6 +199,7 @@ class CampaignController extends Controller
         return DB::transaction(function () use ($campaign, $r) {
             $campaign = Campaign::whereKey($campaign->id)->lockForUpdate()->firstOrFail();
             abort_if($campaign->investments()->exists(), 422, 'La campaña tiene inversiones y no puede eliminarse.');
+            abort_if($campaign->financialMovements()->withTrashed()->exists(), 422, 'La campaña tiene movimientos financieros con trazabilidad y no puede eliminarse.');
             if ($campaign->creator_id === $r->user()->id) {
                 abort_unless(in_array($campaign->status, ['draft', 'rejected']), 422, 'Solo se pueden eliminar borradores o campañas rechazadas.');
             }
@@ -421,7 +423,7 @@ class CampaignController extends Controller
         return Api::ok(Api::page($query, $r));
     }
 
-    public function addFinancialMovement(Request $r, Campaign $campaign)
+    public function addFinancialMovement(Request $r, Campaign $campaign, FinancialMovementAudit $audit)
     {
         self::authorizeOwner($r, $campaign);
         $data = $r->validate([
@@ -433,70 +435,62 @@ class CampaignController extends Controller
             'referenceNumber' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:2000',
             'receipt' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:10240',
+            'source' => 'prohibited',
+            'investmentId' => 'prohibited',
+            'status' => 'prohibited',
+            'version' => 'prohibited',
         ]);
 
-        $receiptUrl = null;
-        if ($r->hasFile('receipt')) {
-            $file = $r->file('receipt');
-            $path = $file->store('receipts', 'public');
-            $receiptUrl = '/storage/'.$path;
-        }
-
-        $movement = $campaign->financialMovements()->create([
-            'created_by' => $r->user()->id,
-            'type' => $data['type'],
-            'concept' => $data['concept'],
-            'category' => $data['category'],
-            'amount' => $data['amount'],
-            'currency' => $campaign->currency,
-            'movement_date' => $data['movementDate'],
-            'reference_number' => $data['referenceNumber'] ?? null,
-            'receipt_url' => $receiptUrl,
-            'notes' => $data['notes'] ?? null,
-            'status' => $data['type'] === 'expense' ? 'pending' : 'verified',
-        ]);
+        $movement = $audit->createManual($campaign, $r->user()->id, $data, $r->file('receipt'));
 
         return Api::ok($movement, 201);
     }
 
-    public function updateFinancialMovement(Request $r, Campaign $campaign, string $movementId)
+    public function updateFinancialMovement(Request $r, Campaign $campaign, string $movementId, FinancialMovementAudit $audit)
     {
         self::authorizeOwner($r, $campaign);
-        $movement = $campaign->financialMovements()->findOrFail($movementId);
         $data = $r->validate([
             'concept' => 'sometimes|string|min:3|max:200',
             'category' => 'sometimes|string|min:2|max:150',
             'referenceNumber' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:2000',
+            'source' => 'prohibited',
+            'investmentId' => 'prohibited',
+            'status' => 'prohibited',
+            'amount' => 'prohibited',
         ]);
 
-        $movement->update(Api::snake($data));
+        $movement = $audit->update($campaign, $movementId, $r->user()->id, Api::snake($data));
 
         return Api::ok($movement->fresh());
     }
 
-    public function deleteFinancialMovement(Request $r, Campaign $campaign, string $movementId)
+    public function deleteFinancialMovement(Request $r, Campaign $campaign, string $movementId, FinancialMovementAudit $audit)
     {
         self::authorizeOwner($r, $campaign);
-        $movement = $campaign->financialMovements()->findOrFail($movementId);
-        abort_if($movement->type === 'income' && ! empty($movement->reference_number), 422, 'No puedes eliminar un ingreso vinculado a un aporte de sistema.');
-        $movement->delete();
+        $audit->delete($campaign, $movementId, $r->user()->id);
 
         return Api::ok();
     }
 
-    public function uploadMovementReceipt(Request $r, Campaign $campaign, string $movementId)
+    public function uploadMovementReceipt(Request $r, Campaign $campaign, string $movementId, FinancialMovementAudit $audit)
     {
         self::authorizeOwner($r, $campaign);
-        $movement = $campaign->financialMovements()->findOrFail($movementId);
         $r->validate([
             'receipt' => 'required|file|mimes:pdf,jpg,jpeg,png,webp|max:10240',
         ]);
 
-        $path = $r->file('receipt')->store('receipts', 'public');
-        $movement->update(['receipt_url' => '/storage/'.$path]);
+        $movement = $audit->replaceReceipt($campaign, $movementId, $r->user()->id, $r->file('receipt'));
 
         return Api::ok($movement->fresh());
+    }
+
+    public function financialMovementHistory(Request $r, Campaign $campaign, string $movementId, FinancialMovementAudit $audit)
+    {
+        self::authorizeOwner($r, $campaign, true);
+        $movement = $campaign->financialMovements()->withTrashed()->findOrFail($movementId);
+
+        return Api::ok($audit->history($movement));
     }
 
     public function addMilestone(Request $r, Campaign $campaign)

@@ -13,6 +13,7 @@ use App\Models\EntrepreneurProfile;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\CampaignFinance;
+use App\Services\FinancialMovementAudit;
 use App\Services\Notifier;
 use App\Support\Api;
 use Illuminate\Http\Request;
@@ -175,6 +176,11 @@ class AdminController extends Controller
 
         return [
             'id' => $m->id,
+            'source' => $m->source,
+            'investmentId' => $m->investment_id,
+            'version' => $m->version,
+            'hasBeenReviewed' => $m->hasReview(),
+            'canReview' => $m->source === 'manual' && $m->investment_id === null,
             'campaignId' => $m->campaign_id,
             'campaignTitle' => $m->campaign?->title,
             'campaignStatus' => $m->campaign?->status,
@@ -283,7 +289,7 @@ class AdminController extends Controller
         return Api::ok(Api::page($q, $r, fn ($m) => $this->movementData($m)), 200, false);
     }
 
-    public function showFinancialMovement(CampaignFinancialMovement $movement)
+    public function showFinancialMovement(CampaignFinancialMovement $movement, FinancialMovementAudit $audit)
     {
         $movement->load(['campaign.creator.entrepreneur', 'creator.entrepreneur', 'reviewer.admin']);
         $data = $this->movementData($movement);
@@ -336,57 +342,30 @@ class AdminController extends Controller
         }
 
         $data['consistencyFlags'] = $consistencyFlags;
+        $data['history'] = $audit->history($movement);
 
         return Api::ok($data, 200, false);
     }
 
-    public function reviewFinancialMovement(Request $r, CampaignFinancialMovement $movement, Notifier $notifier)
+    public function financialMovementHistory(string $movement, FinancialMovementAudit $audit)
+    {
+        return Api::ok($audit->history(CampaignFinancialMovement::withTrashed()->findOrFail($movement)), 200, false);
+    }
+
+    public function reviewFinancialMovement(Request $r, CampaignFinancialMovement $movement, FinancialMovementAudit $audit)
     {
         $data = $r->validate([
             'action' => 'required|in:approve,flag,reject,reset',
             'notes' => 'nullable|string|max:5000',
+            'version' => 'required|integer|min:1',
         ]);
 
         if (in_array($data['action'], ['flag', 'reject']) && empty($data['notes'])) {
             abort(422, 'Debes incluir notas de auditoría explicando la observación o motivo de rechazo.');
         }
 
-        $statusMap = [
-            'approve' => 'verified',
-            'flag' => 'flagged',
-            'reject' => 'rejected',
-            'reset' => 'pending',
-        ];
-
-        $newStatus = $statusMap[$data['action']];
-
-        $movement->update([
-            'status' => $newStatus,
-            'reviewed_by' => $r->user()->id,
-            'reviewed_at' => now(),
-            'review_notes' => $data['notes'] ?? null,
-        ]);
-
+        $movement = $audit->review($movement, $r->user()->id, $data);
         $movement->load(['campaign.creator.entrepreneur', 'creator.entrepreneur', 'reviewer.admin']);
-
-        if ($movement->campaign && $movement->campaign->creator_id) {
-            $actionLabel = match ($data['action']) {
-                'approve' => 'aprobado y verificado',
-                'flag' => 'marcado con observaciones / inconsistencias',
-                'reject' => 'rechazado',
-                'reset' => 'puesto en revisión pendiente',
-            };
-
-            $notesText = ! empty($data['notes']) ? "\nObservaciones: ".$data['notes'] : '';
-
-            $notifier->send(
-                $movement->campaign->creator_id,
-                'financial_movement_'.$newStatus,
-                'Auditoría de gasto: '.$movement->campaign->title,
-                "El movimiento '{$movement->concept}' ({$movement->currency} {$movement->amount}) ha sido {$actionLabel} por la administración.{$notesText}",
-                $movement->campaign_id
-            );
-        }
 
         return Api::ok($this->movementData($movement), 200, false);
     }

@@ -79,6 +79,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::delete('campaigns/{campaign}/funding-plan/{item}', [CampaignController::class, 'deleteFundingPlanItem']);
         Route::get('campaigns/{campaign}/financial-ledger', [CampaignReadController::class, 'financialLedger']);
         Route::get('campaigns/{campaign}/financial-movements', [CampaignController::class, 'financialMovements']);
+        Route::get('campaigns/{campaign}/financial-movements/{movement}/history', [CampaignController::class, 'financialMovementHistory']);
         Route::post('campaigns/{campaign}/financial-movements', [CampaignController::class, 'addFinancialMovement']);
         Route::patch('campaigns/{campaign}/financial-movements/{movement}', [CampaignController::class, 'updateFinancialMovement']);
         Route::delete('campaigns/{campaign}/financial-movements/{movement}', [CampaignController::class, 'deleteFinancialMovement']);
@@ -152,6 +153,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::post('kyc/{profile}/review', [AdminController::class, 'reviewKyc']);
         Route::get('financial-movements', [AdminController::class, 'financialMovements']);
         Route::get('financial-movements/{movement}', [AdminController::class, 'showFinancialMovement']);
+        Route::get('financial-movements/{movement}/history', [AdminController::class, 'financialMovementHistory']);
         Route::post('financial-movements/{movement}/review', [AdminController::class, 'reviewFinancialMovement']);
         Route::get('financial-audit/summary', [AdminController::class, 'financialAuditSummary']);
         Route::get('campaigns/{campaign}/financial-audit', [AdminController::class, 'campaignFinancialAudit']);
