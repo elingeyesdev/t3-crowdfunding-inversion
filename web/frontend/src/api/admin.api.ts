@@ -257,11 +257,12 @@ export async function getAdminFinancialMovement(id: string): Promise<FinancialMo
 export async function reviewAdminFinancialMovement(
   id: string,
   action: 'approve' | 'flag' | 'reject' | 'reset',
+  version: number,
   notes?: string
 ): Promise<FinancialMovementAuditItem> {
   const { data } = await api.post<ApiSuccessResponse<FinancialMovementAuditItem>>(
     `/admin/financial-movements/${id}/review`,
-    { action, notes }
+    { action, notes, version }
   );
   return data.data;
 }

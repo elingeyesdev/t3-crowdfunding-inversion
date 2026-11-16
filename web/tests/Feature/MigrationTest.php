@@ -292,7 +292,7 @@ class MigrationTest extends TestCase
         $this->asUser($u)->deleteJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/financial-movements/'.$movementId)
             ->assertOk();
 
-        $this->assertDatabaseMissing('campaign_financial_movements', ['id' => $movementId]);
+        $this->assertSoftDeleted('campaign_financial_movements', ['id' => $movementId]);
     }
 
     public function test_campaign_milestones_updates_and_evidence_system(): void
@@ -625,6 +625,7 @@ class MigrationTest extends TestCase
         // 7. Admin approves legitimate expense #1
         $this->asUser($admin)->postJson('/api/v1/admin/financial-movements/'.$movementId1.'/review', [
             'action' => 'approve',
+            'version' => $resp1->json('data.version'),
             'notes' => 'Comprobante revisado y validado contra equipamiento.',
         ])->assertOk()
           ->assertJsonPath('data.status', 'verified')
@@ -640,11 +641,13 @@ class MigrationTest extends TestCase
         // Validation: flag requires notes
         $this->asUser($admin)->postJson('/api/v1/admin/financial-movements/'.$movementId2.'/review', [
             'action' => 'flag',
+            'version' => $resp2->json('data.version'),
         ])->assertUnprocessable();
 
         // Flagging with explanatory notes
         $this->asUser($admin)->postJson('/api/v1/admin/financial-movements/'.$movementId2.'/review', [
             'action' => 'flag',
+            'version' => $resp2->json('data.version'),
             'notes' => 'Falta comprobante fiscal y la categoría Marketing no fue aprobada en el plan de uso de fondos.',
         ])->assertOk()
           ->assertJsonPath('data.status', 'flagged')

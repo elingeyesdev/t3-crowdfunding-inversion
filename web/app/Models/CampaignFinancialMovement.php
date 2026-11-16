@@ -2,8 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class CampaignFinancialMovement extends Record
 {
+    use SoftDeletes;
+
     protected $table = 'campaign_financial_movements';
 
     protected function casts(): array
@@ -12,6 +16,8 @@ class CampaignFinancialMovement extends Record
             'amount' => 'float',
             'movement_date' => 'date:Y-m-d',
             'reviewed_at' => 'datetime',
+            'version' => 'integer',
+            'has_been_reviewed' => 'boolean',
         ];
     }
 
@@ -28,6 +34,16 @@ class CampaignFinancialMovement extends Record
     public function reviewer()
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    public function history()
+    {
+        return $this->hasMany(CampaignFinancialMovementHistory::class, 'movement_id')->orderBy('version');
+    }
+
+    public function hasReview(): bool
+    {
+        return $this->has_been_reviewed || $this->reviewed_at !== null || $this->reviewed_by !== null || $this->review_notes !== null || in_array($this->status, ['verified', 'audited', 'flagged', 'rejected'], true);
     }
 
     public function scopeIncome($query)

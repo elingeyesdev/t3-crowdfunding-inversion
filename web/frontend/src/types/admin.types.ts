@@ -100,6 +100,12 @@ export interface CampaignHistoryItem {
 
 export interface FinancialMovementAuditItem {
   id: string;
+  source: 'manual' | 'investment' | 'refund' | 'legacy';
+  investmentId: string | null;
+  version: number;
+  hasBeenReviewed: boolean;
+  canReview: boolean;
+  history?: FinancialMovementHistoryEntry[];
   campaignId: string;
   campaignTitle: string;
   campaignStatus: string;
@@ -132,6 +138,17 @@ export interface FinancialMovementAuditItem {
     severity: 'info' | 'warning' | 'danger';
     message: string;
   }>;
+}
+
+export interface FinancialMovementHistoryEntry {
+  id: string;
+  actorId: string | null;
+  actorName: string;
+  action: 'created' | 'updated' | 'receipt_replaced' | 'reviewed' | 'deleted' | 'legacy_snapshot';
+  version: number;
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown>;
+  createdAt: string;
 }
 
 export interface FinancialAuditSummary {
