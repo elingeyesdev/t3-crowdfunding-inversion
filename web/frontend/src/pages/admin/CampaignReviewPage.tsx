@@ -154,7 +154,7 @@ export const CampaignReviewPage: React.FC = () => {
     
     setActionLoading(true);
     try {
-      await updateCampaignStatus(selectedCampaignId, status === 'approved' ? 'published' : 'rejected', feedback);
+      await updateCampaignStatus(selectedCampaignId, status, feedback);
       setIsModalOpen(false);
       setSelectedCampaignDetail(null);
       loadCampaigns();
@@ -172,7 +172,7 @@ export const CampaignReviewPage: React.FC = () => {
     
     setLoading(true);
     try {
-      await updateCampaignStatus(id, 'published');
+      await updateCampaignStatus(id, 'approved');
       loadCampaigns();
     } catch (err) {
       console.error('Error approving campaign:', err);

@@ -13,6 +13,7 @@ use App\Models\EntrepreneurProfile;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\CampaignFinance;
+use App\Services\CampaignPublication;
 use App\Services\FinancialMovementAudit;
 use App\Services\Notifier;
 use App\Support\Api;
@@ -61,16 +62,33 @@ class AdminController extends Controller
         return Api::ok($this->campaignData($campaign), 200, false);
     }
 
-    public function status(Request $r, Campaign $campaign, Notifier $notifier)
+    public function status(Request $r, Campaign $campaign, Notifier $notifier, CampaignPublication $publication)
     {
         $data = $r->validate(['status' => 'required|in:in_review,approved,rejected,published,suspended,cancelled', 'feedback' => 'nullable|string|max:10000']);
 
-        return DB::transaction(function () use ($r, $campaign, $data, $notifier) {
+        return DB::transaction(function () use ($r, $campaign, $data, $notifier, $publication) {
             $c = Campaign::whereKey($campaign->id)->lockForUpdate()->firstOrFail();
             $old = $c->status;
             $next = $data['status'];
-            $transitions = ['draft' => ['in_review', 'approved', 'rejected', 'published', 'cancelled'], 'pending_review' => ['in_review', 'approved', 'rejected', 'published', 'cancelled'], 'in_review' => ['approved', 'rejected', 'published', 'cancelled'], 'approved' => ['published', 'rejected', 'cancelled'], 'rejected' => ['in_review', 'approved', 'published', 'cancelled'], 'published' => ['suspended'], 'partially_funded' => ['suspended'], 'suspended' => ['published']];
+            $transitions = [
+                'draft' => ['cancelled'],
+                'pending_review' => ['in_review', 'approved', 'rejected', 'cancelled'],
+                'in_review' => ['approved', 'rejected', 'cancelled'],
+                'approved' => ['rejected', 'cancelled'],
+                'rejected' => ['cancelled'],
+                'published' => ['suspended'],
+                'partially_funded' => ['suspended'],
+                'funded' => ['suspended'],
+                'suspended' => ['published'],
+            ];
             abort_unless(in_array($next, $transitions[$old] ?? []), 422, 'Transición administrativa inválida.');
+            if (in_array($next, ['approved', 'published'], true)) {
+                $publication->validate($c);
+            }
+            // Restore the funding state when lifting a suspension.
+            if ($old === 'suspended' && $next === 'published') {
+                $next = $c->current_amount >= $c->goal_amount ? 'funded' : ($c->current_amount > 0 ? 'partially_funded' : 'published');
+            }
             $metadata = $c->metadata ?? [];
             if (! empty($data['feedback'])) {
                 $metadata['review_feedback'] = $data['feedback'];
