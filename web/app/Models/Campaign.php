@@ -2,8 +2,19 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
+
 class Campaign extends Record
 {
+    protected function endDate(): Attribute
+    {
+        // Storage uses the application's local zone. Normalize incoming instants
+        // before dropping their offset; existing stored values are read as before.
+        return Attribute::make(set: fn ($value) => $value === null || $value === ''
+            ? null
+            : $this->fromDateTime($this->asDateTime($value)->copy()->setTimezone(config('app.timezone'))));
+    }
+
     public const PUBLIC_STATUSES = ['published', 'funded', 'partially_funded'];
 
     public const HISTORICAL_STATUSES = ['completed', 'failed'];

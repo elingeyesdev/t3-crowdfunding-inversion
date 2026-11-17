@@ -29,7 +29,7 @@ class InvestmentEngine
             $amount = $this->money($data['amount']);
             $balance = bcsub($this->money($p->max_investment), $this->money($p->total_invested), 2);
             abort_unless(in_array($c->status, ['published', 'partially_funded']), 422, 'La campaña no acepta inversiones actualmente.');
-            abort_if($c->end_date && $c->end_date->isPast(), 422, 'La campaña ha expirado.');
+            abort_if($c->end_date && ! $c->end_date->isFuture(), 422, 'La campaña ha expirado.');
             abort_if($c->creator_id === $userId, 422, 'No puedes invertir en tu propia campaña.');
             abort_if(bccomp($balance, $amount, 2) < 0, 422, 'Saldo simulado insuficiente.');
             abort_if(bccomp($amount, $this->money($c->min_investment), 2) < 0, 422, 'El monto es menor al mínimo de la campaña.');
