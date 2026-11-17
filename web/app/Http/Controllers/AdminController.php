@@ -20,6 +20,8 @@ use App\Support\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
 {
@@ -163,21 +165,31 @@ class AdminController extends Controller
     public function reviewDocument(Request $r, Campaign $campaign, CampaignDocument $document, Notifier $notifier)
     {
         abort_unless($document->campaign_id === $campaign->id, 404);
-        $data = $r->validate(['status' => 'required|in:approved,rejected', 'reviewerNotes' => 'nullable|string|max:5000']);
-        $document->update([...Api::snake($data), 'reviewed_by' => $r->user()->id, 'reviewed_at' => now()]);
+        $data = $r->validate(['status' => 'required|in:approved,rejected', 'reviewerNotes' => 'nullable|string|max:5000', 'isPublic' => 'sometimes|boolean']);
 
-        if ($campaign->creator_id) {
-            $statusLabel = $data['status'] === 'approved' ? 'aprobado' : 'rechazado';
-            $notifier->send(
-                $campaign->creator_id,
-                'document_'.$data['status'],
-                "Documento {$statusLabel}: {$campaign->title}",
-                "El documento '{$document->title}' de tu campaña fue {$statusLabel} por la administración.".(! empty($data['reviewerNotes']) ? ' Observaciones: '.$data['reviewerNotes'] : ''),
-                $campaign->id
-            );
-        }
+        return DB::transaction(function () use ($r, $campaign, $document, $data, $notifier) {
+            $currentCampaign = Campaign::whereKey($campaign->id)->lockForUpdate()->firstOrFail();
+            $current = $currentCampaign->documents()->whereKey($document->id)->lockForUpdate()->firstOrFail();
+            $publish = $data['isPublic'] ?? ($data['status'] === 'approved' && $current->is_public);
+            if ($publish && ($data['status'] !== 'approved' || ! $current->documentPath() || ! Storage::disk('local')->exists($current->documentPath()))) {
+                throw ValidationException::withMessages(['isPublic' => 'Solo puedes publicar un documento aprobado con un archivo de campaña disponible.']);
+            }
+            $oldStatus = $current->status;
+            $current->update([...Api::snake($data), 'is_public' => $publish, 'reviewed_by' => $r->user()->id, 'reviewed_at' => now()]);
 
-        return Api::ok($document->fresh(), 200, false);
+            if ($currentCampaign->creator_id && $oldStatus !== $data['status']) {
+                $statusLabel = $data['status'] === 'approved' ? 'aprobado' : 'rechazado';
+                $notifier->send(
+                    $currentCampaign->creator_id,
+                    'document_'.$data['status'],
+                    "Documento {$statusLabel}: {$currentCampaign->title}",
+                    "El documento '{$current->original_name}' de tu campaña fue {$statusLabel} por la administración.".(! empty($data['reviewerNotes']) ? ' Observaciones: '.$data['reviewerNotes'] : ''),
+                    $currentCampaign->id
+                );
+            }
+
+            return Api::ok($current->fresh(), 200, false);
+        });
     }
 
     private function movementData(CampaignFinancialMovement $m): array
@@ -513,4 +525,3 @@ class AdminController extends Controller
         ], 200, false);
     }
 }
-

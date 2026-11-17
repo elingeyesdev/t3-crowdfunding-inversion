@@ -130,8 +130,7 @@ export interface PublicCampaignDocument {
   mimeType: string;
   fileSizeBytes: number;
   justification: string;
-  status: 'pending' | 'approved' | 'rejected' | string;
-  reviewerNotes?: string | null;
+  status: 'approved';
   createdAt: string;
 }
 
@@ -158,7 +157,7 @@ export async function fetchPublicCampaignFinancialProgress(
 export async function fetchPublicCampaignDocuments(
   campaignId: string,
 ): Promise<PublicCampaignDocument[]> {
-  const res = await API.get(`/campaigns/public/${campaignId}/documents`);
+  const res = await API.get(`/campaigns/public/${campaignId}/documents`, { timeout: 15000 });
   return res.data.data;
 }
 

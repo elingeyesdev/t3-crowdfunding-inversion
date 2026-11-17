@@ -296,7 +296,7 @@ class CampaignController extends Controller
         $f = $r->file('file');
         $path = $f->store('documents', 'local');
 
-        return Api::ok($campaign->documents()->create(['file_url' => '/api/v1/private-files/'.$path, 'original_name' => $f->getClientOriginalName(), 'mime_type' => $f->getMimeType(), 'file_size_bytes' => $f->getSize(), 'justification' => $r->input('justification')]), 201, false);
+        return Api::ok($campaign->documents()->create(['file_url' => '/api/v1/private-files/'.$path, 'original_name' => $f->getClientOriginalName(), 'mime_type' => $f->getMimeType(), 'file_size_bytes' => $f->getSize(), 'justification' => $r->input('justification')])->fresh(), 201, false);
     }
 
     public function deleteDocument(Request $r, Campaign $campaign, string $document)

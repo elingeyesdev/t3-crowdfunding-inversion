@@ -22,6 +22,8 @@ Route::get('categories', [CampaignController::class, 'categories']);
 Route::get('campaigns/public', [CampaignController::class, 'publicIndex']);
 Route::get('campaigns/public/updates/recent', [CampaignController::class, 'stories']);
 Route::get('campaigns/public/{campaign}', [CampaignController::class, 'publicShow']);
+Route::get('campaigns/public/{campaign}/documents', [CampaignReadController::class, 'publicDocuments']);
+Route::get('campaigns/public/{campaign}/documents/{document}/file', [CampaignReadController::class, 'publicDocumentFile'])->name('campaign.document.public');
 Route::get('campaigns/public/{campaign}/financial-progress', [CampaignController::class, 'publicProgress']);
 Route::post('campaigns/public/{campaign}/view', [CampaignController::class, 'view'])->middleware('throttle:60,1');
 Route::get('campaigns/{campaign}/comments', [CommunityController::class, 'comments']);

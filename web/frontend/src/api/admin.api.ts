@@ -209,11 +209,12 @@ export async function reviewAdminCampaignDocument(
   campaignId: string,
   docId: string,
   status: 'approved' | 'rejected',
-  reviewerNotes: string
+  reviewerNotes?: string,
+  isPublic?: boolean
 ): Promise<any> {
   const { data } = await api.patch<ApiSuccessResponse<any>>(
     `/admin/campaigns/${campaignId}/documents/${docId}/review`,
-    { status, reviewerNotes }
+    { status, ...(reviewerNotes !== undefined ? { reviewerNotes } : {}), ...(isPublic !== undefined ? { isPublic } : {}) }
   );
   return data.data;
 }
