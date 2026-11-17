@@ -17,7 +17,7 @@ class RewardController extends Controller
         if (str_ends_with($r->path(), '/all')) {
             CampaignController::authorizeOwner($r, $campaign, true);
         } else {
-            abort_unless(in_array($campaign->status, Campaign::PUBLIC_STATUSES), 404);
+            abort_unless($campaign->isPubliclyReadable(), 404);
             $query->where('is_active', true);
         }
 

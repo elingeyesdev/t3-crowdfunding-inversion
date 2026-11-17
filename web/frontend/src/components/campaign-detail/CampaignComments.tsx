@@ -11,6 +11,7 @@ import {
 
 interface Props {
   campaignId: string;
+  readOnly?: boolean;
 }
 
 function timeAgo(dateStr: string): string {
@@ -40,7 +41,7 @@ function Avatar({ name, avatarUrl }: { name: string | null | undefined; avatarUr
   return <span className="text-[13px] font-black text-white">{initials || '?'}</span>;
 }
 
-export function CampaignComments({ campaignId }: Props) {
+export function CampaignComments({ campaignId, readOnly = false }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -69,6 +70,7 @@ export function CampaignComments({ campaignId }: Props) {
   }, [loadComments]);
 
   const handlePost = async () => {
+    if (readOnly) return;
     if (!isLoggedIn) {
       navigate('/login', { state: { from: location.pathname } });
       return;
@@ -88,6 +90,7 @@ export function CampaignComments({ campaignId }: Props) {
   };
 
   const handleLike = async (commentId: string) => {
+    if (readOnly) return;
     if (!isLoggedIn) {
       navigate('/login', { state: { from: location.pathname } });
       return;
@@ -142,7 +145,9 @@ export function CampaignComments({ campaignId }: Props) {
       </h2>
 
       {/* ── Write comment box ── */}
-      <div className="flex gap-3 mb-8">
+      {readOnly ? (
+        <p className="mb-6 text-sm text-slate-500">Los comentarios de esta campaña cerrada se conservan para consulta.</p>
+      ) : <div className="flex gap-3 mb-8">
         {/* User avatar placeholder */}
         <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#1c2b1e] to-[#72B626] flex items-center justify-center shrink-0 overflow-hidden">
           {isLoggedIn && localStorage.getItem('userAvatar') ? (
@@ -184,10 +189,10 @@ export function CampaignComments({ campaignId }: Props) {
             )}
           </button>
         </div>
-      </div>
+      </div>}
 
       {/* ── Login nudge for non-authenticated ── */}
-      {!isLoggedIn && (
+      {!readOnly && !isLoggedIn && (
         <div className="flex items-center gap-3 mb-6 bg-slate-50 rounded-2xl p-4 border border-slate-100">
           <LogIn size={18} strokeWidth={2} className="text-slate-400 shrink-0" />
           <p className="text-[13px] text-slate-500 font-medium flex-1">
@@ -237,7 +242,7 @@ export function CampaignComments({ campaignId }: Props) {
                 {/* Like button — YouTube style */}
                 <button
                   onClick={() => handleLike(comment.id)}
-                  disabled={likingId === comment.id}
+                  disabled={readOnly || likingId === comment.id}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-black transition-all active:scale-90 border-none cursor-pointer disabled:opacity-60 ${
                     comment.likedByMe
                       ? 'bg-[#72B626]/10 text-[#72B626] hover:bg-[#72B626]/15'

@@ -29,7 +29,7 @@ class CampaignController extends Controller
 
     private function publicCampaign(Campaign $c): void
     {
-        abort_unless(in_array($c->status, Campaign::PUBLIC_STATUSES), 404);
+        abort_unless($c->isPubliclyReadable(), 404);
     }
 
     public function categories()

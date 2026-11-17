@@ -22,7 +22,7 @@ class CommunityController extends Controller
 
     public function comments(Request $r, Campaign $campaign)
     {
-        abort_unless(in_array($campaign->status, Campaign::PUBLIC_STATUSES), 404);
+        abort_unless($campaign->isPubliclyReadable(), 404);
         $userId = Auth::guard('sanctum')->user()?->id;
 
         return Api::ok(Comment::with(['author.entrepreneur', 'author.investor'])->where('campaign_id', $campaign->id)->latest()->limit(200)->get()->map(fn ($c) => $this->commentData($c, $userId)));
