@@ -6,6 +6,25 @@ class Campaign extends Record
 {
     public const PUBLIC_STATUSES = ['published', 'funded', 'partially_funded'];
 
+    public const HISTORICAL_STATUSES = ['completed', 'failed'];
+
+    public function isPubliclyReadable(): bool
+    {
+        if (in_array($this->status, self::PUBLIC_STATUSES, true)) {
+            return true;
+        }
+        if (! in_array($this->status, self::HISTORICAL_STATUSES, true)) {
+            return false;
+        }
+
+        // Older campaigns may have no published_at; their closure history is
+        // also evidence that they were public. A closed status alone is not.
+        return $this->published_at !== null || CampaignStatusHistory::where('campaign_id', $this->id)
+            ->whereIn('from_status', self::PUBLIC_STATUSES)
+            ->where('to_status', $this->status)
+            ->exists();
+    }
+
     protected function casts(): array
     {
         return ['goal_amount' => 'float', 'current_amount' => 'float', 'min_investment' => 'float', 'max_investment' => 'float', 'is_featured' => 'boolean', 'metadata' => 'array', 'tags' => 'array', 'faq' => 'array', 'social_links' => 'array', 'start_date' => 'datetime', 'end_date' => 'datetime', 'funded_at' => 'datetime', 'published_at' => 'datetime'];

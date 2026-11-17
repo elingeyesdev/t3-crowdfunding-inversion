@@ -44,15 +44,6 @@ class AuditDiagnosticsTest extends TestCase
         return Campaign::create(['creator_id' => $owner->id, 'category_id' => Category::first()->id, 'title' => 'Audit campaign', 'slug' => uniqid('audit-'), 'goal_amount' => 1000, 'status' => 'draft', ...$attrs]);
     }
 
-    public function test_observed_finalization_removes_public_detail(): void
-    {
-        $u = $this->user();
-        $c = $this->campaign($u, ['status' => 'funded', 'current_amount' => 1000]);
-        $this->getJson('/api/v1/campaigns/public/'.$c->id)->assertOk();
-        $this->login($u)->postJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/finalize')->assertOk();
-        $this->getJson('/api/v1/campaigns/public/'.$c->id)->assertNotFound();
-    }
-
     public function test_observed_frontend_endpoints_are_missing(): void
     {
         $u = $this->user('investor');

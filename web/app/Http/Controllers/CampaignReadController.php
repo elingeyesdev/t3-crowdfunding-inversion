@@ -15,7 +15,7 @@ class CampaignReadController extends Controller
 {
     private function authorizePublic(Campaign $campaign): void
     {
-        abort_unless(in_array($campaign->status, Campaign::PUBLIC_STATUSES, true), 404);
+        abort_unless($campaign->isPubliclyReadable(), 404);
     }
 
     public function publicFundingPlan(Campaign $campaign)

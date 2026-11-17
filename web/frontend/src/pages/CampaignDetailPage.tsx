@@ -265,7 +265,8 @@ export function CampaignDetailPage() {
   }
 
 
-  const isExpired = daysRemaining !== null && daysRemaining <= 0;
+  const isExpired = !!campaign.endDate && new Date(campaign.endDate).getTime() <= Date.now();
+  const isHistorical = campaign.status === 'completed' || campaign.status === 'failed';
   const isFundedOrCompleted =
     campaign.status === 'funded' ||
     campaign.status === 'completed' ||
@@ -279,7 +280,10 @@ export function CampaignDetailPage() {
   const selectedTier = selectedTierId ? campaign.rewardTiers?.find(t => t.id === selectedTierId) : null;
   const amountBelowTier = !!(selectedTier && hasValidAmount && parsedAmount < selectedTier.amount);
   const canInvest = acceptsDonations && !investmentLoading && !investmentSuccess && hasValidAmount && !amountTooLow && !amountTooHigh && !amountBelowTier;
-  const closedDonationLabel = isFundedOrCompleted ? 'Campaña completada' : isExpired ? 'Campaña finalizada' : 'No disponible';
+  const closedDonationLabel = campaign.status === 'completed' ? 'Campaña finalizada con éxito'
+    : campaign.status === 'failed' ? 'Campaña cerrada sin alcanzar la meta'
+    : isFundedOrCompleted ? 'Meta de financiación alcanzada'
+    : isExpired ? 'Campaña finalizada' : 'No disponible';
 
   const scrollToDonationCard = () => {
     donationCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -343,6 +347,13 @@ export function CampaignDetailPage() {
             <span className="inline sm:hidden">Compartir</span>
           </button>
         </div>
+
+        {isHistorical && (
+          <div role="status" className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 text-slate-600">
+            <p className="font-bold text-[#1c2b1e]">{closedDonationLabel}</p>
+            <p className="mt-1 text-sm">Esta campaña permanece disponible para consulta histórica y ya no acepta nuevos aportes.</p>
+          </div>
+        )}
 
         {/* ── Hero Image ── */}
         <div className="relative h-[260px] sm:h-[320px] md:h-[440px] rounded-2xl sm:rounded-[28px] overflow-hidden shadow-xl shadow-black/5 mb-8 sm:mb-10">
@@ -593,7 +604,7 @@ export function CampaignDetailPage() {
                         if (tier) setCustomAmount(String(tier.amount));
                       }
                     }}
-                    disabled={investmentLoading || investmentSuccess || (daysRemaining !== null && daysRemaining <= 0)}
+                    disabled={!acceptsDonations || investmentLoading || investmentSuccess}
                   />
                 )}
 
@@ -700,7 +711,7 @@ export function CampaignDetailPage() {
             {/* ── Tab 4: Comentarios ── */}
             {activeTab === 'comentarios' && (
               <div className="mb-8">
-                <CampaignComments campaignId={campaign.id} />
+                <CampaignComments campaignId={campaign.id} readOnly={isHistorical} />
               </div>
             )}
           </div>
@@ -845,7 +856,7 @@ export function CampaignDetailPage() {
                 </div>
 
                 {/* ── Investment Amount Input (in sidebar) ── */}
-                {!(daysRemaining !== null && daysRemaining <= 0) && !investmentSuccess && (
+                {acceptsDonations && !investmentSuccess && (
                   <div className="mb-4">
                     <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
                       Monto a donar
@@ -863,7 +874,7 @@ export function CampaignDetailPage() {
                           setInvestmentError(null);
                         }}
                         placeholder={`Mínimo Bs. ${campaign.minInvestment?.toLocaleString('es-BO') || '1'}`}
-                        disabled={investmentLoading}
+                        disabled={!acceptsDonations || investmentLoading}
                         className="w-full pl-9 pr-4 py-3 rounded-xl bg-slate-50 border-2 border-slate-100 text-[16px] font-black text-[#1c2b1e] outline-none focus:border-[#72B626] focus:ring-4 focus:ring-green-500/10 transition-all placeholder:text-slate-300 placeholder:font-medium placeholder:text-[13px] disabled:opacity-50 disabled:bg-slate-100"
                       />
                     </div>
@@ -924,56 +935,14 @@ export function CampaignDetailPage() {
 
                 {/* CTA Button */}
                 {(() => {
-                  const isExpired = daysRemaining !== null && daysRemaining <= 0;
-                  const token = localStorage.getItem('accessToken');
-                  const parsedAmount = parseFloat(customAmount);
-                  const hasValidAmount = !isNaN(parsedAmount) && parsedAmount > 0;
-
-                  // Validate amount limits
-                  const amountTooLow = hasValidAmount && campaign.minInvestment && parsedAmount < campaign.minInvestment;
-                  const amountTooHigh = hasValidAmount && campaign.maxInvestment && parsedAmount > campaign.maxInvestment;
-
-                  // Validate tier minimum
-                  const selectedTier = selectedTierId ? campaign.rewardTiers?.find(t => t.id === selectedTierId) : null;
-                  const amountBelowTier = selectedTier && hasValidAmount && parsedAmount < selectedTier.amount;
-
-                  const canInvest = !isExpired && !investmentLoading && !investmentSuccess && hasValidAmount && !amountTooLow && !amountTooHigh && !amountBelowTier;
-
-                  const handleInvest = () => {
-                    if (!token) {
-                      navigate('/login', { state: { from: location.pathname } });
-                      return;
-                    }
-                    if (!hasValidAmount) {
-                      setInvestmentError('Ingresa un monto válido para donar.');
-                      return;
-                    }
-                    if (amountTooLow) {
-                      setInvestmentError(`El monto mínimo de donación es Bs. ${campaign.minInvestment?.toLocaleString('es-BO')}.`);
-                      return;
-                    }
-                    if (amountTooHigh) {
-                      setInvestmentError(`El monto máximo de donación es Bs. ${campaign.maxInvestment?.toLocaleString('es-BO')}.`);
-                      return;
-                    }
-                    if (amountBelowTier && selectedTier) {
-                      setInvestmentError(`El monto mínimo para la recompensa "${selectedTier.title}" es Bs. ${selectedTier.amount.toLocaleString('es-BO')}.`);
-                      return;
-                    }
-                    // All validations passed → show confirmation modal
-                    setInvestmentError(null);
-                    setShowConfirmModal(true);
-                  };
-
-
-                  if (isExpired) {
+                  if (!acceptsDonations) {
                     return (
                       <button
                         className="w-full py-4 rounded-2xl font-black text-[14px] uppercase tracking-widest border-none cursor-not-allowed"
                         style={{ background: '#94a3b8', color: '#fff' }}
                         disabled
                       >
-                        Campaña Finalizada
+                        {closedDonationLabel}
                       </button>
                     );
                   }
@@ -1019,7 +988,7 @@ export function CampaignDetailPage() {
                   return (
                     <>
                       <button
-                        onClick={handleInvest}
+                        onClick={handleDonateClick}
                         disabled={!canInvest}
                         className="w-full py-4 rounded-2xl font-black text-[14px] uppercase tracking-widest border-none cursor-pointer transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         style={{
@@ -1077,6 +1046,7 @@ export function CampaignDetailPage() {
                     {campaign.status === 'published' ? 'Campaña Activa'
                       : campaign.status === 'funded' ? 'Completamente Financiada'
                       : campaign.status === 'partially_funded' ? 'Parcialmente Financiada'
+                      : isHistorical ? closedDonationLabel
                       : campaign.status}
                   </span>
                 </div>
@@ -1186,7 +1156,7 @@ export function CampaignDetailPage() {
         </div>
       )}
 
-      {showConfirmModal && (
+      {showConfirmModal && acceptsDonations && (
         <ContributionConfirmModal
           campaign={{
             title: campaign.title,
@@ -1207,8 +1177,7 @@ export function CampaignDetailPage() {
           }
           loading={investmentLoading}
           onConfirm={async () => {
-            // handleConfirmInvest is defined inside the IIFE above,
-            // so we replicate the logic here for the modal callback
+            if (!acceptsDonations) return;
             setInvestmentLoading(true);
             setInvestmentError(null);
             try {
