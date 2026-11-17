@@ -38,6 +38,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('auth/me', [AuthController::class, 'me']);
     Route::post('auth/logout', [AuthController::class, 'logout']);
     Route::get('users/me', [AuthController::class, 'me']);
+    Route::patch('users/me/password', [AuthController::class, 'changePassword'])->middleware('throttle:5,1');
     Route::get('users/{id}', [AuthController::class, 'show']);
     Route::post('broadcasting/auth', fn (Request $r) => Broadcast::auth($r));
     foreach (['entrepreneurs', 'investors'] as $prefix) {
@@ -159,8 +160,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('campaigns/{campaign}/financial-audit', [AdminController::class, 'campaignFinancialAudit']);
     });
     Route::prefix('superadmin')->middleware('roles:super_admin')->group(function () {
-        Route::get('admins',[AdminController::class, 'admins']);
-        Route::post('admins',[AdminController::class, 'createAdmin']);
-        Route::delete('admins/{admin}',[AdminController::class, 'deleteAdmin']);
+        Route::get('admins', [AdminController::class, 'admins']);
+        Route::post('admins', [AdminController::class, 'createAdmin']);
+        Route::delete('admins/{admin}', [AdminController::class, 'deleteAdmin']);
     });
 });

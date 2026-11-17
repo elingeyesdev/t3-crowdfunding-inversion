@@ -9,6 +9,7 @@ export interface AuthUser {
   createdAt: string;
   emailVerified?: boolean;
   oauthProvider?: string | null;
+  hasPassword?: boolean;
 }
 
 export async function logout(): Promise<void> {

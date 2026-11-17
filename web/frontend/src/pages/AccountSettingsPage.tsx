@@ -16,6 +16,7 @@ import {
 import { Navbar } from '../components/Navbar';
 import { useAuth } from '../hooks/useAuth';
 import { changePassword, logout } from '../api/auth.api';
+import { getApiErrorMessage } from '../utils/apiError';
 
 /** Formatea fecha en español con hora */
 function formatDate(iso: string | null): string {
@@ -105,9 +106,11 @@ export function AccountSettingsPage() {
       : 'Gestiona tu información como donador, historial de inversiones y preferencias.';
 
   const isGoogleUser = !!user?.oauthProvider;
+  const canChangePassword = user?.hasPassword ?? !isGoogleUser;
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (pwLoading) return;
     setPwError(null);
     setPwSuccess(false);
 
@@ -115,8 +118,12 @@ export function AccountSettingsPage() {
       setPwError('Las contraseñas nuevas no coinciden');
       return;
     }
-    if (newPassword.length < 8) {
-      setPwError('La nueva contraseña debe tener al menos 8 caracteres');
+    if (newPassword.length < 8 || newPassword.length > 128) {
+      setPwError('La nueva contraseña debe tener entre 8 y 128 caracteres');
+      return;
+    }
+    if (newPassword === currentPassword) {
+      setPwError('La nueva contraseña debe ser diferente de la actual');
       return;
     }
     if (!/[A-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
@@ -131,12 +138,8 @@ export function AccountSettingsPage() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ??
-        err?.response?.data?.error ??
-        'Error al cambiar la contraseña. Verifica tu contraseña actual.';
-      setPwError(Array.isArray(msg) ? msg.join('. ') : msg);
+    } catch (err: unknown) {
+      setPwError(getApiErrorMessage(err, 'Error al cambiar la contraseña. Verifica tu contraseña actual.'));
     } finally {
       setPwLoading(false);
     }
@@ -245,15 +248,16 @@ export function AccountSettingsPage() {
               {/* Formulario cambio de contraseña */}
               <div className="border-t border-gray-100 pt-5">
                 <h3 className="text-[14px] font-semibold text-gray-700 mb-4">
-                  {isGoogleUser ? 'Contraseña' : 'Cambiar contraseña'}
+                  {canChangePassword ? 'Cambiar contraseña' : 'Contraseña'}
                 </h3>
 
-                {isGoogleUser ? (
+                {!canChangePassword ? (
                   <p className="text-[13px] text-gray-500 bg-gray-50 rounded-xl p-3">
-                    Tu cuenta usa inicio de sesión con Google. No es necesario establecer una contraseña.
+                    Tu cuenta no tiene contraseña local. Utiliza el inicio de sesión con Google.
                   </p>
                 ) : (
                   <form onSubmit={handleChangePassword} className="space-y-3">
+                    <p className="text-[12px] text-gray-500">Al cambiarla, tu sesión actual seguirá abierta y las demás sesiones se cerrarán.</p>
                     {/* Contraseña actual */}
                     <div className="relative">
                       <label className="block text-[12px] font-medium text-gray-600 mb-1">
@@ -268,6 +272,8 @@ export function AccountSettingsPage() {
                           onChange={(e) => setCurrentPassword(e.target.value)}
                           required
                           autoComplete="current-password"
+                          maxLength={128}
+                          disabled={pwLoading}
                         />
                         <button
                           type="button"
@@ -293,6 +299,8 @@ export function AccountSettingsPage() {
                           onChange={(e) => setNewPassword(e.target.value)}
                           required
                           autoComplete="new-password"
+                          maxLength={128}
+                          disabled={pwLoading}
                         />
                         <button
                           type="button"
@@ -316,6 +324,8 @@ export function AccountSettingsPage() {
                           className={inputClass}
                           placeholder="Repite la nueva contraseña"
                           value={confirmPassword}
+                          maxLength={128}
+                          disabled={pwLoading}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           required
                           autoComplete="new-password"
@@ -332,7 +342,7 @@ export function AccountSettingsPage() {
 
                     {/* Feedback */}
                     {pwError && (
-                      <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-100 text-red-700 text-[12px]">
+                      <div role="alert" className="flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-100 text-red-700 text-[12px]">
                         <XCircle size={14} className="mt-0.5 flex-shrink-0" />
                         {pwError}
                       </div>
@@ -340,7 +350,7 @@ export function AccountSettingsPage() {
                     {pwSuccess && (
                       <div className="flex items-center gap-2 p-3 rounded-xl bg-[#f0fae4] border border-[#c3e89a] text-[#4a7f1a] text-[12px]">
                         <CheckCircle size={14} />
-                        ¡Contraseña actualizada correctamente!
+                        ¡Contraseña actualizada! Las demás sesiones se cerraron.
                       </div>
                     )}
 
