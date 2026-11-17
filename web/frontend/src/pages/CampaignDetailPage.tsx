@@ -1,3 +1,4 @@
+import { campaignStatusLabel } from '../utils/campaignStatus';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { PitchVideoPlayer } from '../components/campaigns/PitchVideoPlayer';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
@@ -1043,11 +1044,7 @@ export function CampaignDetailPage() {
                     }}
                   />
                   <span className="text-[12px] font-black text-slate-500 uppercase tracking-widest">
-                    {campaign.status === 'published' ? 'Campaña Activa'
-                      : campaign.status === 'funded' ? 'Completamente Financiada'
-                      : campaign.status === 'partially_funded' ? 'Parcialmente Financiada'
-                      : isHistorical ? closedDonationLabel
-                      : campaign.status}
+                    {campaignStatusLabel(campaign.status)}
                   </span>
                 </div>
               </div>

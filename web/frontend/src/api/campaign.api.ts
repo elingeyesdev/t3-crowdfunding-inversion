@@ -12,6 +12,7 @@ import type {
   RewardClaim,
 } from '../types/campaign.types';
 import type { CampaignHistoryItem } from '../types/admin.types';
+import { collectCampaignPages } from '../utils/campaignPages';
 
 interface ApiSuccessResponse<T> {
   statusCode: number;
@@ -52,6 +53,10 @@ export async function getMyCampaigns(
     { params: buildCampaignQueryParams(query) },
   );
   return data.data;
+}
+
+export async function getAllMyCampaigns(query?: QueryCampaignsDto): Promise<PaginatedResponse<EntrepreneurCampaign>> {
+  return collectCampaignPages(page => getMyCampaigns({ ...query, page, limit: 100 }));
 }
 
 export async function getMyCampaignById(

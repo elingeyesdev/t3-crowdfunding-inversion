@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
 import {
-  getMyCampaigns,
+  getAllMyCampaigns,
   createCampaign,
   updateCampaign as updateCampaignApi,
   submitCampaignForReview,
@@ -58,7 +58,7 @@ export function useCampaigns() {
       try {
         setLoading(true);
         setError(null);
-        const paginated = await getMyCampaigns(query);
+        const paginated = await getAllMyCampaigns(query);
         if (cancelled) return;
         setCampaigns(paginated.data);
         setMeta(paginated.meta);
@@ -154,7 +154,7 @@ export function useCampaigns() {
       }
 
       // Actualizar lista local
-      const paginated = await getMyCampaigns(queryRef.current);
+      const paginated = await getAllMyCampaigns(queryRef.current);
       setCampaigns(paginated.data);
       return true;
     } catch (err: unknown) {
@@ -171,7 +171,7 @@ export function useCampaigns() {
       setError(null);
       setActionCampaignId(campaignId);
       await submitCampaignForReview(campaignId);
-      const paginated = await getMyCampaigns(queryRef.current);
+      const paginated = await getAllMyCampaigns(queryRef.current);
       setCampaigns(paginated.data);
       setMeta(paginated.meta);
       return true;
@@ -189,7 +189,7 @@ export function useCampaigns() {
       setError(null);
       setActionCampaignId(campaignId);
       await publishCampaignApi(campaignId);
-      const paginated = await getMyCampaigns(queryRef.current);
+      const paginated = await getAllMyCampaigns(queryRef.current);
       setCampaigns(paginated.data);
       setMeta(paginated.meta);
       return true;
@@ -208,7 +208,7 @@ export function useCampaigns() {
       setActionCampaignId(campaignId);
       await uploadCampaignImageApi(campaignId, file);
       // Actualizar la lista local
-      const paginated = await getMyCampaigns(queryRef.current);
+      const paginated = await getAllMyCampaigns(queryRef.current);
       setCampaigns(paginated.data);
       setMeta(paginated.meta);
       return true;
@@ -242,7 +242,7 @@ export function useCampaigns() {
       setError(null);
       setActionCampaignId(campaignId);
       await finalizeCampaignApi(campaignId);
-      const paginated = await getMyCampaigns(queryRef.current);
+      const paginated = await getAllMyCampaigns(queryRef.current);
       setCampaigns(paginated.data);
       return true;
     } catch (err: unknown) {

@@ -1,3 +1,4 @@
+import { campaignStatusLabel } from '../utils/campaignStatus';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { EntrepreneurCampaign, CampaignFinancialProgress } from '../types/campaign.types';
@@ -38,17 +39,7 @@ import {
 
 
 
-function statusLabel(status: string): string {
-  const map: Record<string, string> = {
-    draft: 'Borrador',
-    published: 'Publicada',
-    in_review: 'En revisión',
-    pending_review: 'En revisión',
-    approved: 'Aprobado',
-    rejected: 'Rechazado',
-  };
-  return map[status] ?? status;
-}
+const statusLabel = campaignStatusLabel;
 
 function formatShortDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('es', {
@@ -833,7 +824,7 @@ export function CampaignPreviewModal({
                           <p className="font-bold text-[14px] mb-1">{doc.original_filename}</p>
                           <p className="text-[12px] text-slate-500">{doc.justification}</p>
                           <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">
-                            Estado: <span className={`font-bold ${doc.verification_status === 'approved' ? 'text-[#72B626]' : doc.verification_status === 'rejected' ? 'text-red-500' : 'text-amber-500'}`}>{statusLabel(doc.verification_status)}</span>
+                            Estado: <span className={`font-bold ${doc.verification_status === 'approved' ? 'text-[#72B626]' : doc.verification_status === 'rejected' ? 'text-red-500' : 'text-amber-500'}`}>{doc.verification_status === 'approved' ? 'Aprobado' : doc.verification_status === 'rejected' ? 'Rechazado' : 'Pendiente'}</span>
                           </p>
                           {doc.reviewer_notes && <p className="text-[11px] text-red-500 mt-1 italic">"{doc.reviewer_notes}"</p>}
                         </div>

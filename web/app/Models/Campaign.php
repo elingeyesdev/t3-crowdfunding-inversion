@@ -8,6 +8,16 @@ class Campaign extends Record
 
     public const HISTORICAL_STATUSES = ['completed', 'failed'];
 
+    public const FILTER_GROUPS = [
+        'drafts' => ['draft', 'rejected'],
+        'review' => ['pending_review', 'in_review'],
+        'approved' => ['approved'],
+        'active' => ['published', 'partially_funded'],
+        'funded' => ['funded'],
+        'completed' => ['completed', 'failed', 'cancelled'],
+        'suspended' => ['suspended'],
+    ];
+
     public function isPubliclyReadable(): bool
     {
         if (in_array($this->status, self::PUBLIC_STATUSES, true)) {
