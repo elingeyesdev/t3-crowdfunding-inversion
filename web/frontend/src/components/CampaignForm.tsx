@@ -7,20 +7,21 @@ import type { CreateRewardTierDto, EntrepreneurCampaign, CreateCampaignDto } fro
 import type { Category } from '../types/category.types';
 import { getCategories } from '../api/categories.api';
 import { getImageUrl } from '../utils/image.utils';
-import { formatNumberSpanish, isFutureDate } from '../utils/numberFormat';
+import { formatNumberSpanish } from '../utils/numberFormat';
+import { isFutureLocalDateTime, localDateTimeToUtc, toLocalDateTime } from '../utils/campaignDate';
 import { InfoHint } from './InfoHint';
 
 
 
-const schema = z.object({
+const schema = (originalEndDate?: string | null) => z.object({
   title: z.string().min(5, 'El título debe tener entre 5 y 50 caracteres').max(50, 'El título debe tener entre 5 y 50 caracteres'),
   description: z.string().min(50, 'La descripción debe tener entre 50 y 800 caracteres').max(800, 'La descripción debe tener entre 50 y 800 caracteres'),
   shortDescription: z.string().min(10, 'El eslogan debe tener entre 10 y 50 caracteres').max(50, 'El eslogan debe tener entre 10 y 50 caracteres'),
   goalAmount: z.number().min(100, 'La meta mínima es Bs. 100'),
   categoryIds: z.array(z.string()).min(1, 'Debes seleccionar al menos una categoría'),
   endDate: z.string().optional().or(z.literal(''))
-    .refine((val) => !val || isFutureDate(val), {
-      message: 'La fecha de cierre debe ser posterior a hoy',
+    .refine((val) => !val || isFutureLocalDateTime(val, Date.now(), originalEndDate), {
+      message: 'La fecha y hora de cierre deben ser válidas y posteriores al momento actual',
     }),
   videoUrl: z.string().optional().or(z.literal(''))
     .refine((val) => !val || /(youtube\.com|youtu\.be|tiktok\.com)/i.test(val), {
@@ -28,7 +29,7 @@ const schema = z.object({
     }),
 });
 
-type FormValues = z.infer<typeof schema>;
+type FormValues = z.infer<ReturnType<typeof schema>>;
 
 type ConfirmAction = 'discard' | 'draft' | 'review' | null;
 
@@ -50,14 +51,14 @@ export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCanc
     control,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema(initialData?.endDate)),
     defaultValues: {
       title: initialData?.title || '',
       description: initialData?.description || '',
       shortDescription: initialData?.shortDescription || '',
       goalAmount: initialData?.goalAmount || 1000,
       categoryIds: initialData?.categoryIds || (initialData?.categoryId ? [initialData.categoryId] : []),
-      endDate: initialData?.endDate ? new Date(initialData.endDate).toISOString().slice(0, 16) : '',
+      endDate: toLocalDateTime(initialData?.endDate),
       videoUrl: initialData?.videoUrl || '',
     },
   });
@@ -136,7 +137,7 @@ export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCanc
         shortDescription: initialData.shortDescription || '',
         goalAmount: initialData.goalAmount || 1000,
         categoryIds: initialData.categoryIds || (initialData.categoryId ? [initialData.categoryId] : []),
-        endDate: initialData.endDate ? new Date(initialData.endDate).toISOString().slice(0, 16) : '',
+        endDate: toLocalDateTime(initialData.endDate),
         videoUrl: initialData.videoUrl || '',
       });
     }
@@ -209,7 +210,7 @@ export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCanc
     shortDescription: data.shortDescription || undefined,
     categoryIds: data.categoryIds,
     goalAmount: data.goalAmount,
-    endDate: data.endDate ? `${data.endDate}:00.000Z` : undefined,
+    endDate: localDateTimeToUtc(data.endDate ?? '', initialData?.endDate),
     rewards: rewards,
     videoUrl: data.videoUrl || undefined,
   });
@@ -359,20 +360,12 @@ export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCanc
           </div>
 
           <div className="flex flex-col md:col-span-1">
-            <label htmlFor="endDate" className={`${labelClass} flex items-center gap-2`}>Fecha de Cierre (Opcional)<InfoHint text="Fecha límite para recibir aportes." /></label>
+            <label htmlFor="endDate" className={`${labelClass} flex items-center gap-2`}>Fecha de Cierre (Opcional)<InfoHint text="Fecha límite para recibir aportes, en la zona horaria de tu dispositivo." /></label>
             <input
               id="endDate"
               type="datetime-local"
               className={`${inputClass} ${errors.endDate ? errorClass : ''}`}
-              min={(() => {
-                const now = new Date();
-                const y = now.getFullYear();
-                const m = String(now.getMonth() + 1).padStart(2, '0');
-                const d = String(now.getDate()).padStart(2, '0');
-                const h = String(now.getHours()).padStart(2, '0');
-                const mi = String(now.getMinutes()).padStart(2, '0');
-                return `${y}-${m}-${d}T${h}:${mi}`;
-              })()}
+              min={toLocalDateTime(new Date())}
               {...register('endDate')}
             />
             {errors.endDate && <span className="text-[11px] font-bold text-[#c62828] mt-2 ml-1">{String(errors.endDate.message)}</span>}
