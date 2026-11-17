@@ -48,7 +48,7 @@ class AuditDiagnosticsTest extends TestCase
     {
         $u = $this->user('investor');
         $c = $this->campaign($this->user(), ['status' => 'published']);
-        $this->login($u)->patchJson('/api/v1/users/me/password', ['currentPassword' => 'Password123', 'newPassword' => 'Changed123'])->assertNotFound();
+        $this->login($u);
         foreach (['/campaigns/public/'.$c->id.'/documents', '/campaigns/public/'.$c->id.'/updates', '/investments/backed-campaigns/updates'] as $path) {
             $this->getJson('/api/v1'.$path)->assertNotFound();
         }

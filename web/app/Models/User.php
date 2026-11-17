@@ -62,6 +62,6 @@ class User extends Authenticatable
 
     public function apiData(): array
     {
-        return [...$this->toArray(), 'roles' => $this->roles()->pluck('name')->all(), 'admin_access_level' => $this->admin?->access_level];
+        return [...$this->toArray(), 'has_password' => (bool) $this->password_hash, 'roles' => $this->roles()->pluck('name')->all(), 'admin_access_level' => $this->admin?->access_level];
     }
 }
