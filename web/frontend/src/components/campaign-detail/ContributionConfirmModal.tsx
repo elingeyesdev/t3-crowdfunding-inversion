@@ -1,3 +1,4 @@
+import { campaignStatusLabel } from '../../utils/campaignStatus';
 import { useEffect } from 'react';
 import type { RewardTier } from '../../api/public-campaigns.api';
 import {
@@ -149,7 +150,7 @@ export function ContributionConfirmModal({
                       : 'bg-amber-50 text-amber-600 border-amber-100'
                   }`}
                 >
-                  {campaign.status === 'published' ? 'Activa' : 'En Proceso'}
+                  {campaignStatusLabel(campaign.status ?? '')}
                 </span>
                 <span
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest"

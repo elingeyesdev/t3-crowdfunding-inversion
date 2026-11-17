@@ -1,3 +1,4 @@
+import { CAMPAIGN_FILTERS, campaignStatusLabel, matchesCampaignGroup, type CampaignGroupFilter } from '../../utils/campaignStatus';
 import { useState, useMemo } from 'react';
 import type { EntrepreneurCampaign } from '../../types/campaign.types';
 import {
@@ -24,11 +25,10 @@ interface Props {
   onCampaignClick: (campaign: EntrepreneurCampaign) => void;
 }
 
-type CampaignFilter = 'all' | 'active' | 'drafts' | 'review' | 'completed';
 
 export function CampaignsFeed({ openModal, hasBanking, campaigns, loading, onCampaignClick }: Props) {
   const [showTip, setShowTip] = useState(true);
-  const [filter, setFilter] = useState<CampaignFilter>('all');
+  const [filter, setFilter] = useState<CampaignGroupFilter>('all');
 
   const calculatePercentage = (current: number, goal: number) => {
     if (!goal) return 0;
@@ -37,44 +37,27 @@ export function CampaignsFeed({ openModal, hasBanking, campaigns, loading, onCam
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'partially_funded':
+      case 'funded':
       case 'published': return 'bg-[#72B626] border-gray-100';
       case 'draft': return 'bg-slate-500 border-slate-400';
       case 'pending_review':
       case 'in_review': return 'bg-[#f9a825] border-amber-300';
       case 'approved': return 'bg-[#72B626] border-gray-100';
+      case 'failed':
       case 'rejected': return 'bg-red-500 border-red-300';
+      case 'suspended': return 'bg-amber-600 border-amber-300';
+      case 'completed': return 'bg-indigo-500 border-indigo-300';
       default: return 'bg-slate-400 border-slate-300';
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'published': return 'ACTIVA';
-      case 'draft': return 'BORRADOR';
-      case 'pending_review': return 'EN REVISIÓN';
-      case 'in_review': return 'EN REVISIÓN';
-      case 'approved': return 'APROBADO';
-      case 'rejected': return 'RECHAZADO';
-      default: return status.toUpperCase();
-    }
-  };
-
-  const filteredCampaigns = useMemo(() => {
-    if (filter === 'all') return campaigns;
-    if (filter === 'active') return campaigns.filter(c => c.status === 'published');
-    if (filter === 'drafts') return campaigns.filter(c => c.status === 'draft');
-    if (filter === 'review') return campaigns.filter(c => c.status === 'pending_review' || c.status === 'in_review');
-    if (filter === 'completed') return campaigns.filter(c => c.status === 'approved' || c.status === 'rejected');
-    return campaigns;
-  }, [campaigns, filter]);
-
-  const filterTabs = [
-    { id: 'all', label: 'Todas' },
-    { id: 'active', label: 'Activas' },
-    { id: 'drafts', label: 'Borradores' },
-    { id: 'review', label: 'En revisión' },
-    { id: 'completed', label: 'Finalizadas' }
-  ];
+  const getStatusLabel = campaignStatusLabel;
+  const filteredCampaigns = useMemo(
+    () => campaigns.filter(c => matchesCampaignGroup(c.status, filter)),
+    [campaigns, filter],
+  );
+  const filterTabs = CAMPAIGN_FILTERS;
 
   return (
     <div className="flex-1 min-w-[280px] flex flex-col gap-4 lg:gap-8 font-['Plus Jakarta Sans',sans-serif]">
@@ -113,11 +96,11 @@ export function CampaignsFeed({ openModal, hasBanking, campaigns, loading, onCam
       <div className="flex gap-1 lg:gap-2 p-1 lg:p-1.5 bg-white rounded-lg lg:rounded-2xl border border-gray-100 shadow-sm w-full lg:w-fit overflow-x-auto lg:overflow-visible scrollbar-hide">
         {filterTabs.map((tab) => (
           <button
-            key={tab.id}
-            onClick={() => setFilter(tab.id as CampaignFilter)}
+            key={tab.value}
+            onClick={() => setFilter(tab.value as CampaignGroupFilter)}
             className={`
               shrink-0 px-3 lg:px-5 py-2 lg:py-2.5 rounded-md lg:rounded-xl text-[11px] lg:text-[12px] font-black uppercase tracking-widest transition-all cursor-pointer border-none
-              ${filter === tab.id
+              ${filter === tab.value
                 ? 'bg-[#1c2b1e] text-white shadow-lg shadow-[#1c2b1e]/20/10'
                 : 'bg-transparent text-slate-500 hover:bg-[#f0f9e0] hover:text-[#72B626]'
               }

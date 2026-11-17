@@ -6,6 +6,7 @@ import {
   AlertTriangle, X, ChevronRight, MoreHorizontal, Flag, Share2
 } from 'lucide-react';
 import { ShareModal } from './ShareModal';
+import { campaignStatusLabel } from '../utils/campaignStatus';
 
 interface Props {
   campaign: EntrepreneurCampaign;
@@ -18,17 +19,19 @@ interface Props {
   actionCampaignId?: string | null;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; dot: string; bg: string; text: string; border: string }> = {
-  published:     { label: 'Publicada',  dot: '#22c55e', bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
-  funded:        { label: 'Activa',     dot: '#22c55e', bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
-  partially_funded:{ label: 'Activa',   dot: '#22c55e', bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
-  approved:      { label: 'Aprobada',   dot: '#22c55e', bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
-  draft:         { label: 'Borrador',   dot: '#94a3b8', bg: '#f8fafc', text: '#475569', border: '#e2e8f0' },
-  pending_review:{ label: 'En Revisión',dot: '#f59e0b', bg: '#fffbeb', text: '#b45309', border: '#fde68a' },
-  in_review:     { label: 'En Revisión',dot: '#f59e0b', bg: '#fffbeb', text: '#b45309', border: '#fde68a' },
-  rejected:      { label: 'Rechazada', dot: '#ef4444', bg: '#fef2f2', text: '#b91c1c', border: '#fecaca' },
-  completed:     { label: 'Finalizada', dot: '#6366f1', bg: '#eef2ff', text: '#4338ca', border: '#c7d2fe' },
-  failed:        { label: 'Fallida',    dot: '#ef4444', bg: '#fef2f2', text: '#b91c1c', border: '#fecaca' },
+const STATUS_CONFIG: Record<string, { dot: string; bg: string; text: string; border: string }> = {
+  published:     { dot: '#22c55e', bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
+  funded:        { dot: '#22c55e', bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
+  partially_funded:{ dot: '#22c55e', bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
+  approved:      { dot: '#22c55e', bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
+  draft:         { dot: '#94a3b8', bg: '#f8fafc', text: '#475569', border: '#e2e8f0' },
+  pending_review:{ dot: '#f59e0b', bg: '#fffbeb', text: '#b45309', border: '#fde68a' },
+  in_review:     { dot: '#f59e0b', bg: '#fffbeb', text: '#b45309', border: '#fde68a' },
+  rejected:      { dot: '#ef4444', bg: '#fef2f2', text: '#b91c1c', border: '#fecaca' },
+  completed:     { dot: '#6366f1', bg: '#eef2ff', text: '#4338ca', border: '#c7d2fe' },
+  failed:        { dot: '#ef4444', bg: '#fef2f2', text: '#b91c1c', border: '#fecaca' },
+  cancelled:     { dot: '#64748b', bg: '#f8fafc', text: '#475569', border: '#e2e8f0' },
+  suspended:     { dot: '#f59e0b', bg: '#fffbeb', text: '#b45309', border: '#fde68a' },
 };
 
 export function CampaignCard({
@@ -47,7 +50,7 @@ export function CampaignCard({
   const [showMenu, setShowMenu] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
-  const statusCfg = STATUS_CONFIG[campaign.status] ?? STATUS_CONFIG['draft'];
+  const statusCfg = { ...STATUS_CONFIG[campaign.status], label: campaignStatusLabel(campaign.status) };
   const rawPercent = computeFundingPercent(campaign.currentAmount, campaign.goalAmount);
   const barWidth = clampPercentForBar(rawPercent);
   const pct = Math.round(rawPercent);

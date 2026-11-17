@@ -1,3 +1,4 @@
+import { CAMPAIGN_FILTERS, campaignStatusLabel, matchesCampaignGroup } from '../../utils/campaignStatus';
 import { useState, useEffect } from 'react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { getAllCampaigns, hardDeleteCampaign, getCampaignDetail } from '../../api/admin.api';
@@ -88,44 +89,15 @@ export function AdminCampaignsPage() {
     const matchesSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           (c.creator_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                           (c.creator_email || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' ? true : c.status === statusFilter;
+    const matchesStatus = matchesCampaignGroup(c.status, statusFilter);
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusBadge = (status: string) => {
-    switch(status) {
-      case 'published':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-emerald-700 bg-green-50 border border-green-100">
-            Activa
-          </span>
-        );
-      case 'pending_review':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100">
-            En Revisión
-          </span>
-        );
-      case 'draft':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-gray-700 bg-gray-50 border border-gray-100">
-            Borrador
-          </span>
-        );
-      case 'rejected':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-red-700 bg-red-50 border border-red-100">
-            Rechazada
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-gray-600 bg-gray-100 border border-gray-200">
-            {status}
-          </span>
-        );
-    }
-  };
+  const getStatusBadge = (status: string) => (
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-gray-700 bg-gray-50 border border-gray-200">
+      {campaignStatusLabel(status)}
+    </span>
+  );
 
   return (
     <AdminLayout>
@@ -168,11 +140,9 @@ export function AdminCampaignsPage() {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="all">Todos los estados</option>
-              <option value="published">Activas (Published)</option>
-              <option value="pending_review">En Revisión (Pending)</option>
-              <option value="draft">Borradores (Draft)</option>
-              <option value="rejected">Rechazadas (Rejected)</option>
+              {CAMPAIGN_FILTERS.map(filter => (
+                <option key={filter.value} value={filter.value}>{filter.label}</option>
+              ))}
             </select>
 
             <button 

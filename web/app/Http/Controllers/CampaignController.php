@@ -47,7 +47,8 @@ class CampaignController extends Controller
             if ($r->filled('status')) {
                 $query->where('status', $r->input('status'));
             } elseif ($preset = $r->input('filterPreset')) {
-                $groups = ['draft' => ['draft', 'rejected'], 'approval' => ['pending_review', 'in_review', 'approved'], 'published' => ['published', 'partially_funded', 'funded'], 'archived' => ['failed', 'cancelled', 'completed', 'suspended']];
+                // Keep older API presets while exposing the precise groups used by the UI.
+                $groups = [...Campaign::FILTER_GROUPS, 'draft' => ['draft', 'rejected'], 'approval' => ['pending_review', 'in_review', 'approved'], 'published' => ['published', 'partially_funded', 'funded'], 'archived' => ['failed', 'cancelled', 'completed', 'suspended']];
                 if (isset($groups[$preset])) {
                     $query->whereIn('status', $groups[$preset]);
                 }
@@ -73,6 +74,7 @@ class CampaignController extends Controller
         }
         $sort = in_array($r->input('sortBy'), ['created_at', 'current_amount', 'goal_amount', 'end_date', 'title']) ? $r->input('sortBy') : 'created_at';
         $query->orderBy($sort, strtoupper($r->input('sortOrder', 'DESC')) === 'ASC' ? 'asc' : 'desc');
+        $query->orderBy('id');
 
         return Api::ok(Api::page($query, $r, fn ($c) => $c->apiData()));
     }

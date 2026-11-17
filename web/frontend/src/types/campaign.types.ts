@@ -182,6 +182,13 @@ export interface CreateCampaignDto {
 
 
 export type CampaignFilterPreset =
+  | 'drafts'
+  | 'review'
+  | 'approved'
+  | 'active'
+  | 'funded'
+  | 'completed'
+  | 'suspended'
   | 'all'
   | 'draft'
   | 'approval'

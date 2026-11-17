@@ -10,6 +10,7 @@ import { PublishUpdateModal } from '../components/PublishUpdateModal';
 import { KYCUploadModal } from '../components/KYCUploadModal';
 import type { EntrepreneurCampaign } from '../types/campaign.types';
 import { getMyCampaignById } from '../api/campaign.api';
+import { CAMPAIGN_FILTERS, matchesCampaignGroup } from '../utils/campaignStatus';
 import {
   Rocket, Plus, Search, AlertCircle, Loader2,
   LayoutGrid, List, ShieldAlert,
@@ -17,13 +18,7 @@ import {
 
 /* ─── Small Summary Card ─── */
 
-const STATUS_TABS = [
-  { value: 'all',            label: 'Todas' },
-  { value: 'active',         label: 'Activas' },
-  { value: 'draft',          label: 'Borradores' },
-  { value: 'pending_review', label: 'En Revisión' },
-  { value: 'completed',      label: 'Finalizadas' },
-];
+const STATUS_TABS = CAMPAIGN_FILTERS;
 
 export function MyCampaignsPage() {
   const {
@@ -71,12 +66,7 @@ export function MyCampaignsPage() {
 
   const filteredCampaigns = campaigns.filter(c => {
     const matchesSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === 'all' ||
-      (statusFilter === 'active' && (c.status === 'published' || c.status === 'funded' || c.status === 'partially_funded')) ||
-      (statusFilter === 'pending_review' && (c.status === 'pending_review' || c.status === 'in_review')) ||
-      (statusFilter === 'completed' && c.status === 'completed') ||
-      c.status === statusFilter;
+    const matchesStatus = matchesCampaignGroup(c.status, statusFilter);
     return matchesSearch && matchesStatus;
   });
 
@@ -194,12 +184,7 @@ export function MyCampaignsPage() {
                 {tab.value !== 'all' && (
                   <span className="ml-1.5 text-[11px] font-medium text-gray-400">
                     ({
-                      campaigns.filter(c =>
-                        (tab.value === 'active' && (c.status === 'published' || c.status === 'funded' || c.status === 'partially_funded')) ||
-                        (tab.value === 'pending_review' && (c.status === 'pending_review' || c.status === 'in_review')) ||
-                        (tab.value === 'completed' && c.status === 'completed') ||
-                        c.status === tab.value
-                      ).length
+                      campaigns.filter(c => matchesCampaignGroup(c.status, tab.value)).length
                     })
                   </span>
                 )}
