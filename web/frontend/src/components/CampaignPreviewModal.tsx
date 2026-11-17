@@ -11,6 +11,7 @@ import { getCampaignFinancialProgress as getAdminFinancialProgress, getCampaignH
 import type { CampaignHistoryItem } from '../types/admin.types';
 import { formatCampaignCurrency } from '../utils/campaignFunding';
 import { getImageUrl } from '../utils/image.utils';
+import { getApiErrorMessage } from '../utils/apiError';
 import {
   FileText,
   TrendingUp,
@@ -128,6 +129,7 @@ export function CampaignPreviewModal({
 
   const [documents, setDocuments] = useState<any[]>([]);
   const [documentsLoading, setDocumentsLoading] = useState(false);
+  const [updatingDocumentId, setUpdatingDocumentId] = useState<string | null>(null);
 
   // Custom modal dialog states
   const [dialog, setDialog] = useState<{
@@ -248,6 +250,19 @@ export function CampaignPreviewModal({
       loadDocuments();
     }
   }, [activeTab, campaign]);
+
+  const handleDocumentVisibility = async (docId: string, isPublic: boolean) => {
+    if (!campaign || !isAdmin || updatingDocumentId) return;
+    setUpdatingDocumentId(docId);
+    try {
+      await reviewAdminCampaignDocument(campaign.id, docId, 'approved', undefined, isPublic);
+      await loadDocuments();
+    } catch (error) {
+      await showAlert('No se pudo cambiar la publicación', getApiErrorMessage(error, 'Intenta nuevamente.'));
+    } finally {
+      setUpdatingDocumentId(null);
+    }
+  };
 
   const handleReviewDocument = async (docId: string, status: 'approved' | 'rejected') => {
     if (status === 'rejected') {
@@ -812,6 +827,7 @@ export function CampaignPreviewModal({
                   <FileText size={24} className="text-blue-500" />
                   Documentos de Respaldo
                 </h3>
+                {isAdmin && <p className="mb-5 text-sm text-slate-500">Aprobar un documento no lo publica. Publica únicamente archivos aptos para consulta por cualquier visitante; puedes retirar su publicación en cualquier momento.</p>}
                 {documentsLoading ? (
                   <div className="flex justify-center py-10"><Loader2 className="animate-spin text-slate-300" size={32} /></div>
                 ) : documents.length === 0 ? (
@@ -821,16 +837,22 @@ export function CampaignPreviewModal({
                     {documents.map((doc: any) => (
                       <div key={doc.id} className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 border border-slate-100 rounded-2xl gap-4">
                         <div className="flex-1">
-                          <p className="font-bold text-[14px] mb-1">{doc.original_filename}</p>
+                          <p className="font-bold text-[14px] mb-1">{doc.original_name}</p>
                           <p className="text-[12px] text-slate-500">{doc.justification}</p>
                           <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">
-                            Estado: <span className={`font-bold ${doc.verification_status === 'approved' ? 'text-[#72B626]' : doc.verification_status === 'rejected' ? 'text-red-500' : 'text-amber-500'}`}>{doc.verification_status === 'approved' ? 'Aprobado' : doc.verification_status === 'rejected' ? 'Rechazado' : 'Pendiente'}</span>
+                            Estado: <span className={`font-bold ${doc.status === 'approved' ? 'text-[#72B626]' : doc.status === 'rejected' ? 'text-red-500' : 'text-amber-500'}`}>{doc.status === 'approved' ? 'Aprobado' : doc.status === 'rejected' ? 'Rechazado' : 'Pendiente'}</span>
                           </p>
+                          <p className="text-xs text-slate-500 mt-1">{doc.is_public ? 'Autorizado para publicación' : 'Privado'}</p>
                           {doc.reviewer_notes && <p className="text-[11px] text-red-500 mt-1 italic">"{doc.reviewer_notes}"</p>}
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           <a href={getImageUrl(doc.file_url)} target="_blank" rel="noreferrer" className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[12px] font-bold no-underline">Ver Documento</a>
-                          {isAdmin && doc.verification_status === 'pending' && (
+                          {isAdmin && doc.status === 'approved' && (
+                            <button type="button" disabled={updatingDocumentId !== null || documentsLoading} onClick={() => handleDocumentVisibility(doc.id, !doc.is_public)} className="px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border-none cursor-pointer disabled:opacity-50">
+                              {updatingDocumentId === doc.id ? 'Guardando...' : doc.is_public ? 'Retirar publicación' : 'Publicar evidencia'}
+                            </button>
+                          )}
+                          {isAdmin && doc.status === 'pending' && (
                             <>
                               <button onClick={() => handleReviewDocument(doc.id, 'approved')} className="px-4 py-2 bg-[#f0f9e0] hover:bg-[#f0f9e0] text-[#4a7f1a] rounded-lg text-[12px] font-bold border-none cursor-pointer">Aprobar</button>
                               <button onClick={() => handleReviewDocument(doc.id, 'rejected')} className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-[12px] font-bold border-none cursor-pointer">Rechazar</button>

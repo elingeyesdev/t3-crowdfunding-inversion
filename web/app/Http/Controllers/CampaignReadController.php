@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Campaign;
+use App\Models\CampaignDocument;
 use App\Models\CampaignMilestone;
 use App\Models\CampaignUpdate;
 use App\Services\CampaignFinance;
@@ -10,12 +11,44 @@ use App\Support\Api;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 
 class CampaignReadController extends Controller
 {
     private function authorizePublic(Campaign $campaign): void
     {
         abort_unless($campaign->isPubliclyReadable(), 404);
+    }
+
+    public function publicDocuments(Campaign $campaign)
+    {
+        $this->authorizePublic($campaign);
+        $documents = $campaign->documents()->where('status', 'approved')->where('is_public', true)->latest()->get()
+            ->filter(fn ($document) => $document->documentPath() && Storage::disk('local')->exists($document->documentPath()))
+            ->map(fn ($document) => [
+                ...Arr::only($document->attributesToArray(), ['id', 'campaign_id', 'original_name', 'mime_type', 'file_size_bytes', 'justification', 'status', 'created_at']),
+                'file_url' => route('campaign.document.public', ['campaign' => $campaign->id, 'document' => $document->id], false),
+            ])->values();
+
+        // Public metadata must never pass through automatic private-URL signing:
+        // a name or justification may itself contain a private-looking path.
+        return response()->json(['data' => Api::camel($documents), 'message' => 'Operación exitosa', 'statusCode' => 200]);
+    }
+
+    public function publicDocumentFile(Campaign $campaign, CampaignDocument $document)
+    {
+        $this->authorizePublic($campaign);
+        abort_unless($document->campaign_id === $campaign->id && $document->status === 'approved' && $document->is_public, 404);
+        $path = $document->documentPath();
+        abort_unless($path && Storage::disk('local')->exists($path), 404);
+
+        $name = preg_replace('/[\x00-\x1F\x7F]/u', '', basename(str_replace('\\', '/', $document->original_name))) ?: 'documento';
+
+        return Storage::disk('local')->download($path, $name, [
+            'Cache-Control' => 'private, no-store',
+            'X-Content-Type-Options' => 'nosniff',
+            'Content-Security-Policy' => "sandbox; default-src 'none'",
+        ]);
     }
 
     public function publicFundingPlan(Campaign $campaign)

@@ -14,12 +14,11 @@ import { FundAllocationPlan } from './transparency/FundAllocationPlan';
 import { PublicFinancialAuditing } from './transparency/PublicFinancialAuditing';
 import { ProjectMilestones } from './transparency/ProjectMilestones';
 import { PublicEvidenceDocuments } from './transparency/PublicEvidenceDocuments';
+import { usePublicCampaignDocuments } from '../../hooks/usePublicCampaignDocuments';
 import { CampaignUpdatesTimeline } from './transparency/CampaignUpdatesTimeline';
 import {
   fetchPublicCampaignFinancialProgress,
-  fetchPublicCampaignDocuments,
   fetchPublicCampaignUpdates,
-  type PublicCampaignDocument,
   type PublicCampaignUpdate,
 } from '../../api/public-campaigns.api';
 import type { CampaignFinancialProgress } from '../../types/campaign.types';
@@ -55,7 +54,7 @@ export function CampaignTransparencySection({
 
   // State for data
   const [finance, setFinance] = useState<CampaignFinancialProgress | null>(null);
-  const [documents, setDocuments] = useState<PublicCampaignDocument[]>([]);
+  const { documents, loading: documentsLoading, error: documentsError, retry: retryDocuments } = usePublicCampaignDocuments(campaignId);
   const [updates, setUpdates] = useState<PublicCampaignUpdate[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -65,18 +64,14 @@ export function CampaignTransparencySection({
     async function loadTransparencyData() {
       try {
         setLoading(true);
-        const [financeData, docsData, updatesData] = await Promise.allSettled([
+        const [financeData, updatesData] = await Promise.allSettled([
           fetchPublicCampaignFinancialProgress(campaignId),
-          fetchPublicCampaignDocuments(campaignId),
           fetchPublicCampaignUpdates(campaignId),
         ]);
 
         if (isMounted) {
           if (financeData.status === 'fulfilled') {
             setFinance(financeData.value);
-          }
-          if (docsData.status === 'fulfilled') {
-            setDocuments(docsData.value || []);
           }
           if (updatesData.status === 'fulfilled') {
             setUpdates(updatesData.value || []);
@@ -193,7 +188,9 @@ export function CampaignTransparencySection({
       {subTab === 'evidencias' && (
         <PublicEvidenceDocuments
           documents={documents}
-          loading={loading}
+          loading={documentsLoading}
+          error={documentsError}
+          onRetry={retryDocuments}
         />
       )}
 
