@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { PaginatedResponse } from '../types/campaign.types';
 import type {
   ApiSuccessResponse,
   CapitalOverview,
@@ -164,10 +165,18 @@ export async function getMyInvestments(): Promise<InvestmentHistoryItem[]> {
   return data.data;
 }
 
-export async function getBackedCampaignUpdates(): Promise<BackedCampaignUpdate[]> {
-  const { data } = await api.get<ApiSuccessResponse<BackedCampaignUpdate[]>>(
+export interface BackedCampaignUpdatesPage extends PaginatedResponse<BackedCampaignUpdate> {
+  campaigns: { id: string; title: string }[];
+}
+
+export async function getBackedCampaignUpdates(query: { page?: number; limit?: number; campaignId?: string } = {}): Promise<BackedCampaignUpdatesPage> {
+  const { data } = await api.get<ApiSuccessResponse<BackedCampaignUpdatesPage>>(
     '/investments/backed-campaigns/updates',
+    { params: { page: query.page ?? 1, limit: query.limit ?? 10, ...(query.campaignId ? { campaignId: query.campaignId } : {}) }, timeout: 15000 },
   );
+  if (!Array.isArray(data.data?.data) || !data.data.meta || !Array.isArray(data.data.campaigns)) {
+    throw new Error('La respuesta de novedades no es válida.');
+  }
   return data.data;
 }
 

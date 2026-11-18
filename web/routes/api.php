@@ -96,6 +96,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::post('campaigns/{campaign}/milestones/{milestone}/evidence', [CampaignController::class, 'uploadMilestoneEvidence']);
     });
     Route::prefix('investments')->middleware('roles:investor')->group(function () {
+        Route::get('backed-campaigns/updates', [InvestmentController::class, 'backedUpdates']);
         Route::get('me', [InvestmentController::class, 'index']);
         Route::post('/', [InvestmentController::class, 'store']);
         Route::get('{investment}/receipt', [InvestmentController::class, 'receipt']);

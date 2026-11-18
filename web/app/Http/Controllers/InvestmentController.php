@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Campaign;
+use App\Models\CampaignUpdate;
 use App\Models\Investment;
 use App\Services\CampaignFinance;
 use App\Services\InvestmentEngine;
@@ -22,6 +23,41 @@ class InvestmentController extends Controller
     public function index(Request $r)
     {
         return Api::ok(Investment::with(['campaign', 'reward'])->where('investor_id', $r->user()->id)->latest()->get()->map(fn ($i) => ['id' => $i->id, 'amount' => $i->amount, 'investmentStatus' => $i->status, 'createdAt' => $i->created_at, 'campaignId' => $i->campaign_id, 'campaignTitle' => $i->campaign->title, 'campaignType' => $i->campaign->campaign_type, 'campaignGoal' => $i->campaign->goal_amount, 'campaignCoverImage' => $i->campaign->cover_image_url, 'campaignStatus' => $i->campaign->status, 'rewardTitle' => $i->reward?->title]));
+    }
+
+    public function backedUpdates(Request $r)
+    {
+        $data = $r->validate(['page' => 'sometimes|integer|min:1', 'limit' => 'sometimes|integer|min:1|max:100', 'campaignId' => 'nullable|uuid']);
+        $campaigns = Campaign::query()->publiclyReadable()->whereHas('investments', function ($investments) use ($r) {
+            $investments->where('investor_id', $r->user()->id)->whereIn('status', ['completed', 'refunded']);
+        });
+        $options = (clone $campaigns)->orderBy('title')->orderBy('id')->get(['id', 'title']);
+        // EXISTS in the campaign query prevents duplicate updates for repeat donors.
+        $updates = CampaignUpdate::query()->where('is_public', true)
+            ->whereIn('campaign_id', (clone $campaigns)->select('campaigns.id'))
+            ->with(['campaign', 'author.entrepreneur', 'author.investor'])
+            ->when($data['campaignId'] ?? null, fn ($query, $id) => $query->where('campaign_id', $id))
+            ->orderByDesc('created_at')->orderByDesc('id');
+        $page = Api::page($updates, $r, function ($update) {
+            $profile = $update->author?->entrepreneur ?? $update->author?->investor;
+
+            return [
+                'id' => $update->id, 'campaignId' => $update->campaign_id,
+                'title' => $update->title, 'content' => $update->content,
+                'attachments' => $update->attachments ?? [],
+                'createdAt' => $update->created_at, 'updatedAt' => $update->updated_at,
+                'campaignTitle' => $update->campaign->title,
+                'campaignCoverImage' => $update->campaign->cover_image_url,
+                'campaignCurrentAmount' => $update->campaign->current_amount,
+                'campaignGoalAmount' => $update->campaign->goal_amount,
+                'entrepreneurName' => trim(($profile?->first_name ?? '').' '.($profile?->last_name ?? '')) ?: 'Usuario',
+                'entrepreneurDisplayName' => $profile?->display_name,
+                'entrepreneurAvatar' => $profile?->avatar_url,
+            ];
+        });
+
+        // Neither public content nor metadata may mint signed private-file links.
+        return response()->json(['data' => Api::camel([...$page, 'campaigns' => $options]), 'message' => 'Operación exitosa', 'statusCode' => 200]);
     }
 
     public function receipt(Request $r, Investment $investment)

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Campaign extends Record
@@ -44,6 +45,25 @@ class Campaign extends Record
             ->whereIn('from_status', self::PUBLIC_STATUSES)
             ->where('to_status', $this->status)
             ->exists();
+    }
+
+    public function scopePubliclyReadable(Builder $query): Builder
+    {
+        return $query->where(function ($visible) {
+            $visible->whereIn('campaigns.status', self::PUBLIC_STATUSES)
+                ->orWhere(function ($historical) {
+                    $historical->whereIn('campaigns.status', self::HISTORICAL_STATUSES)
+                        ->where(function ($published) {
+                            $published->whereNotNull('campaigns.published_at')
+                                ->orWhereExists(function ($history) {
+                                    $history->selectRaw('1')->from('campaign_status_history')
+                                        ->whereColumn('campaign_status_history.campaign_id', 'campaigns.id')
+                                        ->whereIn('campaign_status_history.from_status', self::PUBLIC_STATUSES)
+                                        ->whereColumn('campaign_status_history.to_status', 'campaigns.status');
+                                });
+                        });
+                });
+        });
     }
 
     protected function casts(): array
