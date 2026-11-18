@@ -6,6 +6,8 @@ import {
   Image as ImageIcon,
   ExternalLink,
   Clock,
+  AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
 import type { PublicCampaignUpdate } from '../../../api/public-campaigns.api';
 import { getImageUrl } from '../../../utils/image.utils';
@@ -13,6 +15,8 @@ import { getImageUrl } from '../../../utils/image.utils';
 interface Props {
   updates: PublicCampaignUpdate[];
   loading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   entrepreneurName?: string;
   entrepreneurAvatar?: string | null;
 }
@@ -20,14 +24,28 @@ interface Props {
 export function CampaignUpdatesTimeline({
   updates,
   loading = false,
+  error = null,
+  onRetry,
   entrepreneurName = 'Emprendedor',
   entrepreneurAvatar,
 }: Props) {
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl p-10 text-center border border-slate-100">
+      <div role="status" className="bg-white rounded-2xl p-10 text-center border border-slate-100">
         <Clock size={28} className="animate-spin text-slate-300 mx-auto mb-2" />
         <p className="text-slate-400 text-[12px] font-bold">Cargando bitácora de avances...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div role="alert" className="bg-white rounded-2xl p-8 text-center border border-red-100">
+        <AlertTriangle size={28} className="text-red-500 mx-auto mb-3" />
+        <p className="text-sm text-red-700">{error}</p>
+        {onRetry && <button type="button" onClick={onRetry} className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-50 text-[#4a7f1a] font-bold border-none cursor-pointer">
+          <RefreshCw size={16} /> Reintentar
+        </button>}
       </div>
     );
   }
