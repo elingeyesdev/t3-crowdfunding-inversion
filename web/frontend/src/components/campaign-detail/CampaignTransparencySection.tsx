@@ -15,11 +15,10 @@ import { PublicFinancialAuditing } from './transparency/PublicFinancialAuditing'
 import { ProjectMilestones } from './transparency/ProjectMilestones';
 import { PublicEvidenceDocuments } from './transparency/PublicEvidenceDocuments';
 import { usePublicCampaignDocuments } from '../../hooks/usePublicCampaignDocuments';
+import { usePublicCampaignUpdates } from '../../hooks/usePublicCampaignUpdates';
 import { CampaignUpdatesTimeline } from './transparency/CampaignUpdatesTimeline';
 import {
   fetchPublicCampaignFinancialProgress,
-  fetchPublicCampaignUpdates,
-  type PublicCampaignUpdate,
 } from '../../api/public-campaigns.api';
 import type { CampaignFinancialProgress } from '../../types/campaign.types';
 
@@ -55,7 +54,7 @@ export function CampaignTransparencySection({
   // State for data
   const [finance, setFinance] = useState<CampaignFinancialProgress | null>(null);
   const { documents, loading: documentsLoading, error: documentsError, retry: retryDocuments } = usePublicCampaignDocuments(campaignId);
-  const [updates, setUpdates] = useState<PublicCampaignUpdate[]>([]);
+  const { updates, loading: updatesLoading, error: updatesError, retry: retryUpdates } = usePublicCampaignUpdates(campaignId);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -64,17 +63,13 @@ export function CampaignTransparencySection({
     async function loadTransparencyData() {
       try {
         setLoading(true);
-        const [financeData, updatesData] = await Promise.allSettled([
+        const [financeData] = await Promise.allSettled([
           fetchPublicCampaignFinancialProgress(campaignId),
-          fetchPublicCampaignUpdates(campaignId),
         ]);
 
         if (isMounted) {
           if (financeData.status === 'fulfilled') {
             setFinance(financeData.value);
-          }
-          if (updatesData.status === 'fulfilled') {
-            setUpdates(updatesData.value || []);
           }
         }
       } catch (err) {
@@ -197,7 +192,9 @@ export function CampaignTransparencySection({
       {subTab === 'bitacora' && (
         <CampaignUpdatesTimeline
           updates={updates}
-          loading={loading}
+          loading={updatesLoading}
+          error={updatesError}
+          onRetry={retryUpdates}
           entrepreneurName={entrepreneurName}
           entrepreneurAvatar={entrepreneurAvatar}
         />

@@ -111,7 +111,10 @@ class CampaignReadController extends Controller
     {
         $this->authorizePublic($campaign);
 
-        return Api::ok($this->updatesQuery($campaign, true)->get()->map(fn ($update) => $this->publicUpdateData($update, true)));
+        $updates = $this->updatesQuery($campaign, true)->get()->map(fn ($update) => $this->publicUpdateData($update, true));
+
+        // Public text and attachments must not mint signed private-file URLs.
+        return response()->json(['data' => Api::camel($updates), 'message' => 'Operación exitosa', 'statusCode' => 200]);
     }
 
     public function updates(Request $request, Campaign $campaign)

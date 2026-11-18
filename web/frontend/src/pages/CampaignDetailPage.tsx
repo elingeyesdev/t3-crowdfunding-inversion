@@ -4,11 +4,10 @@ import { PitchVideoPlayer } from '../components/campaigns/PitchVideoPlayer';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { getImageUrl } from '../utils/image.utils';
 import { useCampaignDetail } from '../hooks/useCampaignDetail';
+import { usePublicCampaignUpdates } from '../hooks/usePublicCampaignUpdates';
 import {
   fetchPublicCampaigns,
-  fetchPublicCampaignUpdates,
   type PublicCampaign,
-  type PublicCampaignUpdate,
 } from '../api/public-campaigns.api';
 import { Navbar } from '../components/Navbar';
 import { RewardTierCards } from '../components/campaign-detail/RewardTierCards';
@@ -139,8 +138,7 @@ export function CampaignDetailPage() {
       ? initialTab
       : 'historia'
   );
-  const [publicUpdates, setPublicUpdates] = useState<PublicCampaignUpdate[]>([]);
-  const [updatesLoading, setUpdatesLoading] = useState(false);
+  const { updates: publicUpdates, loading: updatesLoading, error: updatesError, retry: retryUpdates } = usePublicCampaignUpdates(id);
 
   // Sync tab with URL query parameter
   useEffect(() => {
@@ -149,16 +147,6 @@ export function CampaignDetailPage() {
       setActiveTab(tabParam as any);
     }
   }, [searchParams]);
-
-  // Fetch campaign updates for badge counters & timeline
-  useEffect(() => {
-    if (!id) return;
-    setUpdatesLoading(true);
-    fetchPublicCampaignUpdates(id)
-      .then((data) => setPublicUpdates(data || []))
-      .catch((err) => console.error('Error cargando actualizaciones públicas:', err))
-      .finally(() => setUpdatesLoading(false));
-  }, [id]);
 
   // ── Pitch video state ──
   const [showPitch, setShowPitch] = useState(false);
@@ -703,6 +691,8 @@ export function CampaignDetailPage() {
                 <CampaignUpdatesTimeline
                   updates={publicUpdates}
                   loading={updatesLoading}
+                  error={updatesError}
+                  onRetry={retryUpdates}
                   entrepreneurName={campaign.entrepreneurName}
                   entrepreneurAvatar={campaign.entrepreneurAvatar}
                 />

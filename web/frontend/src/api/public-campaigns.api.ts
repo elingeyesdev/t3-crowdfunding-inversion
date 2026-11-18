@@ -164,7 +164,8 @@ export async function fetchPublicCampaignDocuments(
 export async function fetchPublicCampaignUpdates(
   campaignId: string,
 ): Promise<PublicCampaignUpdate[]> {
-  const res = await API.get(`/campaigns/public/${campaignId}/updates`);
+  const res = await API.get(`/campaigns/${campaignId}/updates`, { timeout: 15000 });
+  if (!Array.isArray(res.data?.data)) throw new Error('La respuesta de la bitácora no es válida.');
   return res.data.data;
 }
 
