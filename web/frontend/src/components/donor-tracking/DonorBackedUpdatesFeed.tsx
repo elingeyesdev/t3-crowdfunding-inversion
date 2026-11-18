@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Sparkles,
@@ -10,40 +9,31 @@ import {
   Clock,
   ArrowRight,
   Filter,
+  AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
-import { getBackedCampaignUpdates, type BackedCampaignUpdate } from '../../api/investor.api';
+import type { BackedCampaignUpdate, BackedCampaignUpdatesPage } from '../../api/investor.api';
+import { useBackedCampaignUpdates } from '../../hooks/useBackedCampaignUpdates';
 import { getImageUrl } from '../../utils/image.utils';
 
 export function DonorBackedUpdatesFeed() {
-  const [updates, setUpdates] = useState<BackedCampaignUpdate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedCampaignId, setSelectedCampaignId] = useState<string>('all');
+  return <DonorBackedUpdatesFeedView {...useBackedCampaignUpdates()} />;
+}
 
-  useEffect(() => {
-    let isMounted = true;
-    setLoading(true);
-    getBackedCampaignUpdates()
-      .then((data) => {
-        if (isMounted) setUpdates(data || []);
-      })
-      .catch((err) => console.error('Error cargando novedades de campañas respaldadas:', err))
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
+interface FeedProps {
+  updates: BackedCampaignUpdate[];
+  campaigns: BackedCampaignUpdatesPage['campaigns'];
+  meta: BackedCampaignUpdatesPage['meta'] | null;
+  loading: boolean;
+  error: string | null;
+  page: number;
+  selectedCampaignId: string;
+  onCampaignChange: (id: string) => void;
+  onPageChange: (page: number) => void;
+  onRetry: () => void;
+}
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  // Unique campaigns from updates list for filter
-  const uniqueCampaigns = Array.from(
-    new Map(updates.map((u) => [u.campaignId, { id: u.campaignId, title: u.campaignTitle }])).values()
-  );
-
-  const filteredUpdates = selectedCampaignId === 'all'
-    ? updates
-    : updates.filter((u) => u.campaignId === selectedCampaignId);
+export function DonorBackedUpdatesFeedView({ updates, campaigns, meta, loading, error, page, selectedCampaignId, onCampaignChange, onPageChange, onRetry }: FeedProps) {
 
   return (
     <div className="space-y-6 font-['Plus Jakarta Sans',sans-serif]">
@@ -64,16 +54,19 @@ export function DonorBackedUpdatesFeed() {
           </p>
         </div>
 
-        {uniqueCampaigns.length > 1 && (
+        {(campaigns.length > 0 || selectedCampaignId !== 'all') && (
           <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/80 rounded-2xl p-2 shrink-0">
             <Filter size={15} className="text-slate-400 ml-1" />
             <select
               value={selectedCampaignId}
-              onChange={(e) => setSelectedCampaignId(e.target.value)}
+              onChange={(e) => onCampaignChange(e.target.value)}
               className="bg-transparent border-none text-[12px] font-bold text-slate-700 outline-none cursor-pointer pr-4"
             >
-              <option value="all">Todos los proyectos ({updates.length})</option>
-              {uniqueCampaigns.map((c) => (
+              <option value="all">Todos los proyectos ({campaigns.length})</option>
+              {selectedCampaignId !== 'all' && !campaigns.some(campaign => campaign.id === selectedCampaignId) && (
+                <option value={selectedCampaignId}>Proyecto no disponible</option>
+              )}
+              {campaigns.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.title}
                 </option>
@@ -91,7 +84,15 @@ export function DonorBackedUpdatesFeed() {
             Sincronizando bitácora de proyectos...
           </p>
         </div>
-      ) : filteredUpdates.length === 0 ? (
+      ) : error ? (
+        <div role="alert" className="bg-white rounded-2xl p-8 text-center border border-red-100">
+          <AlertTriangle size={28} className="text-red-500 mx-auto mb-3" />
+          <p className="text-sm text-red-700">{error}</p>
+          <button type="button" onClick={onRetry} className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-50 text-[#4a7f1a] font-bold border-none cursor-pointer">
+            <RefreshCw size={16} /> Reintentar
+          </button>
+        </div>
+      ) : updates.length === 0 ? (
         <div className="bg-white rounded-[32px] border border-dashed border-gray-200 p-12 sm:p-16 text-center">
           <div className="w-16 h-16 rounded-2xl bg-green-50 text-[#72B626] flex items-center justify-center mx-auto mb-4">
             <Sparkles size={32} />
@@ -113,7 +114,7 @@ export function DonorBackedUpdatesFeed() {
         </div>
       ) : (
         <div className="space-y-6">
-          {filteredUpdates.map((update) => {
+          {updates.map((update) => {
             const author = update.entrepreneurName || 'Emprendedor';
             const progress = update.campaignGoalAmount > 0
               ? Math.min(100, Math.round((update.campaignCurrentAmount / update.campaignGoalAmount) * 100))
@@ -245,6 +246,13 @@ export function DonorBackedUpdatesFeed() {
             );
           })}
         </div>
+      )}
+      {!loading && !error && meta && (meta.totalPages > 1 || page > 1) && (
+        <nav aria-label="Paginación de novedades" className="flex flex-wrap items-center justify-center gap-4">
+          <button type="button" disabled={page <= 1} onClick={() => onPageChange(page - 1)} className="px-4 py-2 rounded-xl bg-white border border-gray-200 font-bold text-sm disabled:opacity-40">Anterior</button>
+          <span className="text-sm text-slate-600">Página {page} de {meta.totalPages} · {meta.totalItems} novedades</span>
+          <button type="button" disabled={page >= meta.totalPages} onClick={() => onPageChange(page + 1)} className="px-4 py-2 rounded-xl bg-white border border-gray-200 font-bold text-sm disabled:opacity-40">Siguiente</button>
+        </nav>
       )}
     </div>
   );

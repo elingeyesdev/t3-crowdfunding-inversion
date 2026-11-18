@@ -44,16 +44,6 @@ class AuditDiagnosticsTest extends TestCase
         return Campaign::create(['creator_id' => $owner->id, 'category_id' => Category::first()->id, 'title' => 'Audit campaign', 'slug' => uniqid('audit-'), 'goal_amount' => 1000, 'status' => 'draft', ...$attrs]);
     }
 
-    public function test_observed_frontend_endpoints_are_missing(): void
-    {
-        $u = $this->user('investor');
-        $c = $this->campaign($this->user(), ['status' => 'published']);
-        $this->login($u);
-        foreach (['/investments/backed-campaigns/updates'] as $path) {
-            $this->getJson('/api/v1'.$path)->assertNotFound();
-        }
-    }
-
     public function test_observed_category_preference_does_not_suppress_notification(): void
     {
         $u = $this->user('investor');
