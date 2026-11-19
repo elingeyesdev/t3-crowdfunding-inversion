@@ -7,7 +7,8 @@ import 'package:movil/app/shell/main_shell.dart';
 import 'package:movil/app/unifundme_app.dart';
 import 'package:movil/features/account/presentation/account_page.dart';
 import 'package:movil/features/catalog/presentation/explore_page.dart';
-import 'package:movil/features/tracking/presentation/tracking_page.dart';
+
+import '../features/auth/auth_test_support.dart';
 
 Future<void> openAccessFromAccount(WidgetTester tester) async {
   await tester.pumpWidget(const UniFundMeApp());
@@ -33,13 +34,13 @@ void main() {
   ) async {
     await openAccessFromAccount(tester);
 
-    expect(find.text('Acceso'), findsNWidgets(2));
+    expect(find.text('Acceso'), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
-    expect(find.byType(TextField), findsNothing);
-    final router = GoRouter.of(tester.element(find.byType(BackButton)));
+    expect(find.byType(TextFormField), findsNWidgets(2));
+    final router = GoRouter.of(tester.element(find.byTooltip('Volver')));
     expect(router.canPop(), isTrue);
 
-    await tester.tap(find.byType(BackButton));
+    await tester.tap(find.byTooltip('Volver'));
     await tester.pumpAndSettle();
 
     expectAccountSelected(tester);
@@ -56,7 +57,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expectAccountSelected(tester);
-    expect(find.byType(BackButton), findsNothing);
+    expect(find.byTooltip('Volver'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -65,8 +66,6 @@ void main() {
   ) async {
     await tester.pumpWidget(const UniFundMeApp());
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(NavigationDestination).at(1));
-    await tester.pumpAndSettle();
     final router = GoRouter.of(tester.element(find.byType(MainShell)));
     router.pushNamed<void>(AppRoutes.accessName);
     await tester.pumpAndSettle();
@@ -74,10 +73,10 @@ void main() {
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
 
-    expect(find.byType(TrackingPage), findsOneWidget);
+    expect(find.byType(ExplorePage), findsOneWidget);
     expect(
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-      1,
+      0,
     );
     expect(tester.takeException(), isNull);
   });
@@ -85,12 +84,17 @@ void main() {
   testWidgets('Acceso abierto directamente permite volver a Explorar', (
     tester,
   ) async {
-    final router = AppRouter.create(initialLocation: AppRoutes.access);
+    final dependencies = testDependencies(configured: false);
+    addTearDown(dependencies.dispose);
+    final router = AppRouter.create(
+      dependencies: dependencies,
+      initialLocation: AppRoutes.access,
+    );
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     await tester.pumpAndSettle();
 
     expect(router.canPop(), isFalse);
-    await tester.tap(find.byType(BackButton));
+    await tester.tap(find.byTooltip('Volver'));
     await tester.pumpAndSettle();
 
     expect(find.byType(ExplorePage), findsOneWidget);
@@ -103,7 +107,12 @@ void main() {
   testWidgets('Una ruta inicial desconocida permite recuperar Explorar', (
     tester,
   ) async {
-    final router = AppRouter.create(initialLocation: '/pantalla-inexistente');
+    final dependencies = testDependencies(configured: false);
+    addTearDown(dependencies.dispose);
+    final router = AppRouter.create(
+      dependencies: dependencies,
+      initialLocation: '/pantalla-inexistente',
+    );
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     await tester.pumpAndSettle();
 
@@ -162,7 +171,7 @@ void main() {
 
       await openAccessFromAccount(tester);
       expect(tester.takeException(), isNull);
-      await tester.tap(find.byType(BackButton));
+      await tester.tap(find.byTooltip('Volver'));
       await tester.pumpAndSettle();
       expectAccountSelected(tester);
 

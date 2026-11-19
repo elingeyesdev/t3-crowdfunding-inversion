@@ -51,3 +51,4 @@ app.*.map.json
 /.env.*
 !/.env.example
 /config.production.json
+/integration_test/.native_persistence_runs/

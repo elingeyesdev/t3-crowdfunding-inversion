@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android 11 y anteriores. flutter_secure_storage-v11.2.0:
+    AndroidOptions() sin storageNamespace personalizado.
+    Fuentes: FlutterSecureStorageConfig.java y NamespacedConfigSource.java.
+    Cambiar storageNamespace exige revisar estas reglas y data_extraction_rules.xml.
+    Las copias de migracion (_BACKUP) son entradas de estos mismos almacenes.
+    Se excluyen tambien los archivos .bak de SharedPreferences (AOSP).
+    El resto de los datos conserva la politica de backup predeterminada.
+-->
+<full-backup-content>
+    <exclude domain="sharedpref" path="FlutterSecureStorage.xml" />
+    <exclude domain="sharedpref" path="FlutterSecureStorage.xml.bak" />
+    <exclude domain="sharedpref" path="FlutterSecureKeyStorage.xml" />
+    <exclude domain="sharedpref" path="FlutterSecureKeyStorage.xml.bak" />
+    <exclude domain="sharedpref" path="FlutterSecureStorageConfiguration:FlutterSecureStorage.xml" />
+    <exclude domain="sharedpref" path="FlutterSecureStorageConfiguration:FlutterSecureStorage.xml.bak" />
+    <exclude domain="sharedpref" path="FlutterSecureStorageConfiguration.xml" />
+    <exclude domain="sharedpref" path="FlutterSecureStorageConfiguration.xml.bak" />
+</full-backup-content>
