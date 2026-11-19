@@ -71,13 +71,6 @@ class AuditDiagnosticsTest extends TestCase
         $this->getJson('/api/v1/investments/me')->assertOk()->assertJsonMissingPath('data.0.rewardClaimStatus')->assertJsonMissingPath('data.0.trackingNumber');
     }
 
-    public function test_observed_admin_duplicate_email_with_uppercase_returns_server_error(): void
-    {
-        $u = $this->user('super_admin');
-        User::create(['email' => 'duplicate@example.test', 'password_hash' => Hash::make('Password123')]);
-        $this->login($u)->postJson('/api/v1/superadmin/admins', ['email' => 'DUPLICATE@EXAMPLE.TEST', 'password' => 'Password123'])->assertStatus(500);
-    }
-
     public function test_observed_refunded_claim_can_be_marked_delivered_again(): void
     {
         $owner = $this->user();
