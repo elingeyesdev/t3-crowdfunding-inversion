@@ -37,6 +37,8 @@ export interface RewardTier {
   imageUrl: string | null;
   minPercentage?: number;
   maxPercentage?: number;
+  isActive?: boolean;
+  expiresAt?: string | null;
 }
 
 export interface PublicCampaignDetail extends PublicCampaign {

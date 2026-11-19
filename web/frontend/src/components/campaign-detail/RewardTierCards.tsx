@@ -1,4 +1,5 @@
 import type { RewardTier } from '../../api/public-campaigns.api';
+import { rewardAmountRange, rewardUnavailableReason } from '../../utils/rewardSelection';
 import {
   Check,
   Gift,
@@ -12,6 +13,7 @@ interface RewardTierCardsProps {
   selectedTierId: string | null;
   onSelect: (tierId: string) => void;
   disabled?: boolean;
+  goalAmount: number;
 }
 
 export function RewardTierCards({
@@ -19,6 +21,7 @@ export function RewardTierCards({
   selectedTierId,
   onSelect,
   disabled = false,
+  goalAmount,
 }: RewardTierCardsProps) {
   if (!tiers || tiers.length === 0) return null;
 
@@ -37,9 +40,9 @@ export function RewardTierCards({
       <div className="flex flex-col gap-4">
         {tiers.map((tier) => {
           const isSelected = selectedTierId === tier.id;
-          const isSoldOut =
-            tier.maxClaims !== null && tier.currentClaims >= tier.maxClaims;
-          const isDisabled = disabled || isSoldOut;
+          const unavailable = rewardUnavailableReason(tier);
+          const { min, max } = rewardAmountRange(tier, goalAmount);
+          const isDisabled = disabled || !!unavailable;
 
           return (
             <button
@@ -66,11 +69,11 @@ export function RewardTierCards({
               )}
 
               {/* Sold out badge */}
-              {isSoldOut && (
+              {unavailable && (
                 <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-lg">
                   <Lock size={11} strokeWidth={3} className="text-slate-400" />
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Agotada
+                    {unavailable}
                   </span>
                 </div>
               )}
@@ -82,10 +85,10 @@ export function RewardTierCards({
                     isSelected ? 'text-[#72B626]' : 'text-[#1c2b1e]'
                   }`}
                 >
-                  Bs. {tier.amount.toLocaleString('es-BO')}
+                  {min.toLocaleString('es-BO')} – {max.toLocaleString('es-BO')}
                 </span>
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                  {tier.currency || 'BOB'} o más
+                  {tier.currency || 'BOB'}
                 </span>
               </div>
 

@@ -1,4 +1,5 @@
 import { campaignStatusLabel } from '../utils/campaignStatus';
+import { rewardAmountRange, rewardSelectionError } from '../utils/rewardSelection';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { PitchVideoPlayer } from '../components/campaigns/PitchVideoPlayer';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
@@ -267,8 +268,8 @@ export function CampaignDetailPage() {
   const amountTooLow = !!(hasValidAmount && campaign.minInvestment && parsedAmount < campaign.minInvestment);
   const amountTooHigh = !!(hasValidAmount && campaign.maxInvestment && parsedAmount > campaign.maxInvestment);
   const selectedTier = selectedTierId ? campaign.rewardTiers?.find(t => t.id === selectedTierId) : null;
-  const amountBelowTier = !!(selectedTier && hasValidAmount && parsedAmount < selectedTier.amount);
-  const canInvest = acceptsDonations && !investmentLoading && !investmentSuccess && hasValidAmount && !amountTooLow && !amountTooHigh && !amountBelowTier;
+  const rewardError = selectedTierId ? rewardSelectionError(selectedTier, parsedAmount, campaign.goalAmount, campaign.currency) : null;
+  const canInvest = acceptsDonations && !investmentLoading && !investmentSuccess && hasValidAmount && !amountTooLow && !amountTooHigh && !rewardError;
   const closedDonationLabel = campaign.status === 'completed' ? 'Campaña finalizada con éxito'
     : campaign.status === 'failed' ? 'Campaña cerrada sin alcanzar la meta'
     : isFundedOrCompleted ? 'Meta de financiación alcanzada'
@@ -299,8 +300,8 @@ export function CampaignDetailPage() {
       scrollToDonationCard();
       return;
     }
-    if (amountBelowTier && selectedTier) {
-      setInvestmentError(`El monto mínimo para la recompensa "${selectedTier.title}" es Bs. ${selectedTier.amount.toLocaleString('es-BO')}.`);
+    if (rewardError) {
+      setInvestmentError(rewardError);
       scrollToDonationCard();
       return;
     }
@@ -580,6 +581,7 @@ export function CampaignDetailPage() {
                 {campaign.rewardTiers && campaign.rewardTiers.length > 0 && (
                   <RewardTierCards
                     tiers={campaign.rewardTiers}
+                    goalAmount={campaign.goalAmount}
                     selectedTierId={selectedTierId}
                     onSelect={(tierId) => {
                       setInvestmentError(null);
@@ -590,7 +592,7 @@ export function CampaignDetailPage() {
                       } else {
                         setSelectedTierId(tierId);
                         const tier = campaign.rewardTiers.find((t) => t.id === tierId);
-                        if (tier) setCustomAmount(String(tier.amount));
+                        if (tier) setCustomAmount(String(Math.max(campaign.minInvestment, rewardAmountRange(tier, campaign.goalAmount).min)));
                       }
                     }}
                     disabled={!acceptsDonations || investmentLoading || investmentSuccess}
@@ -873,6 +875,9 @@ export function CampaignDetailPage() {
                       <p className="text-[11px] text-[#72B626] font-bold mt-2 flex items-center gap-1">
                         <Gift size={11} strokeWidth={2.5} />
                         Recompensa: {campaign.rewardTiers?.find(t => t.id === selectedTierId)?.title}
+                        <button type="button" disabled={investmentLoading || investmentSuccess} onClick={() => { setSelectedTierId(null); setInvestmentError(null); }} className="ml-2 underline cursor-pointer disabled:opacity-50">
+                          Aportar sin recompensa
+                        </button>
                       </p>
                     )}
                   </div>
@@ -1006,9 +1011,9 @@ export function CampaignDetailPage() {
                           Ingresa el monto que deseas donar
                         </p>
                       )}
-                      {amountBelowTier && selectedTier && (
+                      {rewardError && (
                         <p className="text-[11px] text-amber-600 font-bold text-center mt-2">
-                          Mínimo Bs. {selectedTier.amount.toLocaleString('es-BO')} para esta recompensa
+                          {rewardError}
                         </p>
                       )}
                       {amountTooLow && (
@@ -1165,6 +1170,12 @@ export function CampaignDetailPage() {
           loading={investmentLoading}
           onConfirm={async () => {
             if (!acceptsDonations) return;
+            const selectionError = selectedTierId ? rewardSelectionError(selectedTier, parseFloat(customAmount), campaign.goalAmount, campaign.currency) : null;
+            if (selectionError) {
+              setInvestmentError(selectionError);
+              setShowConfirmModal(false);
+              return;
+            }
             setInvestmentLoading(true);
             setInvestmentError(null);
             try {
@@ -1183,6 +1194,7 @@ export function CampaignDetailPage() {
               const msg = err?.response?.data?.message || 'Error al procesar la inversión. Intenta nuevamente.';
               setInvestmentError(typeof msg === 'string' ? msg : msg[0] || 'Error desconocido.');
               setShowConfirmModal(false);
+              refetch();
             } finally {
               setInvestmentLoading(false);
             }

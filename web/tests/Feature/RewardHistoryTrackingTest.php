@@ -67,7 +67,7 @@ class RewardHistoryTrackingTest extends TestCase
         $donor = $this->user();
         $campaign = $this->campaign($owner);
         $reward = $this->reward($campaign);
-        $id = $this->login($donor)->postJson('/api/v1/investments', ['campaignId' => $campaign->id, 'amount' => 100])->assertCreated()->json('data.ticket.id');
+        $id = $this->login($donor)->postJson('/api/v1/investments', ['campaignId' => $campaign->id, 'amount' => 100, 'rewardTierId' => $reward->id])->assertCreated()->json('data.ticket.id');
         $claim = RewardClaim::where('investment_id', $id)->firstOrFail();
         $this->getJson(self::PATH)->assertOk()->assertJsonPath('data.0.rewardClaimStatus', 'pending')->assertJsonPath('data.0.rewardClaimId', $claim->id)->assertJsonPath('data.0.rewardTierId', $reward->id)->assertJsonPath('data.0.trackingNumber', null)->assertJsonPath('data.0.shippedAt', null);
         $route = '/api/v1/campaigns/'.$campaign->id.'/rewards/claims/'.$claim->id;
@@ -90,8 +90,8 @@ class RewardHistoryTrackingTest extends TestCase
         $owner = $this->user('entrepreneur');
         $donor = $this->user();
         $campaign = $this->campaign($owner);
-        $this->reward($campaign);
-        $this->login($donor)->postJson('/api/v1/investments', ['campaignId' => $campaign->id, 'amount' => 100])->assertCreated();
+        $reward = $this->reward($campaign);
+        $this->login($donor)->postJson('/api/v1/investments', ['campaignId' => $campaign->id, 'amount' => 100, 'rewardTierId' => $reward->id])->assertCreated();
         $this->login($owner)->postJson('/api/v1/entrepreneurs/me/campaigns/'.$campaign->id.'/finalize')->assertOk();
         $this->login($donor)->getJson(self::PATH)->assertOk()->assertJsonPath('data.0.investmentStatus', 'refunded')->assertJsonPath('data.0.rewardClaimStatus', 'cancelled')->assertJsonPath('data.0.trackingNumber', null)->assertJsonPath('data.0.shippedAt', null)->assertJsonPath('data.0.deliveredAt', null);
     }
