@@ -23,4 +23,9 @@ class Investment extends Record
     {
         return $this->belongsTo(RewardTier::class, 'reward_tier_id');
     }
+
+    public function rewardClaim()
+    {
+        return $this->hasOne(RewardClaim::class);
+    }
 }

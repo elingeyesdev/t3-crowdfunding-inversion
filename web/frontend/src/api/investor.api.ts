@@ -135,6 +135,7 @@ export interface InvestmentHistoryItem {
   rewardEstimatedDelivery?: string | null;
   rewardImageUrl?: string | null;
   rewardClaimStatus?: string | null;
+  rewardClaimId?: string | null;
   trackingNumber?: string | null;
   trackingUrl?: string | null;
   shippedAt?: string | null;
