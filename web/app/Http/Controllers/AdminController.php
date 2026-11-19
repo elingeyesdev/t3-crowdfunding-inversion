@@ -121,10 +121,15 @@ class AdminController extends Controller
 
     public function createAdmin(Request $r)
     {
-        $data = $r->validate(['email' => 'required|email|unique:users,email', 'password' => ['required', 'string', 'min:8', 'max:128', 'regex:/^(?=.*[A-Z])(?=.*\d).+$/'], 'firstName' => 'nullable|string|max:100', 'lastName' => 'nullable|string|max:100', 'accessLevel' => 'sometimes|in:admin,super_admin']);
+        if (is_string($r->input('email'))) {
+            $r->merge(['email' => strtolower(trim($r->input('email')))]);
+        }
+        $data = $r->validate(['email' => 'bail|required|string|email|max:255|unique:users,email', 'password' => ['required', 'string', 'min:8', 'max:128', 'regex:/^(?=.*[A-Z])(?=.*\d).+$/'], 'firstName' => 'nullable|string|max:100', 'lastName' => 'nullable|string|max:100', 'accessLevel' => 'sometimes|in:admin,super_admin'], [
+            'email.unique' => 'Ya existe una cuenta con este correo electrónico.',
+        ]);
 
         return DB::transaction(function () use ($data) {
-            $user = User::create(['email' => strtolower($data['email']), 'password_hash' => Hash::make($data['password'])]);
+            $user = User::create(['email' => $data['email'], 'password_hash' => Hash::make($data['password'])]);
             $level = $data['accessLevel'] ?? 'admin';
             $user->assignRole($level);
 
