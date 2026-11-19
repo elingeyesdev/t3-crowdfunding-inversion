@@ -13,4 +13,18 @@ class RewardClaim extends Record
     {
         return $this->belongsTo(Investment::class);
     }
+
+    public function allowedStatuses(): array
+    {
+        if ($this->investment->status !== 'completed' || $this->investment->refunded_amount > 0) {
+            return [];
+        }
+
+        return match ($this->status) {
+            'pending' => ['processing', 'cancelled'],
+            'processing' => ['shipped', 'cancelled'],
+            'shipped' => ['delivered', 'cancelled'],
+            default => [],
+        };
+    }
 }

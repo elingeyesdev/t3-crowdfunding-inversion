@@ -325,6 +325,8 @@ export interface UpdateRewardTierDto extends Partial<CreateRewardTierDto> {
 }
 
 export interface RewardClaim {
+  investment_status?: string;
+  allowed_statuses?: string[];
   claim_id: string;
   claim_status: string;
   tracking_number: string | null;

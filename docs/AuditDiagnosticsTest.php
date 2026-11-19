@@ -2,7 +2,7 @@
 
 namespace Tests\Audit;
 
-use App\Models\{Campaign, Category, EntrepreneurProfile, InvestorProfile, Notification, RewardClaim, RewardTier, User};
+use App\Models\{Campaign, Category, EntrepreneurProfile, InvestorProfile, Notification, User};
 use App\Services\Notifier;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\{Auth, DB, Hash};
@@ -60,16 +60,4 @@ class AuditDiagnosticsTest extends TestCase
         $this->getJson('/api/v1/notifications/unread-count')->assertJsonPath('data.unreadCount', 1);
     }
 
-    public function test_observed_refunded_claim_can_be_marked_delivered_again(): void
-    {
-        $owner = $this->user();
-        $c = $this->campaign($owner, ['status' => 'published']);
-        $reward = RewardTier::create(['campaign_id' => $c->id, 'title' => 'Reward', 'min_percentage' => 1, 'max_percentage' => 100]);
-        $u = $this->user('investor');
-        $id = $this->login($u)->postJson('/api/v1/investments', ['campaignId' => $c->id, 'amount' => 100, 'rewardTierId' => $reward->id])->assertCreated()->json('data.ticket.id');
-        $this->login($owner)->postJson('/api/v1/entrepreneurs/me/campaigns/'.$c->id.'/finalize')->assertOk();
-        $claim = RewardClaim::where('investment_id', $id)->firstOrFail();
-        $this->assertSame('cancelled', $claim->status);
-        $this->patchJson('/api/v1/campaigns/'.$c->id.'/rewards/claims/'.$claim->id, ['status' => 'delivered'])->assertOk()->assertJsonPath('data.status', 'delivered');
-    }
 }
