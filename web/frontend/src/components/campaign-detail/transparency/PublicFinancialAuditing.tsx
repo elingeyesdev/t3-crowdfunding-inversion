@@ -17,19 +17,21 @@ import {
   Sparkles,
   Users,
   DollarSign,
-  ArrowUpRight,
-  PieChart as PieIcon,
   Receipt,
   CheckCircle2,
   Lock,
-  Calendar,
-  Layers,
+  AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
-import type { CampaignFinancialProgress, RecentInvestment } from '../../../types/campaign.types';
+import type { CampaignFinancialProgress } from '../../../types/campaign.types';
 import { formatCampaignCurrency } from '../../../utils/campaignFunding';
 
 interface Props {
+  campaignId: string;
   finance: CampaignFinancialProgress | null;
+  loading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   startDate?: string | Date | null;
   createdAt?: string | Date | null;
 }
@@ -37,15 +39,17 @@ interface Props {
 const PIE_COLORS = ['#72B626', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#64748b'];
 
 export function PublicFinancialAuditing({
+  campaignId,
   finance,
+  loading = false,
+  error = null,
+  onRetry,
   startDate,
   createdAt,
 }: Props) {
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'direct' | 'rewards'>('all');
-
-  if (!finance) {
+  if (loading) {
     return (
-      <div className="bg-white rounded-[28px] p-10 border border-slate-100 text-center">
+      <div role="status" className="bg-white rounded-[28px] p-10 border border-slate-100 text-center">
         <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 mx-auto mb-3 animate-pulse">
           <TrendingUp size={24} />
         </div>
@@ -56,29 +60,55 @@ export function PublicFinancialAuditing({
     );
   }
 
+  if (error) {
+    return (
+      <div role="alert" className="bg-white rounded-[28px] p-8 border border-red-100 text-center">
+        <AlertTriangle size={28} className="text-red-500 mx-auto mb-3" />
+        <p className="text-sm text-red-700">{error}</p>
+        {onRetry && <button type="button" onClick={onRetry} className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-50 text-[#4a7f1a] font-bold border-none cursor-pointer">
+          <RefreshCw size={16} /> Reintentar
+        </button>}
+      </div>
+    );
+  }
+
+  if (!finance) {
+    return (
+      <div className="bg-white rounded-[28px] p-10 border border-slate-100 text-center">
+        <TrendingUp size={28} className="text-slate-300 mx-auto mb-3" />
+        <p className="text-sm text-slate-500">No hay información financiera disponible para esta campaña.</p>
+      </div>
+    );
+  }
+
+  return <PublicFinancialAuditPanel key={campaignId} finance={finance} startDate={startDate} createdAt={createdAt} />;
+}
+
+// This component mounts only with data; all its hooks run on every render.
+function PublicFinancialAuditPanel({ finance, startDate, createdAt }: Pick<Props, 'startDate' | 'createdAt'> & { finance: CampaignFinancialProgress }) {
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'direct' | 'rewards'>('all');
+  const [fallbackDate] = useState(() => new Date());
+
   const {
     currentAmount = 0,
-    goalAmount = 0,
     currency = 'BOB',
     investorCount = 0,
     fundingPercentage = 0,
     averageInvestment = 0,
     largestInvestment = 0,
-    smallestInvestment = 0,
     recentInvestments = [],
     dailyProgress = [],
     fundingBreakdown = [],
   } = finance;
 
   // Transparencia en deducción de comisiones
-  const platformFeePercentage = 5;
   const platformFeeAmount = Math.round(currentAmount * 0.05 * 100) / 100;
   const netEntrepreneurAmount = Math.round((currentAmount - platformFeeAmount) * 100) / 100;
 
   // Chart 1: Time series evolution
   const chartData = useMemo(() => {
     if (dailyProgress.length === 0) {
-      const initialDate = new Date(startDate || createdAt || Date.now());
+      const initialDate = new Date(startDate || createdAt || fallbackDate);
       const formattedDate = initialDate.toLocaleDateString('es-BO', { day: 'numeric', month: 'short' });
       return [{ date: formattedDate, accumulated: 0 }];
     }
@@ -93,7 +123,7 @@ export function PublicFinancialAuditing({
         accumulated: p.accumulatedAmount,
       };
     });
-  }, [dailyProgress, startDate, createdAt]);
+  }, [dailyProgress, startDate, createdAt, fallbackDate]);
 
   // Chart 2: Funding breakdown by rewards/direct
   const pieData = useMemo(() => {
@@ -291,7 +321,7 @@ export function PublicFinancialAuditing({
                     color: '#fff',
                     fontFamily: "'Plus Jakarta Sans', sans-serif",
                   }}
-                  formatter={(value: any) => [`Bs. ${Number(value).toLocaleString('es-BO')}`, 'Acumulado']}
+                  formatter={(value) => [`Bs. ${Number(value).toLocaleString('es-BO')}`, 'Acumulado']}
                   labelStyle={{ fontWeight: 900, color: '#72B626', textTransform: 'uppercase', fontSize: 10 }}
                 />
                 <Area
@@ -342,7 +372,7 @@ export function PublicFinancialAuditing({
                     color: '#fff',
                     fontFamily: "'Plus Jakarta Sans', sans-serif",
                   }}
-                  formatter={(value: any) => [`Bs. ${Number(value).toLocaleString('es-BO')}`, 'Monto']}
+                  formatter={(value) => [`Bs. ${Number(value).toLocaleString('es-BO')}`, 'Monto']}
                 />
               </PieChart>
             </ResponsiveContainer>

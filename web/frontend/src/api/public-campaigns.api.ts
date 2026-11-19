@@ -149,8 +149,8 @@ export interface PublicCampaignUpdate {
 
 export async function fetchPublicCampaignFinancialProgress(
   campaignId: string,
-): Promise<CampaignFinancialProgress> {
-  const res = await API.get(`/campaigns/public/${campaignId}/financial-progress`);
+): Promise<CampaignFinancialProgress | null> {
+  const res = await API.get(`/campaigns/public/${campaignId}/financial-progress`, { timeout: 15000 });
   return res.data.data;
 }
 
