@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Models\Campaign;
-use App\Models\CampaignDocument;
-use App\Models\CampaignFinancialMovement;
 use App\Models\CampaignMilestone;
 use App\Models\CampaignUpdate;
 use App\Models\Comment;
@@ -15,6 +13,17 @@ use App\Models\User;
 
 class Notifier
 {
+    private const CATEGORY_EVENTS = [
+        'investmentAlerts' => ['investment_confirmed', 'investment_received', 'investment_refunded'],
+        'commentAlerts' => ['new_comment', 'new_message'],
+        'campaignStatusUpdates' => [
+            'campaign_draft', 'campaign_pending_review', 'campaign_in_review', 'campaign_approved',
+            'campaign_rejected', 'campaign_published', 'campaign_partially_funded', 'campaign_funded',
+            'campaign_completed', 'campaign_failed', 'campaign_cancelled', 'campaign_suspended',
+        ],
+        'milestoneUpdates' => ['milestone_completed', 'campaign_update'],
+    ];
+
     /**
      * Send a notification to a specific user.
      */
@@ -39,6 +48,14 @@ class Notifier
         if (! empty($prefs)) {
             if (isset($prefs['inAppEnabled']) && ! $prefs['inAppEnabled'] && $channel === 'in_app') {
                 return null;
+            }
+            if (isset($prefs['emailEnabled']) && ! $prefs['emailEnabled'] && $channel === 'email') {
+                return null;
+            }
+            foreach (self::CATEGORY_EVENTS as $preference => $events) {
+                if (in_array($code, $events, true) && isset($prefs[$preference]) && ! $prefs[$preference]) {
+                    return null;
+                }
             }
             if (isset($prefs['categories'][$code]) && ! $prefs['categories'][$code]) {
                 return null;

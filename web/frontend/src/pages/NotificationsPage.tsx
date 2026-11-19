@@ -539,7 +539,7 @@ export function NotificationsPage() {
       {/* Preferences Modal */}
       {showPreferences && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl border border-gray-200 shadow-2xl max-w-md w-full p-6 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl border border-gray-200 shadow-2xl max-w-md w-full max-h-[calc(100dvh-2rem)] overflow-y-auto p-6 animate-in fade-in duration-200">
             <div className="flex items-center justify-between pb-4 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-[#f0f9e0] text-[#72B626] flex items-center justify-center">
@@ -622,6 +622,19 @@ export function NotificationsPage() {
                   />
                 </label>
               </div>
+
+              <label className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100 cursor-pointer">
+                <div>
+                  <span className="text-xs font-bold text-gray-900 block">Hitos y avances</span>
+                  <span className="text-[11px] text-gray-500">Hitos completados y nuevos avances de las campañas que apoyas</span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={preferences.milestoneUpdates}
+                  onChange={(e) => setPreferences({ ...preferences, milestoneUpdates: e.target.checked })}
+                  className="w-4 h-4 text-[#72B626] rounded focus:ring-0 cursor-pointer"
+                />
+              </label>
 
               {prefsSuccess && (
                 <div className="p-3 bg-green-50 border border-green-200 text-green-700 text-xs font-bold rounded-xl flex items-center gap-2">

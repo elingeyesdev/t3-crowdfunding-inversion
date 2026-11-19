@@ -143,7 +143,7 @@ class NotificationController extends Controller
 
         $current = $r->user()->notification_preferences ?? [];
 
-        return Api::ok(array_merge($defaultPreferences, $current));
+        return Api::ok(array_merge($defaultPreferences, $current), camel: false);
     }
 
     public function updatePreferences(Request $r)
@@ -156,13 +156,17 @@ class NotificationController extends Controller
             'commentAlerts' => 'sometimes|boolean',
             'milestoneUpdates' => 'sometimes|boolean',
             'categories' => 'sometimes|array',
+            'categories.*' => 'boolean',
         ]);
 
         $current = $r->user()->notification_preferences ?? [];
         $merged = array_merge($current, $data);
+        if (isset($data['categories'])) {
+            $merged['categories'] = array_replace($current['categories'] ?? [], $data['categories']);
+        }
 
         $r->user()->update(['notification_preferences' => $merged]);
 
-        return Api::ok($merged);
+        return Api::ok($merged, camel: false);
     }
 }

@@ -3,7 +3,6 @@
 namespace Tests\Audit;
 
 use App\Models\{Campaign, Category, EntrepreneurProfile, InvestorProfile, Notification, User};
-use App\Services\Notifier;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\{Auth, DB, Hash};
 use Tests\TestCase;
@@ -42,13 +41,6 @@ class AuditDiagnosticsTest extends TestCase
     private function campaign(User $owner, array $attrs = []): Campaign
     {
         return Campaign::create(['creator_id' => $owner->id, 'category_id' => Category::first()->id, 'title' => 'Audit campaign', 'slug' => uniqid('audit-'), 'goal_amount' => 1000, 'status' => 'draft', ...$attrs]);
-    }
-
-    public function test_observed_category_preference_does_not_suppress_notification(): void
-    {
-        $u = $this->user('investor');
-        $this->login($u)->putJson('/api/v1/notifications/preferences', ['investmentAlerts' => false])->assertOk();
-        $this->assertNotNull(app(Notifier::class)->send($u->id, 'investment_received', 'Audit', 'Should be suppressed by category preference'));
     }
 
     public function test_observed_filtered_mark_all_returns_wrong_unread_count(): void
