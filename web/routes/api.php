@@ -154,6 +154,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('campaigns/{campaign}/documents', [CampaignController::class, 'documents']);
         Route::patch('campaigns/{campaign}/documents/{document}/review', [AdminController::class, 'reviewDocument']);
         Route::get('kyc/pending', [AdminController::class, 'kyc']);
+        Route::get('kyc/{profile}', [AdminController::class, 'kycProfile']);
         Route::post('kyc/{profile}/review', [AdminController::class, 'reviewKyc']);
         Route::get('financial-movements', [AdminController::class, 'financialMovements']);
         Route::get('financial-movements/{movement}', [AdminController::class, 'showFinancialMovement']);

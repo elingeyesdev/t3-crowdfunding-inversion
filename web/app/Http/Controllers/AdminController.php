@@ -151,6 +151,13 @@ class AdminController extends Controller
         return Api::ok(EntrepreneurProfile::with('user')->where('kyc_status', 'pending')->oldest('updated_at')->get()->map(fn ($p) => [...$p->attributesToArray(), 'email' => $p->user?->email]), 200, false);
     }
 
+    public function kycProfile(EntrepreneurProfile $profile)
+    {
+        abort_unless($profile->kyc_status === 'pending', 404, 'La solicitud KYC ya no está pendiente.');
+
+        return Api::ok([...$profile->attributesToArray(), 'email' => $profile->user?->email], 200, false);
+    }
+
     public function reviewKyc(Request $r, EntrepreneurProfile $profile, Notifier $notifier)
     {
         $data = $r->validate(['action' => 'required|in:approve,reject', 'reason' => 'nullable|string|max:2000']);

@@ -1,6 +1,7 @@
+import type { KycReviewData } from '../../types/kyc.types';
 import { useState, useEffect } from 'react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
-import { getPendingKyc, reviewKyc } from '../../api/admin.api';
+import { getPendingKyc, getKycProfile, reviewKyc } from '../../api/admin.api';
 import { KYCReviewModal } from '../../components/admin/KYCReviewModal';
 import { 
   UserCheck, 
@@ -13,10 +14,10 @@ import {
 } from 'lucide-react';
 
 export function AdminKycPage() {
-  const [pendingKyc, setPendingKyc] = useState<any[]>([]);
+  const [pendingKyc, setPendingKyc] = useState<KycReviewData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedKyc, setSelectedKyc] = useState<any | null>(null);
+  const [selectedKyc, setSelectedKyc] = useState<KycReviewData | null>(null);
   const [isKycModalOpen, setIsKycModalOpen] = useState(false);
 
   useEffect(() => {
@@ -205,6 +206,11 @@ export function AdminKycPage() {
             setSelectedKyc(null);
           }}
           kycData={selectedKyc}
+          onRefresh={async id => {
+            const fresh = await getKycProfile(id);
+            setSelectedKyc(current => current?.id === id ? fresh : current);
+            return fresh;
+          }}
           onApprove={handleApproveKyc}
           onReject={handleRejectKyc}
         />
