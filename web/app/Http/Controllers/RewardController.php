@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Campaign;
+use App\Models\Investment;
 use App\Models\RewardClaim;
 use App\Models\RewardTier;
 use App\Services\Notifier;
 use App\Support\Api;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RewardController extends Controller
 {
@@ -69,7 +71,7 @@ class RewardController extends Controller
             $i = $claim->investment;
             $p = $i->investor?->investor;
 
-            return ['claim_id' => $claim->id, 'claim_status' => $claim->status, 'tracking_number' => $claim->tracking_number, 'tracking_url' => $claim->tracking_url, 'investment_id' => $i->id, 'amount' => $i->amount, 'invested_at' => $i->created_at, 'reward_title' => $i->reward?->title, 'reward_id' => $i->reward_tier_id, 'expires_at' => $i->reward?->expires_at, 'investor_email' => $i->investor?->email, 'first_name' => $p?->first_name, 'last_name' => $p?->last_name];
+            return ['claim_id' => $claim->id, 'claim_status' => $claim->status, 'investment_status' => $i->status, 'allowed_statuses' => $claim->allowedStatuses(), 'tracking_number' => $claim->tracking_number, 'tracking_url' => $claim->tracking_url, 'investment_id' => $i->id, 'amount' => $i->amount, 'invested_at' => $i->created_at, 'reward_title' => $i->reward?->title, 'reward_id' => $i->reward_tier_id, 'expires_at' => $i->reward?->expires_at, 'investor_email' => $i->investor?->email, 'first_name' => $p?->first_name, 'last_name' => $p?->last_name];
         }), 200, false);
     }
 
@@ -78,11 +80,26 @@ class RewardController extends Controller
         CampaignController::authorizeOwner($r, $campaign);
         abort_unless($claim->investment->campaign_id === $campaign->id, 404);
         $data = $r->validate(['status' => 'required|in:pending,processing,shipped,delivered,cancelled', 'trackingNumber' => 'nullable|string|max:255', 'trackingUrl' => 'nullable|url:http,https|max:2048']);
-        $claim->update([...Api::snake($data), ...($data['status'] === 'shipped' ? ['shipped_at' => now()] : []), ...($data['status'] === 'delivered' ? ['delivered_at' => now()] : [])]);
-        if (in_array($data['status'], ['shipped', 'delivered'])) {
-            $notifier->send($claim->investment->investor_id, 'reward_'.$data['status'], 'Recompensa actualizada', $campaign->title.': '.$data['status'], $campaign->id);
-        }
 
-        return Api::ok($claim->fresh());
+        return DB::transaction(function () use ($r, $campaign, $claim, $data, $notifier) {
+            // Match the refund lock order and reread state after acquiring the locks.
+            $campaign = Campaign::whereKey($campaign->id)->lockForUpdate()->firstOrFail();
+            CampaignController::authorizeOwner($r, $campaign);
+            $investment = Investment::whereKey($claim->investment_id)->lockForUpdate()->firstOrFail();
+            $claim = RewardClaim::whereKey($claim->id)->lockForUpdate()->firstOrFail();
+            abort_unless($investment->campaign_id === $campaign->id, 404);
+            $claim->setRelation('investment', $investment);
+            abort_unless($investment->status === 'completed' && $investment->refunded_amount <= 0, 422, 'No se puede actualizar la recompensa de un aporte reembolsado o no completado.');
+            abort_if($claim->status === 'cancelled', 422, 'Esta recompensa está cancelada y no puede reactivarse ni modificarse.');
+            abort_if($claim->status === 'delivered', 422, 'Esta recompensa ya fue entregada y no puede modificarse.');
+            $changed = $data['status'] !== $claim->status;
+            abort_unless(in_array($data['status'], $claim->allowedStatuses(), true) || (! $changed && $claim->allowedStatuses()), 422, 'Cambio de estado no permitido. Sigue el orden: pendiente, en preparación, enviada y entregada.');
+            $claim->update([...Api::snake($data), ...($changed && $data['status'] === 'shipped' ? ['shipped_at' => now()] : []), ...($changed && $data['status'] === 'delivered' ? ['delivered_at' => now()] : [])]);
+            if ($changed && in_array($data['status'], ['shipped', 'delivered'])) {
+                $notifier->send($investment->investor_id, 'reward_'.$data['status'], 'Recompensa actualizada', $campaign->title.': '.$data['status'], $campaign->id);
+            }
+
+            return Api::ok([...$claim->fresh()->toArray(), 'allowed_statuses' => $claim->allowedStatuses()]);
+        }, 3);
     }
 }

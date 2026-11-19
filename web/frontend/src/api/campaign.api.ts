@@ -212,8 +212,8 @@ export async function updateRewardClaim(
   campaignId: string,
   claimId: string,
   dto: { status?: string; trackingNumber?: string; trackingUrl?: string; notes?: string },
-): Promise<RewardClaim> {
-  const { data } = await api.patch<ApiSuccessResponse<RewardClaim>>(
+): Promise<{ id: string; status: string; allowedStatuses: string[] }> {
+  const { data } = await api.patch<ApiSuccessResponse<{ id: string; status: string; allowedStatuses: string[] }>>(
     `/campaigns/${campaignId}/rewards/claims/${claimId}`,
     dto,
   );

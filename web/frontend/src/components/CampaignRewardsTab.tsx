@@ -14,15 +14,17 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { formatCampaignCurrency } from '../utils/campaignFunding';
+import { rewardTrackingLabel } from '../utils/rewardTracking';
 
 interface Props {
   campaignId: string;
   currency: string;
   readOnly?: boolean;
   isAdmin?: boolean;
+  canManageClaims?: boolean;
 }
 
-export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isAdmin = false }: Props) {
+export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isAdmin = false, canManageClaims = !readOnly }: Props) {
   const [tiers, setTiers] = useState<RewardTier[]>([]);
   const [claims, setClaims] = useState<RewardClaim[]>([]);
   const [_financialProgress, setFinancialProgress] = useState<CampaignFinancialProgress | null>(null);
@@ -33,6 +35,8 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
   const [formData, setFormData] = useState<Partial<UpdateRewardTierDto>>({});
   const [submitting, setSubmitting] = useState(false);
   const [showClaims, setShowClaims] = useState(false);
+  const [updatingClaimId, setUpdatingClaimId] = useState<string | null>(null);
+  const [claimError, setClaimError] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -354,6 +358,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
 
           {showClaims && (
             <div className="mt-4 bg-white rounded-[24px] border border-slate-200 overflow-hidden">
+              {claimError && <p role="alert" className="p-4 text-sm text-red-700 bg-red-50">{claimError}</p>}
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-[13px]">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-black uppercase tracking-widest text-[10px]">
@@ -385,21 +390,27 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
                           {claim.claim_id ? (
                             <select 
                               className="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-slate-200 outline-none"
-                              value={claim.claim_status || 'pending'}
+                              aria-label={`Estado de recompensa de ${claim.investor_email}`}
+                              value={claim.claim_status}
+                              disabled={!canManageClaims || isAdmin || !!updatingClaimId || !claim.allowed_statuses?.length}
                               onChange={async (e) => {
+                                const status = e.target.value;
+                                setUpdatingClaimId(claim.claim_id);
+                                setClaimError(null);
                                 try {
-                                  await updateRewardClaim(campaignId, claim.claim_id, { status: e.target.value });
-                                  setClaims(claims.map(c => c.claim_id === claim.claim_id ? { ...c, claim_status: e.target.value } : c));
-                                } catch(err) {
-                                  alert('Error al actualizar el estado.');
+                                  const updated = await updateRewardClaim(campaignId, claim.claim_id, { status });
+                                  setClaims(current => current.map(c => c.claim_id === claim.claim_id ? { ...c, claim_status: updated.status, allowed_statuses: updated.allowedStatuses } : c));
+                                } catch(err: any) {
+                                  const message = err?.response?.data?.message;
+                                  setClaimError(typeof message === 'string' ? message : Array.isArray(message) ? message.join(' ') : 'No se pudo actualizar el estado. Intenta nuevamente.');
+                                  try { setClaims(await getRewardClaims(campaignId)); } catch { /* Keep the last confirmed state if refreshing fails. */ }
+                                } finally {
+                                  setUpdatingClaimId(null);
                                 }
                               }}
                             >
-                              <option value="pending">Pendiente</option>
-                              <option value="processing">Procesando</option>
-                              <option value="shipped">Enviado</option>
-                              <option value="delivered">Entregado</option>
-                              <option value="issue_reported">Problema</option>
+                              <option value={claim.claim_status}>{rewardTrackingLabel(claim.claim_status)}</option>
+                              {(claim.allowed_statuses ?? []).map(status => <option key={status} value={status}>{rewardTrackingLabel(status)}</option>)}
                             </select>
                           ) : (
                             <span className="text-slate-400 text-[11px] italic">Sin registro logístico</span>
