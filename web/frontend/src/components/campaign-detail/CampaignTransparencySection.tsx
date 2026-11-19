@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   ShieldCheck,
   TrendingUp,
@@ -17,10 +17,7 @@ import { PublicEvidenceDocuments } from './transparency/PublicEvidenceDocuments'
 import { usePublicCampaignDocuments } from '../../hooks/usePublicCampaignDocuments';
 import { usePublicCampaignUpdates } from '../../hooks/usePublicCampaignUpdates';
 import { CampaignUpdatesTimeline } from './transparency/CampaignUpdatesTimeline';
-import {
-  fetchPublicCampaignFinancialProgress,
-} from '../../api/public-campaigns.api';
-import type { CampaignFinancialProgress } from '../../types/campaign.types';
+import { usePublicCampaignFinance } from '../../hooks/usePublicCampaignFinance';
 
 export type TransparencySubTab = 'presupuesto' | 'auditoria' | 'hitos' | 'evidencias' | 'bitacora';
 
@@ -52,41 +49,9 @@ export function CampaignTransparencySection({
   const [subTab, setSubTab] = useState<TransparencySubTab>('presupuesto');
 
   // State for data
-  const [finance, setFinance] = useState<CampaignFinancialProgress | null>(null);
+  const { finance, loading, error: financeError, retry: retryFinance } = usePublicCampaignFinance(campaignId);
   const { documents, loading: documentsLoading, error: documentsError, retry: retryDocuments } = usePublicCampaignDocuments(campaignId);
   const { updates, loading: updatesLoading, error: updatesError, retry: retryUpdates } = usePublicCampaignUpdates(campaignId);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadTransparencyData() {
-      try {
-        setLoading(true);
-        const [financeData] = await Promise.allSettled([
-          fetchPublicCampaignFinancialProgress(campaignId),
-        ]);
-
-        if (isMounted) {
-          if (financeData.status === 'fulfilled') {
-            setFinance(financeData.value);
-          }
-        }
-      } catch (err) {
-        console.error('Error cargando datos de transparencia pública:', err);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-
-    if (campaignId) {
-      loadTransparencyData();
-    }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [campaignId]);
 
   return (
     <div className="space-y-6 font-['Plus Jakarta Sans',sans-serif]">
@@ -165,7 +130,11 @@ export function CampaignTransparencySection({
 
       {subTab === 'auditoria' && (
         <PublicFinancialAuditing
+          campaignId={campaignId}
           finance={finance}
+          loading={loading}
+          error={financeError}
+          onRetry={retryFinance}
           startDate={startDate}
           createdAt={createdAt}
         />
