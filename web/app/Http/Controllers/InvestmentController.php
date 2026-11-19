@@ -22,7 +22,22 @@ class InvestmentController extends Controller
 
     public function index(Request $r)
     {
-        return Api::ok(Investment::with(['campaign', 'reward'])->where('investor_id', $r->user()->id)->latest()->get()->map(fn ($i) => ['id' => $i->id, 'amount' => $i->amount, 'investmentStatus' => $i->status, 'createdAt' => $i->created_at, 'campaignId' => $i->campaign_id, 'campaignTitle' => $i->campaign->title, 'campaignType' => $i->campaign->campaign_type, 'campaignGoal' => $i->campaign->goal_amount, 'campaignCoverImage' => $i->campaign->cover_image_url, 'campaignStatus' => $i->campaign->status, 'rewardTitle' => $i->reward?->title]));
+        $history = Investment::with(['campaign', 'reward', 'rewardClaim'])->where('investor_id', $r->user()->id)->latest()->get()->map(fn ($i) => [
+            'id' => $i->id, 'amount' => $i->amount, 'currency' => $i->currency,
+            'investmentStatus' => $i->status, 'createdAt' => $i->created_at,
+            'campaignId' => $i->campaign_id, 'campaignTitle' => $i->campaign->title,
+            'campaignType' => $i->campaign->campaign_type, 'campaignGoal' => $i->campaign->goal_amount,
+            'campaignCoverImage' => $i->campaign->cover_image_url, 'campaignStatus' => $i->campaign->status,
+            'rewardTierId' => $i->reward_tier_id, 'rewardTitle' => $i->reward?->title,
+            'rewardDescription' => $i->reward?->description, 'rewardEstimatedDelivery' => $i->reward?->estimated_delivery,
+            'rewardImageUrl' => $i->reward?->image_url, 'rewardClaimId' => $i->rewardClaim?->id,
+            'rewardClaimStatus' => $i->rewardClaim?->status,
+            'trackingNumber' => $i->rewardClaim?->tracking_number, 'trackingUrl' => $i->rewardClaim?->tracking_url,
+            'shippedAt' => $i->rewardClaim?->shipped_at, 'deliveredAt' => $i->rewardClaim?->delivered_at,
+        ]);
+
+        // Reward descriptions and tracking metadata must not mint private-file URLs.
+        return response()->json(['data' => Api::camel($history), 'message' => 'Operación exitosa', 'statusCode' => 200]);
     }
 
     public function backedUpdates(Request $r)

@@ -60,15 +60,13 @@ class AuditDiagnosticsTest extends TestCase
         $this->getJson('/api/v1/notifications/unread-count')->assertJsonPath('data.unreadCount', 1);
     }
 
-    public function test_observed_selected_reward_is_replaced_and_tracking_missing_in_history(): void
+    public function test_observed_selected_reward_is_replaced(): void
     {
         $c = $this->campaign($this->user(), ['status' => 'published']);
         $selected = RewardTier::create(['campaign_id' => $c->id, 'title' => 'Selected', 'min_percentage' => 1, 'max_percentage' => 9]);
         $assigned = RewardTier::create(['campaign_id' => $c->id, 'title' => 'Assigned', 'min_percentage' => 10, 'max_percentage' => 100]);
         $u = $this->user('investor');
-        $id = $this->login($u)->postJson('/api/v1/investments', ['campaignId' => $c->id, 'amount' => 100, 'rewardTierId' => $selected->id])->assertCreated()->assertJsonPath('data.ticket.rewardTierId', $assigned->id)->json('data.ticket.id');
-        RewardClaim::where('investment_id', $id)->update(['status' => 'shipped', 'tracking_number' => 'AUDIT123']);
-        $this->getJson('/api/v1/investments/me')->assertOk()->assertJsonMissingPath('data.0.rewardClaimStatus')->assertJsonMissingPath('data.0.trackingNumber');
+        $this->login($u)->postJson('/api/v1/investments', ['campaignId' => $c->id, 'amount' => 100, 'rewardTierId' => $selected->id])->assertCreated()->assertJsonPath('data.ticket.rewardTierId', $assigned->id);
     }
 
     public function test_observed_refunded_claim_can_be_marked_delivered_again(): void

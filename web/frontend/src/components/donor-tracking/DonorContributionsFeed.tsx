@@ -18,6 +18,7 @@ import {
   Layers,
 } from 'lucide-react';
 import type { InvestmentHistoryItem } from '../../api/investor.api';
+import { hasInvestmentReward, rewardTrackingLabel } from '../../utils/rewardTracking';
 import { downloadInvestmentReceipt } from '../../api/investor.api';
 import { getImageUrl } from '../../utils/image.utils';
 import { ProgressBar } from '../ProgressBar';
@@ -226,15 +227,13 @@ export function DonorContributionsFeed({ investments, loading, onSelectTab }: Pr
                     </Link>
 
                     {/* Reward Badge */}
-                    {inv.rewardTitle && (
+                    {hasInvestmentReward(inv) && (
                       <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-800 rounded-lg text-[11px] font-bold mt-2">
                         <Gift size={12} strokeWidth={2.5} className="text-amber-600 shrink-0" />
-                        <span className="truncate max-w-xs">{inv.rewardTitle}</span>
-                        {inv.rewardClaimStatus && (
-                          <span className="text-[9px] uppercase tracking-wider font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 ml-1">
-                            {inv.rewardClaimStatus === 'delivered' ? 'Entregada' : inv.rewardClaimStatus === 'shipped' ? 'Enviada' : 'En preparación'}
-                          </span>
-                        )}
+                        <span className="truncate max-w-xs">{inv.rewardTitle || 'Recompensa asociada al aporte'}</span>
+                        <span className="text-[9px] uppercase tracking-wider font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 ml-1">
+                          {rewardTrackingLabel(inv.rewardClaimStatus)}
+                        </span>
                       </div>
                     )}
 

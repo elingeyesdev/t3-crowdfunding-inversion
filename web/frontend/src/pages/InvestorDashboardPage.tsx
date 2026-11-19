@@ -23,6 +23,7 @@ import {
   FolderOpen,
 } from 'lucide-react';
 import { getMyInvestments, type InvestmentHistoryItem } from '../api/investor.api';
+import { hasInvestmentReward } from '../utils/rewardTracking';
 
 export type InvestorDashboardTab = 'contributions' | 'rewards' | 'updates' | 'receipts' | 'analytics';
 
@@ -72,9 +73,7 @@ export function InvestorDashboardPage() {
     }
   }, [data]);
 
-  const rewardCount = investments.filter(
-    (inv) => inv.rewardTitle && inv.rewardTitle.trim() !== '' && inv.rewardTitle !== 'Aporte Directo'
-  ).length;
+  const rewardCount = investments.filter(hasInvestmentReward).length;
 
   const completedReceiptCount = investments.filter(
     (inv) => inv.investmentStatus === 'completed'

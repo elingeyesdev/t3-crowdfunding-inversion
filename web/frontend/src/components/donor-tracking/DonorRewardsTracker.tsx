@@ -13,21 +13,26 @@ import {
   ArrowRight,
   ShieldCheck,
   Search,
+  XCircle,
+  type LucideIcon,
 } from 'lucide-react';
 import type { InvestmentHistoryItem } from '../../api/investor.api';
 import { getImageUrl } from '../../utils/image.utils';
+import { hasInvestmentReward, rewardTrackingStatus, rewardTrackingDate, rewardTrackingUrl } from '../../utils/rewardTracking';
 
 interface Props {
   investments: InvestmentHistoryItem[];
   loading?: boolean;
 }
 
-const CLAIM_STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: any; step: number }> = {
+const CLAIM_STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: LucideIcon; step: number }> = {
   pending: { label: 'En Espera de Producción', color: '#f59e0b', bg: '#fef3c7', icon: Clock, step: 1 },
   processing: { label: 'En Preparación / Empaque', color: '#3b82f6', bg: '#dbeafe', icon: Package, step: 2 },
   shipped: { label: 'En Camino / Despachada', color: '#8b5cf6', bg: '#ede9fe', icon: Truck, step: 3 },
   delivered: { label: 'Entregada con Éxito', color: '#72B626', bg: '#f0f9e0', icon: CheckCircle2, step: 4 },
   issue_reported: { label: 'Incidencia Reportada', color: '#ef4444', bg: '#fee2e2', icon: AlertCircle, step: 0 },
+  cancelled: { label: 'Recompensa Cancelada', color: '#b91c1c', bg: '#fee2e2', icon: XCircle, step: 0 },
+  unknown: { label: 'Sin seguimiento disponible', color: '#64748b', bg: '#f1f5f9', icon: AlertCircle, step: 0 },
 };
 
 export function DonorRewardsTracker({ investments, loading }: Props) {
@@ -35,12 +40,10 @@ export function DonorRewardsTracker({ investments, loading }: Props) {
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Filter only investments with a reward
-  const rewardInvestments = investments.filter(
-    (inv) => inv.rewardTitle && inv.rewardTitle.trim() !== '' && inv.rewardTitle !== 'Aporte Directo'
-  );
+  const rewardInvestments = investments.filter(hasInvestmentReward);
 
   const filteredRewards = rewardInvestments.filter((inv) => {
-    const status = inv.rewardClaimStatus || 'pending';
+    const status = rewardTrackingStatus(inv.rewardClaimStatus);
     const matchesStatus = filterStatus === 'all' || status === filterStatus;
     const matchesSearch =
       inv.rewardTitle?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -149,6 +152,11 @@ export function DonorRewardsTracker({ investments, loading }: Props) {
           >
             Entregadas
           </button>
+          {(['cancelled', 'unknown'] as const).map(status => (
+            <button key={status} type="button" onClick={() => setFilterStatus(status)} className={`px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider border-none cursor-pointer shrink-0 ${filterStatus === status ? 'bg-[#1c2b1e] text-white' : 'bg-white text-slate-500'}`}>
+              {status === 'cancelled' ? 'Canceladas' : 'Sin seguimiento'}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -188,9 +196,12 @@ export function DonorRewardsTracker({ investments, loading }: Props) {
       ) : (
         <div className="grid grid-cols-1 gap-5">
           {filteredRewards.map((item) => {
-            const rawStatus = item.rewardClaimStatus || 'pending';
-            const statusConfig = CLAIM_STATUS_MAP[rawStatus] || CLAIM_STATUS_MAP.pending;
+            const rawStatus = rewardTrackingStatus(item.rewardClaimStatus);
+            const statusConfig = CLAIM_STATUS_MAP[rawStatus];
             const StatusIcon = statusConfig.icon;
+            const trackingUrl = rewardTrackingUrl(item.trackingUrl);
+            const shippedAt = rewardTrackingDate(item.shippedAt);
+            const deliveredAt = rewardTrackingDate(item.deliveredAt);
 
             return (
               <div
@@ -213,7 +224,7 @@ export function DonorRewardsTracker({ investments, loading }: Props) {
                   </div>
 
                   <h3 className="text-[17px] sm:text-[19px] font-black text-[#1c2b1e] tracking-tight mb-2">
-                    {item.rewardTitle}
+                    {item.rewardTitle || 'Recompensa asociada al aporte'}
                   </h3>
 
                   {item.rewardDescription && (
@@ -257,11 +268,13 @@ export function DonorRewardsTracker({ investments, loading }: Props) {
                         Guía de envío: {item.trackingNumber}
                       </span>
                     )}
-                    {item.trackingUrl && (
+                    {shippedAt && <span>Enviado el {shippedAt}</span>}
+                    {deliveredAt && <span>Entregado el {deliveredAt}</span>}
+                    {trackingUrl && (
                       <a
-                        href={item.trackingUrl}
+                        href={trackingUrl}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-[11px] font-black text-blue-600 hover:underline"
                       >
                         <span>Rastrear paquete</span>
@@ -276,7 +289,9 @@ export function DonorRewardsTracker({ investments, loading }: Props) {
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
                     Fases de Entrega
                   </p>
-                  <div className="space-y-2.5 text-[11px] font-bold">
+                  {statusConfig.step === 0 ? (
+                    <p className="text-xs text-slate-600">{rawStatus === 'cancelled' ? 'La entrega de esta recompensa está cancelada.' : 'Consulta el estado de seguimiento registrado para esta recompensa.'}</p>
+                  ) : <div className="space-y-2.5 text-[11px] font-bold">
                     <div className="flex items-center gap-2 text-slate-700">
                       <div className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] shrink-0">
                         ✓
@@ -319,7 +334,7 @@ export function DonorRewardsTracker({ investments, loading }: Props) {
                         Entregado
                       </span>
                     </div>
-                  </div>
+                  </div>}
                 </div>
               </div>
             );
