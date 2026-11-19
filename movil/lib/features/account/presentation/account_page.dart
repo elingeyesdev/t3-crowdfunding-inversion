@@ -6,6 +6,8 @@ import '../../auth/application/app_dependencies.dart';
 import '../../auth/application/session_state.dart';
 import '../../auth/presentation/auth_messages.dart';
 import '../../auth/presentation/session_status_view.dart';
+import '../domain/profile_details.dart';
+import 'profile_page.dart';
 
 class AccountPage extends StatelessWidget {
   const AccountPage({super.key, required this.dependencies});
@@ -59,6 +61,24 @@ class AccountPage extends StatelessWidget {
                           : 'Roles: ${user.roles.join(', ')}',
                     ),
                     const SizedBox(height: 24),
+                    for (final kind in ProfileKind.values)
+                      if (user.roles.contains(kind.role))
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: OutlinedButton.icon(
+                            key: Key('account.profile.${kind.role}'),
+                            icon: const Icon(Icons.person_outline),
+                            label: Text('Perfil de ${kind.label}'),
+                            onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => ProfilePage(
+                                  dependencies: dependencies,
+                                  kind: kind,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                     FilledButton(
                       key: const Key('account.logout'),
                       onPressed: () => dependencies.logout(),
