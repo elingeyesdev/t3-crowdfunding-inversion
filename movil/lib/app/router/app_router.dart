@@ -1,7 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/account/presentation/account_page.dart';
+import '../../features/auth/application/app_dependencies.dart';
+import '../../features/auth/application/session_state.dart';
+import '../../features/auth/presentation/login_page.dart';
+import '../../features/auth/presentation/register_page.dart';
+import '../../features/auth/presentation/session_status_view.dart';
 import '../../features/catalog/presentation/explore_page.dart';
 import '../../features/notifications/presentation/notifications_page.dart';
 import '../../features/tracking/presentation/tracking_page.dart';
@@ -10,30 +17,102 @@ import '../shell/main_shell.dart';
 import 'app_routes.dart';
 
 abstract final class AppRouter {
-  static GoRouter create({String initialLocation = AppRoutes.root}) {
+  static GoRouter create({
+    required AppDependencies dependencies,
+    String initialLocation = AppRoutes.root,
+  }) {
+    final session = dependencies.session;
     return GoRouter(
       initialLocation: initialLocation,
+      refreshListenable: session,
+      redirect: (context, state) {
+        final path = state.uri.path;
+        final status = session.state.status;
+        final authenticated =
+            status == SessionStatus.authenticated &&
+            session.accessToken != null;
+        final destination = AppRoutes.safeReturn(
+          state.uri.queryParameters['from'],
+        );
+        if (status == SessionStatus.authenticated && !authenticated) {
+          scheduleMicrotask(session.checkExpiration);
+        }
+        if (authenticated) {
+          if ([
+            AppRoutes.access,
+            AppRoutes.register,
+            AppRoutes.session,
+          ].contains(path)) {
+            return destination;
+          }
+          return null;
+        }
+        if (status == SessionStatus.closing &&
+            path != AppRoutes.explore &&
+            path != AppRoutes.account) {
+          return AppRoutes.account;
+        }
+        if (AppRoutes.isPrivate(path)) {
+          final target = status == SessionStatus.guest
+              ? AppRoutes.access
+              : AppRoutes.session;
+          return Uri(path: target, queryParameters: {'from': path}).toString();
+        }
+        if (path == AppRoutes.session && status == SessionStatus.guest) {
+          return Uri(
+            path: AppRoutes.access,
+            queryParameters: {'from': destination},
+          ).toString();
+        }
+        return null;
+      },
       errorBuilder: (context, state) => const _NotFoundPage(),
       routes: [
-        GoRoute(
-          path: AppRoutes.root,
-          redirect: (context, state) => AppRoutes.explore,
-        ),
+        GoRoute(path: AppRoutes.root, redirect: (_, _) => AppRoutes.explore),
         GoRoute(
           path: AppRoutes.access,
           name: AppRoutes.accessName,
-          builder: (context, state) => const _AccessPage(),
+          builder: (_, state) => LoginPage(
+            dependencies: dependencies,
+            registered: state.extra == AuthNotice.registered,
+            returnTo: AppRoutes.safeReturn(state.uri.queryParameters['from']),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.register,
+          name: AppRoutes.registerName,
+          // La restauración puede finalizar sin cambiar la URI. El refresh
+          // del router reevalúa redirecciones, pero no garantiza reconstruir
+          // una página cuya coincidencia de ruta sigue siendo la misma.
+          builder: (_, state) => ListenableBuilder(
+            listenable: session,
+            builder: (_, _) => session.state.status == SessionStatus.guest
+                ? RegisterPage(
+                    dependencies: dependencies,
+                    returnTo: AppRoutes.safeReturn(
+                      state.uri.queryParameters['from'],
+                    ),
+                  )
+                : _SessionPage(dependencies: dependencies),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.session,
+          name: AppRoutes.sessionName,
+          builder: (_, _) => _SessionPage(dependencies: dependencies),
         ),
         StatefulShellRoute.indexedStack(
-          builder: (context, state, navigationShell) =>
-              MainShell(navigationShell: navigationShell),
+          pageBuilder: (context, state, shell) => NoTransitionPage(
+            key: state.pageKey,
+            child: MainShell(navigationShell: shell),
+          ),
           branches: [
             StatefulShellBranch(
               routes: [
                 GoRoute(
                   path: AppRoutes.explore,
                   name: AppRoutes.exploreName,
-                  builder: (context, state) => const ExplorePage(),
+                  builder: (_, _) => const ExplorePage(),
                 ),
               ],
             ),
@@ -42,7 +121,10 @@ abstract final class AppRouter {
                 GoRoute(
                   path: AppRoutes.tracking,
                   name: AppRoutes.trackingName,
-                  builder: (context, state) => const TrackingPage(),
+                  builder: (_, _) => _PrivateView(
+                    dependencies: dependencies,
+                    child: const TrackingPage(),
+                  ),
                 ),
               ],
             ),
@@ -51,7 +133,10 @@ abstract final class AppRouter {
                 GoRoute(
                   path: AppRoutes.notifications,
                   name: AppRoutes.notificationsName,
-                  builder: (context, state) => const NotificationsPage(),
+                  builder: (_, _) => _PrivateView(
+                    dependencies: dependencies,
+                    child: const NotificationsPage(),
+                  ),
                 ),
               ],
             ),
@@ -60,7 +145,7 @@ abstract final class AppRouter {
                 GoRoute(
                   path: AppRoutes.account,
                   name: AppRoutes.accountName,
-                  builder: (context, state) => const AccountPage(),
+                  builder: (_, _) => AccountPage(dependencies: dependencies),
                 ),
               ],
             ),
@@ -71,34 +156,27 @@ abstract final class AppRouter {
   }
 }
 
-class _AccessPage extends StatelessWidget {
-  const _AccessPage();
-
+class _SessionPage extends StatelessWidget {
+  const _SessionPage({required this.dependencies});
+  final AppDependencies dependencies;
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Acceso'),
-        leading: BackButton(
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              // Apertura directa sin una pantalla de origen en la pila.
-              context.goNamed(AppRoutes.exploreName);
-            }
-          },
-        ),
-      ),
-      body: const SafeArea(
-        child: FeaturePendingView(
-          icon: Icons.login,
-          title: 'Acceso',
-          description: 'Próximamente podrás iniciar sesión en UniFundMe.',
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Sesión')),
+    body: SessionStatusView(dependencies: dependencies),
+  );
+}
+
+class _PrivateView extends StatelessWidget {
+  const _PrivateView({required this.dependencies, required this.child});
+  final AppDependencies dependencies;
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: dependencies.session,
+    builder: (_, _) => dependencies.session.accessToken != null
+        ? child
+        : SessionStatusView(dependencies: dependencies),
+  );
 }
 
 class _NotFoundPage extends StatelessWidget {

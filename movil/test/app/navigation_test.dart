@@ -9,13 +9,16 @@ import 'package:movil/features/account/presentation/account_page.dart';
 import 'package:movil/features/catalog/presentation/explore_page.dart';
 import 'package:movil/features/notifications/presentation/notifications_page.dart';
 import 'package:movil/features/tracking/presentation/tracking_page.dart';
-import 'package:movil/shared/widgets/feature_pending_view.dart';
+
+import '../features/auth/auth_test_support.dart';
 
 void main() {
   testWidgets('La raíz redirige a Explorar y selecciona la primera pestaña', (
     tester,
   ) async {
-    final router = AppRouter.create();
+    final dependencies = testDependencies(configured: false);
+    addTearDown(dependencies.dispose);
+    final router = AppRouter.create(dependencies: dependencies);
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     await tester.pumpAndSettle();
 
@@ -34,7 +37,9 @@ void main() {
   testWidgets('Las cuatro pestañas muestran su página y actualizan la ruta', (
     tester,
   ) async {
-    await tester.pumpWidget(const UniFundMeApp());
+    final dependencies = testDependencies();
+    await authenticateTest(dependencies);
+    await pumpAuthApp(tester, dependencies);
     await tester.pumpAndSettle();
     final router = GoRouter.of(tester.element(find.byType(MainShell)));
     final pages = [ExplorePage, TrackingPage, NotificationsPage, AccountPage];
@@ -52,7 +57,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(pages[index]), findsOneWidget);
-      expect(find.byType(FeaturePendingView), findsOneWidget);
       expect(router.routeInformationProvider.value.uri.path, paths[index]);
       final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
       expect(bar.selectedIndex, index);
@@ -71,8 +75,14 @@ void main() {
       AppRoutes.notifications,
       AppRoutes.account,
     ];
+    final dependencies = testDependencies();
+    addTearDown(dependencies.dispose);
+    await authenticateTest(dependencies);
     for (var index = 0; index < paths.length; index++) {
-      final router = AppRouter.create(initialLocation: paths[index]);
+      final router = AppRouter.create(
+        dependencies: dependencies,
+        initialLocation: paths[index],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       await tester.pumpAndSettle();
 
@@ -81,7 +91,6 @@ void main() {
         tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
         index,
       );
-      expect(find.byType(FeaturePendingView), findsOneWidget);
 
       await tester.pumpWidget(const SizedBox.shrink());
       router.dispose();
@@ -91,7 +100,9 @@ void main() {
   testWidgets(
     'La navegación mantiene el destino al reconstruir la aplicación',
     (tester) async {
-      await tester.pumpWidget(const UniFundMeApp());
+      final dependencies = testDependencies();
+      await authenticateTest(dependencies);
+      await pumpAuthApp(tester, dependencies);
       await tester.pumpAndSettle();
       await tester.tap(find.byType(NavigationDestination).at(3));
       await tester.pumpAndSettle();

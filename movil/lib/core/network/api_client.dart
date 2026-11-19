@@ -39,7 +39,14 @@ class ApiClient {
     String path, {
     Object? body,
     Map<String, String>? queryParameters,
-  }) => _json('POST', path, body: body, queryParameters: queryParameters);
+    bool authenticated = true,
+  }) => _json(
+    'POST',
+    path,
+    body: body,
+    queryParameters: queryParameters,
+    authenticated: authenticated,
+  );
 
   Future<Object?> put(
     String path, {
@@ -78,12 +85,14 @@ class ApiClient {
     String path, {
     Object? body,
     Map<String, String>? queryParameters,
+    bool authenticated = true,
   }) async {
     final response = await _send(
       method,
       path,
       body: body,
       queryParameters: queryParameters,
+      authenticated: authenticated,
     );
     if (response.statusCode == 204 || response.bodyBytes.isEmpty) return null;
     final contentType = response.headers['content-type']
@@ -137,6 +146,7 @@ class ApiClient {
     Object? body,
     Map<String, String>? queryParameters,
     String accept = 'application/json',
+    bool authenticated = true,
   }) async {
     if (_closed) throw const ApiException(ApiErrorKind.closed);
     final uri = _buildUri(path, queryParameters);
@@ -153,7 +163,7 @@ class ApiClient {
     }
 
     final provider = _tokenProvider;
-    if (provider != null) {
+    if (authenticated && provider != null) {
       String? token;
       try {
         token = await Future<String?>.sync(provider).timeout(timeout);
@@ -185,7 +195,29 @@ class ApiClient {
       throw const ApiException(ApiErrorKind.connection);
     }
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw ApiException(ApiErrorKind.http, statusCode: response.statusCode);
+      Object? payload;
+      final type = response.headers['content-type']
+          ?.split(';')
+          .first
+          .trim()
+          .toLowerCase();
+      // Se extraen solo detalles estructurados de JSON acotado; no se conserva el cuerpo.
+      if (response.bodyBytes.length <= 65536 &&
+          (type == 'application/json' ||
+              (type != null &&
+                  type.startsWith('application/') &&
+                  type.endsWith('+json')))) {
+        try {
+          payload = jsonDecode(utf8.decode(response.bodyBytes));
+        } on FormatException {
+          // El HTTP original sigue siendo la causa aunque su cuerpo sea inválido.
+        }
+      }
+      throw ApiException.fromHttp(
+        response.statusCode,
+        payload: payload,
+        retryAfterHeader: response.headers['retry-after'],
+      );
     }
     return response;
   }

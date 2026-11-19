@@ -5,6 +5,8 @@ import 'package:movil/core/config/app_config.dart';
 import 'package:movil/features/catalog/presentation/explore_page.dart';
 import 'package:movil/main.dart' as entrypoint;
 
+import 'features/auth/auth_test_support.dart';
+
 void main() {
   testWidgets('Desarrollo sin API conserva la navegación', (tester) async {
     await tester.pumpWidget(
@@ -19,8 +21,8 @@ void main() {
     await tester.ensureVisible(find.text('Ir a Acceso'));
     await tester.tap(find.text('Ir a Acceso'));
     await tester.pumpAndSettle();
-    expect(find.text('Acceso'), findsNWidgets(2));
-    await tester.tap(find.byType(BackButton));
+    expect(find.text('Acceso'), findsOneWidget);
+    await tester.tap(find.byTooltip('Volver'));
     await tester.pumpAndSettle();
     expect(find.text('Ir a Acceso'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -66,12 +68,14 @@ void main() {
   });
 
   testWidgets('Producción válida conserva Explorar y el tema', (tester) async {
+    final dependencies = testDependencies();
     await tester.pumpWidget(
       UniFundMeApp(
         configLoader: () => AppConfig.fromValues(
           appEnv: 'production',
           apiBaseUrl: 'https://api.example.com/api/v1',
         ),
+        dependenciesBuilder: (_) => dependencies,
       ),
     );
     await tester.pumpAndSettle();
