@@ -9,6 +9,7 @@ use App\Models\InvestorProfile;
 use App\Models\RewardClaim;
 use App\Models\RewardTier;
 use App\Models\Transaction;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class InvestmentEngine
@@ -38,10 +39,19 @@ class InvestmentEngine
             }
             $remaining = bcsub($this->money($c->goal_amount), $this->money($c->current_amount), 2);
             abort_if(bccomp($amount, $remaining, 2) > 0, 422, 'El monto supera el saldo restante de la campaña.');
-            $percentage = (float) bcdiv(bcmul($amount, '100', 6), $this->money($c->goal_amount), 6);
-            $tier = RewardTier::where('campaign_id', $c->id)->where('is_active', true)->where('min_percentage', '<=', $percentage)->where('max_percentage', '>=', $percentage)->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))->orderByDesc('min_percentage')->lockForUpdate()->first();
-            if ($tier && $tier->max_claims !== null && $tier->current_claims >= $tier->max_claims) {
-                $tier = null;
+            $tier = null;
+            if (! empty($data['rewardTierId'])) {
+                $tier = RewardTier::where('campaign_id', $c->id)->whereKey($data['rewardTierId'])->lockForUpdate()->first();
+                abort_unless($tier && $tier->is_active, 422, 'La recompensa seleccionada ya no está disponible en esta campaña. Revisa tu selección antes de confirmar.');
+                abort_if($tier->expires_at && ! Carbon::parse($tier->expires_at)->isFuture(), 422, 'La recompensa seleccionada ha vencido. Revisa tu selección antes de confirmar.');
+                abort_if($tier->max_claims !== null && $tier->current_claims >= $tier->max_claims, 422, 'La recompensa seleccionada se ha agotado. No se registró el aporte.');
+                abort_if($tier->currency !== $c->currency, 422, 'La moneda de la recompensa no coincide con la campaña.');
+                // Compare cross-products without truncating a percentage at its boundaries.
+                $weightedAmount = bcmul($amount, '100', 6);
+                abort_if(bccomp($amount, $this->money($tier->amount), 2) < 0
+                    || bccomp($weightedAmount, bcmul($this->money($c->goal_amount), (string) $tier->min_percentage, 6), 6) < 0
+                    || bccomp($weightedAmount, bcmul($this->money($c->goal_amount), (string) $tier->max_percentage, 6), 6) > 0,
+                    422, 'El monto no cumple las condiciones de la recompensa seleccionada. Ajusta el monto o elige otra recompensa.');
             }
             $newTotal = bcadd($this->money($c->current_amount), $amount, 2);
             $funded = bccomp($newTotal, $this->money($c->goal_amount), 2) >= 0;
@@ -95,7 +105,7 @@ class InvestmentEngine
                 $c->update(['status' => 'completed']);
             }
             CampaignStatusHistory::create(['campaign_id' => $c->id, 'from_status' => $old, 'to_status' => $c->status, 'changed_by' => $actor, 'reason' => 'Finalización de campaña']);
-            $this->notifier->send($c->creator_id,'campaign_'.$c->status,'Campaña finalizada',$c->title.': '.$c->status,$c->id);
+            $this->notifier->send($c->creator_id, 'campaign_'.$c->status, 'Campaña finalizada', $c->title.': '.$c->status, $c->id);
 
             return $c->fresh();
         }, 3);

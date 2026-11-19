@@ -372,7 +372,7 @@ class MigrationTest extends TestCase
         $c = $this->campaign();
         $u = $this->account();
         $tier = RewardTier::create(['campaign_id' => $c->id, 'title' => 'Gracias', 'min_percentage' => 10, 'max_percentage' => 20, 'max_claims' => 1]);
-        $id = $this->asUser($u)->postJson('/api/v1/investments', ['campaignId' => $c->id, 'amount' => 100])->assertCreated()->assertJsonPath('data.remainingBalance', 900)->assertJsonPath('data.ticket.rewardTierId', $tier->id)->json('data.ticket.id');
+        $id = $this->asUser($u)->postJson('/api/v1/investments', ['campaignId' => $c->id, 'amount' => 100, 'rewardTierId' => $tier->id])->assertCreated()->assertJsonPath('data.remainingBalance', 900)->assertJsonPath('data.ticket.rewardTierId', $tier->id)->json('data.ticket.id');
         $this->assertDatabaseHas('campaigns', ['id' => $c->id, 'current_amount' => 100, 'investor_count' => 1]);
         $this->assertDatabaseHas('investor_profiles', ['user_id' => $u->id, 'total_invested' => 100, 'total_investments' => 1]);
         $this->assertDatabaseHas('reward_tiers', ['id' => $tier->id, 'current_claims' => 1]);

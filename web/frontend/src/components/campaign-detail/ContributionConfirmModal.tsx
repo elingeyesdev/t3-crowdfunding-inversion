@@ -209,7 +209,7 @@ export function ContributionConfirmModal({
           </div>
 
           {/* Selected reward tier (if any) */}
-          {selectedTier && (
+          {selectedTier ? (
             <div className="border-2 border-amber-100 bg-amber-50/50 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Gift size={14} strokeWidth={2.5} className="text-amber-600" />
@@ -226,7 +226,7 @@ export function ContributionConfirmModal({
                 </p>
               )}
             </div>
-          )}
+          ) : <p className="text-sm font-bold text-slate-600">Aporte directo sin recompensa.</p>}
 
           {/* Disclaimer */}
           <div className="flex items-start gap-2.5 bg-slate-50 rounded-xl p-3.5">
