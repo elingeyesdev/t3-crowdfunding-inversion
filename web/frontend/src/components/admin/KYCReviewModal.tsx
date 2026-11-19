@@ -1,21 +1,44 @@
 import { useState } from 'react';
-import { X, Check, Eye } from 'lucide-react';
+import { X, Check } from 'lucide-react';
+import type { KycReviewData } from '../../types/kyc.types';
+import { parseKycDocuments } from '../../utils/kycFiles';
+import { KycFileViewer } from './KycFileViewer';
 
 interface KYCReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  kycData: any;
+  kycData: KycReviewData | null;
+  onRefresh: (id: string) => Promise<KycReviewData>;
   onApprove: (id: string) => Promise<void>;
   onReject: (id: string, reason: string) => Promise<void>;
 }
 
-export function KYCReviewModal({ isOpen, onClose, kycData, onApprove, onReject }: KYCReviewModalProps) {
+export function KYCReviewModal(props: KYCReviewModalProps) {
+  if (!props.isOpen || !props.kycData) return null;
+  return <KycReviewPanel key={props.kycData.id} {...props} kycData={props.kycData} />;
+}
+
+function KycReviewPanel({ onClose, kycData, onApprove, onReject, onRefresh }: Omit<KYCReviewModalProps, 'kycData'> & { kycData: KycReviewData }) {
   const [loading, setLoading] = useState(false);
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
+  const [generation, setGeneration] = useState(0);
 
-  if (!isOpen || !kycData) return null;
+  const refresh = async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    setRefreshError(null);
+    try {
+      await onRefresh(kycData.id);
+      setGeneration(value => value + 1);
+    } catch {
+      setRefreshError('No se pudieron renovar los enlaces. Comprueba tu sesión o actualiza la lista de solicitudes pendientes.');
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const handleApprove = async () => {
     if (!window.confirm("¿Estás seguro de aprobar este KYC? Esta acción no se puede deshacer.")) {
@@ -52,17 +75,9 @@ export function KYCReviewModal({ isOpen, onClose, kycData, onApprove, onReject }
     }
   };
 
-  let docs = [];
-  try {
-    if (typeof kycData.verification_documents === 'string') {
-      docs = JSON.parse(kycData.verification_documents);
-    } else {
-      docs = kycData.verification_documents || [];
-    }
-  } catch (e) {}
-
-  const idDoc = docs.find((d: any) => d.type === 'idDocument');
-  const faceDoc = docs.find((d: any) => d.type === 'faceValidation');
+  const docs = parseKycDocuments(kycData.verification_documents);
+  const idDoc = docs.find(document => document.type === 'idDocument');
+  const faceDoc = docs.find(document => document.type === 'faceValidation');
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
@@ -83,47 +98,18 @@ export function KYCReviewModal({ isOpen, onClose, kycData, onApprove, onReject }
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="border border-gray-200 rounded-xl p-4">
               <h4 className="font-bold text-gray-800 mb-3">Documento de Identidad</h4>
-              {idDoc ? (
-                <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-                   {idDoc.url.toLowerCase().endsWith('.pdf') ? (
-                     <a href={idDoc.url} target="_blank" rel="noreferrer" className="flex flex-col items-center text-blue-600 hover:underline">
-                        <Eye size={32} className="mb-2" />
-                        Ver PDF
-                     </a>
-                   ) : (
-                     <img 
-                       src={idDoc.url} 
-                       alt="ID Document" 
-                       className="w-full h-full object-contain cursor-pointer hover:opacity-90 transition-opacity" 
-                       onClick={() => setPreviewImage(idDoc.url)}
-                     />
-                   )}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500">No disponible</p>
-              )}
+              {idDoc ? <KycFileViewer key={idDoc.url + generation} document={idDoc} label="Documento de identidad" onRefresh={refresh} refreshing={refreshing} />
+                : <p className="text-sm text-gray-500">No disponible</p>}
             </div>
             
             <div className="border border-gray-200 rounded-xl p-4">
               <h4 className="font-bold text-gray-800 mb-3">Validación Facial</h4>
-              {faceDoc ? (
-                <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-                   {faceDoc.url.toLowerCase().match(/\.(mp4|webm|ogg)$/) ? (
-                     <video src={faceDoc.url} controls className="w-full h-full object-contain" />
-                   ) : (
-                     <img 
-                       src={faceDoc.url} 
-                       alt="Face Validation" 
-                       className="w-full h-full object-contain cursor-pointer hover:opacity-90 transition-opacity" 
-                       onClick={() => setPreviewImage(faceDoc.url)}
-                     />
-                   )}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500">No disponible</p>
-              )}
+              {faceDoc ? <KycFileViewer key={faceDoc.url + generation} document={faceDoc} label="Validación facial" onRefresh={refresh} refreshing={refreshing} />
+                : <p className="text-sm text-gray-500">No disponible</p>}
             </div>
           </div>
+
+          {refreshError && <p role="alert" className="text-sm text-red-600">{refreshError}</p>}
 
           {showRejectForm && (
             <div className="mt-6 border-t border-gray-200 pt-6 animate-in slide-in-from-top-4">
@@ -181,23 +167,7 @@ export function KYCReviewModal({ isOpen, onClose, kycData, onApprove, onReject }
         </div>
       </div>
 
-      {/* Image Preview Modal */}
-      {previewImage && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 p-4" onClick={() => setPreviewImage(null)}>
-          <button 
-            className="absolute top-4 right-4 text-white hover:text-gray-300 p-2"
-            onClick={() => setPreviewImage(null)}
-          >
-            <X size={32} />
-          </button>
-          <img 
-            src={previewImage} 
-            alt="Preview" 
-            className="max-w-full max-h-[90vh] object-contain cursor-zoom-out" 
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
+
     </div>
   );
 }

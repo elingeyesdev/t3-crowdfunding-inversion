@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { submitKycDocuments } from '../api/entrepreneur.api';
 import type { EntrepreneurProfile } from '../types/entrepreneur.types';
 import { InfoHint } from './InfoHint';
+import { KYC_ID_ACCEPT, KYC_FACE_ACCEPT, kycFileKind, kycUploadError } from '../utils/kycFiles';
 
 interface KYCUploadModalProps {
   onClose: () => void;
@@ -18,6 +19,8 @@ export function KYCUploadModal({ onClose, onSuccess }: KYCUploadModalProps) {
   const [capturedPreview, setCapturedPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => () => { if (capturedPreview) URL.revokeObjectURL(capturedPreview); }, [capturedPreview]);
 
   const idInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -106,13 +109,19 @@ export function KYCUploadModal({ onClose, onSuccess }: KYCUploadModalProps) {
               <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">Sube tu Documento Oficial <InfoHint text="Formato imagen o PDF, legible y vigente." /></label>
               <div onClick={() => idInputRef.current?.click()} className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer ${idDocument ? 'border-green-400 bg-green-50' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'}`}>
                 <p className="font-semibold break-words">{idDocument ? idDocument.name : 'Haz clic para seleccionar archivo'}</p>
-                <input ref={idInputRef} type="file" className="hidden" accept="image/*,.pdf" onChange={(e) => setIdDocument(e.target.files?.[0] || null)} />
+                <input ref={idInputRef} type="file" className="hidden" accept={KYC_ID_ACCEPT} onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  const error = file ? kycUploadError(file, 'idDocument') : null;
+                  setError(error || '');
+                  setIdDocument(error ? null : file || null);
+                  if (error) event.target.value = '';
+                }} />
               </div>
             </div>
           )}
           {step === 2 && (
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">Selfie con documento <InfoHint text="Toma la foto en vivo con tu cámara o sube un archivo." /></label>
+              <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">Selfie o video con documento <InfoHint text="Toma una foto en vivo o sube JPG, PNG, WEBP, MP4, WEBM o MOV (máximo 50 MB)." /></label>
               {!faceVideo ? (
                 <div className="border-2 border-dashed rounded-xl p-4 bg-gray-50">
                   <div className="rounded-lg overflow-hidden bg-black mb-3 min-h-[220px] relative">
@@ -129,14 +138,17 @@ export function KYCUploadModal({ onClose, onSuccess }: KYCUploadModalProps) {
                   <div className="pt-3 border-t border-gray-200 text-center">
                     <p className="text-xs text-gray-500 mb-2">¿Sin cámara o problemas de permisos?</p>
                     <label className="inline-block px-3 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                      Subir foto desde archivo
+                      Subir foto o video desde archivo
                       <input
                         type="file"
                         className="hidden"
-                        accept="image/*"
+                        accept={KYC_FACE_ACCEPT}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
+                            const error = kycUploadError(file, 'faceValidation');
+                            setError(error || '');
+                            if (error) { e.target.value = ''; return; }
                             setFaceVideo(file);
                             setCapturedPreview(URL.createObjectURL(file));
                             stopCamera();
@@ -148,8 +160,10 @@ export function KYCUploadModal({ onClose, onSuccess }: KYCUploadModalProps) {
                 </div>
               ) : (
                 <div className="border-2 border-green-400 bg-green-50 rounded-xl p-4 text-green-700">
-                  {capturedPreview && <img src={capturedPreview} alt="Captura KYC" className="w-full max-h-64 object-cover rounded-lg mb-3" />}
-                  <button type="button" onClick={() => { setFaceVideo(null); setCapturedPreview(null); startCamera(); }} className="w-full px-4 py-2 text-sm font-bold text-[#4a7f1a] bg-[#f0f9e0] rounded-lg">Tomar otra foto</button>
+                  {capturedPreview && (kycFileKind(faceVideo.name, faceVideo.type) === 'video'
+                    ? <video src={capturedPreview} controls playsInline className="w-full max-h-64 rounded-lg mb-3" />
+                    : <img src={capturedPreview} alt="Captura KYC" className="w-full max-h-64 object-cover rounded-lg mb-3" />)}
+                  <button type="button" onClick={() => { setFaceVideo(null); setCapturedPreview(null); startCamera(); }} className="w-full px-4 py-2 text-sm font-bold text-[#4a7f1a] bg-[#f0f9e0] rounded-lg">Cambiar foto o video</button>
                 </div>
               )}
             </div>

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { KycReviewData } from '../types/kyc.types';
 import type {
   DashboardStats,
   SystemUser,
@@ -219,8 +220,13 @@ export async function reviewAdminCampaignDocument(
   return data.data;
 }
 
-export async function getPendingKyc(): Promise<any[]> {
+export async function getPendingKyc(): Promise<KycReviewData[]> {
   const { data } = await api.get<ApiSuccessResponse<any[]>>('/admin/kyc/pending');
+  return data.data;
+}
+
+export async function getKycProfile(id: string): Promise<KycReviewData> {
+  const { data } = await api.get<ApiSuccessResponse<KycReviewData>>(`/admin/kyc/${id}`, { timeout: 15000 });
   return data.data;
 }
 

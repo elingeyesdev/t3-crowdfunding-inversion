@@ -119,7 +119,7 @@ class ProfileController extends Controller
         $docs = [];
         foreach (['idDocument', 'faceVideo'] as $field) {
             $path = $r->file($field)->store('kyc', 'local');
-            $docs[] = ['type' => $field === 'faceVideo' ? 'faceValidation' : $field, 'url' => '/api/v1/private-files/'.$path, 'uploadedAt' => now()->toIso8601String()];
+            $docs[] = ['type' => $field === 'faceVideo' ? 'faceValidation' : $field, 'url' => '/api/v1/private-files/'.$path, 'mimeType' => $r->file($field)->getMimeType(), 'originalName' => $r->file($field)->getClientOriginalName(), 'uploadedAt' => now()->toIso8601String()];
         }
         $profile->update(['verification_documents' => $docs, 'kyc_status' => 'pending', 'identity_verified' => false, 'kyc_rejection_reason' => null]);
 
@@ -144,7 +144,7 @@ class ProfileController extends Controller
             $p->update(['max_investment' => $newMax]);
             Transaction::create(['user_id' => $r->user()->id, 'transaction_type' => 'capital_addition', 'amount' => $data['amount'], 'notes' => $data['notes'] ?? null]);
 
-            return Api::ok(['newMax' => (float) $newMax, 'availableCapital' => (float) bcsub($newMax,(string) $p->total_invested,2)]);
+            return Api::ok(['newMax' => (float) $newMax, 'availableCapital' => (float) bcsub($newMax, (string) $p->total_invested, 2)]);
         });
     }
 }
