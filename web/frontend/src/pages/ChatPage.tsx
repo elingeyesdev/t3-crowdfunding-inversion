@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { ConversationsSidebar } from '../components/chat/ConversationsSidebar';
@@ -20,26 +20,46 @@ export function ChatPage() {
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const [search, setSearch] = useState('');
   const [showSidebar, setShowSidebar] = useState(true);
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [connectionVersion, setConnectionVersion] = useState(0);
+  const mounted = useRef(true);
+  const syncing = useRef<Promise<void> | null>(null);
+  const syncRequested = useRef(false);
 
-  // Último mensaje recibido por WebSocket para pasarlo al ChatWindow
-  const [lastIncoming, setLastIncoming] = useState<Message | null>(null);
+  // Queue live messages until ChatWindow has merged them, including batched events.
+  const [incomingMessages, setIncomingMessages] = useState<Message[]>([]);
 
   const currentUserId = localStorage.getItem('userId') ?? '';
 
   // ── Cargar conversaciones via REST ────────────────────────
-  const loadConversations = useCallback(async () => {
-    try {
-      const convs = await getMyConversations();
-      setConversations(convs);
-    } catch (err) {
-      console.error('Error cargando conversaciones:', err);
-    } finally {
-      setLoadingConvs(false);
-    }
+  const loadConversations = useCallback(() => {
+    syncRequested.current = true;
+    if (syncing.current) return syncing.current;
+    syncing.current = (async () => {
+      try {
+        do {
+          syncRequested.current = false;
+          const convs = await getMyConversations();
+          if (!mounted.current) return;
+          if (syncRequested.current) continue;
+          setConversations([...new Map(convs.map(conv => [conv.id, conv])).values()].sort((a, b) =>
+            new Date(b.lastMessageAt ?? 0).getTime() - new Date(a.lastMessageAt ?? 0).getTime()));
+          setSyncError(null);
+        } while (syncRequested.current && mounted.current);
+      } catch {
+        if (mounted.current) setSyncError('No se pudieron sincronizar las conversaciones. Intenta nuevamente.');
+      } finally {
+        syncing.current = null;
+        if (mounted.current) setLoadingConvs(false);
+      }
+    })();
+    return syncing.current;
   }, []);
 
   useEffect(() => {
+    mounted.current = true;
     loadConversations();
+    return () => { mounted.current = false; };
   }, [loadConversations]);
 
   // Synchronize URL conversationId with activeConversation state
@@ -51,7 +71,7 @@ export function ChatPage() {
       if (found) {
         if (activeConversation?.id !== found.id) {
           setActiveConversation(found);
-          setLastIncoming(null);
+          setIncomingMessages([]);
           setShowSidebar(false);
           // Mark as read locally in sidebar list
           setConversations((prev) =>
@@ -73,61 +93,27 @@ export function ChatPage() {
 
   // ── Callback para nuevo mensaje recibido por WS ───────────
   const handleNewMessage = useCallback((msg: Message) => {
-    setLastIncoming(msg);
-
-    // Actualizar la conversación en el sidebar
-    setConversations((prev) =>
-      prev.map((c) => {
-        if (c.id !== msg.conversationId) return c;
-        const isActive = msg.conversationId === activeConversation?.id;
-        return {
-          ...c,
-          lastMessage: {
-            content: msg.content,
-            createdAt: msg.createdAt,
-            senderId: msg.senderId,
-          },
-          lastMessageAt: msg.createdAt,
-          unreadCount: isActive ? 0 : c.unreadCount + 1,
-        };
-      }),
-    );
-  }, [activeConversation?.id]);
+    setIncomingMessages(current => [...current, msg]);
+  }, []);
+  const handleIncomingProcessed = useCallback((ids: string[]) => {
+    const processed = new Set(ids);
+    setIncomingMessages(current => current.filter(message => !processed.has(message.id)));
+  }, []);
 
   // ── Callback para actualización de conversación ───────────
-  const handleConversationUpdated = useCallback(
-    (data: { conversationId: string; lastMessage: Message }) => {
-      setConversations((prev) =>
-        prev
-          .map((c) => {
-            if (c.id !== data.conversationId) return c;
-            const isActive = data.conversationId === activeConversation?.id;
-            return {
-              ...c,
-              lastMessage: {
-                content: data.lastMessage.content,
-                createdAt: data.lastMessage.createdAt,
-                senderId: data.lastMessage.senderId,
-              },
-              lastMessageAt: data.lastMessage.createdAt,
-              unreadCount: isActive ? 0 : c.unreadCount + (data.lastMessage.senderId !== currentUserId ? 1 : 0),
-            };
-          })
-          .sort(
-            (a, b) =>
-              new Date(b.lastMessageAt ?? 0).getTime() -
-              new Date(a.lastMessageAt ?? 0).getTime(),
-          ),
-      );
-    },
-    [activeConversation?.id, currentUserId],
-  );
+  // REST supplies identities and canonical counts, including previously unknown chats.
+  const handleConversationUpdated = useCallback(() => { void loadConversations(); }, [loadConversations]);
+  const handleConnected = useCallback(() => {
+    void loadConversations();
+    setConnectionVersion(version => version + 1);
+  }, [loadConversations]);
 
   // ── WebSocket hook ────────────────────────────────────────
   const { connected, typingUsers, sendMessage, emitTyping, emitMarkAsRead } = useChat({
     conversationId: activeConversation?.id ?? null,
     onNewMessage: handleNewMessage,
     onConversationUpdated: handleConversationUpdated,
+    onConnected: handleConnected,
   });
 
   // ── Seleccionar conversación ──────────────────────────────
@@ -145,17 +131,20 @@ export function ChatPage() {
 
   const handleMarkAsRead = useCallback(
     async (convId: string) => {
-      await markAsRead(convId).catch(() => { });
-      setConversations((prev) =>
-        prev.map((c) => (c.id === convId ? { ...c, unreadCount: 0 } : c)),
-      );
+      try {
+        await markAsRead(convId);
+        if (mounted.current) await loadConversations();
+      } catch {
+        if (mounted.current) setSyncError('No se pudo confirmar la lectura. Intenta sincronizar nuevamente.');
+      }
     },
-    [],
+    [loadConversations],
   );
 
   return (
     <div className="flex flex-col h-screen bg-white font-['Plus Jakarta Sans',sans-serif] overflow-hidden">
       <Navbar />
+      {syncError && <div role="alert" className="p-3 text-sm text-red-700 bg-red-50">{syncError} <button type="button" onClick={() => { void loadConversations(); setConnectionVersion(version => version + 1); }} className="underline">Reintentar</button></div>}
 
       {/* Contenido principal - Fluido de pantalla completa */}
       <div className="flex-1 flex overflow-hidden w-full bg-[#f8f9fa]">
@@ -192,7 +181,9 @@ export function ChatPage() {
               onSend={sendMessage}
               onTyping={emitTyping}
               onMarkAsRead={handleMarkAsRead}
-              newIncomingMessage={lastIncoming}
+              incomingMessages={incomingMessages}
+              onIncomingProcessed={handleIncomingProcessed}
+              connectionVersion={connectionVersion}
             />
           ) : (
             /* Pantalla vacía cuando no hay conversación seleccionada */

@@ -36,9 +36,14 @@ class ChatController extends Controller
         return Api::ok(Conversation::with('campaign')->where(fn ($q) => $q->where('user_one_id', $id)->orWhere('user_two_id', $id))->orderByDesc('last_message_at')->get()->map(function ($c) use ($id) {
             $other = User::findOrFail($c->user_one_id === $id ? $c->user_two_id : $c->user_one_id);
             $readAt = $c->user_one_id === $id ? $c->user_one_read_at : $c->user_two_read_at;
+            $readMessageId = $c->user_one_id === $id ? $c->user_one_read_message_id : $c->user_two_read_message_id;
+            $readMessage = $readMessageId ? $c->messages()->find($readMessageId) : null;
             $last = $c->messages()->latest('created_at')->latest('id')->first();
             $unread = $c->messages()->where('sender_id', '!=', $id);
-            if ($readAt) {
+            if ($readMessage) {
+                $unread->where(fn ($q) => $q->where('created_at', '>', $readMessage->created_at)
+                    ->orWhere(fn ($sameSecond) => $sameSecond->where('created_at', $readMessage->created_at)->where('id', '>', $readMessage->id)));
+            } elseif ($readAt) {
                 $unread->where('created_at', '>', $readAt);
             }
 
@@ -102,7 +107,14 @@ class ChatController extends Controller
     public function read(Request $r, Conversation $conversation)
     {
         $this->member($r, $conversation);
-        $conversation->update([$conversation->user_one_id === $r->user()->id ? 'user_one_read_at' : 'user_two_read_at' => now()]);
+        DB::transaction(function () use ($r, $conversation) {
+            // Serialize with send(), so a later message cannot be covered by this read.
+            $current = Conversation::whereKey($conversation->id)->lockForUpdate()->firstOrFail();
+            $this->member($r, $current);
+            $last = $current->messages()->orderByDesc('created_at')->orderByDesc('id')->first();
+            $prefix = $current->user_one_id === $r->user()->id ? 'user_one' : 'user_two';
+            $current->update([$prefix.'_read_at' => $last ? now() : null, $prefix.'_read_message_id' => $last?->id]);
+        }, 3);
 
         return Api::ok();
     }
