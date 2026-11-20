@@ -86,10 +86,27 @@ export async function markNotificationAsRead(id: string): Promise<AppNotificatio
   return data.data;
 }
 
+const NOTIFICATIONS_READ_EVENT = 'app:notifications-read';
+
+interface NotificationsReadResult {
+  updatedCount: number;
+  unreadCount: number;
+  typeCode?: string;
+}
+
+export function subscribeToNotificationsRead(listener: (result: NotificationsReadResult) => void): () => void {
+  const handleRead = (event: Event) => listener((event as CustomEvent<NotificationsReadResult>).detail);
+  window.addEventListener(NOTIFICATIONS_READ_EVENT, handleRead);
+  return () => window.removeEventListener(NOTIFICATIONS_READ_EVENT, handleRead);
+}
+
 export async function markAllNotificationsAsRead(typeCode?: string): Promise<{ updatedCount: number; unreadCount: number }> {
   const { data } = await api.patch<{ data: { updatedCount: number; unreadCount: number } }>('/notifications/read-all', {
     typeCode,
   });
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new window.CustomEvent(NOTIFICATIONS_READ_EVENT, { detail: { ...data.data, typeCode } }));
+  }
   return data.data;
 }
 

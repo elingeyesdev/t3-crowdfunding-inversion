@@ -11,6 +11,7 @@ import {
   markAllNotificationsAsRead,
   deleteNotification,
   clearReadNotifications,
+  subscribeToNotificationsRead,
   type AppNotification,
 } from '../api/notifications.api';
 
@@ -94,6 +95,12 @@ export function NotificationBell() {
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 
+  useEffect(() => subscribeToNotificationsRead(({ typeCode, unreadCount }) => {
+    setNotifications(current => current.map(notification => !typeCode || notification.typeCode === typeCode ? { ...notification, isRead: true } : notification));
+    setUnreadCount(unreadCount);
+    prevUnreadRef.current = unreadCount;
+  }), []);
+
   // Close on outside click
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -123,8 +130,6 @@ export function NotificationBell() {
     setLoading(true);
     try {
       await markAllNotificationsAsRead();
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-      setUnreadCount(0);
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,8 @@
 
 Fecha: 14 de noviembre de 2026.
 
+Nota de mantenimiento (19 de noviembre de 2026): los diagnósticos de `docs/AuditDiagnosticsTest.php` se retiraron al corregir el último defecto que reproducían (issue 4.20). Las correcciones están cubiertas por pruebas de regresión en `web/tests/Feature/`; los resultados y comandos de este informe se conservan como registro de la auditoría original.
+
 ## Alcance y conclusión
 
 Se revisó la aplicación activa Laravel + React en `web/`: rutas, controladores, servicios, modelos, pantallas, clientes de API y pruebas. NestJS en `web/backend/` es referencia histórica, no el servidor activo. Esta revisión identifica 22 incidencias concretas y separa las funciones pendientes y las comprobaciones todavía necesarias. No representa una garantía de ausencia de otros defectos.
