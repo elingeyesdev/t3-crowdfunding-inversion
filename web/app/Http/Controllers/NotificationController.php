@@ -106,10 +106,11 @@ class NotificationController extends Controller
         }
 
         $updatedCount = $q->update(['is_read' => true, 'read_at' => now()]);
+        $unreadCount = Notification::where('user_id', $r->user()->id)->where('is_read', false)->count();
 
         return Api::ok([
             'updatedCount' => $updatedCount,
-            'unreadCount' => 0,
+            'unreadCount' => $unreadCount,
         ]);
     }
 

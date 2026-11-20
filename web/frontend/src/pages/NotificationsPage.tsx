@@ -7,6 +7,7 @@ import {
   markAllNotificationsAsRead,
   deleteNotification,
   clearReadNotifications,
+  subscribeToNotificationsRead,
   getNotificationPreferences,
   updateNotificationPreferences,
   type AppNotification,
@@ -175,6 +176,11 @@ export function NotificationsPage() {
     fetchNotifications();
   }, [fetchNotifications]);
 
+  useEffect(() => subscribeToNotificationsRead(({ typeCode, unreadCount }) => {
+    setNotifications(current => current.map(notification => !typeCode || notification.typeCode === typeCode ? { ...notification, isRead: true } : notification));
+    setUnreadCount(unreadCount);
+  }), []);
+
   const handleOpenPreferences = async () => {
     setShowPreferences(true);
     try {
@@ -222,8 +228,6 @@ export function NotificationsPage() {
   const handleMarkAll = async () => {
     try {
       await markAllNotificationsAsRead();
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-      setUnreadCount(0);
     } catch (err) {
       console.error('Error al marcar todas como leídas:', err);
     }
