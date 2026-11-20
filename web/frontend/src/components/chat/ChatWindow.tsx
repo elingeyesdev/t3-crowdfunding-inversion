@@ -5,6 +5,7 @@ import { getMessages } from '../../api/chat.api';
 import { getImageUrl } from '../../utils/image.utils';
 import { Link } from 'react-router-dom';
 import { ConversationAvatar } from './ConversationsSidebar';
+import { mergeChatMessages } from '../../utils/chatMessages';
 
 interface ChatWindowProps {
   conversation: Conversation;
@@ -14,7 +15,9 @@ interface ChatWindowProps {
   onSend: (conversationId: string, content: string) => Promise<void>;
   onTyping: (conversationId: string) => void;
   onMarkAsRead: (conversationId: string) => void;
-  newIncomingMessage: Message | null; // mensaje nuevo llegado por WS
+  incomingMessages: Message[];
+  onIncomingProcessed: (ids: string[]) => void;
+  connectionVersion?: number;
 }
 
 // Avatar fallback is handled by ConversationAvatar imported above
@@ -57,7 +60,9 @@ export function ChatWindow({
   onSend,
   onTyping,
   onMarkAsRead,
-  newIncomingMessage,
+  incomingMessages,
+  onIncomingProcessed,
+  connectionVersion = 0,
 }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,6 +71,12 @@ export function ChatWindow({
   const [sendError, setSendError] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [historyError, setHistoryError] = useState(false);
+  const [retryVersion, setRetryVersion] = useState(0);
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  const currentConversationId = useRef(conversation.id);
+  currentConversationId.current = conversation.id;
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isTypingIndicatorVisible = typingUsers.size > 0;
@@ -76,43 +87,57 @@ export function ChatWindow({
   // ── Carga inicial de mensajes ──────────────────────────────
   useEffect(() => {
     let cancelled = false;
-    setMessages([]);
+    const existing = messagesRef.current.filter(message => message.conversationId === conversation.id);
+    const knownIds = new Set(existing.map(message => message.id));
+    setMessages(existing);
     setLoading(true);
+    setHistoryError(false);
     setHasMore(true);
 
-    getMessages(conversation.id, 50)
+    const recoverMessages = async () => {
+      let batch = await getMessages(conversation.id, 50);
+      let recovered = batch;
+      // Reconnects may span more than one page. Bridge the gap to our known history.
+      while (!cancelled && knownIds.size > 0 && batch.length === 50 && !batch.some(message => knownIds.has(message.id))) {
+        const before = batch[0]?.id;
+        batch = await getMessages(conversation.id, 50, before);
+        recovered = mergeChatMessages(batch, recovered);
+      }
+      return recovered;
+    };
+    recoverMessages()
       .then((msgs) => {
         if (!cancelled) {
-          setMessages(msgs);
+          setMessages(current => mergeChatMessages(current.filter(message => message.conversationId === conversation.id), msgs));
           setLoading(false);
           setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'instant' }), 50);
           onMarkAsRead(conversation.id);
         }
       })
-      .catch(() => !cancelled && setLoading(false));
+      .catch(() => { if (!cancelled) { setLoading(false); setHistoryError(true); } });
 
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversation.id]);
+  }, [conversation.id, connectionVersion, retryVersion]);
 
   // ── Nuevo mensaje por WebSocket ────────────────────────────
   useEffect(() => {
-    if (!newIncomingMessage) return;
-    if (newIncomingMessage.conversationId !== conversation.id) return;
+    if (!incomingMessages.length) return;
+    const matching = incomingMessages.filter(message => message.conversationId === conversation.id);
 
     setMessages((prev) => {
       // Evitar duplicados
-      if (prev.some((m) => m.id === newIncomingMessage.id)) return prev;
-      return [...prev, newIncomingMessage];
+      return mergeChatMessages(prev, matching);
     });
+    onIncomingProcessed(incomingMessages.map(message => message.id));
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
 
     // Marcar como leído si el mensaje es del otro usuario
-    if (newIncomingMessage.senderId !== currentUserId) {
+    if (matching.some(message => message.senderId !== currentUserId)) {
       onMarkAsRead(conversation.id);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newIncomingMessage]);
+  }, [incomingMessages, conversation.id, currentUserId, onIncomingProcessed, onMarkAsRead]);
 
   // ── Scroll automático al escribir ─────────────────────────
   useEffect(() => {
@@ -133,8 +158,9 @@ export function ChatWindow({
 
     try {
       const older = await getMessages(conversation.id, 30, firstId);
+      if (currentConversationId.current !== conversation.id) return;
       if (older.length < 30) setHasMore(false);
-      setMessages((cur) => [...older, ...cur]);
+      setMessages((cur) => mergeChatMessages(older, cur));
       // Mantener la posición de scroll después de agregar mensajes arriba
       requestAnimationFrame(() => {
         if (containerRef.current) {
@@ -188,6 +214,7 @@ export function ChatWindow({
 
   return (
     <div className="flex flex-col h-full bg-[#f4f7f4]">
+      {historyError && <p role="alert" className="px-5 py-2 text-sm text-red-700 bg-red-50">No se pudieron recuperar los mensajes. <button type="button" className="underline" onClick={() => setRetryVersion(version => version + 1)}>Reintentar</button></p>}
       {sendError && <p role="alert" className="px-5 py-2 text-sm text-red-700 bg-red-50">{sendError}</p>}
       {/* ── Header ───────────────────────────────────────── */}
       <header className="flex items-center gap-3 px-5 py-4 bg-white border-b border-slate-100 shadow-sm shrink-0">
@@ -367,6 +394,7 @@ export function ChatWindow({
           />
           <button
             onClick={handleSend}
+            aria-label="Enviar mensaje"
             disabled={!text.trim() || sending}
             className="shrink-0 w-8 h-8 rounded bg-[#72B626] hover:bg-[#4a7f1a] disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-all active:scale-95 cursor-pointer border-none shadow-sm"
           >

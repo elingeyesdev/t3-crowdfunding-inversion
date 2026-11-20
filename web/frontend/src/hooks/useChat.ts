@@ -7,6 +7,7 @@ interface UseChatOptions {
   conversationId: string | null;
   onNewMessage?: (msg: Message) => void;
   onConversationUpdated?: (data: { conversationId: string; lastMessage: Message }) => void;
+  onConnected?: () => void;
 }
 
 export function useChat(options: UseChatOptions) {
@@ -47,7 +48,9 @@ export function useChat(options: UseChatOptions) {
     connection.bind('connected', () => setConnected(true));
     connection.bind('disconnected', () => setConnected(false));
     connection.bind('unavailable', () => setConnected(false));
-    echo.private(`users.${userId}`).listen('.chat.message', (event: { message: Message }) => receive(event.message));
+    echo.private(`users.${userId}`)
+      .listen('.chat.message', (event: { message: Message }) => receive(event.message))
+      .subscribed(() => callbacks.current.onConnected?.());
     return () => { echo.disconnect(); echoRef.current = null; };
   }, [receive]);
 
