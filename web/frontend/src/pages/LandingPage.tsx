@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
+import { campaignDonorsLabel } from '../utils/campaignDonors';
 import { fetchPublicCampaigns, type PublicCampaign } from '../api/public-campaigns.api';
 import { getCategories } from '../api/categories.api';
 import { UniFoundMeLogo } from '../components/UniFoundMeLogo';
@@ -12,7 +14,7 @@ import {
   Rocket, Search, Heart, Gem, TrendingUp, Users, Target, Calendar,
   Shield, ChevronRight, ArrowRight, LayoutGrid,
   CheckCircle2, Globe, Lock, Flame,
-  Play, Share2, MessageSquare,
+  Play, Share2,
   ChevronUp, ChevronDown,
 } from 'lucide-react';
 
@@ -51,7 +53,7 @@ const ARC_POSITIONS = [
   { top: '75%', left: '60%', size: 90 },
 ];
 
-function HeroSection({ totalCampaigns, campaigns }: { totalCampaigns: number; campaigns: PublicCampaign[] }) {
+function HeroSection({ totalCampaigns, campaigns, loading }: { totalCampaigns: number | null; campaigns: PublicCampaign[]; loading: boolean }) {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
 
@@ -83,7 +85,7 @@ function HeroSection({ totalCampaigns, campaigns }: { totalCampaigns: number; ca
 
             <p className="text-[14px] sm:text-[15px] lg:text-[16px] text-gray-500 leading-relaxed mb-8 max-w-[500px] font-medium mx-auto lg:mx-0">
               Empieza en solo unos minutos. Con nuevas herramientas es más fácil
-              que nunca crear tu campaña, contar tu historia y llegar a miles de donadores.
+              que nunca crear tu campaña, contar tu historia y conectar con personas que quieran apoyarte.
             </p>
 
             {/* Search bar */}
@@ -136,9 +138,9 @@ function HeroSection({ totalCampaigns, campaigns }: { totalCampaigns: number; ca
             {/* Trust badges */}
             <div className="flex flex-wrap justify-center lg:justify-start gap-5">
               {[
-                { icon: CheckCircle2, text: `${totalCampaigns > 0 ? totalCampaigns + '+' : ''} campañas activas`, color: GREEN },
-                { icon: Shield, text: 'Plataforma verificada', color: '#1565c0' },
-                { icon: Users, text: '100+ donadores activos', color: '#7b1fa2' },
+                { icon: CheckCircle2, text: loading ? 'Cargando campañas...' : totalCampaigns === null ? 'Campañas: sin datos' : `${totalCampaigns.toLocaleString('es-BO')} ${totalCampaigns === 1 ? 'campaña disponible' : 'campañas disponibles'}`, color: GREEN },
+                { icon: Shield, text: 'Consulta avances de campaña', color: '#1565c0' },
+                { icon: Users, text: 'Conecta con emprendedores', color: '#7b1fa2' },
               ].map(({ icon: Icon, text, color }) => (
                 <div key={text} className="flex items-center gap-1.5 text-gray-500 text-[13px] font-semibold">
                   <Icon size={14} strokeWidth={2.5} style={{ color }} /> {text}
@@ -236,7 +238,7 @@ function CampaignCard({ campaign }: { campaign: PublicCampaign }) {
         {/* Footer */}
         <div className="flex items-center justify-between text-[11px] text-gray-400 font-semibold pt-2 border-t border-gray-50">
           <span className="flex items-center gap-1 font-black" style={{ color: GREEN }}><Target size={11} strokeWidth={3} />{progress}%</span>
-          <span className="flex items-center gap-1"><Users size={11} strokeWidth={2.5} />{campaign.investorCount} donadores</span>
+          <span className="flex items-center gap-1" title="Personas con aportes vigentes en esta campaña"><Users size={11} strokeWidth={2.5} />{campaignDonorsLabel(campaign.investorCount)}</span>
           {daysLeft !== null && <span className="flex items-center gap-1"><Calendar size={11} strokeWidth={2.5} />{daysLeft > 0 ? `${daysLeft}d` : 'Finalizada'}</span>}
         </div>
       </div>
@@ -244,7 +246,7 @@ function CampaignCard({ campaign }: { campaign: PublicCampaign }) {
   );
 }
 
-function FeaturedCampaignsSection({ campaigns, loading }: { campaigns: PublicCampaign[]; loading: boolean }) {
+function FeaturedCampaignsSection({ campaigns, loading, error, onRetry }: { campaigns: PublicCampaign[]; loading: boolean; error: boolean; onRetry: () => void }) {
   return (
     <section className="bg-[#f7f9f7] py-12 sm:py-20">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
@@ -275,6 +277,8 @@ function FeaturedCampaignsSection({ campaigns, loading }: { campaigns: PublicCam
               </div>
             ))}
           </div>
+        ) : error ? (
+          <div role="alert" className="text-center py-12 text-gray-600"><p>No se pudieron cargar las campañas.</p><button type="button" onClick={onRetry} className="mt-3 underline font-bold">Reintentar</button></div>
         ) : campaigns.length === 0 ? (
           <p className="text-center py-16 text-gray-400 font-semibold">No hay campañas disponibles aún.</p>
         ) : (
@@ -442,7 +446,7 @@ function YellowHelpSection() {
 
 const DONATOKS_COLORS = ['#1c2b1e', '#0d2137', '#1a1a2e', '#1c1c1e', '#0a1628'];
 
-function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
+function DonatokPreviewSection({ campaigns, loading, error }: { campaigns: PublicCampaign[]; loading: boolean; error: boolean }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const items = campaigns.slice(0, 5);
@@ -454,11 +458,6 @@ function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
     }, 3000);
     return () => clearInterval(timer);
   }, [items.length, isPaused]);
-
-  const mockStats = items.map((_, i) => ({
-    likes: [327, 184, 512, 96, 241][i % 5],
-    comments: [42, 17, 88, 9, 63][i % 5],
-  }));
 
   return (
     <section className="bg-white py-14 sm:py-20 lg:py-24 overflow-hidden">
@@ -523,20 +522,9 @@ function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
                           <span className="text-white text-[8px] font-black tracking-widest">VIDEO</span>
                         </div>
 
-                        {/* Acciones laterales */}
-                        <div className="absolute right-2.5 bottom-[110px] z-20 flex flex-col items-center gap-4">
-                          {[
-                            { Icon: Heart, val: mockStats[i]?.likes ?? 0, color: '#ff4d6d' },
-                            { Icon: MessageSquare, val: mockStats[i]?.comments ?? 0, color: '#60a5fa' },
-                            { Icon: Share2, val: null, color: '#a7f3d0' },
-                          ].map(({ Icon, val, color }, idx) => (
-                            <div key={idx} className="flex flex-col items-center gap-0.5">
-                              <div className="w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
-                                <Icon size={14} strokeWidth={2.5} style={{ color }} />
-                              </div>
-                              <span className="text-white/70 text-[8px] font-bold">{val ?? 'Compartir'}</span>
-                            </div>
-                          ))}
+                        <div className="absolute right-2.5 bottom-[110px] z-20 flex flex-col items-center gap-1 text-white" title="Personas con aportes vigentes en esta campaña">
+                          <Users size={18} strokeWidth={2.5} />
+                          <span className="text-[9px] font-bold">{campaignDonorsLabel(c.investorCount)}</span>
                         </div>
 
                         {/* Info inferior */}
@@ -560,7 +548,7 @@ function DonatokPreviewSection({ campaigns }: { campaigns: PublicCampaign[] }) {
                     <div className="absolute inset-0 flex items-center justify-center" style={{ background: `linear-gradient(135deg,#1c2b1e,${GREEN_DARK})` }}>
                       <div className="text-center text-white/30">
                         <Play size={36} strokeWidth={1} className="mx-auto mb-2 opacity-40" />
-                        <p className="text-[11px] font-bold">DonaTok</p>
+                        <p className="text-[11px] font-bold">{loading ? 'Cargando campañas...' : error ? 'Campañas: sin datos' : 'No hay campañas disponibles aún.'}</p>
                       </div>
                     </div>
                   )}
@@ -720,7 +708,7 @@ function TrustSection() {
             <ul className="flex flex-col gap-4 mb-10">
               {[
                 { icon: Shield, text: 'Verificación KYC obligatoria para emprendedores', color: '#a7f3d0' },
-                { icon: Lock, text: 'Transacciones 100% seguras y auditadas', color: '#93c5fd' },
+                { icon: Lock, text: 'Consulta el historial de aportes', color: '#93c5fd' },
                 { icon: CheckCircle2, text: 'Equipo de revisión humana de campañas', color: '#fde68a' },
                 { icon: Globe, text: 'Plataforma accesible desde toda Bolivia', color: '#f9a8d4' },
               ].map(({ icon: Icon, text, color }) => (
@@ -752,8 +740,8 @@ function TrustSection() {
                 <TrendingUp size={20} style={{ color: GREEN }} strokeWidth={2.5} />
               </div>
               <div>
-                <p className="text-[12px] font-black text-gray-900">Éxito comprobado</p>
-                <p className="text-[11px] text-gray-400 font-semibold">94% campañas exitosas</p>
+                <p className="text-[12px] font-black text-gray-900">Sigue cada proyecto</p>
+                <p className="text-[11px] text-gray-400 font-semibold">Consulta sus avances y aportes</p>
               </div>
             </div>
           </div>
@@ -773,7 +761,7 @@ function CTABanner() {
           ¿Listo para hacer realidad<br />tu proyecto?
         </h2>
         <p className="text-gray-500 text-[16px] leading-relaxed mb-8">
-          Únete a cientos de emprendedores bolivianos que ya están financiando sus sueños con Unifundme.
+          Conecta con emprendedores bolivianos y descubre proyectos que puedes apoyar con Unifundme.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Link to="/entrepreneur-profile"
@@ -796,28 +784,37 @@ export function LandingPage() {
   const [featuredCampaigns, setFeaturedCampaigns] = useState<PublicCampaign[]>([]);
   const [campaignsLoading, setCampaignsLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [totalCampaigns, setTotalCampaigns] = useState(0);
+  const [totalCampaigns, setTotalCampaigns] = useState<number | null>(null);
+  const [campaignsError, setCampaignsError] = useState(false);
 
-  useEffect(() => {
-    fetchPublicCampaigns({ limit: 8, sortBy: 'current_amount', sortOrder: 'DESC' })
-      .then(res => {
-        setFeaturedCampaigns(res.data);
-        setTotalCampaigns(res.meta.totalItems);
-      })
-      .catch(() => { })
-      .finally(() => setCampaignsLoading(false));
-
-    getCategories().then(setCategories).catch(() => { });
+  const loadCampaigns = useCallback(async () => {
+    setCampaignsLoading(true);
+    setCampaignsError(false);
+    setTotalCampaigns(null);
+    setFeaturedCampaigns([]);
+    try {
+      const res = await fetchPublicCampaigns({ limit: 8, sortBy: 'current_amount', sortOrder: 'DESC' });
+      setFeaturedCampaigns(res.data);
+      const total = res.meta.totalItems;
+      setTotalCampaigns(Number.isSafeInteger(total) && total >= 0 ? total : null);
+    } catch {
+      setCampaignsError(true);
+    } finally {
+      setCampaignsLoading(false);
+    }
   }, []);
+
+  useEffect(() => { void loadCampaigns(); }, [loadCampaigns]);
+  useEffect(() => { getCategories().then(setCategories).catch(() => { }); }, []);
 
   return (
     <div>
       <Navbar />
-      <HeroSection totalCampaigns={totalCampaigns} campaigns={featuredCampaigns} />
-      <FeaturedCampaignsSection campaigns={featuredCampaigns.slice(0, 6)} loading={campaignsLoading} />
+      <HeroSection totalCampaigns={totalCampaigns} campaigns={featuredCampaigns} loading={campaignsLoading} />
+      <FeaturedCampaignsSection campaigns={featuredCampaigns.slice(0, 6)} loading={campaignsLoading} error={campaignsError} onRetry={loadCampaigns} />
       <HowItWorksSection />
       <YellowHelpSection />
-      <DonatokPreviewSection campaigns={featuredCampaigns} />
+      <DonatokPreviewSection campaigns={featuredCampaigns} loading={campaignsLoading} error={campaignsError} />
       <CategoriesSection categories={categories} />
       <TrustSection />
       <CTABanner />
