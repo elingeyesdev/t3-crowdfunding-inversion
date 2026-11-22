@@ -16,6 +16,7 @@ use App\Services\CampaignFinance;
 use App\Services\CampaignPublication;
 use App\Services\FinancialMovementAudit;
 use App\Services\Notifier;
+use App\Services\PrivateFileLinks;
 use App\Support\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -153,14 +154,14 @@ class AdminController extends Controller
 
     public function kyc()
     {
-        return Api::ok(EntrepreneurProfile::with('user')->where('kyc_status', 'pending')->oldest('updated_at')->get()->map(fn ($p) => [...$p->attributesToArray(), 'email' => $p->user?->email]), 200, false);
+        return Api::ok(EntrepreneurProfile::with('user')->where('kyc_status', 'pending')->oldest('updated_at')->get()->map(fn ($p) => [...PrivateFileLinks::profileData($p), 'email' => $p->user?->email]), 200, false);
     }
 
     public function kycProfile(EntrepreneurProfile $profile)
     {
         abort_unless($profile->kyc_status === 'pending', 404, 'La solicitud KYC ya no está pendiente.');
 
-        return Api::ok([...$profile->attributesToArray(), 'email' => $profile->user?->email], 200, false);
+        return Api::ok([...PrivateFileLinks::profileData($profile), 'email' => $profile->user?->email], 200, false);
     }
 
     public function reviewKyc(Request $r, EntrepreneurProfile $profile, Notifier $notifier)
@@ -171,7 +172,7 @@ class AdminController extends Controller
         $profile->update(['kyc_status' => $approved ? 'approved' : 'rejected', 'identity_verified' => $approved, 'identity_verified_at' => $approved ? now() : null, 'kyc_rejection_reason' => $approved ? null : ($data['reason'] ?? null)]);
         $notifier->send($profile->user_id, 'kyc_reviewed', 'Verificación de identidad revisada', $approved ? 'Tu identidad fue verificada.' : ('Verificación rechazada. '.($data['reason'] ?? '')));
 
-        return Api::ok($profile->fresh(), 200, false);
+        return Api::ok(PrivateFileLinks::profileData($profile->fresh()), 200, false);
     }
 
     public function reviewDocument(Request $r, Campaign $campaign, CampaignDocument $document, Notifier $notifier)
@@ -200,7 +201,7 @@ class AdminController extends Controller
                 );
             }
 
-            return Api::ok($current->fresh(), 200, false);
+            return Api::ok(PrivateFileLinks::documentData($current->fresh()), 200, false);
         });
     }
 
