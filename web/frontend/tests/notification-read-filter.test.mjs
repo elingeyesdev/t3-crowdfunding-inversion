@@ -32,7 +32,7 @@ registerHooks({
 });
 
 const notice = (id, isRead) => ({ id, title: id, body: 'Notification body', typeCode: 'new_comment',
-  isRead, createdAt: '2026-11-22T12:00:00Z', actionUrl: null });
+  isRead, category: 'chat', createdAt: '2026-11-22T12:00:00Z', actionUrl: null });
 const firstReadPage = Array.from({ length: 12 }, (_, i) => notice('Leída '+(i + 1), true));
 const fixtures = {
   all: { notifications: [notice('Pendiente', false), notice('Leída 1', true)], total: 17, totalPages: 2 },
@@ -40,15 +40,27 @@ const fixtures = {
   read: { notifications: firstReadPage, total: 13, totalPages: 2 },
   lastRead: { notifications: [notice('Leída 13', true)], total: 13, totalPages: 2 },
 };
-let requests, container, root;
+const investments = Array.from({ length: 13 }, (_, i) => ({ ...notice('Aporte '+(i + 1), true), typeCode: 'investment_confirmed', category: 'investment' }));
+let requests, container, root, holdInvestment, releaseInvestment;
 const originalAdapter = axios.defaults.adapter;
 axios.defaults.adapter = async config => {
   assert.equal(config.headers.Authorization, 'Bearer user-token');
   const uri = new URL(axios.getUri(config), 'http://localhost');
   requests.push(uri);
   const selection = config.params?.unread;
-  const fixture = selection === true ? fixtures.unread : selection === false
+  let fixture = selection === true ? fixtures.unread : selection === false
     ? (config.params?.page === 2 ? fixtures.lastRead : fixtures.read) : fixtures.all;
+  if (config.params?.category === 'investment') {
+    fixture = { notifications: config.params?.page === 2 ? investments.slice(12) : investments.slice(0, 12), total: 13, totalPages: 2 };
+    if (holdInvestment) {
+      holdInvestment = false;
+      await new Promise(resolve => { releaseInvestment = resolve; });
+    }
+  } else if (config.params?.category === 'kyc') {
+    fixture = { notifications: [], total: 0, totalPages: 1 };
+  } else if (config.params?.category === 'financial') {
+    fixture = { notifications: [{ ...notice('Auditoría', true), typeCode: 'FINANCIAL_MOVEMENT_VERIFIED', category: 'financial' }], total: 1, totalPages: 1 };
+  }
   return { data: { data: { ...fixture, unreadCount: 4, page: config.params?.page || 1, perPage: 12 } },
     config, headers: {}, status: 200, statusText: 'OK' };
 };
@@ -56,12 +68,18 @@ const { NotificationsPage } = await import('../src/pages/NotificationsPage.tsx')
 const { getMyNotifications, getNotifications } = await import('../src/api/notifications.api.ts');
 beforeEach(() => {
   requests = [];
+  holdInvestment = false; releaseInvestment = null;
   container = document.createElement('div'); document.body.append(container); root = createRoot(container);
 });
 afterEach(async () => { await act(async () => root.unmount()); container.remove(); });
 after(() => { axios.defaults.adapter = originalAdapter; dom.window.close(); });
 const button = prefix => [...container.querySelectorAll('button')].find(node => node.textContent.trim().startsWith(prefix));
 const click = async node => { assert.ok(node); await act(async () => node.dispatchEvent(new MouseEvent('click', { bubbles: true }))); };
+const selectCategory = async value => act(async () => {
+  const select = container.querySelector('select[aria-label="Filtrar por categoría"]');
+  select.value = value;
+  select.dispatchEvent(new Event('change', { bubbles: true }));
+});
 
 test('both API clients preserve explicit false and omit an absent read filter in the actual query string', async () => {
   for (const client of [getMyNotifications, getNotifications]) {
@@ -102,4 +120,66 @@ test('read history and unread tabs send distinct filters and changing tabs reset
   assert.equal(requests.at(-1).searchParams.has('unread'), false);
   assert.match(container.textContent, /Pendiente/);
   assert.match(container.textContent, /Leída 1/);
+});
+
+test('category changes request server pages, retain other filters and reset to page one', async () => {
+  await act(async () => root.render(createElement(MemoryRouter, null, createElement(NotificationsPage))));
+  assert.equal(requests.at(-1).searchParams.has('category'), false);
+  await click(button('Siguiente'));
+  await selectCategory('investment');
+  assert.equal(requests.at(-1).searchParams.get('category'), 'investment');
+  assert.equal(requests.at(-1).searchParams.get('page'), '1');
+  assert.match(container.textContent, /Aporte 12/);
+  assert.doesNotMatch(container.textContent, /Pendiente/);
+  await click(button('Siguiente'));
+  assert.equal(requests.at(-1).searchParams.get('category'), 'investment');
+  assert.match(container.textContent, /Aporte 13/);
+  assert.match(container.textContent, /Página 2 de 2/);
+  await click(button('Historial leídas'));
+  assert.equal(requests.at(-1).searchParams.get('unread'), 'false');
+  assert.equal(requests.at(-1).searchParams.get('category'), 'investment');
+  assert.equal(requests.at(-1).searchParams.get('page'), '1');
+  await act(async () => {
+    const search = container.querySelector('input[placeholder="Buscar en notificaciones por texto o título..."]');
+    Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(search, 'aporte');
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  assert.equal(requests.at(-1).searchParams.get('q'), 'aporte');
+  assert.equal(requests.at(-1).searchParams.get('category'), 'investment');
+  await selectCategory('kyc');
+  assert.equal(requests.at(-1).searchParams.get('category'), 'kyc');
+  assert.equal(requests.at(-1).searchParams.get('unread'), 'false');
+  assert.equal(requests.at(-1).searchParams.get('q'), 'aporte');
+  assert.match(container.textContent, /No se encontraron notificaciones/);
+  assert.equal(button('Siguiente'), undefined);
+  await click(button('Restablecer filtros'));
+  assert.equal(requests.at(-1).searchParams.has('category'), false);
+  assert.equal(requests.at(-1).searchParams.has('unread'), false);
+  assert.equal(requests.at(-1).searchParams.has('q'), false);
+  assert.equal(requests.at(-1).searchParams.get('page'), '1');
+});
+
+test('badges use the category supplied by the server and both API clients send it', async () => {
+  for (const client of [getMyNotifications, getNotifications]) {
+    await client({ category: 'financial' });
+    assert.equal(requests.at(-1).searchParams.get('category'), 'financial');
+  }
+  await act(async () => root.render(createElement(MemoryRouter, null, createElement(NotificationsPage))));
+  await selectCategory('financial');
+  assert.match(container.textContent, /Auditoría Financiera/);
+  const badge = [...container.querySelectorAll('span')].find(node => node.textContent === 'Auditoría');
+  assert.ok(badge, 'The badge must use the server category, including normalized event codes.');
+});
+
+test('a late response from a previous category cannot replace the current category results', async () => {
+  await act(async () => root.render(createElement(MemoryRouter, null, createElement(NotificationsPage))));
+  holdInvestment = true;
+  await selectCategory('investment');
+  assert.equal(typeof releaseInvestment, 'function');
+  await selectCategory('financial');
+  assert.match(container.textContent, /Auditoría/);
+  await act(async () => releaseInvestment());
+  assert.equal(container.querySelector('select').value, 'financial');
+  assert.match(container.textContent, /Auditoría/);
+  assert.doesNotMatch(container.textContent, /Aporte 1/);
 });

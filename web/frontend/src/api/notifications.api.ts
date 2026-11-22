@@ -1,10 +1,13 @@
 import axios from 'axios';
 
+export type NotificationCategory = 'campaign' | 'investment' | 'kyc' | 'chat' | 'financial' | 'system';
+
 export interface AppNotification {
   id: string;
   userId: string;
   typeId?: string | null;
   typeCode: string | null;
+  category: NotificationCategory;
   title: string;
   body: string;
   channel: string;
@@ -54,6 +57,7 @@ export async function getMyNotifications(params?: {
   page?: number;
   limit?: number;
   unread?: boolean;
+  category?: NotificationCategory;
   typeCode?: string;
   q?: string;
 }): Promise<NotificationsResponse> {
@@ -67,6 +71,7 @@ export async function getNotifications(params?: {
   page?: number;
   limit?: number;
   unread?: boolean;
+  category?: NotificationCategory;
   typeCode?: string;
   q?: string;
 }): Promise<NotificationsResponse> {

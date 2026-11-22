@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Notification;
 use App\Support\Api;
+use App\Support\NotificationCategories;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class NotificationController extends Controller
 {
@@ -15,6 +17,7 @@ class NotificationController extends Controller
             'userId' => $n->user_id,
             'typeId' => $n->type_id,
             'typeCode' => $n->type_code,
+            'category' => NotificationCategories::forType($n->type_code),
             'title' => $n->title,
             'body' => $n->body,
             'channel' => $n->channel,
@@ -31,8 +34,13 @@ class NotificationController extends Controller
 
     public function index(Request $r)
     {
+        $r->validate(['category' => ['sometimes', 'nullable', 'string', Rule::in([...NotificationCategories::names(), 'all'])]]);
         $userId = $r->user()->id;
         $q = Notification::where('user_id', $userId);
+
+        if ($r->filled('category') && $r->input('category') !== 'all') {
+            NotificationCategories::filter($q, $r->input('category'));
+        }
 
         if ($r->has('unread')) {
             // An explicit false selects read notices; absence selects all.
@@ -62,7 +70,7 @@ class NotificationController extends Controller
         $total = (clone $q)->count();
         $totalPages = max(1, (int) ceil($total / $perPage));
 
-        $notifications = $q->latest()->forPage($page, $perPage)->get()
+        $notifications = $q->latest()->orderByDesc('id')->forPage($page, $perPage)->get()
             ->map(fn ($n) => $this->notificationData($n));
 
         return Api::ok([
