@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import {
@@ -11,6 +11,7 @@ import {
   getNotificationPreferences,
   updateNotificationPreferences,
   type AppNotification,
+  type NotificationCategory,
   type NotificationPreferences,
 } from '../api/notifications.api';
 import {
@@ -61,19 +62,8 @@ function formatDate(dateStr: string): string {
   }
 }
 
-function getCategoryFromType(typeCode?: string | null): string {
-  if (!typeCode) return 'system';
-  if (typeCode.startsWith('investment_')) return 'investment';
-  if (typeCode.startsWith('campaign_')) return 'campaign';
-  if (typeCode.startsWith('kyc_')) return 'kyc';
-  if (typeCode === 'new_message' || typeCode === 'new_comment') return 'chat';
-  if (typeCode.startsWith('financial_') || typeCode.startsWith('document_')) return 'financial';
-  return 'system';
-}
-
-function getCategoryBadge(typeCode?: string | null): { label: string; color: string } {
-  const cat = getCategoryFromType(typeCode);
-  switch (cat) {
+function getCategoryBadge(category: NotificationCategory): { label: string; color: string } {
+  switch (category) {
     case 'investment':
       return { label: 'Inversión', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
     case 'campaign':
@@ -130,11 +120,12 @@ export function NotificationsPage() {
 
   // Filters state
   const [filterStatus, setFilterStatus] = useState<'all' | 'unread' | 'read'>('all');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [categoryFilter, setCategoryFilter] = useState<NotificationCategory | 'all'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const latestRequest = useRef(0);
 
   // Preferences modal state
   const [showPreferences, setShowPreferences] = useState(false);
@@ -150,6 +141,7 @@ export function NotificationsPage() {
   const [prefsSuccess, setPrefsSuccess] = useState(false);
 
   const fetchNotifications = useCallback(async () => {
+    const requestId = ++latestRequest.current;
     try {
       setLoading(true);
       const isUnread = filterStatus === 'unread' ? true : filterStatus === 'read' ? false : undefined;
@@ -157,23 +149,29 @@ export function NotificationsPage() {
         page,
         limit: 12,
         unread: isUnread,
+        category: categoryFilter === 'all' ? undefined : categoryFilter,
         q: searchTerm || undefined,
       });
 
+      if (requestId !== latestRequest.current) return;
       setNotifications(res.notifications || []);
       setUnreadCount(res.unreadCount || 0);
       setTotalPages(res.totalPages || Math.max(1, Math.ceil((res.total || res.notifications.length) / (res.perPage || 12))));
       setTotalCount(res.total ?? res.notifications.length);
     } catch (err) {
-      console.error('Error cargando notificaciones:', err);
+      if (requestId === latestRequest.current) console.error('Error cargando notificaciones:', err);
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (requestId === latestRequest.current) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
-  }, [page, filterStatus, searchTerm]);
+  }, [page, filterStatus, searchTerm, categoryFilter]);
 
   useEffect(() => {
     fetchNotifications();
+    // Ignore responses from an older filter selection or an unmounted view.
+    return () => { latestRequest.current++; };
   }, [fetchNotifications]);
 
   useEffect(() => subscribeToNotificationsRead(({ typeCode, unreadCount }) => {
@@ -256,12 +254,6 @@ export function NotificationsPage() {
       console.error('Error al limpiar leídas:', err);
     }
   };
-
-  // Filter by category client-side
-  const filteredNotifications = notifications.filter((notif) => {
-    if (categoryFilter === 'all') return true;
-    return getCategoryFromType(notif.typeCode) === categoryFilter;
-  });
 
   return (
     <div className="min-h-screen bg-[#f9fafb] text-gray-800" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
@@ -400,7 +392,10 @@ export function NotificationsPage() {
               <Filter size={15} className="text-gray-400 shrink-0 hidden sm:block" />
               <select
                 value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
+                onChange={(e) => {
+                  setCategoryFilter(e.target.value as NotificationCategory | 'all');
+                  setPage(1);
+                }}
                 aria-label="Filtrar por categoría"
                 className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-xs font-semibold text-gray-700 focus:outline-none focus:border-[#72B626] transition-colors shadow-xs cursor-pointer"
               >
@@ -422,7 +417,7 @@ export function NotificationsPage() {
             <div className="w-10 h-10 border-4 border-gray-200 border-t-[#72B626] rounded-full animate-spin"></div>
             <p className="text-gray-400 font-bold uppercase tracking-wider text-xs">Cargando notificaciones...</p>
           </div>
-        ) : filteredNotifications.length === 0 ? (
+        ) : notifications.length === 0 ? (
           <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
             <div className="w-14 h-14 rounded-2xl bg-[#f0f9e0] text-[#72B626] flex items-center justify-center mx-auto mb-3.5">
               <BellRing size={26} strokeWidth={2} />
@@ -439,6 +434,7 @@ export function NotificationsPage() {
                   setSearchTerm('');
                   setCategoryFilter('all');
                   setFilterStatus('all');
+                  setPage(1);
                 }}
                 className="mt-4 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs font-bold text-gray-700 transition-colors cursor-pointer border-none"
               >
@@ -448,8 +444,8 @@ export function NotificationsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredNotifications.map((notif) => {
-              const badge = getCategoryBadge(notif.typeCode);
+            {notifications.map((notif) => {
+              const badge = getCategoryBadge(notif.category);
               return (
                 <div
                   key={notif.id}
