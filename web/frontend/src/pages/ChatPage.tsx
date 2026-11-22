@@ -44,6 +44,9 @@ export function ChatPage() {
           if (syncRequested.current) continue;
           setConversations([...new Map(convs.map(conv => [conv.id, conv])).values()].sort((a, b) =>
             new Date(b.lastMessageAt ?? 0).getTime() - new Date(a.lastMessageAt ?? 0).getTime()));
+          // Apply current campaign permissions to the open window too, even
+          // when its conversation ID has not changed.
+          setActiveConversation(current => current ? convs.find(conv => conv.id === current.id) ?? null : null);
           setSyncError(null);
         } while (syncRequested.current && mounted.current);
       } catch {
