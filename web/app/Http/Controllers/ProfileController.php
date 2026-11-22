@@ -9,6 +9,7 @@ use App\Models\InvestorProfile;
 use App\Models\Role;
 use App\Models\Transaction;
 use App\Services\ProfileReadiness;
+use App\Services\PrivateFileLinks;
 use App\Support\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -28,7 +29,7 @@ class ProfileController extends Controller
 
     public function show(Request $r)
     {
-        return Api::ok($this->query($r)->where('user_id', $r->user()->id)->firstOrFail());
+        return Api::ok(PrivateFileLinks::profileData($this->query($r)->where('user_id', $r->user()->id)->firstOrFail()));
     }
 
     public function publicShow(Request $r, string $id)
@@ -76,7 +77,7 @@ class ProfileController extends Controller
             }
             $r->user()->assignRole($this->kind($r));
 
-            return Api::ok($profile, $creating ? 201 : 200);
+            return Api::ok(PrivateFileLinks::profileData($profile), $creating ? 201 : 200);
         });
     }
 
@@ -108,7 +109,7 @@ class ProfileController extends Controller
         $path = $r->file('file')->store('profiles', 'public');
         $profile->update([$field => '/storage/'.$path]);
 
-        return Api::ok($profile->fresh());
+        return Api::ok(PrivateFileLinks::profileData($profile->fresh()));
     }
 
     public function kyc(Request $r)
@@ -123,7 +124,7 @@ class ProfileController extends Controller
         }
         $profile->update(['verification_documents' => $docs, 'kyc_status' => 'pending', 'identity_verified' => false, 'kyc_rejection_reason' => null]);
 
-        return Api::ok($profile->fresh());
+        return Api::ok(PrivateFileLinks::profileData($profile->fresh()));
     }
 
     public function capital(Request $r)

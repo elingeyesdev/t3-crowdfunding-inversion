@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -34,31 +33,6 @@ class LegacyKycFiles
         });
 
         return $documents;
-    }
-
-    public static function maySign(string $url): bool
-    {
-        $user = Auth::guard('sanctum')->user();
-        if (! $user || ! $user->is_active) {
-            return false;
-        }
-        if ($user->roles()->whereIn('name', ['admin', 'super_admin'])->exists()) {
-            return true;
-        }
-        foreach ([$user->entrepreneur?->verification_documents, $user->investor?->verification_documents] as $documents) {
-            $values = $documents ?? [];
-            $found = false;
-            array_walk_recursive($values, function ($value) use ($url, &$found): void {
-                if (is_string($value) && self::privateUrl($value) === $url) {
-                    $found = true;
-                }
-            });
-            if ($found) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**

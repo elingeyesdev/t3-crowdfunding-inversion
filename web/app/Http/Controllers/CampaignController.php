@@ -12,6 +12,7 @@ use App\Services\FinancialMovementAudit;
 use App\Services\InvestmentEngine;
 use App\Services\Notifier;
 use App\Services\ProfileReadiness;
+use App\Services\PrivateFileLinks;
 use App\Support\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -286,7 +287,7 @@ class CampaignController extends Controller
     {
         self::authorizeOwner($r, $campaign, true);
 
-        return Api::ok($campaign->documents()->latest()->get(), 200, false);
+        return Api::ok($campaign->documents()->latest()->get()->map(fn ($document) => PrivateFileLinks::documentData($document)), 200, false);
     }
 
     public function uploadDocument(Request $r, Campaign $campaign)
@@ -296,7 +297,9 @@ class CampaignController extends Controller
         $f = $r->file('file');
         $path = $f->store('documents', 'local');
 
-        return Api::ok($campaign->documents()->create(['file_url' => '/api/v1/private-files/'.$path, 'original_name' => $f->getClientOriginalName(), 'mime_type' => $f->getMimeType(), 'file_size_bytes' => $f->getSize(), 'justification' => $r->input('justification')])->fresh(), 201, false);
+        $document = $campaign->documents()->create(['file_url' => '/api/v1/private-files/'.$path, 'original_name' => $f->getClientOriginalName(), 'mime_type' => $f->getMimeType(), 'file_size_bytes' => $f->getSize(), 'justification' => $r->input('justification')])->fresh();
+
+        return Api::ok(PrivateFileLinks::documentData($document), 201, false);
     }
 
     public function deleteDocument(Request $r, Campaign $campaign, string $document)
