@@ -12,6 +12,7 @@ import {
   deleteNotification,
   clearReadNotifications,
   subscribeToNotificationsRead,
+  subscribeToNotificationsChanged,
   type AppNotification,
 } from '../api/notifications.api';
 
@@ -72,10 +73,16 @@ export function NotificationBell() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const prevUnreadRef = useRef(0);
   const [shake, setShake] = useState(false);
+  const latestRequest = useRef(0);
+  const mounted = useRef(false);
+  const deletionPending = useRef(false);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchNotifications = useCallback(async () => {
+    const requestId = ++latestRequest.current;
     try {
       const res = await getMyNotifications();
+      if (requestId !== latestRequest.current) return;
       setNotifications(res.notifications);
       if (res.unreadCount > prevUnreadRef.current) {
         setShake(true);
@@ -90,10 +97,13 @@ export function NotificationBell() {
 
   // Initial fetch + polling
   useEffect(() => {
+    mounted.current = true;
     fetchNotifications();
     const interval = setInterval(fetchNotifications, POLL_INTERVAL_MS);
-    return () => clearInterval(interval);
+    return () => { mounted.current = false; latestRequest.current++; clearInterval(interval); };
   }, [fetchNotifications]);
+
+  useEffect(() => subscribeToNotificationsChanged(() => { void fetchNotifications(); }), [fetchNotifications]);
 
   useEffect(() => subscribeToNotificationsRead(({ typeCode, unreadCount }) => {
     setNotifications(current => current.map(notification => !typeCode || notification.typeCode === typeCode ? { ...notification, isRead: true } : notification));
@@ -135,25 +145,32 @@ export function NotificationBell() {
     }
   }
 
-  async function handleDelete(e: React.MouseEvent, id: string, wasRead: boolean) {
+  async function handleDelete(e: React.MouseEvent, id: string) {
     e.stopPropagation();
+    if (deletionPending.current) return;
+    deletionPending.current = true;
+    setDeleting(true);
     try {
       await deleteNotification(id);
-      setNotifications((prev) => prev.filter((n) => n.id !== id));
-      if (!wasRead) {
-        setUnreadCount((c) => Math.max(0, c - 1));
-      }
     } catch (err) {
       console.error('Error al eliminar notificación:', err);
+    } finally {
+      deletionPending.current = false;
+      if (mounted.current) setDeleting(false);
     }
   }
 
   async function handleClearRead() {
+    if (deletionPending.current) return;
+    deletionPending.current = true;
+    setDeleting(true);
     try {
       await clearReadNotifications();
-      setNotifications((prev) => prev.filter((n) => !n.isRead));
     } catch (err) {
       console.error('Error al limpiar notificaciones leídas:', err);
+    } finally {
+      deletionPending.current = false;
+      if (mounted.current) setDeleting(false);
     }
   }
 
@@ -244,6 +261,7 @@ export function NotificationBell() {
               <button
                 type="button"
                 onClick={handleClearRead}
+                disabled={deleting}
                 className="text-[11px] text-slate-400 hover:text-rose-600 transition-colors"
                 title="Limpiar leídas"
               >
@@ -301,7 +319,8 @@ export function NotificationBell() {
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           type="button"
-                          onClick={(e) => handleDelete(e, notif.id, notif.isRead)}
+                          onClick={(e) => handleDelete(e, notif.id)}
+                          disabled={deleting}
                           className="text-slate-400 hover:text-rose-600 p-0.5"
                           title="Eliminar notificación"
                         >
