@@ -115,12 +115,25 @@ export async function markAllNotificationsAsRead(typeCode?: string): Promise<{ u
   return data.data;
 }
 
+const NOTIFICATIONS_CHANGED_EVENT = 'app:notifications-changed';
+
+export function subscribeToNotificationsChanged(listener: () => void): () => void {
+  window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, listener);
+  return () => window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, listener);
+}
+
+function notifyNotificationsChanged(): void {
+  if (typeof window !== 'undefined') window.dispatchEvent(new window.Event(NOTIFICATIONS_CHANGED_EVENT));
+}
+
 export async function deleteNotification(id: string): Promise<void> {
   await api.delete(`/notifications/${id}`);
+  notifyNotificationsChanged();
 }
 
 export async function clearReadNotifications(): Promise<{ deletedCount: number }> {
   const { data } = await api.delete<{ data: { deletedCount: number } }>('/notifications/clear-read');
+  notifyNotificationsChanged();
   return data.data;
 }
 

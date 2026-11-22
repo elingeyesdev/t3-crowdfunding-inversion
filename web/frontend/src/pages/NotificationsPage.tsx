@@ -8,6 +8,7 @@ import {
   deleteNotification,
   clearReadNotifications,
   subscribeToNotificationsRead,
+  subscribeToNotificationsChanged,
   getNotificationPreferences,
   updateNotificationPreferences,
   type AppNotification,
@@ -126,6 +127,9 @@ export function NotificationsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const latestRequest = useRef(0);
+  const reloadNotifications = useRef<(() => Promise<void>) | null>(null);
+  const deletionPending = useRef(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Preferences modal state
   const [showPreferences, setShowPreferences] = useState(false);
@@ -154,9 +158,16 @@ export function NotificationsPage() {
       });
 
       if (requestId !== latestRequest.current) return;
+      const pages = res.totalPages || Math.max(1, Math.ceil((res.total ?? res.notifications.length) / (res.perPage || 12)));
+      if (page > pages) {
+        // The deletion may have removed this page. Fetch the last valid one
+        // with the same filters instead of showing an out-of-range empty page.
+        setPage(pages);
+        return;
+      }
       setNotifications(res.notifications || []);
       setUnreadCount(res.unreadCount || 0);
-      setTotalPages(res.totalPages || Math.max(1, Math.ceil((res.total || res.notifications.length) / (res.perPage || 12))));
+      setTotalPages(pages);
       setTotalCount(res.total ?? res.notifications.length);
     } catch (err) {
       if (requestId === latestRequest.current) console.error('Error cargando notificaciones:', err);
@@ -169,10 +180,13 @@ export function NotificationsPage() {
   }, [page, filterStatus, searchTerm, categoryFilter]);
 
   useEffect(() => {
+    reloadNotifications.current = fetchNotifications;
     fetchNotifications();
     // Ignore responses from an older filter selection or an unmounted view.
-    return () => { latestRequest.current++; };
+    return () => { reloadNotifications.current = null; latestRequest.current++; };
   }, [fetchNotifications]);
+
+  useEffect(() => subscribeToNotificationsChanged(() => { void reloadNotifications.current?.(); }), []);
 
   useEffect(() => subscribeToNotificationsRead(({ typeCode, unreadCount }) => {
     setNotifications(current => current.map(notification => !typeCode || notification.typeCode === typeCode ? { ...notification, isRead: true } : notification));
@@ -231,27 +245,33 @@ export function NotificationsPage() {
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent, id: string, wasRead: boolean) => {
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
+    if (deletionPending.current) return;
+    deletionPending.current = true;
+    setDeleting(true);
     try {
+      // The successful mutation notifies both views to reload server counts.
       await deleteNotification(id);
-      setNotifications((prev) => prev.filter((n) => n.id !== id));
-      if (!wasRead) {
-        setUnreadCount((c) => Math.max(0, c - 1));
-      }
-      setTotalCount((c) => Math.max(0, c - 1));
     } catch (err) {
       console.error('Error al eliminar notificación:', err);
+    } finally {
+      deletionPending.current = false;
+      if (reloadNotifications.current) setDeleting(false);
     }
   };
 
   const handleClearRead = async () => {
+    if (deletionPending.current) return;
+    deletionPending.current = true;
+    setDeleting(true);
     try {
       await clearReadNotifications();
-      setNotifications((prev) => prev.filter((n) => !n.isRead));
-      setTotalCount((c) => Math.max(unreadCount, c - (notifications.length - unreadCount)));
     } catch (err) {
       console.error('Error al limpiar leídas:', err);
+    } finally {
+      deletionPending.current = false;
+      if (reloadNotifications.current) setDeleting(false);
     }
   };
 
@@ -364,6 +384,7 @@ export function NotificationsPage() {
             {notifications.some((n) => n.isRead) && (
               <button
                 onClick={handleClearRead}
+                disabled={deleting || loading}
                 className="text-xs font-semibold text-gray-400 hover:text-rose-600 transition-colors flex items-center gap-1 self-end sm:self-auto cursor-pointer bg-transparent border-none"
               >
                 <Trash2 size={14} />
@@ -495,7 +516,8 @@ export function NotificationsPage() {
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={(e) => handleDelete(e, notif.id, notif.isRead)}
+                          onClick={(e) => handleDelete(e, notif.id)}
+                          disabled={deleting}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer border-none bg-transparent"
                           title="Eliminar notificación"
                         >
