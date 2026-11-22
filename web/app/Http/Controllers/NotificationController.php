@@ -34,11 +34,12 @@ class NotificationController extends Controller
         $userId = $r->user()->id;
         $q = Notification::where('user_id', $userId);
 
-        if ($r->has('unread') || $r->has('unreadOnly')) {
-            $unreadFilter = $r->boolean('unread', $r->boolean('unreadOnly'));
-            if ($unreadFilter) {
-                $q->where('is_read', false);
-            }
+        if ($r->has('unread')) {
+            // An explicit false selects read notices; absence selects all.
+            $q->where('is_read', ! $r->boolean('unread'));
+        } elseif ($r->boolean('unreadOnly')) {
+            // Preserve the legacy toggle: false means no restriction.
+            $q->where('is_read', false);
         }
 
         if ($r->filled('type') || $r->filled('typeCode')) {
