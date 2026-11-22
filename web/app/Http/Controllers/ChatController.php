@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\ChatMessageSent;
+use App\Models\Campaign;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
@@ -29,11 +30,18 @@ class ChatController extends Controller
         abort_unless($c->contains($r->user()->id), 403, 'No perteneces a esta conversación.');
     }
 
+    private function canReadCampaign(User $user, Campaign $campaign): bool
+    {
+        return $campaign->creator_id === $user->id
+            || $campaign->isPubliclyReadable()
+            || $user->roles()->whereIn('name', ['admin', 'super_admin'])->exists();
+    }
+
     public function index(Request $r)
     {
         $id = $r->user()->id;
 
-        return Api::ok(Conversation::with('campaign')->where(fn ($q) => $q->where('user_one_id', $id)->orWhere('user_two_id', $id))->orderByDesc('last_message_at')->get()->map(function ($c) use ($id) {
+        return Api::ok(Conversation::with('campaign')->where(fn ($q) => $q->where('user_one_id', $id)->orWhere('user_two_id', $id))->orderByDesc('last_message_at')->get()->map(function ($c) use ($id, $r) {
             $other = User::findOrFail($c->user_one_id === $id ? $c->user_two_id : $c->user_one_id);
             $readAt = $c->user_one_id === $id ? $c->user_one_read_at : $c->user_two_read_at;
             $readMessageId = $c->user_one_id === $id ? $c->user_one_read_message_id : $c->user_two_read_message_id;
@@ -47,20 +55,35 @@ class ChatController extends Controller
                 $unread->where('created_at', '>', $readAt);
             }
 
-            return ['id' => $c->id, 'subject' => $c->subject, 'campaignId' => $c->campaign_id, 'campaignTitle' => $c->campaign?->title, 'campaignCover' => $c->campaign?->cover_image_url, 'status' => $c->status, 'lastMessageAt' => $c->last_message_at, 'messageCount' => $c->messages()->count(), 'unreadCount' => $unread->count(), 'otherUser' => self::userData($other), 'lastMessage' => $last ? ['content' => $last->content, 'createdAt' => $last->created_at, 'senderId' => $last->sender_id] : null];
+            // Existing chats survive visibility changes. Do not expose their
+            // campaign or subject (which may contain its title) to this viewer.
+            $campaign = $c->campaign && $this->canReadCampaign($r->user(), $c->campaign) ? $c->campaign : null;
+            $subject = $c->campaign_id && ! $campaign ? null : $c->subject;
+
+            return ['id' => $c->id, 'subject' => $subject, 'campaignId' => $campaign?->id, 'campaignTitle' => $campaign?->title, 'campaignCover' => $campaign?->cover_image_url, 'status' => $c->status, 'lastMessageAt' => $c->last_message_at, 'messageCount' => $c->messages()->count(), 'unreadCount' => $unread->count(), 'otherUser' => self::userData($other), 'lastMessage' => $last ? ['content' => $last->content, 'createdAt' => $last->created_at, 'senderId' => $last->sender_id] : null];
         }));
     }
 
     public function store(Request $r)
     {
-        $data = $r->validate(['otherUserId' => 'required|uuid|exists:users,id', 'campaignId' => 'nullable|uuid|exists:campaigns,id', 'subject' => 'nullable|string|max:255']);
+        $data = $r->validate(['otherUserId' => 'required|uuid|exists:users,id', 'campaignId' => 'nullable|uuid', 'subject' => 'nullable|string|max:255']);
         abort_if($data['otherUserId'] === $r->user()->id, 422, 'Elige otro usuario.');
-        abort_unless(User::whereKey($data['otherUserId'])->where('is_active', true)->exists(), 422, 'El usuario no está activo.');
+        $other = User::whereKey($data['otherUserId'])->where('is_active', true)->first();
+        abort_unless($other, 422, 'El usuario no está activo.');
         $ids = [$r->user()->id, $data['otherUserId']];
         sort($ids);
         // Lock a stable user row to serialize creation of an identical conversation.
-        $c = DB::transaction(function () use ($ids, $data) {
+        $c = DB::transaction(function () use ($ids, $data, $r, $other) {
             User::whereKey($ids[0])->lockForUpdate()->firstOrFail();
+
+            if (! empty($data['campaignId'])) {
+                $campaign = Campaign::whereKey($data['campaignId'])->lockForUpdate()->firstOrFail();
+                // Permission of the sender alone must not disclose a private
+                // campaign to a recipient who cannot read it. Recheck even if
+                // the conversation already exists, under the campaign lock.
+                abort_unless($this->canReadCampaign($r->user(), $campaign)
+                    && $this->canReadCampaign($other, $campaign), 404);
+            }
 
             return Conversation::firstOrCreate(['user_one_id' => $ids[0], 'user_two_id' => $ids[1], 'campaign_id' => $data['campaignId'] ?? null], ['subject' => $data['subject'] ?? null]);
         });

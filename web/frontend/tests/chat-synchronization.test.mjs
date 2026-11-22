@@ -74,7 +74,7 @@ function persist(id, content, conversationId = 'new-chat', senderId = 'sender') 
 function snapshot() {
   return [...store].map(([id, chat]) => {
     const latest = chat.messages.at(-1);
-    return { id, subject: null, campaignId: null, campaignTitle: 'Proyecto '+id, campaignCover: null, status: 'active', lastMessageAt: latest?.createdAt, messageCount: chat.messages.length, unreadCount: chat.unread, otherUser: sender, lastMessage: latest ? { content: latest.content, senderId: latest.senderId, createdAt: latest.createdAt } : null };
+    return { id, subject: null, campaignId: null, campaignTitle: 'Proyecto '+id, campaignCover: null, status: 'active', lastMessageAt: latest?.createdAt, messageCount: chat.messages.length, unreadCount: chat.unread, otherUser: sender, lastMessage: latest ? { content: latest.content, senderId: latest.senderId, createdAt: latest.createdAt } : null, ...chat.campaign };
   });
 }
 axios.defaults.adapter = async config => {
@@ -232,4 +232,25 @@ test('failed history recovery keeps the existing messages and retry recovers mis
   failMessages = false;
   await click([...container.querySelectorAll('button')].find(node => node.textContent === 'Reintentar'));
   assert.deepEqual(bubbles(), ['Conservado', 'Recuperado']);
+});
+
+test('an open chat removes hidden campaign metadata after synchronization without losing messages', async t => {
+  persist('m1', 'Mensaje conservado');
+  store.get('new-chat').campaign = { campaignId: 'campaign-1', campaignTitle: 'Campaña visible', campaignCover: '/cover.jpg', subject: 'Consulta sobre: Campaña visible' };
+  await mount(t, '/chat/new-chat');
+  const campaignLink = () => container.querySelector('a[href="/campaign/campaign-1"]');
+  assert.ok(campaignLink());
+  assert.match(container.textContent, /Campaña visible/);
+
+  store.get('new-chat').campaign = { campaignId: null, campaignTitle: null, campaignCover: null, subject: null };
+  await incoming(persist('m2', 'Nuevo mensaje'));
+  assert.equal(campaignLink(), null);
+  assert.doesNotMatch(container.textContent, /Campaña visible/);
+  assert.deepEqual(bubbles(), ['Mensaje conservado', 'Nuevo mensaje']);
+  assert.equal(rows().length, 1);
+
+  store.get('new-chat').campaign = { campaignId: 'campaign-1', campaignTitle: 'Campaña publicada otra vez', campaignCover: '/new-cover.jpg', subject: null };
+  await act(async () => echo.connect());
+  assert.match(campaignLink().textContent, /Campaña publicada otra vez/);
+  assert.deepEqual(bubbles(), ['Mensaje conservado', 'Nuevo mensaje']);
 });
