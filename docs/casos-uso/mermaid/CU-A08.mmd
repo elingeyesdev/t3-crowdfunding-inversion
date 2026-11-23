@@ -1,0 +1,29 @@
+%% CU-A08 · Auditar movimientos financieros
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Administrador: Busca por concepto, factura, notas o campaña y aplica tipo, estado o comprobante; recorre las páginas."]
+  N0 --> N1
+  N2["1 · UniFundme: Presenta movimientos coincidentes."]
+  N1 --> N2
+  N3["2 · Administrador: Pulsa Revisar en un movimiento."]
+  N2 --> N3
+  N4["2 · UniFundme: Carga importe, categoría, comprobante disponible e Historial de cambios y revisiones."]
+  N3 --> N4
+  N5["3 · Administrador: Elige Aprobar / Verificado y pulsa Confirmar Dictamen."]
+  N4 --> N5
+  N6{"A1 · ¿Prefiere Marcar Observado o Rechazar?"}
+  A6["A1 · Exige explicación para completar ese dictamen.<br/>Continuidad: Añadir explicación y retomar el paso 3."]
+  N6 -->|Sí| A6
+  N5 --> N6
+  N7{"A2 · ¿Cambió la versión o el movimiento no admite revisión?"}
+  A7["A2 · No sobrescribe otra revisión; requiere recargar o limitarse a consultar.<br/>Continuidad: Volver al paso 2 o terminar con consulta."]
+  N7 -->|Sí| A7
+  N6 -->|No| N7
+  N8["3 · UniFundme: Comprueba permisos y versión y registra el dictamen si el movimiento admite revisión."]
+  N7 -->|No| N8
+  N9["4 · Administrador: Consulta el resultado."]
+  N8 --> N9
+  N10["4 · UniFundme: Actualiza lista, resumen e historial."]
+  N9 --> N10
+  N11(["Fin del recorrido principal"])
+  N10 --> N11

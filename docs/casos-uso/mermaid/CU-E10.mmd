@@ -1,0 +1,21 @@
+%% CU-E10 · Publicar una campaña aprobada
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Emprendedor: Localiza la campaña Aprobada."]
+  N0 --> N1
+  N2["1 · UniFundme: Presenta Publicar Campaña en la tarjeta o Lanzar en Vista Previa."]
+  N1 --> N2
+  N3["2 · Emprendedor: Pulsa Publicar Campaña o Lanzar."]
+  N2 --> N3
+  N4{"A1 · ¿La fecha ya venció o el estado no permite publicar?"}
+  A4["A1 · Rechaza el lanzamiento. En Aprobada la edición está bloqueada y no hay recorrido web completo para corregir la fecha.<br/>Continuidad: Terminar; la solución del recorrido está pendiente en HU-P07."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Comprueba estado y fecha y procesa el lanzamiento."]
+  N4 -->|No| N5
+  N6["3 · Emprendedor: Consulta el resultado."]
+  N5 --> N6
+  N7["3 · UniFundme: La campaña pasa a Publicada y puede aparecer en Explorar si la operación es correcta."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

@@ -1,0 +1,21 @@
+%% CU-D08 · Consultar novedades de proyectos apoyados
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Donador: Abre Mi Panel → Novedades."]
+  N0 --> N1
+  N2{"A1 · ¿No hay novedades o falla la carga?"}
+  A2["A1 · Distingue el estado sin novedades del error de consulta.<br/>Continuidad: Terminar o volver a consultar el paso 1."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Carga publicaciones de proyectos respaldados por su cuenta."]
+  N2 -->|No| N3
+  N4["2 · Donador: Selecciona un proyecto y usa Anterior o Siguiente si hay varias páginas."]
+  N3 --> N4
+  N5["2 · UniFundme: Muestra las novedades y páginas correspondientes."]
+  N4 --> N5
+  N6["3 · Donador: Selecciona Ver proyecto."]
+  N5 --> N6
+  N7["3 · UniFundme: Abre la campaña para continuar en Hitos y Avances."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

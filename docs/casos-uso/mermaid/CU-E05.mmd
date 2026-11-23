@@ -1,0 +1,29 @@
+%% CU-E05 · Crear un borrador de campaña
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Emprendedor: Abre Mis Campañas → Lanzar Campaña."]
+  N0 --> N1
+  N2["1 · UniFundme: Presenta el formulario de campaña."]
+  N1 --> N2
+  N3["2 · Emprendedor: Completa título, eslogan, descripción, meta, categorías y al menos un documento con justificación."]
+  N2 --> N3
+  N4{"A1 · ¿Hay campos inválidos, fecha no futura si se ingresó, video distinto de YouTube/TikTok o falta respaldo?"}
+  A4["A1 · El formulario bloquea la continuación y solicita corregir lo necesario; la fecha es opcional para guardar el borrador.<br/>Continuidad: Corregir y retomar el paso 2."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Valida título 5–50, eslogan 10–50, descripción 50–800 caracteres, meta mínima Bs. 100 y al menos una categoría y un respaldo."]
+  N4 -->|No| N5
+  N6["3 · Emprendedor: Pulsa Guardar Borrador."]
+  N5 --> N6
+  N7{"A2 · ¿Se crea el borrador pero falla una carga posterior?"}
+  A7["A2 · Puede existir campaña sin todos los archivos esperados; no hay garantía de una confirmación integral en la interfaz actual.<br/>Continuidad: Comprobar el borrador en el paso 4 antes de repetir la creación; consultar pendiente HU-P12."]
+  N7 -->|Sí| A7
+  N6 --> N7
+  N8["3 · UniFundme: Crea el borrador propio y realiza las cargas posteriores de archivos como operaciones separadas."]
+  N7 -->|No| N8
+  N9["4 · Emprendedor: Abre Vista Previa."]
+  N8 --> N9
+  N10["4 · UniFundme: Permite comprobar datos, portada y documentos que realmente quedaron guardados."]
+  N9 --> N10
+  N11(["Fin del recorrido principal"])
+  N10 --> N11

@@ -1,0 +1,29 @@
+%% CU-E07 · Adjuntar y consultar respaldo de campaña
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Emprendedor: Selecciona un archivo y escribe su justificación; pulsa Añadir Documento."]
+  N0 --> N1
+  N2{"A1 · ¿Falta archivo o justificación?"}
+  A2["A1 · Solicita ambos datos antes de añadir.<br/>Continuidad: Completar y retomar el paso 1."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3{"A2 · ¿Retira un archivo pendiente antes de guardar?"}
+  A3["A2 · No lo incluye en ese envío; no borra documentos previamente guardados.<br/>Continuidad: Retomar el paso 1 o 2."]
+  N3 -->|Sí| A3
+  N2 -->|No| N3
+  N4["1 · UniFundme: Añade el respaldo a la lista pendiente del formulario."]
+  N3 -->|No| N4
+  N5["2 · Emprendedor: Guarda la campaña."]
+  N4 --> N5
+  N6{"A3 · ¿La carga falla o el formato/tamaño no se admite?"}
+  A6["A3 · El archivo no queda como respaldo válido; puede existir borrador por guardado parcial.<br/>Continuidad: Comprobar la lista del paso 3; consultar pendiente HU-P12."]
+  N6 -->|Sí| A6
+  N5 --> N6
+  N7["2 · UniFundme: Intenta cargar los respaldos; admite PDF, JPG/JPEG, PNG, WEBP, DOC o DOCX de hasta 20 MB."]
+  N6 -->|No| N7
+  N8["3 · Emprendedor: Abre Vista Previa → Documentación y usa Ver Documento."]
+  N7 --> N8
+  N9["3 · UniFundme: Muestra los documentos realmente guardados, estado y observaciones disponibles."]
+  N8 --> N9
+  N10(["Fin del recorrido principal"])
+  N9 --> N10

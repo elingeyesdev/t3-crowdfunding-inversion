@@ -1,0 +1,4699 @@
+{
+  "version": "1.0",
+  "alcance": "Aplicación web de UniFundme; excluye móvil",
+  "convenciones": {
+    "Actual": "Recorrido web conectado identificado en la aplicación; no implica certificación de funcionamiento en producción.",
+    "Parcial": "Recorrido utilizable con las limitaciones explícitas de la ficha.",
+    "Pendiente": "Capacidad sin recorrido web completo disponible; no se presenta como caso operativo."
+  },
+  "casos": [
+    {
+      "id": "CU-V01",
+      "grupo": "V",
+      "actor": "Visitante",
+      "actores_secundarios": [],
+      "titulo": "Conocer la plataforma y acceder al catálogo",
+      "objetivo": "conocer la propuesta de UniFundme y entrar en Explorar para identificar proyectos que puedo apoyar",
+      "estado": "Actual",
+      "acceso": "Inicio; sin sesión.",
+      "limites": "",
+      "historia": "HU-V01",
+      "criterios": [
+        "HU-V01-CA01",
+        "HU-V01-CA02",
+        "HU-V01-CA03"
+      ],
+      "diagramas_previos": [
+        "V01"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/frontend/src/components/Navbar.tsx",
+        "web/frontend/src/hooks/usePublicCampaigns.ts",
+        "web/frontend/src/pages/ExploreCampaignsPage.tsx",
+        "web/frontend/src/pages/LandingPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea conocer UniFundme.",
+      "precondicion": "No requiere sesión.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Inicio.",
+          "sistema": "Presenta la propuesta de la plataforma y los accesos públicos."
+        },
+        {
+          "numero": 2,
+          "actor": "Selecciona Explorar.",
+          "sistema": "Abre el catálogo de campañas públicas."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Prefiere acceder a su cuenta.",
+          "respuesta": "Selecciona Iniciar Sesión y se abre el formulario de acceso.",
+          "continuidad": "Continuar en CU-C02."
+        }
+      ],
+      "postcondicion": "El catálogo queda abierto para consultar proyectos; no se crea una cuenta ni un aporte."
+    },
+    {
+      "id": "CU-V02",
+      "grupo": "V",
+      "actor": "Visitante",
+      "actores_secundarios": [],
+      "titulo": "Buscar y filtrar campañas",
+      "objetivo": "buscar proyectos y seleccionar su sector para encontrar campañas de mi interés",
+      "estado": "Actual",
+      "acceso": "Explorar → Sector y búsqueda.",
+      "limites": "Explorar no ofrece un selector de orden, aunque existan opciones de ordenamiento en otras partes del sistema.",
+      "historia": "HU-V02",
+      "criterios": [
+        "HU-V02-CA01",
+        "HU-V02-CA02",
+        "HU-V02-CA03",
+        "HU-V02-CA04",
+        "HU-V02-CA05"
+      ],
+      "diagramas_previos": [
+        "V01"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/frontend/src/hooks/usePublicCampaigns.ts",
+        "web/frontend/src/pages/ExploreCampaignsPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea localizar un proyecto.",
+      "precondicion": "Explorar está abierto.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Escribe un término y lo envía con Enter o Ver todos los resultados.",
+          "sistema": "Solicita y presenta las campañas coincidentes."
+        },
+        {
+          "numero": 2,
+          "actor": "Selecciona una categoría en Sector.",
+          "sistema": "Limita el catálogo a la categoría seleccionada."
+        },
+        {
+          "numero": 3,
+          "actor": "Recorre las páginas de resultados disponibles.",
+          "sistema": "Muestra la página elegida dentro de los límites de la lista."
+        },
+        {
+          "numero": 4,
+          "actor": "Selecciona una campaña.",
+          "sistema": "Abre la ficha de ese proyecto."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "Selecciona una sugerencia de búsqueda.",
+          "respuesta": "Abre directamente la campaña sugerida.",
+          "continuidad": "Continuar en CU-V03."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "No hay coincidencias.",
+          "respuesta": "Presenta Sin Resultados; Limpiar filtros elimina búsqueda y sector. Todos los sectores retira solo el sector.",
+          "continuidad": "Retomar el paso 1 o 2."
+        }
+      ],
+      "postcondicion": "La persona llega a la campaña elegida o identifica que no hay resultados. No hay selector de orden en Explorar."
+    },
+    {
+      "id": "CU-V03",
+      "grupo": "V",
+      "actor": "Visitante",
+      "actores_secundarios": [],
+      "titulo": "Navegar por el detalle de una campaña",
+      "objetivo": "consultar la información de un proyecto desde sus pestañas para decidir si deseo apoyarlo",
+      "estado": "Actual",
+      "acceso": "Explorar → campaña.",
+      "limites": "",
+      "historia": "HU-V03",
+      "criterios": [
+        "HU-V03-CA01",
+        "HU-V03-CA02",
+        "HU-V03-CA03",
+        "HU-V03-CA04"
+      ],
+      "diagramas_previos": [
+        "V02"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Models/Campaign.php",
+        "web/frontend/src/pages/CampaignDetailPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona abre un enlace de campaña.",
+      "precondicion": "La campaña tiene acceso público.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre la campaña desde Explorar o su enlace.",
+          "sistema": "Carga la ficha con título, resumen, creador, Recaudado, Meta, Donantes y Días Restantes si corresponde."
+        },
+        {
+          "numero": 2,
+          "actor": "Localiza la barra principal de la ficha.",
+          "sistema": "Ofrece Historia y Proyecto, Transparencia y Fondos, Hitos y Avances y Comentarios."
+        },
+        {
+          "numero": 3,
+          "actor": "Selecciona la pestaña que desea consultar.",
+          "sistema": "Muestra el contenido de esa sección y mantiene la navegación de la campaña."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "La campaña no está disponible o falla la carga.",
+          "respuesta": "Presenta el error y permite volver; Reintentar solicita nuevamente la ficha si hubo un fallo de carga.",
+          "continuidad": "Reintentar el paso 1 o terminar."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "Comentarios queda fuera del ancho visible.",
+          "respuesta": "La barra permite desplazar horizontalmente hacia la derecha hasta la cuarta pestaña.",
+          "continuidad": "Retomar el paso 3."
+        }
+      ],
+      "postcondicion": "La sección elegida queda visible; consultar la ficha no registra una donación."
+    },
+    {
+      "id": "CU-V04",
+      "grupo": "V",
+      "actor": "Visitante",
+      "actores_secundarios": [],
+      "titulo": "Consultar Historia y Proyecto",
+      "objetivo": "leer la propuesta y conocer al emprendedor para evaluar el propósito y al responsable de la campaña",
+      "estado": "Actual",
+      "acceso": "Ficha → Historia y Proyecto.",
+      "limites": "",
+      "historia": "HU-V04",
+      "criterios": [
+        "HU-V04-CA01",
+        "HU-V04-CA02",
+        "HU-V04-CA03",
+        "HU-V04-CA04"
+      ],
+      "diagramas_previos": [
+        "V02"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Models/Campaign.php",
+        "web/frontend/src/pages/CampaignDetailPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea conocer la propuesta y a su responsable.",
+      "precondicion": "Ficha pública abierta.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Selecciona Historia y Proyecto.",
+          "sistema": "Presenta Historia del Proyecto y Sobre el Emprendedor."
+        },
+        {
+          "numero": 2,
+          "actor": "Lee la descripción y los datos disponibles del creador.",
+          "sistema": "Muestra además Niveles de Recompensa cuando existen niveles."
+        },
+        {
+          "numero": 3,
+          "actor": "Selecciona Ver Transparencia.",
+          "sistema": "Cambia a Transparencia y Fondos."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 3,
+          "condicion": "Prefiere contactar al creador.",
+          "respuesta": "Usa Contactar Emprendedor en Sobre el Emprendedor; el contacto requiere sesión y no se ofrece para sí mismo.",
+          "continuidad": "Continuar en CU-C05."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "La campaña no tiene recompensas.",
+          "respuesta": "La lectura del proyecto continúa sin niveles de recompensa.",
+          "continuidad": "Retomar el paso 3 o terminar."
+        }
+      ],
+      "postcondicion": "Se consulta la propuesta y se puede continuar a su transparencia o al contacto disponible."
+    },
+    {
+      "id": "CU-V05",
+      "grupo": "V",
+      "actor": "Visitante",
+      "actores_secundarios": [
+        "Proveedor del video"
+      ],
+      "titulo": "Descubrir campañas en DonaTok",
+      "objetivo": "ver videos de presentación de campañas para conocer proyectos de forma audiovisual",
+      "estado": "Actual",
+      "acceso": "Barra superior → DonaTok.",
+      "limites": "",
+      "historia": "HU-V05",
+      "criterios": [
+        "HU-V05-CA01",
+        "HU-V05-CA02",
+        "HU-V05-CA03",
+        "HU-V05-CA04"
+      ],
+      "diagramas_previos": [
+        "V03"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/frontend/src/components/campaigns/PitchVideoPlayer.tsx",
+        "web/frontend/src/pages/PitchFeedPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea descubrir proyectos por video.",
+      "precondicion": "No requiere sesión.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre DonaTok desde la barra superior.",
+          "sistema": "Carga campañas con video y presenta video y resumen."
+        },
+        {
+          "numero": 2,
+          "actor": "Se desplaza verticalmente para cambiar de proyecto.",
+          "sistema": "Presenta la campaña correspondiente al video seleccionado."
+        },
+        {
+          "numero": 3,
+          "actor": "Pulsa Ver Campaña y Donar.",
+          "sistema": "Abre la ficha pública de esa campaña."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "No hay campañas con video o falla la carga.",
+          "respuesta": "Presenta el estado vacío o de error correspondiente; la persona puede volver a Explorar.",
+          "continuidad": "Terminar o continuar en CU-V02."
+        }
+      ],
+      "postcondicion": "Se abre la campaña elegida; Ver Campaña y Donar no confirma un aporte."
+    },
+    {
+      "id": "CU-V06",
+      "grupo": "V",
+      "actor": "Visitante",
+      "actores_secundarios": [],
+      "titulo": "Consultar historias recientes",
+      "objetivo": "ver las novedades recientes en la barra de historias para enterarme de la actividad de las campañas",
+      "estado": "Actual",
+      "acceso": "Explorar → avatares de historias.",
+      "limites": "El visor no incluye un acceso directo a la ficha de campaña; se busca el proyecto después de cerrarlo.",
+      "historia": "HU-V06",
+      "criterios": [
+        "HU-V06-CA01",
+        "HU-V06-CA02",
+        "HU-V06-CA03",
+        "HU-V06-CA04"
+      ],
+      "diagramas_previos": [
+        "V04"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/frontend/src/components/StoriesAvatarBar.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea leer historias recientes.",
+      "precondicion": "Explorar abierto; las historias corresponden a novedades públicas de las últimas 24 horas.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Selecciona un avatar de la barra de historias.",
+          "sistema": "Abre las novedades recientes de esa campaña en el visor."
+        },
+        {
+          "numero": 2,
+          "actor": "Utiliza la navegación anterior o siguiente disponible.",
+          "sistema": "Presenta la historia correspondiente."
+        },
+        {
+          "numero": 3,
+          "actor": "Cierra el visor o pulsa Escape.",
+          "sistema": "Vuelve al catálogo."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "No hay historias recientes.",
+          "respuesta": "La persona sigue consultando el catálogo; no se generan historias ficticias.",
+          "continuidad": "Terminar o continuar en CU-V02."
+        }
+      ],
+      "postcondicion": "Las historias quedan consultadas. Para abrir la campaña se cierra el visor y se busca el proyecto en Explorar."
+    },
+    {
+      "id": "CU-V07",
+      "grupo": "V",
+      "actor": "Visitante",
+      "actores_secundarios": [
+        "Servicio externo de la red social elegida"
+      ],
+      "titulo": "Compartir campañas",
+      "objetivo": "copiar o compartir el enlace de una campaña para difundir el proyecto entre otras personas",
+      "estado": "Actual",
+      "acceso": "Ficha → Compartir Campaña; Explorar → icono de compartir.",
+      "limites": "",
+      "historia": "HU-V07",
+      "criterios": [
+        "HU-V07-CA01",
+        "HU-V07-CA02",
+        "HU-V07-CA03",
+        "HU-V07-CA04"
+      ],
+      "diagramas_previos": [
+        "V05"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/frontend/src/components/ShareModal.tsx",
+        "web/frontend/src/pages/CampaignDetailPage.tsx",
+        "web/frontend/src/pages/ExploreCampaignsPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea difundir una campaña.",
+      "precondicion": "Campaña pública disponible.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Pulsa Compartir Campaña en la ficha o el icono de compartir en Explorar.",
+          "sistema": "Abre el diálogo con enlace y opciones WhatsApp, Facebook, X y LinkedIn."
+        },
+        {
+          "numero": 2,
+          "actor": "Selecciona Copiar enlace.",
+          "sistema": "Copia la URL de la campaña y confirma la copia."
+        },
+        {
+          "numero": 3,
+          "actor": "Cierra el diálogo.",
+          "sistema": "Devuelve a la campaña o al catálogo."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Prefiere una red social.",
+          "respuesta": "Abre el enlace de compartir del servicio elegido con la URL de la campaña; la publicación se completa allí.",
+          "continuidad": "Volver a la web y retomar el paso 3."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "Decide salir sin compartir.",
+          "respuesta": "Cierra el diálogo sin modificar la campaña ni sus aportes.",
+          "continuidad": "Terminar."
+        }
+      ],
+      "postcondicion": "La URL queda copiada o se abre el servicio externo; no se afirma que UniFundme haya publicado en la red social."
+    },
+    {
+      "id": "CU-V08",
+      "grupo": "V",
+      "actor": "Visitante",
+      "actores_secundarios": [],
+      "titulo": "Consultar Plan de Fondos e hitos",
+      "objetivo": "revisar la distribución prevista y las etapas del proyecto para entender cómo se plantea utilizar lo recaudado",
+      "estado": "Parcial",
+      "acceso": "Transparencia y Fondos → Plan de Fondos / Hitos del Proyecto; también Hitos y Avances.",
+      "limites": "Los componentes pueden mostrar datos de ejemplo si falta información del proyecto. Estos criterios cubren la navegación, no acreditan que esos ejemplos sean compromisos reales. La información respaldada por registros de cada campaña se especifica en HU-P08.",
+      "historia": "HU-V08",
+      "criterios": [
+        "HU-V08-CA01",
+        "HU-V08-CA02",
+        "HU-V08-CA03",
+        "HU-V08-CA04"
+      ],
+      "diagramas_previos": [
+        "V06",
+        "V02"
+      ],
+      "pendientes": [
+        "HU-P08"
+      ],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignReadController.php",
+        "web/app/Models/Campaign.php",
+        "web/frontend/src/components/campaign-detail/CampaignTransparencySection.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/ProjectMilestones.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/PublicEvidenceDocuments.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/PublicFinancialAuditing.tsx",
+        "web/frontend/src/pages/CampaignDetailPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea consultar la planificación mostrada.",
+      "precondicion": "Ficha pública abierta. Esta consulta es parcial: la pantalla puede usar datos de ejemplo.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Selecciona Transparencia y Fondos.",
+          "sistema": "Presenta Plan de Fondos, Auditoría y Movimientos, Hitos del Proyecto, Evidencias y Bitácora."
+        },
+        {
+          "numero": 2,
+          "actor": "Selecciona Plan de Fondos.",
+          "sistema": "Muestra las categorías y la distribución que presenta la interfaz."
+        },
+        {
+          "numero": 3,
+          "actor": "Selecciona Hitos del Proyecto.",
+          "sistema": "Muestra las etapas y sus estados visibles."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "Un submenú queda oculto por el ancho de la barra.",
+          "respuesta": "La persona desplaza horizontalmente la barra de submenús.",
+          "continuidad": "Retomar el paso 2 o 3."
+        },
+        {
+          "id": "A2",
+          "paso": 3,
+          "condicion": "Prefiere consultar hitos y novedades juntos.",
+          "respuesta": "Selecciona Hitos y Avances en la barra principal y consulta ambas secciones.",
+          "continuidad": "Terminar."
+        }
+      ],
+      "postcondicion": "Se consulta la planificación visible. Los valores de respaldo no acreditan compromisos ni registros reales del proyecto."
+    },
+    {
+      "id": "CU-V09",
+      "grupo": "V",
+      "actor": "Visitante",
+      "actores_secundarios": [],
+      "titulo": "Consultar la recaudación pública",
+      "objetivo": "revisar gráficos y aportes recientes para conocer la evolución del financiamiento",
+      "estado": "Actual",
+      "acceso": "Transparencia y Fondos → Auditoría y Movimientos.",
+      "limites": "La tabla pública muestra aportes recientes. No equivale al módulo privado de auditoría de egresos ni a un extracto completo de gastos.",
+      "historia": "HU-V09",
+      "criterios": [
+        "HU-V09-CA01",
+        "HU-V09-CA02",
+        "HU-V09-CA03",
+        "HU-V09-CA04"
+      ],
+      "diagramas_previos": [
+        "V06"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignReadController.php",
+        "web/frontend/src/components/campaign-detail/CampaignTransparencySection.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/ProjectMilestones.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/PublicEvidenceDocuments.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/PublicFinancialAuditing.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea consultar la recaudación pública.",
+      "precondicion": "Ficha pública abierta.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Selecciona Transparencia y Fondos → Auditoría y Movimientos.",
+          "sistema": "Carga los indicadores y gráficos de recaudación disponibles."
+        },
+        {
+          "numero": 2,
+          "actor": "Selecciona Todos, Directos o Recompensas.",
+          "sistema": "Filtra la tabla de aportes recientes por el tipo elegido."
+        },
+        {
+          "numero": 3,
+          "actor": "Lee los indicadores y aportes visibles.",
+          "sistema": "Mantiene la consulta limitada a la campaña seleccionada."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "No existen aportes del tipo elegido.",
+          "respuesta": "Presenta la ausencia de transacciones para ese filtro.",
+          "continuidad": "Cambiar el filtro en el paso 2 o terminar."
+        },
+        {
+          "id": "A2",
+          "paso": 1,
+          "condicion": "Falla la carga de la sección.",
+          "respuesta": "Muestra el error y Reintentar; el error no equivale a recaudación cero.",
+          "continuidad": "Reintentar el paso 1."
+        }
+      ],
+      "postcondicion": "Se consulta recaudación y aportes recientes; no se obtiene un extracto completo de egresos."
+    },
+    {
+      "id": "CU-V10",
+      "grupo": "V",
+      "actor": "Visitante",
+      "actores_secundarios": [],
+      "titulo": "Consultar evidencias públicas",
+      "objetivo": "abrir los documentos publicados de una campaña para revisar su respaldo documental",
+      "estado": "Actual",
+      "acceso": "Transparencia y Fondos → Evidencias.",
+      "limites": "",
+      "historia": "HU-V10",
+      "criterios": [
+        "HU-V10-CA01",
+        "HU-V10-CA02",
+        "HU-V10-CA03",
+        "HU-V10-CA04"
+      ],
+      "diagramas_previos": [
+        "V06"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignReadController.php",
+        "web/frontend/src/components/campaign-detail/CampaignTransparencySection.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/ProjectMilestones.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/PublicEvidenceDocuments.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/PublicFinancialAuditing.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea consultar respaldo público.",
+      "precondicion": "Ficha pública abierta; solo son accesibles evidencias autorizadas.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Selecciona Transparencia y Fondos → Evidencias.",
+          "sistema": "Lista las evidencias públicas con su nombre y justificación disponible."
+        },
+        {
+          "numero": 2,
+          "actor": "Pulsa Abrir documento en la evidencia elegida.",
+          "sistema": "Comprueba su acceso público y abre el archivo en otra pestaña."
+        },
+        {
+          "numero": 3,
+          "actor": "Regresa a la pestaña de la campaña.",
+          "sistema": "Conserva la ficha para seguir consultándola."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "No existen evidencias públicas.",
+          "respuesta": "Muestra No hay evidencias públicas disponibles.",
+          "continuidad": "Terminar."
+        },
+        {
+          "id": "A2",
+          "paso": 1,
+          "condicion": "Falla la carga.",
+          "respuesta": "Presenta el error y Reintentar.",
+          "continuidad": "Reintentar el paso 1."
+        },
+        {
+          "id": "A3",
+          "paso": 2,
+          "condicion": "El documento dejó de estar publicado.",
+          "respuesta": "No permite obtenerlo por su acceso público.",
+          "continuidad": "Volver al paso 1 o terminar."
+        }
+      ],
+      "postcondicion": "Se consulta únicamente respaldo publicado; los archivos privados y KYC no se vuelven públicos."
+    },
+    {
+      "id": "CU-V11",
+      "grupo": "V",
+      "actor": "Visitante",
+      "actores_secundarios": [],
+      "titulo": "Consultar novedades de una campaña",
+      "objetivo": "leer las publicaciones del emprendedor para seguir los avances comunicados por el proyecto",
+      "estado": "Actual",
+      "acceso": "Hitos y Avances, o Transparencia y Fondos → Bitácora.",
+      "limites": "",
+      "historia": "HU-V11",
+      "criterios": [
+        "HU-V11-CA01",
+        "HU-V11-CA02",
+        "HU-V11-CA03"
+      ],
+      "diagramas_previos": [
+        "V02",
+        "V06"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignReadController.php",
+        "web/app/Models/Campaign.php",
+        "web/frontend/src/components/campaign-detail/CampaignTransparencySection.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/ProjectMilestones.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/PublicEvidenceDocuments.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/PublicFinancialAuditing.tsx",
+        "web/frontend/src/pages/CampaignDetailPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea leer avances publicados.",
+      "precondicion": "Ficha pública abierta.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Selecciona Hitos y Avances o Transparencia y Fondos → Bitácora.",
+          "sistema": "Solicita las novedades de esa campaña."
+        },
+        {
+          "numero": 2,
+          "actor": "Lee las publicaciones y sus adjuntos disponibles.",
+          "sistema": "Presenta el contenido público asociado al proyecto."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "La campaña no tiene novedades.",
+          "respuesta": "Presenta el estado sin novedades.",
+          "continuidad": "Terminar."
+        },
+        {
+          "id": "A2",
+          "paso": 1,
+          "condicion": "Falla la consulta.",
+          "respuesta": "Presenta el error y permite Reintentar para la misma campaña.",
+          "continuidad": "Reintentar el paso 1."
+        }
+      ],
+      "postcondicion": "Las novedades reales quedan consultadas; no se generan avances para completar la vista."
+    },
+    {
+      "id": "CU-V12",
+      "grupo": "V",
+      "actor": "Visitante",
+      "actores_secundarios": [
+        "Proveedor del video"
+      ],
+      "titulo": "Reproducir la presentación de una campaña",
+      "objetivo": "ver el video del proyecto desde su ficha para conocer la propuesta antes de aportar",
+      "estado": "Actual",
+      "acceso": "Ficha de campaña → Ver Pitch.",
+      "limites": "",
+      "historia": "HU-V12",
+      "criterios": [
+        "HU-V12-CA01",
+        "HU-V12-CA02",
+        "HU-V12-CA03"
+      ],
+      "diagramas_previos": [
+        "V02"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Models/Campaign.php",
+        "web/frontend/src/pages/CampaignDetailPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea ver el video de presentación.",
+      "precondicion": "Campaña pública con enlace de video.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Pulsa Ver Pitch sobre la portada.",
+          "sistema": "Despliega el reproductor asociado a esa campaña."
+        },
+        {
+          "numero": 2,
+          "actor": "Consulta la presentación.",
+          "sistema": "Ofrece el contenido del video mediante el reproductor disponible."
+        },
+        {
+          "numero": 3,
+          "actor": "Pulsa Ocultar Pitch.",
+          "sistema": "Oculta la sección del reproductor."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "La campaña no tiene enlace de video.",
+          "respuesta": "No ofrece Ver Pitch.",
+          "continuidad": "Terminar."
+        }
+      ],
+      "postcondicion": "La presentación se consulta y puede ocultarse sin modificar el proyecto."
+    },
+    {
+      "id": "CU-V13",
+      "grupo": "V",
+      "actor": "Visitante",
+      "actores_secundarios": [],
+      "titulo": "Abrir proyectos relacionados",
+      "objetivo": "consultar otras campañas sugeridas para descubrir proyectos del mismo sector",
+      "estado": "Actual",
+      "acceso": "Ficha de campaña → También te puede interesar.",
+      "limites": "",
+      "historia": "HU-V13",
+      "criterios": [
+        "HU-V13-CA01",
+        "HU-V13-CA02",
+        "HU-V13-CA03"
+      ],
+      "diagramas_previos": [
+        "V02"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Models/Campaign.php",
+        "web/frontend/src/pages/CampaignDetailPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea descubrir proyectos relacionados.",
+      "precondicion": "Ficha pública abierta.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Consulta También te puede interesar.",
+          "sistema": "Puede mostrar hasta tres campañas de la misma categoría, excluyendo la actual."
+        },
+        {
+          "numero": 2,
+          "actor": "Selecciona una sugerencia.",
+          "sistema": "Abre la ficha de la campaña elegida."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "No hay sugerencias disponibles.",
+          "respuesta": "No muestra esa sección; la persona puede seguir buscando en Explorar.",
+          "continuidad": "Continuar en CU-V02 o terminar."
+        }
+      ],
+      "postcondicion": "Se abre otro proyecto relacionado cuando existen sugerencias."
+    },
+    {
+      "id": "CU-C01",
+      "grupo": "C",
+      "actor": "Visitante",
+      "actores_secundarios": [],
+      "titulo": "Crear una cuenta por correo",
+      "objetivo": "registrarme como Donador o Emprendedor para participar con el rol elegido",
+      "estado": "Actual",
+      "acceso": "Iniciar Sesión → Crea tu cuenta.",
+      "limites": "El registro público no ofrece los roles Administrador ni Superadministrador. Google no está disponible.",
+      "historia": "HU-C01",
+      "criterios": [
+        "HU-C01-CA01",
+        "HU-C01-CA02",
+        "HU-C01-CA03",
+        "HU-C01-CA04"
+      ],
+      "diagramas_previos": [
+        "C01"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AuthController.php",
+        "web/frontend/src/pages/RegisterPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea registrarse.",
+      "precondicion": "Visitante sin sesión; registro público solo para Donador o Emprendedor.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Iniciar Sesión → Crea tu cuenta.",
+          "sistema": "Presenta el formulario de registro."
+        },
+        {
+          "numero": 2,
+          "actor": "Elige Donador o Emprendedor e introduce correo y contraseña válidos.",
+          "sistema": "Valida los datos y la disponibilidad del correo al enviar el formulario."
+        },
+        {
+          "numero": 3,
+          "actor": "Envía el registro.",
+          "sistema": "Crea la cuenta, inicia sesión y abre Mi Panel para Donador o Mi Perfil para Emprendedor."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Los datos son inválidos o el correo ya está registrado.",
+          "respuesta": "Rechaza el registro e informa el problema, sin crear otra cuenta.",
+          "continuidad": "Corregir y retomar el paso 2."
+        }
+      ],
+      "postcondicion": "Existe una cuenta del rol público elegido con sesión iniciada. No se crean administradores desde este formulario."
+    },
+    {
+      "id": "CU-C02",
+      "grupo": "C",
+      "actor": "Persona con cuenta",
+      "actores_secundarios": [],
+      "titulo": "Iniciar sesión por correo",
+      "objetivo": "acceder a mi cuenta con correo y contraseña para utilizar las funciones de mi rol",
+      "estado": "Actual",
+      "acceso": "Iniciar Sesión.",
+      "limites": "Recordarme no se documenta como una promesa de sesión indefinida.",
+      "historia": "HU-C02",
+      "criterios": [
+        "HU-C02-CA01",
+        "HU-C02-CA02",
+        "HU-C02-CA03",
+        "HU-C02-CA04",
+        "HU-C02-CA05"
+      ],
+      "diagramas_previos": [
+        "C02"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AuthController.php",
+        "web/frontend/src/pages/LoginPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea acceder a su cuenta.",
+      "precondicion": "Cuenta existente y activa; acceso por correo y contraseña.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Iniciar Sesión e introduce correo y contraseña.",
+          "sistema": "Presenta los campos y permite seleccionar Recordarme para conservar el correo."
+        },
+        {
+          "numero": 2,
+          "actor": "Envía el formulario.",
+          "sistema": "Valida credenciales, estado de la cuenta, roles y nivel administrativo."
+        },
+        {
+          "numero": 3,
+          "actor": "Continúa tras una autenticación correcta.",
+          "sistema": "Abre /superadmin o /admin para cuentas administrativas; para los otros roles vuelve a la ruta solicitada, o a Mi Panel o Mi Perfil si no había una ruta previa."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Las credenciales son incorrectas o la cuenta está suspendida.",
+          "respuesta": "No concede una sesión válida y presenta el error.",
+          "continuidad": "Corregir datos en el paso 1 o terminar."
+        }
+      ],
+      "postcondicion": "La sesión queda abierta con los permisos reales de la cuenta. Recordarme conserva el correo, sin promesa de sesión indefinida."
+    },
+    {
+      "id": "CU-C03",
+      "grupo": "C",
+      "actor": "Usuario con cuenta",
+      "actores_secundarios": [],
+      "titulo": "Cerrar sesión",
+      "objetivo": "finalizar mi acceso para impedir que se siga usando mi sesión desde el navegador",
+      "estado": "Actual",
+      "acceso": "Salir; Cerrar Sesión del panel administrativo; Configuración → Cerrar sesión.",
+      "limites": "",
+      "historia": "HU-C03",
+      "criterios": [
+        "HU-C03-CA01",
+        "HU-C03-CA02",
+        "HU-C03-CA03",
+        "HU-C03-CA04"
+      ],
+      "diagramas_previos": [
+        "C07"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/frontend/src/api/auth.api.ts",
+        "web/frontend/src/components/Navbar.tsx",
+        "web/frontend/src/components/admin/AdminLayout.tsx",
+        "web/frontend/src/pages/AccountSettingsPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea cerrar su sesión.",
+      "precondicion": "Sesión iniciada.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Usa Salir, Cerrar Sesión del panel administrativo o Configuración → Cerrar sesión.",
+          "sistema": "Inicia el cierre; en Configuración solicita confirmación."
+        },
+        {
+          "numero": 2,
+          "actor": "Confirma cuando la pantalla lo solicita.",
+          "sistema": "Cierra el acceso local y vuelve a Iniciar Sesión."
+        },
+        {
+          "numero": 3,
+          "actor": "Intenta abrir una ruta privada tras salir.",
+          "sistema": "Solicita iniciar sesión de nuevo."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Cancela la confirmación de Configuración.",
+          "respuesta": "Mantiene la sesión abierta.",
+          "continuidad": "Terminar sin cerrar sesión."
+        }
+      ],
+      "postcondicion": "La sesión local queda cerrada; el acceso privado vuelve a requerir autenticación."
+    },
+    {
+      "id": "CU-C04",
+      "grupo": "C",
+      "actor": "Usuario con cuenta",
+      "actores_secundarios": [],
+      "titulo": "Cambiar la contraseña local",
+      "objetivo": "actualizar mi contraseña para proteger el acceso a mi cuenta",
+      "estado": "Actual",
+      "acceso": "Configuración → Seguridad y Acceso.",
+      "limites": "",
+      "historia": "HU-C04",
+      "criterios": [
+        "HU-C04-CA01",
+        "HU-C04-CA02",
+        "HU-C04-CA03",
+        "HU-C04-CA04",
+        "HU-C04-CA05"
+      ],
+      "diagramas_previos": [
+        "C06"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AuthController.php",
+        "web/frontend/src/pages/AccountSettingsPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea cambiar su contraseña.",
+      "precondicion": "Sesión iniciada en una cuenta que admite contraseña local.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Configuración → Seguridad y Acceso.",
+          "sistema": "Presenta el formulario de cambio de contraseña local."
+        },
+        {
+          "numero": 2,
+          "actor": "Introduce contraseña actual, nueva válida y confirmación; pulsa Actualizar contraseña.",
+          "sistema": "Valida contraseña actual, coincidencia, requisitos y que la nueva sea distinta."
+        },
+        {
+          "numero": 3,
+          "actor": "Continúa después de la confirmación correcta.",
+          "sistema": "Guarda la nueva contraseña, conserva la sesión actual y revoca las demás."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "La actual es incorrecta, la nueva es inválida, no coincide o es igual a la anterior.",
+          "respuesta": "Rechaza el cambio y muestra el error; no sustituye la contraseña.",
+          "continuidad": "Corregir y retomar el paso 2."
+        },
+        {
+          "id": "A2",
+          "paso": 1,
+          "condicion": "La cuenta no tiene contraseña local.",
+          "respuesta": "No ofrece este formulario; Google continúa no disponible.",
+          "continuidad": "Terminar."
+        }
+      ],
+      "postcondicion": "La nueva contraseña sustituye a la anterior y las otras sesiones se revocan."
+    },
+    {
+      "id": "CU-C05",
+      "grupo": "C",
+      "actor": "Donador o Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Contactar al emprendedor",
+      "objetivo": "iniciar una conversación vinculada a una campaña para consultar dudas al responsable del proyecto",
+      "estado": "Actual",
+      "acceso": "Historia y Proyecto → Sobre el Emprendedor → Contactar Emprendedor.",
+      "limites": "No hay buscador general de usuarios para iniciar chats. Enviar Mensaje desde la ficha de un donador solo anuncia una función futura.",
+      "historia": "HU-C05",
+      "criterios": [
+        "HU-C05-CA01",
+        "HU-C05-CA02",
+        "HU-C05-CA03"
+      ],
+      "diagramas_previos": [
+        "C03"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/ChatController.php",
+        "web/frontend/src/components/chat/ChatWindow.tsx",
+        "web/frontend/src/pages/CampaignDetailPage.tsx",
+        "web/frontend/src/pages/ChatPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea contactar al responsable de una campaña.",
+      "precondicion": "Sesión iniciada de un participante permitido; el creador es otra persona.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Historia y Proyecto y baja hasta Sobre el Emprendedor.",
+          "sistema": "Presenta Contactar Emprendedor cuando el creador no es la propia persona."
+        },
+        {
+          "numero": 2,
+          "actor": "Pulsa Contactar Emprendedor.",
+          "sistema": "Abre o recupera la conversación asociada al destinatario y campaña."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta la conversación abierta.",
+          "sistema": "Presenta el chat para continuar con el intercambio de mensajes."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "No ha iniciado sesión.",
+          "respuesta": "Abre Iniciar Sesión; tras acceder la persona puede regresar y volver a usar el contacto.",
+          "continuidad": "Continuar en CU-C02 y retomar el paso 2."
+        },
+        {
+          "id": "A2",
+          "paso": 1,
+          "condicion": "La campaña pertenece a la propia persona.",
+          "respuesta": "No ofrece una conversación consigo misma.",
+          "continuidad": "Terminar."
+        }
+      ],
+      "postcondicion": "La conversación correcta queda abierta. El envío de mensajes se desarrolla en CU-C06."
+    },
+    {
+      "id": "CU-C06",
+      "grupo": "C",
+      "actor": "Usuario con cuenta",
+      "actores_secundarios": [],
+      "titulo": "Continuar conversaciones",
+      "objetivo": "leer el historial y enviar mensajes para mantener comunicación con otros participantes",
+      "estado": "Actual",
+      "acceso": "Barra superior → Mensajes.",
+      "limites": "No se incluyen adjuntos, eliminación ni edición de mensajes porque no forman parte de este recorrido web.",
+      "historia": "HU-C06",
+      "criterios": [
+        "HU-C06-CA01",
+        "HU-C06-CA02",
+        "HU-C06-CA03",
+        "HU-C06-CA04"
+      ],
+      "diagramas_previos": [
+        "C03"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/ChatController.php",
+        "web/frontend/src/components/chat/ChatWindow.tsx",
+        "web/frontend/src/pages/CampaignDetailPage.tsx",
+        "web/frontend/src/pages/ChatPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea continuar una conversación.",
+      "precondicion": "Sesión iniciada; participa en la conversación.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Mensajes y selecciona una conversación.",
+          "sistema": "Muestra el destinatario y el historial autorizado."
+        },
+        {
+          "numero": 2,
+          "actor": "Consulta mensajes anteriores con el desplazamiento o Ver mensajes anteriores cuando aparece.",
+          "sistema": "Carga el historial previo sin duplicar lo ya mostrado."
+        },
+        {
+          "numero": 3,
+          "actor": "Escribe un texto y usa el icono Enviar mensaje o Enter.",
+          "sistema": "Envía el mensaje y lo incorpora a la conversación si la operación se completa."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 3,
+          "condicion": "Falla el envío.",
+          "respuesta": "Informa que no se pudo enviar y permite intentar de nuevo; no lo confirma como entregado.",
+          "continuidad": "Reintentar el paso 3."
+        }
+      ],
+      "postcondicion": "El mensaje enviado correctamente queda en el historial. No se incluyen adjuntos, edición ni eliminación de mensajes."
+    },
+    {
+      "id": "CU-C07",
+      "grupo": "C",
+      "actor": "Usuario con cuenta",
+      "actores_secundarios": [],
+      "titulo": "Consultar notificaciones",
+      "objetivo": "revisar los avisos de mi cuenta para conocer eventos relevantes y abrir sus destinos",
+      "estado": "Actual",
+      "acceso": "Campana → centro de notificaciones.",
+      "limites": "",
+      "historia": "HU-C07",
+      "criterios": [
+        "HU-C07-CA01",
+        "HU-C07-CA02",
+        "HU-C07-CA03",
+        "HU-C07-CA04"
+      ],
+      "diagramas_previos": [
+        "C04"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/NotificationController.php",
+        "web/frontend/src/components/NotificationBell.tsx",
+        "web/frontend/src/pages/NotificationsPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea consultar sus avisos.",
+      "precondicion": "Sesión iniciada.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre la campana o el centro de notificaciones.",
+          "sistema": "Carga sus avisos y el indicador de no leídas."
+        },
+        {
+          "numero": 2,
+          "actor": "Aplica los filtros disponibles y recorre las páginas.",
+          "sistema": "Muestra los avisos coincidentes de su cuenta."
+        },
+        {
+          "numero": 3,
+          "actor": "Abre una notificación.",
+          "sistema": "Registra la lectura y navega al destino si el aviso tiene uno asociado."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "No hay avisos coincidentes.",
+          "respuesta": "Presenta el estado vacío y Restablecer filtros permite quitar las selecciones.",
+          "continuidad": "Retomar el paso 2 o terminar."
+        }
+      ],
+      "postcondicion": "Los avisos se consultan y los abiertos quedan leídos; no se muestran notificaciones de otras cuentas."
+    },
+    {
+      "id": "CU-C08",
+      "grupo": "C",
+      "actor": "Usuario con cuenta",
+      "actores_secundarios": [],
+      "titulo": "Gestionar notificaciones",
+      "objetivo": "marcar o retirar avisos para mantener organizado mi centro de notificaciones",
+      "estado": "Actual",
+      "acceso": "Campana o centro de notificaciones.",
+      "limites": "",
+      "historia": "HU-C08",
+      "criterios": [
+        "HU-C08-CA01",
+        "HU-C08-CA02",
+        "HU-C08-CA03",
+        "HU-C08-CA04"
+      ],
+      "diagramas_previos": [
+        "C04"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/NotificationController.php",
+        "web/frontend/src/components/NotificationBell.tsx",
+        "web/frontend/src/pages/NotificationsPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea organizar sus avisos.",
+      "precondicion": "Sesión iniciada; notificaciones propias cargadas.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Usa la opción de marcar todas como leídas.",
+          "sistema": "Marca sus notificaciones existentes y actualiza el contador."
+        },
+        {
+          "numero": 2,
+          "actor": "Elimina un aviso con su control disponible.",
+          "sistema": "Retira ese aviso de su cuenta si la operación se completa."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta la campana o el centro de notificaciones.",
+          "sistema": "Refleja los avisos y contadores actualizados."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Prefiere limpiar todas las leídas.",
+          "respuesta": "Usa la opción de limpiar las leídas; retira solo esas y conserva las no leídas.",
+          "continuidad": "Retomar el paso 3."
+        },
+        {
+          "id": "A2",
+          "paso": 1,
+          "condicion": "Solo desea retirar un aviso concreto.",
+          "respuesta": "Omite marcar todas y usa directamente el control de eliminación del aviso.",
+          "continuidad": "Continuar en el paso 2."
+        }
+      ],
+      "postcondicion": "Las notificaciones propias reflejan las operaciones correctas; no se modifican avisos ajenos."
+    },
+    {
+      "id": "CU-C09",
+      "grupo": "C",
+      "actor": "Usuario con cuenta",
+      "actores_secundarios": [],
+      "titulo": "Configurar preferencias de notificación",
+      "objetivo": "elegir los avisos que recibo para ajustar las alertas a mis intereses",
+      "estado": "Parcial",
+      "acceso": "Centro de notificaciones → Preferencias.",
+      "limites": "Guardar el interruptor Notificaciones por correo no acredita entrega real de emails. El envío por correo es una capacidad pendiente separada en HU-P14.",
+      "historia": "HU-C09",
+      "criterios": [
+        "HU-C09-CA01",
+        "HU-C09-CA02",
+        "HU-C09-CA03",
+        "HU-C09-CA04"
+      ],
+      "diagramas_previos": [
+        "C05"
+      ],
+      "pendientes": [
+        "HU-P14"
+      ],
+      "fuentes": [
+        "web/app/Http/Controllers/NotificationController.php",
+        "web/app/Services/Notifier.php",
+        "web/frontend/src/pages/NotificationsPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea ajustar sus preferencias de avisos.",
+      "precondicion": "Sesión iniciada; centro de notificaciones abierto.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Preferencias.",
+          "sistema": "Carga los valores actuales de configuración."
+        },
+        {
+          "numero": 2,
+          "actor": "Cambia los interruptores disponibles y guarda.",
+          "sistema": "Persiste los valores, confirma y cierra el diálogo si la operación termina correctamente."
+        },
+        {
+          "numero": 3,
+          "actor": "Vuelve a consultar las preferencias o recibe eventos cubiertos posteriormente.",
+          "sistema": "Conserva los valores y aplica las preferencias a la generación de avisos correspondiente."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "No se pudieron cargar los valores actuales.",
+          "respuesta": "No permite guardar valores de reemplazo sin haber cargado la configuración.",
+          "continuidad": "Volver a abrir Preferencias o terminar."
+        }
+      ],
+      "postcondicion": "Se guardan preferencias sin borrar avisos previos. Guardar Notificaciones por correo no acredita entrega real de emails."
+    },
+    {
+      "id": "CU-C10",
+      "grupo": "C",
+      "actor": "Donador o Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Publicar comentarios",
+      "objetivo": "comentar una campaña para participar en la conversación sobre el proyecto",
+      "estado": "Actual",
+      "acceso": "Ficha → Comentarios, cuarta pestaña principal a la derecha de Hitos y Avances.",
+      "limites": "",
+      "historia": "HU-C10",
+      "criterios": [
+        "HU-C10-CA01",
+        "HU-C10-CA02",
+        "HU-C10-CA03",
+        "HU-C10-CA04",
+        "HU-C10-CA05"
+      ],
+      "diagramas_previos": [
+        "C09"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CommunityController.php",
+        "web/frontend/src/components/campaign-detail/CampaignComments.tsx",
+        "web/frontend/src/pages/CampaignDetailPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea participar con un comentario.",
+      "precondicion": "Donador o Emprendedor con sesión; campaña que admite participación.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Selecciona Comentarios, cuarta pestaña principal después de Hitos y Avances.",
+          "sistema": "Presenta los comentarios y, si la campaña admite participación, el cuadro Escribe un comentario..."
+        },
+        {
+          "numero": 2,
+          "actor": "Escribe un comentario no vacío de hasta 2000 caracteres y usa el icono de enviar.",
+          "sistema": "Valida la participación y registra el comentario en esa campaña."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta la lista actualizada.",
+          "sistema": "Presenta el comentario publicado."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "Comentarios queda fuera del ancho visible.",
+          "respuesta": "La persona desplaza la barra principal horizontalmente a la derecha.",
+          "continuidad": "Retomar el paso 1."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "No hay sesión o el texto está vacío.",
+          "respuesta": "Solicita Inicia sesión o impide el envío vacío, según corresponda.",
+          "continuidad": "Iniciar sesión en CU-C02 o corregir en el paso 2."
+        },
+        {
+          "id": "A3",
+          "paso": 1,
+          "condicion": "La campaña está cerrada.",
+          "respuesta": "Permite leer comentarios pero no muestra el cuadro para publicar.",
+          "continuidad": "Terminar con consulta de solo lectura."
+        }
+      ],
+      "postcondicion": "El comentario válido queda publicado; una campaña cerrada mantiene solo la consulta."
+    },
+    {
+      "id": "CU-C11",
+      "grupo": "C",
+      "actor": "Donador o Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Marcar Me gusta en comentarios",
+      "objetivo": "expresar mi apoyo a un comentario para participar sin redactar una nueva intervención",
+      "estado": "Actual",
+      "acceso": "Ficha → Comentarios → icono de pulgar arriba.",
+      "limites": "",
+      "historia": "HU-C11",
+      "criterios": [
+        "HU-C11-CA01",
+        "HU-C11-CA02",
+        "HU-C11-CA03",
+        "HU-C11-CA04"
+      ],
+      "diagramas_previos": [
+        "C09"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CommunityController.php",
+        "web/frontend/src/components/campaign-detail/CampaignComments.tsx",
+        "web/frontend/src/pages/CampaignDetailPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea marcar un comentario que le gusta.",
+      "precondicion": "Donador o Emprendedor con sesión; campaña que admite participación.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Comentarios y localiza un comentario.",
+          "sistema": "Muestra el icono de pulgar arriba y su contador."
+        },
+        {
+          "numero": 2,
+          "actor": "Pulsa el pulgar arriba.",
+          "sistema": "Registra su Me gusta y actualiza el contador."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Ya había marcado ese comentario.",
+          "respuesta": "Retira su marca y ajusta el contador; no acumula marcas de la misma cuenta.",
+          "continuidad": "Terminar."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "No ha iniciado sesión.",
+          "respuesta": "Solicita iniciar sesión antes de marcar.",
+          "continuidad": "Continuar en CU-C02 y volver al paso 2."
+        },
+        {
+          "id": "A3",
+          "paso": 1,
+          "condicion": "La campaña está cerrada.",
+          "respuesta": "Mantiene deshabilitado el control de Me gusta.",
+          "continuidad": "Terminar sin cambiar marcas."
+        }
+      ],
+      "postcondicion": "La marca propia queda añadida o retirada una sola vez según su estado anterior."
+    },
+    {
+      "id": "CU-C12",
+      "grupo": "C",
+      "actor": "Usuario con cuenta",
+      "actores_secundarios": [],
+      "titulo": "Consultar la configuración de mi cuenta",
+      "objetivo": "ver mi información de acceso y sus opciones para conocer el estado de mi cuenta",
+      "estado": "Actual",
+      "acceso": "Barra superior → Configuración → Configuración de Cuenta.",
+      "limites": "No hay una acción web para verificar el correo; el indicador es informativo. El futuro proceso se especifica en HU-P17.",
+      "historia": "HU-C12",
+      "criterios": [
+        "HU-C12-CA01",
+        "HU-C12-CA02",
+        "HU-C12-CA03"
+      ],
+      "diagramas_previos": [
+        "C06",
+        "C07"
+      ],
+      "pendientes": [
+        "HU-P17"
+      ],
+      "fuentes": [
+        "web/app/Http/Controllers/AuthController.php",
+        "web/frontend/src/api/auth.api.ts",
+        "web/frontend/src/components/Navbar.tsx",
+        "web/frontend/src/components/admin/AdminLayout.tsx",
+        "web/frontend/src/pages/AccountSettingsPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "La persona desea consultar los datos de su cuenta.",
+      "precondicion": "Sesión iniciada.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Configuración → Configuración de Cuenta.",
+          "sistema": "Muestra correo, indicador Verificado o Sin verificar y Último acceso según los datos disponibles."
+        },
+        {
+          "numero": 2,
+          "actor": "Consulta Mi Perfil y selecciona Perfil de Donador o Perfil de Emprendedor cuando corresponde.",
+          "sistema": "Abre el perfil asociado a su rol."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Prefiere gestionar su acceso.",
+          "respuesta": "Usa Seguridad y Acceso para cambiar la contraseña local o cerrar sesión mediante sus acciones disponibles.",
+          "continuidad": "Continuar en CU-C04 o CU-C03."
+        }
+      ],
+      "postcondicion": "La información de cuenta se consulta. El indicador de correo es informativo y no ejecuta una verificación."
+    },
+    {
+      "id": "CU-D01",
+      "grupo": "D",
+      "actor": "Donador",
+      "actores_secundarios": [],
+      "titulo": "Crear y editar mi perfil",
+      "objetivo": "completar mis datos personales y preferencias para identificarme y preparar mi participación como donador",
+      "estado": "Actual",
+      "acceso": "Mi Perfil → edición por secciones.",
+      "limites": "Las secciones se editan con los accesos disponibles del perfil; no hay eliminación de perfil desde la web.",
+      "historia": "HU-D01",
+      "criterios": [
+        "HU-D01-CA01",
+        "HU-D01-CA02",
+        "HU-D01-CA03",
+        "HU-D01-CA04"
+      ],
+      "diagramas_previos": [
+        "D01"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/ProfileController.php",
+        "web/frontend/src/components/investor-profile/EditProfileModal.tsx",
+        "web/frontend/src/components/investor-profile/ProfileHeader.tsx",
+        "web/frontend/src/pages/InvestorProfilePage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El donador desea completar o actualizar su perfil.",
+      "precondicion": "Cuenta Donador con sesión.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Mi Perfil.",
+          "sistema": "Presenta su perfil o propone completar los datos básicos si todavía no existe."
+        },
+        {
+          "numero": 2,
+          "actor": "Usa la edición de la sección deseada y guarda datos válidos.",
+          "sistema": "Valida y conserva los cambios de esa sección."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta Donaciones, Información o Capital / Fondos.",
+          "sistema": "Muestra el contenido correspondiente con los datos guardados."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Intenta reducir el capital máximo por debajo del total ya invertido.",
+          "respuesta": "Rechaza el cambio sin reducir el capital bajo ese límite.",
+          "continuidad": "Corregir y retomar el paso 2."
+        }
+      ],
+      "postcondicion": "El perfil propio queda actualizado. No hay eliminación de perfil disponible desde la web."
+    },
+    {
+      "id": "CU-D02",
+      "grupo": "D",
+      "actor": "Donador",
+      "actores_secundarios": [],
+      "titulo": "Personalizar mis imágenes",
+      "objetivo": "cambiar mi foto y portada para reconocer y personalizar mi perfil",
+      "estado": "Actual",
+      "acceso": "Mi Perfil → controles de foto y portada.",
+      "limites": "",
+      "historia": "HU-D02",
+      "criterios": [
+        "HU-D02-CA01",
+        "HU-D02-CA02",
+        "HU-D02-CA03",
+        "HU-D02-CA04"
+      ],
+      "diagramas_previos": [
+        "D01"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/ProfileController.php",
+        "web/frontend/src/components/investor-profile/EditProfileModal.tsx",
+        "web/frontend/src/components/investor-profile/ProfileHeader.tsx",
+        "web/frontend/src/pages/InvestorProfilePage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El donador desea cambiar su foto o portada.",
+      "precondicion": "Cuenta Donador con sesión y perfil propio.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre el control de foto o portada en Mi Perfil.",
+          "sistema": "Permite seleccionar una imagen."
+        },
+        {
+          "numero": 2,
+          "actor": "Selecciona JPG/JPEG, PNG, WEBP o AVIF de hasta 10 MB y completa la carga.",
+          "sistema": "Valida el archivo y actualiza la imagen correspondiente si la carga es correcta."
+        },
+        {
+          "numero": 3,
+          "actor": "Vuelve a consultar el perfil.",
+          "sistema": "Presenta la imagen guardada."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Cancela o el formato/tamaño no está permitido.",
+          "respuesta": "No sustituye la imagen anterior por la selección cancelada o rechazada.",
+          "continuidad": "Elegir otro archivo en el paso 2 o terminar."
+        }
+      ],
+      "postcondicion": "La foto o portada válida queda actualizada sin cambiar la otra imagen."
+    },
+    {
+      "id": "CU-D03",
+      "grupo": "D",
+      "actor": "Donador",
+      "actores_secundarios": [],
+      "titulo": "Consultar y aumentar mi capital simulado",
+      "objetivo": "ver y aumentar mi saldo disponible para disponer de capital para nuevos aportes de prueba",
+      "estado": "Actual",
+      "acceso": "Mi Panel → Capital Disponible → Aumentar Capital.",
+      "limites": "Son movimientos de saldo simulado: no hay cobro a tarjetas ni transferencia bancaria real.",
+      "historia": "HU-D03",
+      "criterios": [
+        "HU-D03-CA01",
+        "HU-D03-CA02",
+        "HU-D03-CA03",
+        "HU-D03-CA04"
+      ],
+      "diagramas_previos": [
+        "D02"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/ProfileController.php",
+        "web/frontend/src/components/AddCapitalModal.tsx",
+        "web/frontend/src/components/InvestorDashboardOverview.tsx",
+        "web/frontend/src/pages/InvestorDashboardPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El donador desea aumentar su saldo de prueba.",
+      "precondicion": "Cuenta Donador con sesión y perfil configurado.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Mi Panel.",
+          "sistema": "Presenta Capital Disponible, Total Donado, número de donaciones y Aumentar Capital."
+        },
+        {
+          "numero": 2,
+          "actor": "Selecciona Aumentar Capital y elige un monto sugerido o escribe uno; añade notas opcionales.",
+          "sistema": "Presenta la confirmación y exige un monto mínimo de Bs. 100 en el formulario."
+        },
+        {
+          "numero": 3,
+          "actor": "Confirma un monto permitido.",
+          "sistema": "Aumenta capital configurado y disponible por ese importe si la operación es correcta."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "El monto es menor a Bs. 100.",
+          "respuesta": "El formulario no permite enviar el aumento.",
+          "continuidad": "Corregir el monto en el paso 2."
+        }
+      ],
+      "postcondicion": "El saldo simulado aumenta. No hay cobro a tarjeta ni transferencia bancaria real y no se crea una donación."
+    },
+    {
+      "id": "CU-D04",
+      "grupo": "D",
+      "actor": "Donador",
+      "actores_secundarios": [],
+      "titulo": "Donar a una campaña",
+      "objetivo": "confirmar un aporte a un proyecto para contribuir a su meta de financiamiento",
+      "estado": "Actual",
+      "acceso": "Ficha → monto → Donar Bs. [monto] → Confirmar Aporte.",
+      "limites": "",
+      "historia": "HU-D04",
+      "criterios": [
+        "HU-D04-CA01",
+        "HU-D04-CA02",
+        "HU-D04-CA03",
+        "HU-D04-CA04",
+        "HU-D04-CA05",
+        "HU-D04-CA06"
+      ],
+      "diagramas_previos": [
+        "D03"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Services/InvestmentEngine.php",
+        "web/frontend/src/components/campaign-detail/ContributionConfirmModal.tsx",
+        "web/frontend/src/pages/CampaignDetailPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El donador desea apoyar una campaña.",
+      "precondicion": "Cuenta Donador activa con sesión, perfil y saldo simulado suficiente; campaña ajena Publicada, sin vencimiento y con margen para recibir el monto.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre la ficha e introduce un monto permitido.",
+          "sistema": "Actualiza el formulario y el botón Donar Bs. [monto]."
+        },
+        {
+          "numero": 2,
+          "actor": "Pulsa Donar Bs. [monto].",
+          "sistema": "Abre Confirmar Aporte con campaña, monto y recompensa seleccionada si existe."
+        },
+        {
+          "numero": 3,
+          "actor": "Confirma el aporte.",
+          "sistema": "Valida saldo, estado, fecha, límites y recompensa; registra el aporte y actualiza saldo y recaudación en una sola operación correcta."
+        },
+        {
+          "numero": 4,
+          "actor": "Consulta la confirmación y su panel.",
+          "sistema": "Presenta el aporte registrado y permite continuar a sus comprobantes cuando corresponde."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 3,
+          "condicion": "Cancela la confirmación.",
+          "respuesta": "No registra el aporte ni descuenta saldo.",
+          "continuidad": "Terminar o volver al paso 1."
+        },
+        {
+          "id": "A2",
+          "paso": 3,
+          "condicion": "Cambió el saldo, estado, límite, cupo o validez de la recompensa.",
+          "respuesta": "Rechaza el aporte sin descuento parcial de saldo.",
+          "continuidad": "Revisar condiciones y volver al paso 1 o terminar."
+        },
+        {
+          "id": "A3",
+          "paso": 1,
+          "condicion": "No hay sesión o la campaña no admite aportes.",
+          "respuesta": "Iniciar Sesión para Donar abre el acceso; una campaña propia, cerrada o vencida no habilita el aporte.",
+          "continuidad": "Continuar en CU-C02 si falta sesión; en los demás casos terminar."
+        }
+      ],
+      "postcondicion": "El aporte confirmado queda registrado y saldo y recaudación cambian por el mismo monto. No se procesa dinero bancario real."
+    },
+    {
+      "id": "CU-D05",
+      "grupo": "D",
+      "actor": "Donador",
+      "actores_secundarios": [],
+      "titulo": "Elegir una recompensa al aportar",
+      "objetivo": "seleccionar un nivel de recompensa compatible con mi monto para conocer el beneficio asociado a mi aporte",
+      "estado": "Actual",
+      "acceso": "Historia y Proyecto → Niveles de Recompensa; formulario de aporte.",
+      "limites": "",
+      "historia": "HU-D05",
+      "criterios": [
+        "HU-D05-CA01",
+        "HU-D05-CA02",
+        "HU-D05-CA03",
+        "HU-D05-CA04"
+      ],
+      "diagramas_previos": [
+        "D03",
+        "D07"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Services/InvestmentEngine.php",
+        "web/frontend/src/components/campaign-detail/ContributionConfirmModal.tsx",
+        "web/frontend/src/components/donor-tracking/DonorRewardsTracker.tsx",
+        "web/frontend/src/pages/CampaignDetailPage.tsx",
+        "web/frontend/src/utils/rewardTracking.ts"
+      ],
+      "relaciones": [
+        {
+          "tipo": "extend",
+          "destino": "CU-D04",
+          "condicion": "La persona elige una recompensa al aportar."
+        }
+      ],
+      "disparador": "El donador desea asociar una recompensa a su aporte.",
+      "precondicion": "Condiciones de CU-D04; campaña con niveles activos disponibles.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Consulta Historia y Proyecto → Niveles de Recompensa y selecciona un nivel.",
+          "sistema": "Refleja el nivel elegido y su monto sugerido en el formulario de aporte."
+        },
+        {
+          "numero": 2,
+          "actor": "Ajusta el monto dentro del rango del nivel y abre Confirmar Aporte.",
+          "sistema": "Presenta la recompensa exacta seleccionada."
+        },
+        {
+          "numero": 3,
+          "actor": "Confirma el aporte.",
+          "sistema": "Comprueba rango, moneda, vigencia y cupos y asocia exactamente ese nivel al aporte correcto."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 3,
+          "condicion": "El nivel venció, no tiene cupos o el monto no satisface sus condiciones.",
+          "respuesta": "Rechaza la operación sin sustituir silenciosamente la recompensa por otra.",
+          "continuidad": "Ajustar monto o selección en el paso 1 o 2."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "Prefiere aportar sin recompensa.",
+          "respuesta": "Usa Aportar sin recompensa y retira la selección.",
+          "continuidad": "Continuar en CU-D04 sin recompensa."
+        }
+      ],
+      "postcondicion": "El aporte correcto queda asociado al nivel elegido; CU-D04 rige la confirmación y el saldo."
+    },
+    {
+      "id": "CU-D06",
+      "grupo": "D",
+      "actor": "Donador",
+      "actores_secundarios": [],
+      "titulo": "Consultar Mis Aportes",
+      "objetivo": "buscar y organizar mis donaciones para conocer el destino y estado de mis contribuciones",
+      "estado": "Actual",
+      "acceso": "Mi Panel → Mis Aportes.",
+      "limites": "",
+      "historia": "HU-D06",
+      "criterios": [
+        "HU-D06-CA01",
+        "HU-D06-CA02",
+        "HU-D06-CA03",
+        "HU-D06-CA04"
+      ],
+      "diagramas_previos": [
+        "D04"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/InvestmentController.php",
+        "web/frontend/src/components/donor-tracking/DonorContributionsFeed.tsx",
+        "web/frontend/src/pages/InvestorDashboardPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El donador desea consultar sus aportes.",
+      "precondicion": "Cuenta Donador con sesión.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Mi Panel → Mis Aportes.",
+          "sistema": "Presenta sus campañas, fechas, montos y estados."
+        },
+        {
+          "numero": 2,
+          "actor": "Busca por proyecto y aplica estado, fecha u orden disponibles.",
+          "sistema": "Muestra las coincidencias con el orden elegido."
+        },
+        {
+          "numero": 3,
+          "actor": "Selecciona Ver proyecto.",
+          "sistema": "Abre la ficha si la campaña conserva acceso público."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 3,
+          "condicion": "Prefiere obtener un recibo.",
+          "respuesta": "Recibo se ofrece solo en aportes completados.",
+          "continuidad": "Continuar en CU-D07."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "No tiene aportes coincidentes.",
+          "respuesta": "La consulta no agrega registros; la persona puede cambiar los filtros.",
+          "continuidad": "Retomar el paso 2 o terminar."
+        }
+      ],
+      "postcondicion": "Los aportes propios quedan consultados sin alterar sus estados."
+    },
+    {
+      "id": "CU-D07",
+      "grupo": "D",
+      "actor": "Donador",
+      "actores_secundarios": [],
+      "titulo": "Descargar mis comprobantes",
+      "objetivo": "obtener un PDF de mis aportes completados para conservar una constancia de la contribución",
+      "estado": "Actual",
+      "acceso": "Mi Panel → Comprobantes; también Recibo de Mis Aportes o confirmación del aporte.",
+      "limites": "Una descarga técnica no se presenta como certificación de validez tributaria. Los reembolsados no se listan en la pestaña Comprobantes.",
+      "historia": "HU-D07",
+      "criterios": [
+        "HU-D07-CA01",
+        "HU-D07-CA02",
+        "HU-D07-CA03",
+        "HU-D07-CA04"
+      ],
+      "diagramas_previos": [
+        "D05"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/InvestmentController.php",
+        "web/frontend/src/components/donor-tracking/DonorReceiptsList.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El donador desea descargar un comprobante.",
+      "precondicion": "Cuenta Donador con sesión; aporte propio completado.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Mi Panel → Comprobantes y busca por proyecto o código de recibo.",
+          "sistema": "Lista sus aportes completados disponibles para comprobante."
+        },
+        {
+          "numero": 2,
+          "actor": "Selecciona Descargar PDF en el aporte elegido.",
+          "sistema": "Verifica propiedad y estado y genera el comprobante individual."
+        },
+        {
+          "numero": 3,
+          "actor": "Recibe la descarga del navegador.",
+          "sistema": "Entrega el archivo correspondiente a ese aporte."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "Accede desde Recibo en Mis Aportes o desde la confirmación del aporte.",
+          "respuesta": "Solicita el comprobante de ese mismo aporte completado.",
+          "continuidad": "Continuar en el paso 2."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "El aporte no es propio, no está completado o falla la generación.",
+          "respuesta": "No permite una descarga no autorizada; si falla la generación informa el error y permite intentar nuevamente.",
+          "continuidad": "Terminar si no está autorizado; reintentar el paso 2 si falló la generación."
+        }
+      ],
+      "postcondicion": "Se descarga un PDF individual autorizado. Los reembolsados no se listan aquí ni se certifica validez tributaria."
+    },
+    {
+      "id": "CU-D08",
+      "grupo": "D",
+      "actor": "Donador",
+      "actores_secundarios": [],
+      "titulo": "Consultar novedades de proyectos apoyados",
+      "objetivo": "ver publicaciones de las campañas que respaldé para seguir el uso y avance de mis contribuciones",
+      "estado": "Actual",
+      "acceso": "Mi Panel → Novedades.",
+      "limites": "",
+      "historia": "HU-D08",
+      "criterios": [
+        "HU-D08-CA01",
+        "HU-D08-CA02",
+        "HU-D08-CA03",
+        "HU-D08-CA04"
+      ],
+      "diagramas_previos": [
+        "D06"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/InvestmentController.php",
+        "web/frontend/src/components/donor-tracking/DonorBackedUpdatesFeed.tsx",
+        "web/frontend/src/hooks/useBackedCampaignUpdates.ts"
+      ],
+      "relaciones": [],
+      "disparador": "El donador desea conocer avances de los proyectos que apoyó.",
+      "precondicion": "Cuenta Donador con sesión.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Mi Panel → Novedades.",
+          "sistema": "Carga publicaciones de proyectos respaldados por su cuenta."
+        },
+        {
+          "numero": 2,
+          "actor": "Selecciona un proyecto y usa Anterior o Siguiente si hay varias páginas.",
+          "sistema": "Muestra las novedades y páginas correspondientes."
+        },
+        {
+          "numero": 3,
+          "actor": "Selecciona Ver proyecto.",
+          "sistema": "Abre la campaña para continuar en Hitos y Avances."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "No hay novedades o falla la carga.",
+          "respuesta": "Distingue el estado sin novedades del error de consulta.",
+          "continuidad": "Terminar o volver a consultar el paso 1."
+        }
+      ],
+      "postcondicion": "Las novedades de proyectos apoyados quedan consultadas, sin incluir campañas no respaldadas."
+    },
+    {
+      "id": "CU-D09",
+      "grupo": "D",
+      "actor": "Donador",
+      "actores_secundarios": [],
+      "titulo": "Seguir mis recompensas",
+      "objetivo": "consultar la preparación y entrega de mis beneficios para conocer el estado de cada recompensa",
+      "estado": "Actual",
+      "acceso": "Mi Panel → Recompensas.",
+      "limites": "El donador consulta el estado. No hay un formulario web para reportar incidencias o confirmar recepción.",
+      "historia": "HU-D09",
+      "criterios": [
+        "HU-D09-CA01",
+        "HU-D09-CA02",
+        "HU-D09-CA03",
+        "HU-D09-CA04"
+      ],
+      "diagramas_previos": [
+        "D07"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/frontend/src/components/donor-tracking/DonorRewardsTracker.tsx",
+        "web/frontend/src/utils/rewardTracking.ts"
+      ],
+      "relaciones": [],
+      "disparador": "El donador desea seguir sus recompensas.",
+      "precondicion": "Cuenta Donador con sesión.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Mi Panel → Recompensas.",
+          "sistema": "Carga las recompensas vinculadas a sus contribuciones."
+        },
+        {
+          "numero": 2,
+          "actor": "Busca por proyecto o recompensa y aplica estado y orden disponibles.",
+          "sistema": "Presenta las coincidencias con su estado registrado."
+        },
+        {
+          "numero": 3,
+          "actor": "Selecciona el enlace de seguimiento cuando existe.",
+          "sistema": "Abre el destino de seguimiento guardado."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 3,
+          "condicion": "No hay enlace de seguimiento.",
+          "respuesta": "No inventa un destino ni presenta una recompensa cancelada como entregada.",
+          "continuidad": "Terminar."
+        }
+      ],
+      "postcondicion": "Se consulta el seguimiento existente. No hay formulario de incidencias ni confirmación de recepción por el donador."
+    },
+    {
+      "id": "CU-D10",
+      "grupo": "D",
+      "actor": "Donador",
+      "actores_secundarios": [],
+      "titulo": "Consultar rendimiento y reembolsos",
+      "objetivo": "ver estadísticas e identificar devoluciones para entender mi actividad como donador",
+      "estado": "Actual",
+      "acceso": "Mi Panel → Rendimiento; Mis Aportes y Capital Disponible.",
+      "limites": "No hay solicitud manual de reembolso. La devolución por falta de meta ocurre al ejecutar la finalización, no solo al vencer la fecha.",
+      "historia": "HU-D10",
+      "criterios": [
+        "HU-D10-CA01",
+        "HU-D10-CA02",
+        "HU-D10-CA03",
+        "HU-D10-CA04"
+      ],
+      "diagramas_previos": [
+        "D08"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Services/InvestmentEngine.php",
+        "web/frontend/src/components/InvestorDashboardAnalytics.tsx",
+        "web/frontend/src/components/donor-tracking/DonorContributionsFeed.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El donador desea consultar estadísticas y devoluciones.",
+      "precondicion": "Cuenta Donador con sesión.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Mi Panel → Rendimiento.",
+          "sistema": "Presenta aporte promedio, monto reembolsado y evolución acumulada según sus registros."
+        },
+        {
+          "numero": 2,
+          "actor": "Consulta Mis Aportes y Capital Disponible cuando hay devoluciones.",
+          "sistema": "Refleja los aportes reembolsados y el saldo simulado devuelto."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "No hay aportes completados, incluso si todos fueron reembolsados.",
+          "respuesta": "Rendimiento puede mostrar el estado inicial; Mis Aportes y el capital permiten comprobar devoluciones.",
+          "continuidad": "Continuar en el paso 2."
+        }
+      ],
+      "postcondicion": "Se consultan métricas y devoluciones registradas. No se solicita un reembolso manual ni se genera por vencer la fecha solamente."
+    },
+    {
+      "id": "CU-E01",
+      "grupo": "E",
+      "actor": "Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Completar mi perfil de emprendedor",
+      "objetivo": "guardar mis datos y los del proyecto para presentarme ante los donadores y preparar una campaña",
+      "estado": "Actual",
+      "acceso": "Mi Perfil → edición por secciones; Información y Datos Bancarios.",
+      "limites": "",
+      "historia": "HU-E01",
+      "criterios": [
+        "HU-E01-CA01",
+        "HU-E01-CA02",
+        "HU-E01-CA03",
+        "HU-E01-CA04"
+      ],
+      "diagramas_previos": [
+        "E01"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Services/ProfileReadiness.php",
+        "web/frontend/src/components/entrepreneur-profile/EditProfileModal.tsx",
+        "web/frontend/src/pages/EntrepreneurProfilePage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El emprendedor desea completar su perfil.",
+      "precondicion": "Cuenta Emprendedor con sesión.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Mi Perfil y la edición de la sección deseada.",
+          "sistema": "Presenta los datos actuales o permite completar el perfil inicial."
+        },
+        {
+          "numero": 2,
+          "actor": "Introduce datos válidos y guarda.",
+          "sistema": "Valida y conserva los cambios de esa sección."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta Información, Datos Bancarios y el indicador de avance.",
+          "sistema": "Presenta sus datos; Datos Bancarios ofrece Editar y el indicador muestra el avance del perfil."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Faltan requisitos para crear campañas.",
+          "respuesta": "El perfil puede seguir completándose; el indicador no sustituye la aprobación de identidad.",
+          "continuidad": "Continuar en CU-E04."
+        }
+      ],
+      "postcondicion": "El perfil queda actualizado por sección sin considerar aprobada la identidad por completar los datos."
+    },
+    {
+      "id": "CU-E02",
+      "grupo": "E",
+      "actor": "Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Actualizar mis imágenes",
+      "objetivo": "cambiar foto y portada del perfil para dar una identidad visual al proyecto",
+      "estado": "Actual",
+      "acceso": "Mi Perfil → controles de foto y portada.",
+      "limites": "",
+      "historia": "HU-E02",
+      "criterios": [
+        "HU-E02-CA01",
+        "HU-E02-CA02",
+        "HU-E02-CA03",
+        "HU-E02-CA04"
+      ],
+      "diagramas_previos": [
+        "E01"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Services/ProfileReadiness.php",
+        "web/frontend/src/components/entrepreneur-profile/EditProfileModal.tsx",
+        "web/frontend/src/pages/EntrepreneurProfilePage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El emprendedor desea cambiar su foto o portada.",
+      "precondicion": "Cuenta Emprendedor con sesión y perfil propio.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre el control de foto o portada en Mi Perfil.",
+          "sistema": "Permite seleccionar la imagen correspondiente."
+        },
+        {
+          "numero": 2,
+          "actor": "Selecciona JPG/JPEG, PNG, WEBP o AVIF de hasta 10 MB y completa la carga.",
+          "sistema": "Valida y guarda la imagen si la carga es correcta."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta nuevamente el perfil.",
+          "sistema": "Presenta la foto o portada guardada."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Cancela la selección o el archivo es rechazado por tipo o tamaño.",
+          "respuesta": "Mantiene la imagen anterior.",
+          "continuidad": "Elegir otro archivo en el paso 2 o terminar."
+        }
+      ],
+      "postcondicion": "La imagen válida sustituye a la anterior; una cancelación o rechazo no la modifica."
+    },
+    {
+      "id": "CU-E03",
+      "grupo": "E",
+      "actor": "Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Solicitar verificación de identidad",
+      "objetivo": "enviar documento y validación facial para acreditar mi identidad antes de crear campañas",
+      "estado": "Actual",
+      "acceso": "Mi Perfil → Iniciar Verificación; Mis Campañas → Verificar Identidad o Reintentar KYC.",
+      "limites": "KYC significa verificación de identidad. Los documentos de identidad no son evidencias públicas de la campaña.",
+      "historia": "HU-E03",
+      "criterios": [
+        "HU-E03-CA01",
+        "HU-E03-CA02",
+        "HU-E03-CA03",
+        "HU-E03-CA04",
+        "HU-E03-CA05"
+      ],
+      "diagramas_previos": [
+        "E02"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AdminController.php",
+        "web/app/Http/Controllers/ProfileController.php",
+        "web/frontend/src/components/KYCUploadModal.tsx",
+        "web/frontend/src/utils/kycFiles.ts"
+      ],
+      "relaciones": [],
+      "disparador": "El emprendedor desea solicitar verificación de identidad.",
+      "precondicion": "Cuenta Emprendedor con sesión y perfil; sin solicitud pendiente de decisión.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Usa Iniciar Verificación, Verificar Identidad o Reintentar KYC según el acceso disponible.",
+          "sistema": "Abre el proceso de verificación de identidad."
+        },
+        {
+          "numero": 2,
+          "actor": "Adjunta documento de identidad y pulsa Siguiente.",
+          "sistema": "Valida PDF, JPG/JPEG, PNG o WEBP de hasta 10 MB y abre validación facial."
+        },
+        {
+          "numero": 3,
+          "actor": "Toma una foto con la cámara o adjunta un archivo facial permitido.",
+          "sistema": "Admite JPG/JPEG, PNG, WEBP, MP4, WEBM o MOV de hasta 50 MB."
+        },
+        {
+          "numero": 4,
+          "actor": "Pulsa Enviar a Revisión.",
+          "sistema": "Registra la solicitud pendiente si el envío es correcto; espera una decisión administrativa."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 3,
+          "condicion": "La cámara no funciona o no tiene permiso.",
+          "respuesta": "Permite seleccionar un archivo en lugar de capturar con cámara.",
+          "continuidad": "Retomar el paso 3."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "El archivo no cumple formato o tamaño.",
+          "respuesta": "Rechaza la carga no válida.",
+          "continuidad": "Sustituir el archivo en el paso correspondiente."
+        },
+        {
+          "id": "A3",
+          "paso": 1,
+          "condicion": "Ya tiene una solicitud pendiente o una rechazada.",
+          "respuesta": "La pendiente no se reenvía como nueva; la rechazada permite consultar motivo y reintentar.",
+          "continuidad": "Esperar decisión o retomar el paso 2 tras el rechazo."
+        }
+      ],
+      "postcondicion": "La solicitud queda pendiente; los documentos son privados y no equivalen a evidencias públicas."
+    },
+    {
+      "id": "CU-E04",
+      "grupo": "E",
+      "actor": "Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Conocer los requisitos para crear una campaña",
+      "objetivo": "completar los requisitos de perfil e identidad para poder iniciar la recaudación con mis datos preparados",
+      "estado": "Actual",
+      "acceso": "Mi Perfil; Mis Campañas → Lanzar Campaña.",
+      "limites": "",
+      "historia": "HU-E04",
+      "criterios": [
+        "HU-E04-CA01",
+        "HU-E04-CA02",
+        "HU-E04-CA03"
+      ],
+      "diagramas_previos": [
+        "E01",
+        "E02",
+        "E03"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AdminController.php",
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/app/Http/Controllers/ProfileController.php",
+        "web/app/Services/ProfileReadiness.php",
+        "web/frontend/src/components/CampaignForm.tsx",
+        "web/frontend/src/components/KYCUploadModal.tsx",
+        "web/frontend/src/components/entrepreneur-profile/EditProfileModal.tsx",
+        "web/frontend/src/hooks/useCampaigns.ts",
+        "web/frontend/src/pages/EntrepreneurProfilePage.tsx",
+        "web/frontend/src/pages/MyCampaignsPage.tsx",
+        "web/frontend/src/utils/kycFiles.ts"
+      ],
+      "relaciones": [],
+      "disparador": "El emprendedor intenta comenzar una campaña.",
+      "precondicion": "Cuenta Emprendedor con sesión.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Mi Perfil o Mis Campañas → Lanzar Campaña.",
+          "sistema": "Comprueba el perfil y los requisitos de elegibilidad."
+        },
+        {
+          "numero": 2,
+          "actor": "Completa los requisitos pendientes y vuelve al acceso de creación.",
+          "sistema": "Exige biografía de al menos 30 caracteres, empresa o proyecto de al menos 2, sitio web y LinkedIn válidos HTTP/S, país e identidad aprobada."
+        },
+        {
+          "numero": 3,
+          "actor": "Abre la creación con los requisitos satisfechos.",
+          "sistema": "Permite completar el formulario de campaña."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "La identidad no está aprobada.",
+          "respuesta": "Dirige al proceso de verificación cuando el acceso lo solicita; registrarse no concede elegibilidad.",
+          "continuidad": "Continuar en CU-E03 y volver tras la aprobación."
+        }
+      ],
+      "postcondicion": "El emprendedor conoce lo que falta o accede al formulario; todavía no se crea una campaña."
+    },
+    {
+      "id": "CU-E05",
+      "grupo": "E",
+      "actor": "Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Crear un borrador de campaña",
+      "objetivo": "guardar la propuesta antes de enviarla para preparar la información y revisar su contenido",
+      "estado": "Parcial",
+      "acceso": "Mis Campañas → Lanzar Campaña → Guardar Borrador.",
+      "limites": "La creación y las cargas de archivos son operaciones separadas. Puede existir borrador aunque falle una carga posterior; no se acepta como garantía actual que todo se haya cargado. El manejo integral de fallos se define en HU-P12.",
+      "historia": "HU-E05",
+      "criterios": [
+        "HU-E05-CA01",
+        "HU-E05-CA02",
+        "HU-E05-CA03",
+        "HU-E05-CA04",
+        "HU-E05-CA05"
+      ],
+      "diagramas_previos": [
+        "E03"
+      ],
+      "pendientes": [
+        "HU-P12"
+      ],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/frontend/src/components/CampaignForm.tsx",
+        "web/frontend/src/hooks/useCampaigns.ts",
+        "web/frontend/src/pages/MyCampaignsPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El emprendedor desea guardar una propuesta.",
+      "precondicion": "Cuenta Emprendedor con sesión y elegibilidad de CU-E04 satisfecha.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Mis Campañas → Lanzar Campaña.",
+          "sistema": "Presenta el formulario de campaña."
+        },
+        {
+          "numero": 2,
+          "actor": "Completa título, eslogan, descripción, meta, categorías y al menos un documento con justificación.",
+          "sistema": "Valida título 5–50, eslogan 10–50, descripción 50–800 caracteres, meta mínima Bs. 100 y al menos una categoría y un respaldo."
+        },
+        {
+          "numero": 3,
+          "actor": "Pulsa Guardar Borrador.",
+          "sistema": "Crea el borrador propio y realiza las cargas posteriores de archivos como operaciones separadas."
+        },
+        {
+          "numero": 4,
+          "actor": "Abre Vista Previa.",
+          "sistema": "Permite comprobar datos, portada y documentos que realmente quedaron guardados."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Hay campos inválidos, fecha no futura si se ingresó, video distinto de YouTube/TikTok o falta respaldo.",
+          "respuesta": "El formulario bloquea la continuación y solicita corregir lo necesario; la fecha es opcional para guardar el borrador.",
+          "continuidad": "Corregir y retomar el paso 2."
+        },
+        {
+          "id": "A2",
+          "paso": 3,
+          "condicion": "Se crea el borrador pero falla una carga posterior.",
+          "respuesta": "Puede existir campaña sin todos los archivos esperados; no hay garantía de una confirmación integral en la interfaz actual.",
+          "continuidad": "Comprobar el borrador en el paso 4 antes de repetir la creación; consultar pendiente HU-P12."
+        }
+      ],
+      "postcondicion": "La propuesta creada queda en Borrador. La existencia de la campaña no garantiza que portada y respaldos se cargaron íntegramente."
+    },
+    {
+      "id": "CU-E06",
+      "grupo": "E",
+      "actor": "Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Definir niveles de recompensa",
+      "objetivo": "agregar beneficios y rangos de aporte para ofrecer incentivos comprensibles a los donadores",
+      "estado": "Actual",
+      "acceso": "Formulario de campaña → Estructura de Recompensas → Agregar Nivel.",
+      "limites": "Los primeros niveles se crean desde el formulario: la pestaña Recompensas de Vista Previa aparece cuando ya existen niveles. No se promete un botón para desactivar niveles desde esa vista.",
+      "historia": "HU-E06",
+      "criterios": [
+        "HU-E06-CA01",
+        "HU-E06-CA02",
+        "HU-E06-CA03",
+        "HU-E06-CA04",
+        "HU-E06-CA05"
+      ],
+      "diagramas_previos": [
+        "E03",
+        "E06",
+        "E08"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/app/Http/Controllers/RewardController.php",
+        "web/app/Models/RewardClaim.php",
+        "web/frontend/src/components/CampaignForm.tsx",
+        "web/frontend/src/components/CampaignPreviewModal.tsx",
+        "web/frontend/src/components/CampaignRewardsTab.tsx",
+        "web/frontend/src/hooks/useCampaigns.ts",
+        "web/frontend/src/pages/MyCampaignsPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El emprendedor desea definir las recompensas de su campaña.",
+      "precondicion": "Formulario editable de campaña propia; Borrador o Rechazada.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Estructura de Recompensas y usa Agregar Nivel.",
+          "sistema": "Presenta los campos del nivel."
+        },
+        {
+          "numero": 2,
+          "actor": "Completa título, descripción y porcentajes válidos.",
+          "sistema": "Añade el nivel a la lista del formulario si 0 ≤ mínimo < máximo ≤ 100."
+        },
+        {
+          "numero": 3,
+          "actor": "Guarda la campaña.",
+          "sistema": "Conserva las definiciones guardadas y permite consultarlas en Recompensas de Vista Previa cuando existen niveles."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Desea cambiar o quitar una definición antes de guardar.",
+          "respuesta": "Editar Nivel o Eliminar Nivel modifica la lista del formulario.",
+          "continuidad": "Retomar el paso 2 o 3."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "El rango de porcentajes es inválido.",
+          "respuesta": "No incorpora el nivel con esos porcentajes.",
+          "continuidad": "Corregir y retomar el paso 2."
+        }
+      ],
+      "postcondicion": "Los niveles quedan definidos al guardar correctamente; Vista Previa los consulta en solo lectura, sin promesa de desactivación desde esa pestaña."
+    },
+    {
+      "id": "CU-E07",
+      "grupo": "E",
+      "actor": "Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Adjuntar y consultar respaldo de campaña",
+      "objetivo": "añadir archivos con justificación para presentar evidencias para la revisión del proyecto",
+      "estado": "Parcial",
+      "acceso": "Formulario → Añadir Documento; Vista Previa → Documentación.",
+      "limites": "No hay un control web conectado para eliminar documentos ya guardados. Las cargas pueden fallar después de crear el borrador; comprobar la lista guardada.",
+      "historia": "HU-E07",
+      "criterios": [
+        "HU-E07-CA01",
+        "HU-E07-CA02",
+        "HU-E07-CA03",
+        "HU-E07-CA04",
+        "HU-E07-CA05"
+      ],
+      "diagramas_previos": [
+        "E03",
+        "E06"
+      ],
+      "pendientes": [
+        "HU-P12"
+      ],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/frontend/src/components/CampaignForm.tsx",
+        "web/frontend/src/components/CampaignPreviewModal.tsx",
+        "web/frontend/src/hooks/useCampaigns.ts",
+        "web/frontend/src/pages/MyCampaignsPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El emprendedor desea adjuntar respaldo.",
+      "precondicion": "Formulario de campaña propia editable; para consultar guardados, Vista Previa disponible.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Selecciona un archivo y escribe su justificación; pulsa Añadir Documento.",
+          "sistema": "Añade el respaldo a la lista pendiente del formulario."
+        },
+        {
+          "numero": 2,
+          "actor": "Guarda la campaña.",
+          "sistema": "Intenta cargar los respaldos; admite PDF, JPG/JPEG, PNG, WEBP, DOC o DOCX de hasta 20 MB."
+        },
+        {
+          "numero": 3,
+          "actor": "Abre Vista Previa → Documentación y usa Ver Documento.",
+          "sistema": "Muestra los documentos realmente guardados, estado y observaciones disponibles."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "Falta archivo o justificación.",
+          "respuesta": "Solicita ambos datos antes de añadir.",
+          "continuidad": "Completar y retomar el paso 1."
+        },
+        {
+          "id": "A2",
+          "paso": 1,
+          "condicion": "Retira un archivo pendiente antes de guardar.",
+          "respuesta": "No lo incluye en ese envío; no borra documentos previamente guardados.",
+          "continuidad": "Retomar el paso 1 o 2."
+        },
+        {
+          "id": "A3",
+          "paso": 2,
+          "condicion": "La carga falla o el formato/tamaño no se admite.",
+          "respuesta": "El archivo no queda como respaldo válido; puede existir borrador por guardado parcial.",
+          "continuidad": "Comprobar la lista del paso 3; consultar pendiente HU-P12."
+        }
+      ],
+      "postcondicion": "Los respaldos cargados correctamente pueden consultarse. No existe un control conectado para eliminar documentos ya guardados."
+    },
+    {
+      "id": "CU-E08",
+      "grupo": "E",
+      "actor": "Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Buscar y editar mis campañas",
+      "objetivo": "localizar mis proyectos y ajustar borradores o rechazos para mantener la propuesta antes de su publicación",
+      "estado": "Parcial",
+      "acceso": "Mis Campañas → búsqueda, pestañas de estado, Vista Previa → Editar.",
+      "limites": "Mis Campañas no muestra controles de orden ni paginación y filtra solo lo cargado. La navegación completa de todas las campañas se reserva a HU-P06.",
+      "historia": "HU-E08",
+      "criterios": [
+        "HU-E08-CA01",
+        "HU-E08-CA02",
+        "HU-E08-CA03",
+        "HU-E08-CA04",
+        "HU-E08-CA05"
+      ],
+      "diagramas_previos": [
+        "E06"
+      ],
+      "pendientes": [
+        "HU-P06"
+      ],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/frontend/src/components/CampaignForm.tsx",
+        "web/frontend/src/components/CampaignPreviewModal.tsx",
+        "web/frontend/src/pages/MyCampaignsPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El emprendedor desea localizar y editar una campaña.",
+      "precondicion": "Cuenta Emprendedor con sesión; campañas propias.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Mis Campañas y busca por título o selecciona una pestaña de estado.",
+          "sistema": "Filtra la lista cargada; alternar tarjetas/lista solo cambia la presentación."
+        },
+        {
+          "numero": 2,
+          "actor": "Abre Vista Previa de un Borrador o una Rechazada y selecciona Editar.",
+          "sistema": "Presenta el formulario editable de esa campaña."
+        },
+        {
+          "numero": 3,
+          "actor": "Modifica datos válidos y guarda con el respaldo requerido.",
+          "sistema": "Conserva los cambios correctos y permite comprobarlos en Vista Previa."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "La campaña está en otro estado.",
+          "respuesta": "No ofrece la edición mediante el formulario de borrador.",
+          "continuidad": "Terminar o consultar la campaña sin editar."
+        },
+        {
+          "id": "A2",
+          "paso": 3,
+          "condicion": "Prefiere abandonar cambios.",
+          "respuesta": "Usa Descartar y confirma la salida sin guardar las modificaciones del formulario.",
+          "continuidad": "Terminar sin guardar."
+        }
+      ],
+      "postcondicion": "Los cambios guardados quedan en la campaña propia. La búsqueda solo filtra lo cargado: no hay paginación ni selector de orden en Mis Campañas."
+    },
+    {
+      "id": "CU-E09",
+      "grupo": "E",
+      "actor": "Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Enviar una campaña a revisión",
+      "objetivo": "presentar mi borrador o propuesta corregida para obtener una decisión administrativa antes de publicarla",
+      "estado": "Actual",
+      "acceso": "Mis Campañas → Vista Previa → Enviar Revisión; en Mi Perfil, formulario → Enviar a Revisión.",
+      "limites": "La tarjeta ofrece envío directo en Borrador; Vista Previa también permite reenviar Rechazada. Aprobar y publicar son pasos diferentes.",
+      "historia": "HU-E09",
+      "criterios": [
+        "HU-E09-CA01",
+        "HU-E09-CA02",
+        "HU-E09-CA03",
+        "HU-E09-CA04"
+      ],
+      "diagramas_previos": [
+        "E04"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/frontend/src/components/CampaignPreviewModal.tsx",
+        "web/frontend/src/hooks/useCampaigns.ts"
+      ],
+      "relaciones": [],
+      "disparador": "El emprendedor desea solicitar revisión de una propuesta.",
+      "precondicion": "Campaña propia Borrador o Rechazada; requisitos y respaldos válidos.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Vista Previa y revisa la propuesta guardada.",
+          "sistema": "Presenta datos y acciones disponibles de la campaña."
+        },
+        {
+          "numero": 2,
+          "actor": "Pulsa Enviar Revisión.",
+          "sistema": "Valida el envío y registra la campaña como pendiente de revisión con su historial."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta el estado tras el envío.",
+          "sistema": "Mantiene la espera de una decisión administrativa; no publica la campaña."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "Usa el formulario desde Mi Perfil.",
+          "respuesta": "Enviar a Revisión permite guardar y enviar si la operación completa es correcta.",
+          "continuidad": "Continuar en el paso 3."
+        },
+        {
+          "id": "A2",
+          "paso": 1,
+          "condicion": "Usa el formulario de Mis Campañas sin botón de envío directo.",
+          "respuesta": "Guarda primero con Guardar Borrador y envía desde la tarjeta o Vista Previa.",
+          "continuidad": "Retomar el paso 2."
+        },
+        {
+          "id": "A3",
+          "paso": 2,
+          "condicion": "Faltan requisitos o la campaña ya está pendiente.",
+          "respuesta": "El envío no equivale a una nueva aprobación; se deben corregir requisitos o esperar la decisión según el estado.",
+          "continuidad": "Corregir en CU-E08 o esperar; tras rechazo puede leer motivo, editar y reenviar."
+        }
+      ],
+      "postcondicion": "La solicitud aceptada queda pendiente de revisión. Aprobación y publicación siguen siendo pasos diferentes."
+    },
+    {
+      "id": "CU-E10",
+      "grupo": "E",
+      "actor": "Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Publicar una campaña aprobada",
+      "objetivo": "lanzar mi campaña autorizada para hacerla visible y permitir aportes mientras esté vigente",
+      "estado": "Parcial",
+      "acceso": "Campaña Aprobada → Publicar Campaña en tarjeta, o Vista Previa → Lanzar.",
+      "limites": "La edición está bloqueada en Aprobada. Si la fecha venció, no existe un recorrido web completo para corregirla en ese estado; se registra en HU-P07.",
+      "historia": "HU-E10",
+      "criterios": [
+        "HU-E10-CA01",
+        "HU-E10-CA02",
+        "HU-E10-CA03"
+      ],
+      "diagramas_previos": [
+        "E05"
+      ],
+      "pendientes": [
+        "HU-P07"
+      ],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/app/Services/CampaignPublication.php",
+        "web/frontend/src/components/CampaignCard.tsx",
+        "web/frontend/src/components/CampaignPreviewModal.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El emprendedor desea lanzar una campaña aprobada.",
+      "precondicion": "Campaña propia Aprobada con fecha válida para publicar.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Localiza la campaña Aprobada.",
+          "sistema": "Presenta Publicar Campaña en la tarjeta o Lanzar en Vista Previa."
+        },
+        {
+          "numero": 2,
+          "actor": "Pulsa Publicar Campaña o Lanzar.",
+          "sistema": "Comprueba estado y fecha y procesa el lanzamiento."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta el resultado.",
+          "sistema": "La campaña pasa a Publicada y puede aparecer en Explorar si la operación es correcta."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "La fecha ya venció o el estado no permite publicar.",
+          "respuesta": "Rechaza el lanzamiento. En Aprobada la edición está bloqueada y no hay recorrido web completo para corregir la fecha.",
+          "continuidad": "Terminar; la solución del recorrido está pendiente en HU-P07."
+        }
+      ],
+      "postcondicion": "La campaña lanzada correctamente queda Publicada. Estar Aprobada por sí solo no la publica."
+    },
+    {
+      "id": "CU-E11",
+      "grupo": "E",
+      "actor": "Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Consultar resultados y donadores",
+      "objetivo": "revisar el progreso económico y quiénes apoyan mi campaña para dar seguimiento a la recaudación",
+      "estado": "Actual",
+      "acceso": "Vista Previa → Progreso Económico / Donadores Activos; Mi Perfil → Finanzas.",
+      "limites": "La disponibilidad de pestañas de Vista Previa depende del estado. La mensajería desde la ficha de un donador se define como pendiente en HU-P05.",
+      "historia": "HU-E11",
+      "criterios": [
+        "HU-E11-CA01",
+        "HU-E11-CA02",
+        "HU-E11-CA03",
+        "HU-E11-CA04"
+      ],
+      "diagramas_previos": [
+        "E07"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/frontend/src/components/CampaignAnalyticsDashboard.tsx",
+        "web/frontend/src/components/CampaignInvestorsTab.tsx",
+        "web/frontend/src/components/CampaignPreviewModal.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El emprendedor desea conocer resultados y donadores.",
+      "precondicion": "Cuenta Emprendedor con sesión; campaña propia con pestañas habilitadas según su estado.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Vista Previa → Progreso Económico.",
+          "sistema": "Presenta recaudación, evolución y desglose; las proyecciones son estimaciones."
+        },
+        {
+          "numero": 2,
+          "actor": "Abre Donadores Activos y recorre sus páginas.",
+          "sistema": "Lista los donadores vinculados a su campaña."
+        },
+        {
+          "numero": 3,
+          "actor": "Selecciona una ficha de donador.",
+          "sistema": "Muestra la información que ofrece el sistema para esa ficha."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "Prefiere la consulta desde Mi Perfil.",
+          "respuesta": "En Finanzas selecciona una de sus campañas y consulta sus métricas.",
+          "continuidad": "Terminar tras la consulta."
+        },
+        {
+          "id": "A2",
+          "paso": 3,
+          "condicion": "Intenta contactar desde Enviar Mensaje.",
+          "respuesta": "El control anuncia Próximamente; no inicia una conversación operativa.",
+          "continuidad": "Terminar; función pendiente HU-P05."
+        }
+      ],
+      "postcondicion": "Las métricas y donadores autorizados quedan consultados sin iniciar un chat desde la ficha de donador."
+    },
+    {
+      "id": "CU-E12",
+      "grupo": "E",
+      "actor": "Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Actualizar el seguimiento de recompensas",
+      "objetivo": "registrar el avance de una entrega para informar al donador del estado de su beneficio",
+      "estado": "Actual",
+      "acceso": "Vista Previa → Recompensas → Donadores con Recompensas.",
+      "limites": "La pantalla actual cambia el estado; no ofrece campos para introducir un número o una URL de seguimiento.",
+      "historia": "HU-E12",
+      "criterios": [
+        "HU-E12-CA01",
+        "HU-E12-CA02",
+        "HU-E12-CA03",
+        "HU-E12-CA04",
+        "HU-E12-CA05"
+      ],
+      "diagramas_previos": [
+        "E08"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/RewardController.php",
+        "web/app/Models/RewardClaim.php",
+        "web/frontend/src/components/CampaignPreviewModal.tsx",
+        "web/frontend/src/components/CampaignRewardsTab.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El emprendedor desea actualizar una entrega de recompensa.",
+      "precondicion": "Campaña propia con niveles y registros de recompensa; sesión Emprendedor.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Vista Previa → Recompensas → Donadores con Recompensas.",
+          "sistema": "Lista donador, recompensa, monto y estado de cada registro."
+        },
+        {
+          "numero": 2,
+          "actor": "Abre el selector de un registro y elige una transición permitida.",
+          "sistema": "Ofrece pendiente a preparación, preparación a enviada, enviada a entregada, o cancelación cuando está habilitada."
+        },
+        {
+          "numero": 3,
+          "actor": "Completa el cambio.",
+          "sistema": "Guarda el estado; el donador puede consultarlo desde Mi Panel → Recompensas."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "El registro ya está entregado, cancelado o reembolsado.",
+          "respuesta": "No ofrece reactivarlo ni cambiar su estado.",
+          "continuidad": "Terminar sin modificarlo."
+        },
+        {
+          "id": "A2",
+          "paso": 3,
+          "condicion": "Falla la actualización.",
+          "respuesta": "Muestra el error e intenta recuperar el estado vigente; no confirma un cambio fallido.",
+          "continuidad": "Revisar el estado y volver al paso 2 si todavía corresponde."
+        }
+      ],
+      "postcondicion": "El estado permitido queda actualizado. No hay campos web para introducir número o URL de seguimiento."
+    },
+    {
+      "id": "CU-E13",
+      "grupo": "E",
+      "actor": "Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Publicar novedades",
+      "objetivo": "compartir texto, imágenes o videos sobre mi campaña para mantener informados a quienes la siguen o apoyan",
+      "estado": "Actual",
+      "acceso": "Mis Campañas → campaña Publicada → Publicar Novedad.",
+      "limites": "La acción de la tarjeta aparece en Publicada. Las novedades públicas recientes pueden aparecer en historias; no se promete edición o borrado de publicaciones desde la web.",
+      "historia": "HU-E13",
+      "criterios": [
+        "HU-E13-CA01",
+        "HU-E13-CA02",
+        "HU-E13-CA03",
+        "HU-E13-CA04"
+      ],
+      "diagramas_previos": [
+        "E09"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/frontend/src/components/CampaignCard.tsx",
+        "web/frontend/src/components/PublishUpdateModal.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El emprendedor desea publicar una novedad.",
+      "precondicion": "Campaña propia Publicada; sesión Emprendedor.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "En Mis Campañas pulsa Publicar Novedad en la tarjeta.",
+          "sistema": "Abre el formulario de publicación."
+        },
+        {
+          "numero": 2,
+          "actor": "Escribe título de al menos 3 caracteres y contenido de al menos 10; elige texto o el tipo de adjunto.",
+          "sistema": "Valida campos y solicita archivo si el tipo elegido lo requiere."
+        },
+        {
+          "numero": 3,
+          "actor": "Pulsa Publicar.",
+          "sistema": "Registra la novedad pública si la operación es correcta."
+        },
+        {
+          "numero": 4,
+          "actor": "Consulta Hitos y Avances o Transparencia y Fondos → Bitácora.",
+          "sistema": "Presenta la novedad; los donadores vinculados pueden consultarla en Mi Panel → Novedades."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Faltan caracteres requeridos o el archivo del tipo elegido.",
+          "respuesta": "Solicita completar los datos antes de publicar.",
+          "continuidad": "Corregir y retomar el paso 2."
+        }
+      ],
+      "postcondicion": "La novedad correcta queda publicada; si es reciente puede aparecer en historias. No se documenta edición ni borrado web."
+    },
+    {
+      "id": "CU-E14",
+      "grupo": "E",
+      "actor": "Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Finalizar una campaña publicada",
+      "objetivo": "cerrar una campaña publicada para gestionar su resultado y las devoluciones que correspondan",
+      "estado": "Parcial",
+      "acceso": "Mis Campañas → tarjeta Publicada → Finalizar Campaña.",
+      "limites": "Finalizar Campaña solo aparece en Publicada. Financiada y Parcialmente financiada no tienen esa acción en la tarjeta, aunque el servidor admita su finalización. Vencer la fecha no finaliza ni reembolsa automáticamente.",
+      "historia": "HU-E14",
+      "criterios": [
+        "HU-E14-CA01",
+        "HU-E14-CA02",
+        "HU-E14-CA03"
+      ],
+      "diagramas_previos": [
+        "E10"
+      ],
+      "pendientes": [
+        "HU-P07"
+      ],
+      "fuentes": [
+        "web/app/Services/InvestmentEngine.php",
+        "web/frontend/src/components/CampaignCard.tsx",
+        "web/frontend/src/hooks/useCampaigns.ts"
+      ],
+      "relaciones": [],
+      "disparador": "El emprendedor desea cerrar una campaña publicada.",
+      "precondicion": "Campaña propia Publicada; acción Finalizar Campaña disponible en la tarjeta.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Pulsa Finalizar Campaña en Mis Campañas.",
+          "sistema": "Solicita confirmar la finalización."
+        },
+        {
+          "numero": 2,
+          "actor": "Confirma la operación.",
+          "sistema": "Procesa la finalización y actualiza el estado y su historial."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta el resultado cuando la recaudación es insuficiente.",
+          "sistema": "La campaña queda Fallida, reembolsa los aportes completados al saldo simulado y cancela sus recompensas."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Cancela la confirmación.",
+          "respuesta": "No realiza la finalización.",
+          "continuidad": "Terminar."
+        },
+        {
+          "id": "A2",
+          "paso": 1,
+          "condicion": "La campaña está Financiada o Parcialmente financiada.",
+          "respuesta": "La tarjeta no ofrece esta acción aunque el servidor admita finalizar; no hay recorrido web completo aquí.",
+          "continuidad": "Terminar; recorrido pendiente HU-P07."
+        }
+      ],
+      "postcondicion": "La finalización ejecutada queda registrada. El vencimiento de fecha por sí solo no finaliza ni reembolsa automáticamente."
+    },
+    {
+      "id": "CU-E15",
+      "grupo": "E",
+      "actor": "Emprendedor",
+      "actores_secundarios": [],
+      "titulo": "Eliminar borradores o campañas rechazadas",
+      "objetivo": "retirar propuestas que no voy a continuar para mantener organizados mis proyectos sin borrar registros con actividad financiera",
+      "estado": "Actual",
+      "acceso": "Mis Campañas → Borrador/Rechazada → Eliminar Campaña o menú Eliminar.",
+      "limites": "",
+      "historia": "HU-E15",
+      "criterios": [
+        "HU-E15-CA01",
+        "HU-E15-CA02",
+        "HU-E15-CA03",
+        "HU-E15-CA04"
+      ],
+      "diagramas_previos": [
+        "E11"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/frontend/src/components/CampaignCard.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El emprendedor desea retirar una propuesta.",
+      "precondicion": "Campaña propia Borrador o Rechazada, sin actividad financiera que impida eliminar.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "En Mis Campañas usa Eliminar Campaña o el menú Eliminar.",
+          "sistema": "Solicita confirmación de eliminación."
+        },
+        {
+          "numero": 2,
+          "actor": "Confirma la eliminación.",
+          "sistema": "Comprueba permisos, estado y ausencia de actividad que la bloquee."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta nuevamente sus campañas.",
+          "sistema": "La campaña eliminada correctamente deja de aparecer."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Cancela la confirmación.",
+          "respuesta": "Conserva la campaña.",
+          "continuidad": "Terminar."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "Existe actividad financiera que impide eliminar.",
+          "respuesta": "Bloquea la operación y conserva la campaña.",
+          "continuidad": "Terminar."
+        },
+        {
+          "id": "A3",
+          "paso": 1,
+          "condicion": "La campaña está en otro estado.",
+          "respuesta": "No ofrece esta eliminación de propuesta desde la tarjeta.",
+          "continuidad": "Terminar."
+        }
+      ],
+      "postcondicion": "La propuesta autorizada queda eliminada; cancelar o una restricción conserva el registro."
+    },
+    {
+      "id": "CU-A01",
+      "grupo": "A",
+      "actor": "Administrador",
+      "actores_secundarios": [],
+      "titulo": "Consultar el panel de estadísticas",
+      "objetivo": "ver los indicadores y las tareas administrativas para priorizar las gestiones del sistema",
+      "estado": "Actual",
+      "acceso": "Panel administrativo → Estadísticas.",
+      "limites": "",
+      "historia": "HU-A01",
+      "criterios": [
+        "HU-A01-CA01",
+        "HU-A01-CA02",
+        "HU-A01-CA03"
+      ],
+      "diagramas_previos": [
+        "A01"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AdminController.php",
+        "web/frontend/src/components/admin/AdminLayout.tsx",
+        "web/frontend/src/pages/admin/AdminDashboardPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El administrador desea conocer el estado de la plataforma.",
+      "precondicion": "Sesión Administrador o Superadministrador.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre el panel → Estadísticas.",
+          "sistema": "Carga indicadores disponibles de usuarios, campañas y pendientes."
+        },
+        {
+          "numero": 2,
+          "actor": "Selecciona un acceso de Usuarios, Campañas, Verificación KYC, Revisión o Auditoría.",
+          "sistema": "Abre el módulo administrativo correspondiente."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "La cuenta no tiene permisos administrativos.",
+          "respuesta": "Rechaza el acceso a datos administrativos aunque conozca la dirección.",
+          "continuidad": "Terminar sin acceso."
+        }
+      ],
+      "postcondicion": "Los indicadores quedan consultados y puede abrirse el módulo seleccionado."
+    },
+    {
+      "id": "CU-A02",
+      "grupo": "A",
+      "actor": "Administrador",
+      "actores_secundarios": [],
+      "titulo": "Consultar y suspender usuarios",
+      "objetivo": "buscar cuentas y desactivar accesos para administrar los participantes de la plataforma",
+      "estado": "Actual",
+      "acceso": "Gestión de Usuarios.",
+      "limites": "No hay opción de reactivación desde esta pantalla; se trata como pendiente en HU-P04.",
+      "historia": "HU-A02",
+      "criterios": [
+        "HU-A02-CA01",
+        "HU-A02-CA02",
+        "HU-A02-CA03",
+        "HU-A02-CA04"
+      ],
+      "diagramas_previos": [
+        "A02"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AdminController.php",
+        "web/frontend/src/pages/admin/AdminUsersPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El administrador desea consultar o suspender una cuenta.",
+      "precondicion": "Sesión Administrador o Superadministrador.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Gestión de Usuarios y busca por correo.",
+          "sistema": "Lista coincidencias con correo, identificador abreviado, Fecha de Registro y estado Activo o Suspendido."
+        },
+        {
+          "numero": 2,
+          "actor": "Selecciona la suspensión de una cuenta activa y confirma.",
+          "sistema": "Comprueba las restricciones y desactiva la cuenta si está permitido."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta la lista actualizada.",
+          "sistema": "Presenta la cuenta Suspendida; no puede iniciar sesión."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Cancela la confirmación.",
+          "respuesta": "Conserva el estado anterior.",
+          "continuidad": "Terminar."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "Intenta suspender su propia cuenta o un Superadministrador.",
+          "respuesta": "Bloquea la operación.",
+          "continuidad": "Terminar sin suspender."
+        },
+        {
+          "id": "A3",
+          "paso": 1,
+          "condicion": "Solo desea consultar.",
+          "respuesta": "No realiza acciones de suspensión.",
+          "continuidad": "Terminar tras el paso 1."
+        }
+      ],
+      "postcondicion": "La cuenta autorizada queda suspendida, conservando sus datos; no hay reactivación disponible desde esta pantalla."
+    },
+    {
+      "id": "CU-A03",
+      "grupo": "A",
+      "actor": "Administrador",
+      "actores_secundarios": [],
+      "titulo": "Consultar y eliminar campañas sin actividad financiera",
+      "objetivo": "buscar proyectos y consultar su detalle para supervisar el catálogo y retirar registros que pueden eliminarse",
+      "estado": "Parcial",
+      "acceso": "Gestión de Campañas.",
+      "limites": "Los botones de aprobación que puedan aparecer aquí no tienen sus acciones conectadas. Para decidir se usa Revisión de Campañas; la unificación de esos controles se especifica en HU-P11.",
+      "historia": "HU-A03",
+      "criterios": [
+        "HU-A03-CA01",
+        "HU-A03-CA02",
+        "HU-A03-CA03",
+        "HU-A03-CA04"
+      ],
+      "diagramas_previos": [
+        "A06"
+      ],
+      "pendientes": [
+        "HU-P11"
+      ],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/frontend/src/components/CampaignPreviewModal.tsx",
+        "web/frontend/src/pages/admin/AdminCampaignsPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El administrador desea consultar o eliminar una campaña.",
+      "precondicion": "Sesión Administrador o Superadministrador.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Gestión de Campañas; busca por título, creador o correo y selecciona un estado.",
+          "sistema": "Filtra las campañas y permite recargarlas con Actualizar."
+        },
+        {
+          "numero": 2,
+          "actor": "Abre una campaña.",
+          "sistema": "Presenta sus datos, historial, documentos y pestañas habilitadas."
+        },
+        {
+          "numero": 3,
+          "actor": "Solicita y confirma eliminar una campaña sin actividad financiera.",
+          "sistema": "Comprueba restricciones y la elimina si corresponde."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 3,
+          "condicion": "Existen aportes, movimientos o recompensas que impiden eliminar.",
+          "respuesta": "Bloquea la operación y conserva la campaña.",
+          "continuidad": "Terminar."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "Desea decidir una solicitud pendiente.",
+          "respuesta": "Los botones de aprobación de Gestión de Campañas no están conectados; debe usar Revisión de Campañas.",
+          "continuidad": "Continuar en CU-A04."
+        },
+        {
+          "id": "A3",
+          "paso": 3,
+          "condicion": "Solo desea consultar o cancela eliminar.",
+          "respuesta": "Conserva el registro.",
+          "continuidad": "Terminar sin eliminar."
+        }
+      ],
+      "postcondicion": "Se consulta la campaña o se elimina cuando está permitido. No se aprueba desde controles sin conexión."
+    },
+    {
+      "id": "CU-A04",
+      "grupo": "A",
+      "actor": "Administrador",
+      "actores_secundarios": [],
+      "titulo": "Aprobar o rechazar solicitudes de campaña",
+      "objetivo": "evaluar propuestas pendientes para autorizar o devolver proyectos antes de su publicación",
+      "estado": "Actual",
+      "acceso": "Revisión de Campañas.",
+      "limites": "El listado solicita pendientes; no ofrece filtro para incluir En revisión ni otros estados.",
+      "historia": "HU-A04",
+      "criterios": [
+        "HU-A04-CA01",
+        "HU-A04-CA02",
+        "HU-A04-CA03",
+        "HU-A04-CA04",
+        "HU-A04-CA05"
+      ],
+      "diagramas_previos": [
+        "A03"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AdminController.php",
+        "web/frontend/src/components/CampaignPreviewModal.tsx",
+        "web/frontend/src/pages/admin/CampaignReviewPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El administrador desea decidir una solicitud de campaña.",
+      "precondicion": "Sesión Administrador o Superadministrador; solicitud pendiente.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Revisión de Campañas, busca por título o emprendedor y recorre sus páginas.",
+          "sistema": "Lista las solicitudes pendientes coincidentes."
+        },
+        {
+          "numero": 2,
+          "actor": "Abre la propuesta y revisa propietario, documentos e historial.",
+          "sistema": "Presenta los datos necesarios para su decisión."
+        },
+        {
+          "numero": 3,
+          "actor": "Selecciona Aprobar en el detalle; si usa la aprobación rápida del listado, confirma su diálogo.",
+          "sistema": "Registra Aprobada; el emprendedor todavía debe publicarla."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 3,
+          "condicion": "Decide rechazar.",
+          "respuesta": "Escribe un motivo y confirma; registra Rechazada y deja el motivo disponible para corregir y reenviar.",
+          "continuidad": "Terminar con rechazo."
+        },
+        {
+          "id": "A2",
+          "paso": 3,
+          "condicion": "Intenta rechazar sin motivo.",
+          "respuesta": "La interfaz impide completar el rechazo.",
+          "continuidad": "Completar motivo y retomar el paso 3."
+        }
+      ],
+      "postcondicion": "La decisión queda registrada. El listado no incluye un filtro para todos los estados ni publica automáticamente."
+    },
+    {
+      "id": "CU-A05",
+      "grupo": "A",
+      "actor": "Administrador",
+      "actores_secundarios": [],
+      "titulo": "Revisar solicitudes KYC",
+      "objetivo": "comprobar identidad y validación facial para decidir qué emprendedores quedan verificados",
+      "estado": "Actual",
+      "acceso": "Verificaciones KYC → Revisar.",
+      "limites": "",
+      "historia": "HU-A05",
+      "criterios": [
+        "HU-A05-CA01",
+        "HU-A05-CA02",
+        "HU-A05-CA03",
+        "HU-A05-CA04",
+        "HU-A05-CA05"
+      ],
+      "diagramas_previos": [
+        "A04"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AdminController.php",
+        "web/frontend/src/components/admin/KYCReviewModal.tsx",
+        "web/frontend/src/components/admin/KycFileViewer.tsx",
+        "web/frontend/src/pages/admin/AdminKycPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El administrador desea decidir una verificación de identidad.",
+      "precondicion": "Sesión Administrador o Superadministrador; solicitud KYC pendiente.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Verificaciones KYC y pulsa Revisar.",
+          "sistema": "Presenta datos, documento de identidad y validación facial autorizados."
+        },
+        {
+          "numero": 2,
+          "actor": "Consulta los archivos y la información presentada.",
+          "sistema": "Permite su revisión privada."
+        },
+        {
+          "numero": 3,
+          "actor": "Aprueba la solicitud.",
+          "sistema": "Guarda la revisión, verifica el perfil y retira la solicitud de pendientes."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "El enlace de un archivo caducó.",
+          "respuesta": "Usa la renovación o descarga permitida para intentar recuperar el archivo sin hacerlo público.",
+          "continuidad": "Retomar el paso 2."
+        },
+        {
+          "id": "A2",
+          "paso": 3,
+          "condicion": "Decide rechazar.",
+          "respuesta": "Registra rechazo con motivo; el emprendedor puede reenviar documentación.",
+          "continuidad": "Terminar con rechazo."
+        },
+        {
+          "id": "A3",
+          "paso": 3,
+          "condicion": "La solicitud ya fue resuelta o está desactualizada.",
+          "respuesta": "Impide decidir nuevamente sobre ese estado y requiere actualizar la lista.",
+          "continuidad": "Volver al paso 1."
+        }
+      ],
+      "postcondicion": "La identidad queda aprobada o rechazada; los documentos KYC permanecen privados."
+    },
+    {
+      "id": "CU-A06",
+      "grupo": "A",
+      "actor": "Administrador",
+      "actores_secundarios": [],
+      "titulo": "Revisar documentos de campaña",
+      "objetivo": "aprobar o rechazar respaldos pendientes para evaluar la documentación de cada proyecto",
+      "estado": "Actual",
+      "acceso": "Detalle administrativo → Documentación → Ver Documento.",
+      "limites": "Aprobar o rechazar un documento es independiente de aprobar o rechazar la campaña.",
+      "historia": "HU-A06",
+      "criterios": [
+        "HU-A06-CA01",
+        "HU-A06-CA02",
+        "HU-A06-CA03",
+        "HU-A06-CA04"
+      ],
+      "diagramas_previos": [
+        "A05"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AdminController.php",
+        "web/app/Http/Controllers/CampaignReadController.php",
+        "web/frontend/src/components/CampaignPreviewModal.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El administrador desea revisar un respaldo de campaña.",
+      "precondicion": "Sesión Administrador o Superadministrador; documento de campaña pendiente.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "En el detalle administrativo abre Documentación y Ver Documento.",
+          "sistema": "Presenta archivo autorizado y justificación."
+        },
+        {
+          "numero": 2,
+          "actor": "Revisa el respaldo y selecciona Aprobar.",
+          "sistema": "Registra Aprobado y actualiza la lista, sin publicarlo automáticamente."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta el estado del documento en la lista actualizada.",
+          "sistema": "Presenta el resultado de la revisión."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Decide Rechazar.",
+          "respuesta": "Escribe el motivo solicitado y confirma; registra Rechazado con observaciones para el emprendedor.",
+          "continuidad": "Terminar con rechazo."
+        }
+      ],
+      "postcondicion": "El documento queda revisado. Esta decisión es independiente de aprobar la campaña y de publicar la evidencia."
+    },
+    {
+      "id": "CU-A07",
+      "grupo": "A",
+      "actor": "Administrador",
+      "actores_secundarios": [],
+      "titulo": "Autorizar la publicación de evidencias",
+      "objetivo": "elegir qué documentos aprobados se hacen públicos para publicar respaldo apto sin exponer archivos privados",
+      "estado": "Actual",
+      "acceso": "Documentación → Publicar evidencia / Retirar publicación.",
+      "limites": "",
+      "historia": "HU-A07",
+      "criterios": [
+        "HU-A07-CA01",
+        "HU-A07-CA02",
+        "HU-A07-CA03"
+      ],
+      "diagramas_previos": [
+        "A05"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AdminController.php",
+        "web/app/Http/Controllers/CampaignReadController.php",
+        "web/frontend/src/components/CampaignPreviewModal.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El administrador desea autorizar una evidencia pública.",
+      "precondicion": "Sesión Administrador o Superadministrador; documento aprobado de campaña.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Documentación del detalle administrativo.",
+          "sistema": "Presenta estado y control Publicar evidencia cuando corresponde."
+        },
+        {
+          "numero": 2,
+          "actor": "Pulsa Publicar evidencia.",
+          "sistema": "Guarda la autorización pública si cumple las condiciones."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta Evidencias de la campaña pública.",
+          "sistema": "El documento autorizado queda disponible para su consulta pública."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "La evidencia ya está publicada y decide retirarla.",
+          "respuesta": "Usa Retirar publicación; deja de estar accesible por su publicación pública.",
+          "continuidad": "Terminar con publicación retirada."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "El documento no está aprobado.",
+          "respuesta": "No autoriza publicarlo como evidencia válida.",
+          "continuidad": "Revisar el documento en CU-A06 o terminar."
+        }
+      ],
+      "postcondicion": "La autorización pública queda activada o retirada sin convertir documentos KYC en evidencias."
+    },
+    {
+      "id": "CU-A08",
+      "grupo": "A",
+      "actor": "Administrador",
+      "actores_secundarios": [],
+      "titulo": "Auditar movimientos financieros",
+      "objetivo": "revisar egresos e ingresos registrados para controlar la documentación y las observaciones financieras",
+      "estado": "Actual",
+      "acceso": "Auditoría de Gastos → Revisar.",
+      "limites": "No hay filtros visibles de origen o fechas. Los aportes/reembolsos automáticos y registros de origen no confirmado pueden ser solo consultables.",
+      "historia": "HU-A08",
+      "criterios": [
+        "HU-A08-CA01",
+        "HU-A08-CA02",
+        "HU-A08-CA03",
+        "HU-A08-CA04",
+        "HU-A08-CA05"
+      ],
+      "diagramas_previos": [
+        "A07"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AdminController.php",
+        "web/app/Services/FinancialMovementAudit.php",
+        "web/frontend/src/components/admin/FinancialMovementHistory.tsx",
+        "web/frontend/src/pages/admin/AdminExpensesAuditPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El administrador desea revisar un movimiento financiero.",
+      "precondicion": "Sesión Administrador o Superadministrador; movimiento visible en Auditoría de Gastos.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Busca por concepto, factura, notas o campaña y aplica tipo, estado o comprobante; recorre las páginas.",
+          "sistema": "Presenta movimientos coincidentes."
+        },
+        {
+          "numero": 2,
+          "actor": "Pulsa Revisar en un movimiento.",
+          "sistema": "Carga importe, categoría, comprobante disponible e Historial de cambios y revisiones."
+        },
+        {
+          "numero": 3,
+          "actor": "Elige Aprobar / Verificado y pulsa Confirmar Dictamen.",
+          "sistema": "Comprueba permisos y versión y registra el dictamen si el movimiento admite revisión."
+        },
+        {
+          "numero": 4,
+          "actor": "Consulta el resultado.",
+          "sistema": "Actualiza lista, resumen e historial."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 3,
+          "condicion": "Prefiere Marcar Observado o Rechazar.",
+          "respuesta": "Exige explicación para completar ese dictamen.",
+          "continuidad": "Añadir explicación y retomar el paso 3."
+        },
+        {
+          "id": "A2",
+          "paso": 3,
+          "condicion": "Cambió la versión o el movimiento no admite revisión.",
+          "respuesta": "No sobrescribe otra revisión; requiere recargar o limitarse a consultar.",
+          "continuidad": "Volver al paso 2 o terminar con consulta."
+        }
+      ],
+      "postcondicion": "El dictamen autorizado queda registrado con historial. No existen filtros visibles de origen ni fechas."
+    },
+    {
+      "id": "CU-A09",
+      "grupo": "A",
+      "actor": "Administrador",
+      "actores_secundarios": [],
+      "titulo": "Comparar presupuesto y ejecución",
+      "objetivo": "consultar diferencias entre plan y gastos para identificar sobregiros y gastos sin planificación",
+      "estado": "Actual",
+      "acceso": "Auditoría de Gastos → icono Auditar Plan de Fondos de la Campaña.",
+      "limites": "Esta consulta no incluye indicadores de hitos ni crea registros financieros que no existan.",
+      "historia": "HU-A09",
+      "criterios": [
+        "HU-A09-CA01",
+        "HU-A09-CA02",
+        "HU-A09-CA03",
+        "HU-A09-CA04"
+      ],
+      "diagramas_previos": [
+        "A08"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AdminController.php",
+        "web/frontend/src/pages/admin/AdminExpensesAuditPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El administrador desea comparar presupuesto y ejecución.",
+      "precondicion": "Sesión Administrador o Superadministrador; Auditoría de Gastos abierto.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Pulsa el icono Auditar Plan de Fondos de la Campaña.",
+          "sistema": "Abre Auditoría Presupuestaria de la Campaña correspondiente."
+        },
+        {
+          "numero": 2,
+          "actor": "Consulta categorías, Presupuestado, Ejecutado, Varianza, Comprobantes Faltantes y Estado.",
+          "sistema": "Presenta la comparación basada en los registros disponibles."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta los movimientos sin categoría si existen y pulsa Cerrar Auditoría.",
+          "sistema": "Los muestra en una sección separada y regresa al listado al cerrar."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "No hay registros suficientes para una comparación completa.",
+          "respuesta": "La consulta se limita a los registros disponibles; no genera datos financieros ni indicadores de hitos.",
+          "continuidad": "Terminar la consulta con Cerrar Auditoría."
+        }
+      ],
+      "postcondicion": "Se consulta la comparación sin modificar presupuesto ni movimientos."
+    },
+    {
+      "id": "CU-S01",
+      "grupo": "S",
+      "actor": "Superadministrador",
+      "actores_secundarios": [],
+      "titulo": "Consultar administradores",
+      "objetivo": "ver las cuentas con privilegios administrativos para supervisar quién gestiona la plataforma",
+      "estado": "Actual",
+      "acceso": "Gestión de Admins.",
+      "limites": "",
+      "historia": "HU-S01",
+      "criterios": [
+        "HU-S01-CA01",
+        "HU-S01-CA02",
+        "HU-S01-CA03"
+      ],
+      "diagramas_previos": [
+        "S01"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/frontend/src/components/admin/AdminLayout.tsx",
+        "web/frontend/src/pages/admin/SuperAdminDashboardPage.tsx",
+        "web/routes/api.php"
+      ],
+      "relaciones": [],
+      "disparador": "El superadministrador desea consultar las cuentas administrativas.",
+      "precondicion": "Sesión Superadministrador.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Gestión de Admins.",
+          "sistema": "Lista correo, nivel y estado de las cuentas administrativas."
+        },
+        {
+          "numero": 2,
+          "actor": "Consulta las cuentas o elige otro módulo administrativo en la barra lateral.",
+          "sistema": "Permite continuar con las funciones del Administrador que también posee."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 1,
+          "condicion": "Una cuenta sin nivel Superadministrador intenta acceder.",
+          "respuesta": "Rechaza la gestión de administradores.",
+          "continuidad": "Terminar sin acceso."
+        }
+      ],
+      "postcondicion": "Las cuentas administrativas quedan consultadas sin cambiar sus permisos."
+    },
+    {
+      "id": "CU-S02",
+      "grupo": "S",
+      "actor": "Superadministrador",
+      "actores_secundarios": [],
+      "titulo": "Crear un administrador",
+      "objetivo": "registrar otra cuenta administrativa para delegar la gestión del sistema",
+      "estado": "Actual",
+      "acceso": "Gestión de Admins → Crear Administrador.",
+      "limites": "Crear una cuenta no equivale a promover una cuenta existente. La creación inicial de Superadministrador es una operación local fuera del recorrido web.",
+      "historia": "HU-S02",
+      "criterios": [
+        "HU-S02-CA01",
+        "HU-S02-CA02",
+        "HU-S02-CA03"
+      ],
+      "diagramas_previos": [
+        "S02"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AdminController.php",
+        "web/frontend/src/pages/admin/SuperAdminDashboardPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El superadministrador desea crear un administrador.",
+      "precondicion": "Sesión Superadministrador; correo nuevo.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "Abre Gestión de Admins → Crear Administrador.",
+          "sistema": "Presenta los campos de correo y contraseña."
+        },
+        {
+          "numero": 2,
+          "actor": "Introduce correo y contraseña válida y pulsa Crear Administrador.",
+          "sistema": "Valida datos y que el correo no esté registrado."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta el listado tras la creación correcta.",
+          "sistema": "Muestra la nueva cuenta de Administrador común."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Los datos son inválidos o el correo ya existe.",
+          "respuesta": "Rechaza la creación sin duplicar cuentas.",
+          "continuidad": "Corregir y retomar el paso 2."
+        }
+      ],
+      "postcondicion": "Existe un Administrador común nuevo. El formulario no promueve cuentas existentes ni permite crear Superadministradores."
+    },
+    {
+      "id": "CU-S03",
+      "grupo": "S",
+      "actor": "Superadministrador",
+      "actores_secundarios": [],
+      "titulo": "Revocar permisos administrativos",
+      "objetivo": "retirar los privilegios de otro administrador para mantener control sobre los accesos de gestión",
+      "estado": "Actual",
+      "acceso": "Gestión de Admins → Revocar.",
+      "limites": "Revocar permisos no suspende la cuenta. La suspensión se administra desde Gestión de Usuarios.",
+      "historia": "HU-S03",
+      "criterios": [
+        "HU-S03-CA01",
+        "HU-S03-CA02",
+        "HU-S03-CA03"
+      ],
+      "diagramas_previos": [
+        "S03"
+      ],
+      "pendientes": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AdminController.php",
+        "web/frontend/src/pages/admin/SuperAdminDashboardPage.tsx"
+      ],
+      "relaciones": [],
+      "disparador": "El superadministrador desea retirar permisos administrativos.",
+      "precondicion": "Sesión Superadministrador; cuenta Administrador común distinta de la propia.",
+      "pasos": [
+        {
+          "numero": 1,
+          "actor": "En Gestión de Admins pulsa Revocar sobre el administrador elegido.",
+          "sistema": "Solicita confirmar la revocación."
+        },
+        {
+          "numero": 2,
+          "actor": "Confirma la operación.",
+          "sistema": "Comprueba restricciones y retira sus permisos administrativos."
+        },
+        {
+          "numero": 3,
+          "actor": "Consulta el listado actualizado.",
+          "sistema": "Refleja el retiro de permisos conservando la cuenta de usuario."
+        }
+      ],
+      "alternativas": [
+        {
+          "id": "A1",
+          "paso": 2,
+          "condicion": "Cancela la confirmación.",
+          "respuesta": "Mantiene los privilegios anteriores.",
+          "continuidad": "Terminar."
+        },
+        {
+          "id": "A2",
+          "paso": 2,
+          "condicion": "Intenta revocar su propia cuenta o un Superadministrador.",
+          "respuesta": "Bloquea la operación.",
+          "continuidad": "Terminar sin cambiar permisos."
+        }
+      ],
+      "postcondicion": "La cuenta pierde los permisos administrativos autorizados; no queda suspendida por esta operación."
+    }
+  ],
+  "reglas_transversales": {
+    "id": "HU-T01",
+    "rol": "Todos los roles",
+    "actor": "usuario de la plataforma",
+    "titulo": "Respetar acceso y propiedad de los datos",
+    "historia": "Como usuario de la plataforma, quiero utilizar solo los recursos permitidos a mi cuenta para evitar que otras personas gestionen mi información privada.",
+    "acceso": "Funciones privadas de la web.",
+    "diagramas": [
+      "C02",
+      "C03",
+      "C04",
+      "D05",
+      "E06",
+      "A01",
+      "S01"
+    ],
+    "estado": "Actual",
+    "limites": "",
+    "dependencias": [],
+    "fuentes": [
+      "web/app/Http/Controllers/AdminController.php",
+      "web/app/Http/Controllers/AuthController.php",
+      "web/app/Http/Controllers/CampaignController.php",
+      "web/app/Http/Controllers/ChatController.php",
+      "web/app/Http/Controllers/InvestmentController.php",
+      "web/app/Http/Controllers/NotificationController.php",
+      "web/app/Http/Middleware/RequireRole.php",
+      "web/frontend/src/components/CampaignForm.tsx",
+      "web/frontend/src/components/CampaignPreviewModal.tsx",
+      "web/frontend/src/components/NotificationBell.tsx",
+      "web/frontend/src/components/admin/AdminLayout.tsx",
+      "web/frontend/src/components/chat/ChatWindow.tsx",
+      "web/frontend/src/components/donor-tracking/DonorReceiptsList.tsx",
+      "web/frontend/src/pages/CampaignDetailPage.tsx",
+      "web/frontend/src/pages/ChatPage.tsx",
+      "web/frontend/src/pages/LoginPage.tsx",
+      "web/frontend/src/pages/MyCampaignsPage.tsx",
+      "web/frontend/src/pages/NotificationsPage.tsx",
+      "web/frontend/src/pages/admin/AdminDashboardPage.tsx",
+      "web/frontend/src/pages/admin/SuperAdminDashboardPage.tsx",
+      "web/routes/api.php"
+    ],
+    "criterios": [
+      {
+        "id": "HU-T01-CA01",
+        "dado": "que no tengo sesión",
+        "cuando": "abro una ruta privada",
+        "entonces": "se solicita iniciar sesión y no se entregan sus datos privados."
+      },
+      {
+        "id": "HU-T01-CA02",
+        "dado": "que tengo sesión sin el rol requerido",
+        "cuando": "solicito una operación administrativa o de otro rol",
+        "entonces": "el servicio rechaza la operación, aunque intente usar una URL conocida."
+      },
+      {
+        "id": "HU-T01-CA03",
+        "dado": "que un recurso pertenece a otra persona",
+        "cuando": "intento editar su campaña, descargar su comprobante o leer su conversación",
+        "entonces": "el servicio impide la operación no autorizada."
+      },
+      {
+        "id": "HU-T01-CA04",
+        "dado": "que tengo acceso público a una campaña",
+        "cuando": "consulto sus documentos",
+        "entonces": "solo accedo a evidencias publicadas, no a documentos KYC ni a archivos privados."
+      }
+    ]
+  },
+  "funciones_pendientes": [
+    {
+      "id": "HU-P01",
+      "rol": "Funciones pendientes",
+      "actor": "usuario con cuenta",
+      "titulo": "Habilitar acceso con Google",
+      "historia": "Como usuario con cuenta, quiero acceder mediante mi cuenta de Google para tener una alternativa de autenticación.",
+      "acceso": "Sin recorrido operativo; C08 es un aviso de indisponibilidad.",
+      "diagramas": [
+        "C08"
+      ],
+      "estado": "Pendiente",
+      "limites": "No disponible actualmente. El recorrido definitivo, los permisos solicitados y los destinos por rol se especificarán cuando el servicio esté habilitado.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AuthController.php",
+        "web/frontend/src/pages/LoginPage.tsx",
+        "web/frontend/src/pages/OAuthCallbackPage.tsx",
+        "web/frontend/src/pages/RegisterPage.tsx"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P01-CA01",
+          "dado": "que el acceso con Google sigue no disponible",
+          "cuando": "consulto la documentación o su entrada",
+          "entonces": "se informa su estado sin presentar pasos de autenticación como operativos."
+        },
+        {
+          "id": "HU-P01-CA02",
+          "dado": "que se habilite la integración",
+          "cuando": "se defina el recorrido definitivo y se verifique con Google",
+          "entonces": "se publican las pantallas, permisos y destinos reales de cada rol antes de aceptar esta historia."
+        },
+        {
+          "id": "HU-P01-CA03",
+          "dado": "que la integración ya esté habilitada y el proveedor rechace o cancele el acceso",
+          "cuando": "se procese la respuesta",
+          "entonces": "no se crea una sesión indebida y se ofrece volver al acceso por correo."
+        }
+      ]
+    },
+    {
+      "id": "HU-P02",
+      "rol": "Funciones pendientes",
+      "actor": "visitante",
+      "titulo": "Habilitar el asistente IA de soporte",
+      "historia": "Como visitante, quiero consultar dudas al asistente para recibir orientación sobre el uso de UniFundme.",
+      "acceso": "Sin recorrido operativo; V07 es un aviso de indisponibilidad.",
+      "diagramas": [
+        "V07"
+      ],
+      "estado": "Pendiente",
+      "limites": "La presencia del botón de chat no acredita funcionamiento. No incluye atención humana ni creación de tickets.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AiController.php",
+        "web/frontend/src/components/AISupportChat.tsx",
+        "web/frontend/src/pages/LandingPage.tsx"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P02-CA01",
+          "dado": "que el asistente sigue no disponible",
+          "cuando": "consulto la guía",
+          "entonces": "se informa que no está habilitado y no se me pide enviar consultas para recibir respuestas."
+        },
+        {
+          "id": "HU-P02-CA02",
+          "dado": "que se habilite el servicio",
+          "cuando": "se compruebe el recorrido real de envío y respuesta",
+          "entonces": "se documentan sus controles y comportamiento efectivamente disponibles antes de aceptar la historia."
+        },
+        {
+          "id": "HU-P02-CA03",
+          "dado": "que el servicio habilitado no pueda responder",
+          "cuando": "se produzca el fallo",
+          "entonces": "se muestra un estado comprensible sin simular una respuesta válida."
+        }
+      ]
+    },
+    {
+      "id": "HU-P03",
+      "rol": "Funciones pendientes",
+      "actor": "donador o emprendedor",
+      "titulo": "Eliminar perfiles desde la web",
+      "historia": "Como donador o emprendedor, quiero retirar mi perfil cuando no tenga dependencias para dejar de mantener esos datos de participación.",
+      "acceso": "Sin botón web disponible; E12 es un aviso de indisponibilidad.",
+      "diagramas": [
+        "E12"
+      ],
+      "estado": "Pendiente",
+      "limites": "Ni el perfil de donador ni el de emprendedor tienen actualmente un botón de eliminación conectado.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/ProfileController.php",
+        "web/frontend/src/components/entrepreneur-profile/ProfileSidebar.tsx",
+        "web/frontend/src/pages/EntrepreneurProfilePage.tsx"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P03-CA01",
+          "dado": "que se implemente la opción para el perfil correspondiente",
+          "cuando": "selecciono eliminar",
+          "entonces": "se solicita confirmación y se diferencia eliminar perfil de eliminar la cuenta."
+        },
+        {
+          "id": "HU-P03-CA02",
+          "dado": "que el perfil tiene campañas o aportes registrados",
+          "cuando": "intento eliminarlo",
+          "entonces": "se bloquea la operación con una explicación de la dependencia."
+        },
+        {
+          "id": "HU-P03-CA03",
+          "dado": "que el perfil no tiene dependencias y confirmo",
+          "cuando": "la eliminación termina correctamente",
+          "entonces": "se retiran los datos del perfil y su rol asociado según la política definida, conservando la cuenta de acceso."
+        }
+      ]
+    },
+    {
+      "id": "HU-P04",
+      "rol": "Funciones pendientes",
+      "actor": "administrador",
+      "titulo": "Reactivar cuentas suspendidas",
+      "historia": "Como administrador, quiero restablecer el acceso de una cuenta suspendida para resolver suspensiones que ya no deban mantenerse.",
+      "acceso": "Propuesta para Gestión de Usuarios; sin acción actual.",
+      "diagramas": [
+        "A02"
+      ],
+      "estado": "Pendiente",
+      "limites": "Objetivo propuesto. No hay un botón ni recorrido web actual para reactivar.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AdminController.php",
+        "web/frontend/src/pages/admin/AdminUsersPage.tsx"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P04-CA01",
+          "dado": "que se defina y habilite el permiso de reactivación",
+          "cuando": "un administrador autorizado abre una cuenta suspendida",
+          "entonces": "puede identificar su estado y la acción correspondiente."
+        },
+        {
+          "id": "HU-P04-CA02",
+          "dado": "que confirma una reactivación válida",
+          "cuando": "se registra la operación",
+          "entonces": "la cuenta vuelve a estar activa y queda trazabilidad del responsable."
+        },
+        {
+          "id": "HU-P04-CA03",
+          "dado": "que el usuario no tiene permiso",
+          "cuando": "intenta reactivar",
+          "entonces": "se rechaza la operación."
+        }
+      ]
+    },
+    {
+      "id": "HU-P05",
+      "rol": "Funciones pendientes",
+      "actor": "emprendedor",
+      "titulo": "Contactar donadores desde sus fichas",
+      "historia": "Como emprendedor, quiero iniciar una conversación con un donador de mi campaña para coordinar dudas o entregas.",
+      "acceso": "Propuesta para Donadores Activos → ficha; Enviar Mensaje actualmente anuncia Próximamente.",
+      "diagramas": [
+        "E07",
+        "C03"
+      ],
+      "estado": "Pendiente",
+      "limites": "",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/ChatController.php",
+        "web/frontend/src/components/CampaignAnalyticsDashboard.tsx",
+        "web/frontend/src/components/CampaignInvestorsTab.tsx",
+        "web/frontend/src/components/CampaignPreviewModal.tsx",
+        "web/frontend/src/components/chat/ChatWindow.tsx",
+        "web/frontend/src/pages/CampaignDetailPage.tsx",
+        "web/frontend/src/pages/ChatPage.tsx"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P05-CA01",
+          "dado": "que se conecte Enviar Mensaje y el destinatario participe en mi campaña",
+          "cuando": "pulso la acción",
+          "entonces": "se abre o recupera una conversación autorizada con ese donador."
+        },
+        {
+          "id": "HU-P05-CA02",
+          "dado": "que el destinatario no corresponde a la campaña o no estoy autorizado",
+          "cuando": "intento iniciar la conversación",
+          "entonces": "se bloquea el acceso."
+        },
+        {
+          "id": "HU-P05-CA03",
+          "dado": "que todavía no se habilita la función",
+          "cuando": "consulto su acceso",
+          "entonces": "se informa la indisponibilidad sin confirmar que se haya enviado un mensaje."
+        }
+      ]
+    },
+    {
+      "id": "HU-P06",
+      "rol": "Funciones pendientes",
+      "actor": "emprendedor",
+      "titulo": "Recorrer todas las campañas propias",
+      "historia": "Como emprendedor, quiero navegar por la totalidad de mis proyectos para evitar que queden campañas fuera de los resultados visibles.",
+      "acceso": "Propuesta para Mis Campañas.",
+      "diagramas": [
+        "E06"
+      ],
+      "estado": "Pendiente",
+      "limites": "Mis Campañas no muestra hoy paginación ni selector de orden; no se describen como disponibles.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/frontend/src/components/CampaignForm.tsx",
+        "web/frontend/src/components/CampaignPreviewModal.tsx",
+        "web/frontend/src/pages/MyCampaignsPage.tsx"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P06-CA01",
+          "dado": "que tenga más campañas que las cargadas inicialmente",
+          "cuando": "se habilite la navegación de resultados",
+          "entonces": "puedo llegar a todas mediante un control web identificable."
+        },
+        {
+          "id": "HU-P06-CA02",
+          "dado": "que busque por título o filtre estado",
+          "cuando": "se consulten resultados",
+          "entonces": "la búsqueda cubre mis campañas completas, no solo una página ya cargada."
+        },
+        {
+          "id": "HU-P06-CA03",
+          "dado": "que no haya coincidencias",
+          "cuando": "se complete la consulta",
+          "entonces": "se presenta un estado vacío distinto de un error de carga."
+        }
+      ]
+    },
+    {
+      "id": "HU-P07",
+      "rol": "Funciones pendientes",
+      "actor": "emprendedor",
+      "titulo": "Completar la publicación y finalización según estado",
+      "historia": "Como emprendedor, quiero disponer de acciones compatibles con el estado de mi campaña para resolver bloqueos de lanzamiento y cerrar proyectos financiados.",
+      "acceso": "Recorridos incompletos en campaña Aprobada, Financiada y Parcialmente financiada.",
+      "diagramas": [
+        "E05",
+        "E10"
+      ],
+      "estado": "Pendiente",
+      "limites": "La política de corrección de una campaña Aprobada requiere definición. Que el servidor admita finalizar no basta para afirmar que existe el botón web.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/app/Services/CampaignPublication.php",
+        "web/app/Services/InvestmentEngine.php",
+        "web/frontend/src/components/CampaignCard.tsx",
+        "web/frontend/src/components/CampaignPreviewModal.tsx",
+        "web/frontend/src/hooks/useCampaigns.ts"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P07-CA01",
+          "dado": "que la campaña aprobada tenga fecha de cierre vencida",
+          "cuando": "se defina el mecanismo permitido de corrección",
+          "entonces": "puedo resolver el bloqueo sin eludir la revisión ni modificar datos que requieran nueva aprobación."
+        },
+        {
+          "id": "HU-P07-CA02",
+          "dado": "que la campaña sea Financiada o Parcialmente financiada y el cierre esté permitido",
+          "cuando": "se habilite la acción web y confirmo",
+          "entonces": "se finaliza con el resultado correspondiente y trazabilidad."
+        },
+        {
+          "id": "HU-P07-CA03",
+          "dado": "que el estado actual no admita la transición",
+          "cuando": "intento ejecutar la acción",
+          "entonces": "se bloquea sin alterar aportes ni saldo."
+        }
+      ]
+    },
+    {
+      "id": "HU-P08",
+      "rol": "Funciones pendientes",
+      "actor": "visitante",
+      "titulo": "Mostrar planes e hitos respaldados por datos reales",
+      "historia": "Como visitante, quiero distinguir los compromisos registrados de los ejemplos visuales para evaluar información fiable del proyecto.",
+      "acceso": "Plan de Fondos, Hitos del Proyecto y Hitos y Avances.",
+      "diagramas": [
+        "V06",
+        "V02"
+      ],
+      "estado": "Pendiente",
+      "limites": "Los componentes actuales pueden utilizar datos de respaldo visual. Se requiere completar la vinculación a los registros de cada proyecto.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignReadController.php",
+        "web/app/Models/Campaign.php",
+        "web/frontend/src/components/campaign-detail/CampaignTransparencySection.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/FundAllocationPlan.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/ProjectMilestones.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/PublicEvidenceDocuments.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/PublicFinancialAuditing.tsx",
+        "web/frontend/src/pages/CampaignDetailPage.tsx"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P08-CA01",
+          "dado": "que una campaña no tiene un plan o hitos registrados",
+          "cuando": "consulto esas secciones",
+          "entonces": "se muestra ausencia de datos o un ejemplo identificado explícitamente, sin presentarlo como compromiso real."
+        },
+        {
+          "id": "HU-P08-CA02",
+          "dado": "que existe información registrada de la campaña",
+          "cuando": "la consulto",
+          "entonces": "se presenta esa información y sus estados, sin sustituirla por valores de muestra."
+        },
+        {
+          "id": "HU-P08-CA03",
+          "dado": "que falla la consulta de datos",
+          "cuando": "abro la sección",
+          "entonces": "se distingue el error de la ausencia de registros y no se oculta con un plan o hito inventado."
+        }
+      ]
+    },
+    {
+      "id": "HU-P09",
+      "rol": "Funciones pendientes",
+      "actor": "emprendedor",
+      "titulo": "Gestionar planes, hitos y movimientos desde la web",
+      "historia": "Como emprendedor, quiero registrar presupuesto, ejecución e hitos de mis campañas para mantener su información de transparencia.",
+      "acceso": "Sin formularios web conectados para estas operaciones.",
+      "diagramas": [
+        "V06",
+        "A07",
+        "A08"
+      ],
+      "estado": "Pendiente",
+      "limites": "Existen rutas y funciones de acceso a datos, pero eso no constituye un recorrido web disponible. Los campos, permisos y estados de los formularios finales deben acordarse antes de implementar.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AdminController.php",
+        "web/app/Http/Controllers/CampaignReadController.php",
+        "web/app/Services/FinancialMovementAudit.php",
+        "web/frontend/src/api/campaign.api.ts",
+        "web/frontend/src/components/admin/FinancialMovementHistory.tsx",
+        "web/frontend/src/components/campaign-detail/CampaignTransparencySection.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/ProjectMilestones.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/PublicEvidenceDocuments.tsx",
+        "web/frontend/src/components/campaign-detail/transparency/PublicFinancialAuditing.tsx",
+        "web/frontend/src/pages/admin/AdminExpensesAuditPage.tsx",
+        "web/routes/api.php"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P09-CA01",
+          "dado": "que se definan y habiliten los formularios",
+          "cuando": "un propietario autorizado abre la gestión de su campaña",
+          "entonces": "puede distinguir plan de fondos, hitos y movimientos de ejecución."
+        },
+        {
+          "id": "HU-P09-CA02",
+          "dado": "que crea o modifica un registro válido",
+          "cuando": "se guarda",
+          "entonces": "la consulta pública o la auditoría correspondiente puede recuperar la información autorizada."
+        },
+        {
+          "id": "HU-P09-CA03",
+          "dado": "que el registro es financiero y ya tiene trazabilidad",
+          "cuando": "se corrige o retira mediante una acción permitida",
+          "entonces": "se preservan antecedentes, responsables y restricciones sobre movimientos automáticos."
+        }
+      ]
+    },
+    {
+      "id": "HU-P10",
+      "rol": "Funciones pendientes",
+      "actor": "emprendedor o administrador autorizado",
+      "titulo": "Descargar reportes de campañas desde un control visible",
+      "historia": "Como emprendedor o administrador autorizado, quiero obtener reportes generales en PDF o CSV para analizar y conservar resultados de una campaña.",
+      "acceso": "Sin botón de reportes generales conectado; no confundir con Comprobantes.",
+      "diagramas": [
+        "E07",
+        "A06"
+      ],
+      "estado": "Pendiente",
+      "limites": "El servidor dispone de generación de reportes, pero no se encontró un acceso web conectado. D05 sí cubre comprobantes individuales actuales.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/app/Http/Controllers/InvestmentController.php",
+        "web/frontend/src/components/CampaignAnalyticsDashboard.tsx",
+        "web/frontend/src/components/CampaignInvestorsTab.tsx",
+        "web/frontend/src/components/CampaignPreviewModal.tsx",
+        "web/frontend/src/pages/admin/AdminCampaignsPage.tsx"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P10-CA01",
+          "dado": "que se habilite la descarga para un rol autorizado",
+          "cuando": "selecciono campaña y formato permitido",
+          "entonces": "se genera el reporte de esa campaña mediante un control visible."
+        },
+        {
+          "id": "HU-P10-CA02",
+          "dado": "que el usuario no está autorizado",
+          "cuando": "intenta descargar",
+          "entonces": "se rechaza el acceso."
+        },
+        {
+          "id": "HU-P10-CA03",
+          "dado": "que no hay registros o falla la generación",
+          "cuando": "solicito el reporte",
+          "entonces": "se informa el resultado sin confirmar una descarga inexistente."
+        }
+      ]
+    },
+    {
+      "id": "HU-P11",
+      "rol": "Funciones pendientes",
+      "actor": "administrador",
+      "titulo": "Unificar controles administrativos de decisión",
+      "historia": "Como administrador, quiero usar solo acciones de revisión realmente conectadas para evitar botones que aparenten decidir pero no ejecuten una operación.",
+      "acceso": "Gestión de Campañas y Revisión de Campañas.",
+      "diagramas": [
+        "A03",
+        "A06"
+      ],
+      "estado": "Pendiente",
+      "limites": "Actualmente se decide desde Revisión de Campañas, cuyo listado solicita pendientes. No se afirma que exista una gestión web completa de todos los estados administrativos.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AdminController.php",
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/frontend/src/components/CampaignPreviewModal.tsx",
+        "web/frontend/src/pages/admin/AdminCampaignsPage.tsx",
+        "web/frontend/src/pages/admin/CampaignReviewPage.tsx"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P11-CA01",
+          "dado": "que se presenta Aprobar o Rechazar",
+          "cuando": "el usuario tiene permiso y el estado es revisable",
+          "entonces": "el botón ejecuta su decisión o conduce claramente al recorrido habilitado de Revisión de Campañas."
+        },
+        {
+          "id": "HU-P11-CA02",
+          "dado": "que una acción no está disponible en ese contexto",
+          "cuando": "se muestra el detalle",
+          "entonces": "el control se oculta, deshabilita o explica su indisponibilidad sin simular éxito."
+        },
+        {
+          "id": "HU-P11-CA03",
+          "dado": "que se define habilitar otros estados de revisión",
+          "cuando": "se añade el filtro correspondiente",
+          "entonces": "solo se muestran y gestionan las transiciones autorizadas."
+        }
+      ]
+    },
+    {
+      "id": "HU-P12",
+      "rol": "Funciones pendientes",
+      "actor": "emprendedor",
+      "titulo": "Confirmar íntegramente guardados y cargas de campaña",
+      "historia": "Como emprendedor, quiero conocer qué datos y archivos se guardaron para evitar interpretar una operación parcial como completada.",
+      "acceso": "Creación/edición de campaña, portada y respaldos.",
+      "diagramas": [
+        "E03",
+        "E06"
+      ],
+      "estado": "Pendiente",
+      "limites": "Se requiere completar el manejo de éxito parcial y la comunicación de fallos en los contextos de formulario que no muestran todos los errores.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/frontend/src/components/CampaignForm.tsx",
+        "web/frontend/src/components/CampaignPreviewModal.tsx",
+        "web/frontend/src/hooks/useCampaigns.ts",
+        "web/frontend/src/pages/MyCampaignsPage.tsx"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P12-CA01",
+          "dado": "que la campaña se guarda pero una carga posterior falla",
+          "cuando": "termina el proceso",
+          "entonces": "se identifica qué se creó y qué archivo falta, sin confirmar una carga completa."
+        },
+        {
+          "id": "HU-P12-CA02",
+          "dado": "que repito una carga pendiente",
+          "cuando": "se completa el reintento",
+          "entonces": "se asocia a la campaña ya creada sin duplicar la campaña por un reintento de archivo."
+        },
+        {
+          "id": "HU-P12-CA03",
+          "dado": "que la operación no pudo guardarse",
+          "cuando": "el formulario recibe el fallo",
+          "entonces": "veo un resultado verificable y puedo corregir o reintentar sin perder innecesariamente los datos."
+        }
+      ]
+    },
+    {
+      "id": "HU-P13",
+      "rol": "Funciones pendientes",
+      "actor": "usuario con cuenta",
+      "titulo": "Recuperar contraseña por correo",
+      "historia": "Como usuario con cuenta, quiero restablecer el acceso si olvido mi contraseña para volver a ingresar sin intervención sobre la base de datos.",
+      "acceso": "Sin recorrido web actual.",
+      "diagramas": [
+        "C02",
+        "C06"
+      ],
+      "estado": "Pendiente",
+      "limites": "Cambiar la contraseña dentro de una sesión no equivale a recuperación por correo. No se documenta un botón Olvidé mi contraseña como disponible.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AuthController.php",
+        "web/frontend/src/pages/AccountSettingsPage.tsx",
+        "web/frontend/src/pages/LoginPage.tsx"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P13-CA01",
+          "dado": "que se implemente la recuperación y solicito ayuda con un correo",
+          "cuando": "se procesa la solicitud",
+          "entonces": "la respuesta no revela si el correo pertenece a una cuenta."
+        },
+        {
+          "id": "HU-P13-CA02",
+          "dado": "que recibí un enlace válido de recuperación",
+          "cuando": "establezco una contraseña que cumple requisitos",
+          "entonces": "se actualiza la contraseña y el enlace deja de ser reutilizable."
+        },
+        {
+          "id": "HU-P13-CA03",
+          "dado": "que el enlace venció o ya se utilizó",
+          "cuando": "intento restablecer",
+          "entonces": "la operación se rechaza y puedo solicitar otra recuperación."
+        }
+      ]
+    },
+    {
+      "id": "HU-P14",
+      "rol": "Funciones pendientes",
+      "actor": "usuario con cuenta",
+      "titulo": "Entregar notificaciones por correo",
+      "historia": "Como usuario con cuenta, quiero recibir emails según mis preferencias para conocer eventos sin mantener la web abierta.",
+      "acceso": "Preferencias → Notificaciones por correo; entrega de email no acreditada.",
+      "diagramas": [
+        "C05"
+      ],
+      "estado": "Pendiente",
+      "limites": "El interruptor y su guardado no prueban que haya un servicio de entrega de correo operativo. Tipos de eventos y reintentos requieren definición.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/NotificationController.php",
+        "web/app/Services/Notifier.php",
+        "web/frontend/src/pages/NotificationsPage.tsx"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P14-CA01",
+          "dado": "que se habilite el canal de correo y lo tengo activado",
+          "cuando": "ocurre un evento definido para ese canal",
+          "entonces": "se envía el email a mi dirección según la política acordada."
+        },
+        {
+          "id": "HU-P14-CA02",
+          "dado": "que desactivo el canal",
+          "cuando": "ocurre un evento posterior",
+          "entonces": "no se envía un email por ese canal."
+        },
+        {
+          "id": "HU-P14-CA03",
+          "dado": "que el envío externo falla",
+          "cuando": "se procesa la notificación",
+          "entonces": "no se registra una entrega confirmada inexistente y se aplica la política de reintento definida."
+        }
+      ]
+    },
+    {
+      "id": "HU-P15",
+      "rol": "Funciones pendientes",
+      "actor": "emprendedor",
+      "titulo": "Habilitar el asistente para campañas",
+      "historia": "Como emprendedor, quiero recibir orientación para preparar mi propuesta para estructurar el contenido de una campaña.",
+      "acceso": "Sin componente montado en una pantalla web.",
+      "diagramas": [
+        "E03"
+      ],
+      "estado": "Pendiente",
+      "limites": "Es una capacidad distinta del asistente público V07. El componente existente no demuestra disponibilidad del recorrido.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/CampaignController.php",
+        "web/frontend/src/components/AICampaignAssistant.tsx",
+        "web/frontend/src/components/CampaignForm.tsx",
+        "web/frontend/src/hooks/useCampaigns.ts",
+        "web/frontend/src/pages/MyCampaignsPage.tsx"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P15-CA01",
+          "dado": "que se decida habilitar esta capacidad",
+          "cuando": "se incorpore un acceso visible en el contexto acordado",
+          "entonces": "el emprendedor puede identificar para qué sirve el asistente y abrirlo."
+        },
+        {
+          "id": "HU-P15-CA02",
+          "dado": "que el servicio habilitado genera una sugerencia",
+          "cuando": "la consulto",
+          "entonces": "no se guarda ni publica una campaña sin una acción explícita del propietario."
+        },
+        {
+          "id": "HU-P15-CA03",
+          "dado": "que el servicio no está disponible",
+          "cuando": "intento consultarlo",
+          "entonces": "se informa su estado sin presentar una sugerencia ficticia."
+        }
+      ]
+    },
+    {
+      "id": "HU-P16",
+      "rol": "Funciones pendientes",
+      "actor": "donador o emprendedor",
+      "titulo": "Gestionar incidencias y datos de envío de recompensas",
+      "historia": "Como donador o emprendedor, quiero registrar datos de seguimiento y comunicar problemas de entrega para coordinar el cumplimiento de los beneficios.",
+      "acceso": "Sin formularios web actuales para estos datos o incidencias.",
+      "diagramas": [
+        "E08",
+        "D07"
+      ],
+      "estado": "Pendiente",
+      "limites": "Hoy se puede consultar seguimiento existente y cambiar estados permitidos como emprendedor. La visualización de Incidencia Reportada no implica que exista el formulario para reportarla.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/RewardController.php",
+        "web/app/Models/RewardClaim.php",
+        "web/frontend/src/components/CampaignPreviewModal.tsx",
+        "web/frontend/src/components/CampaignRewardsTab.tsx",
+        "web/frontend/src/components/donor-tracking/DonorRewardsTracker.tsx",
+        "web/frontend/src/utils/rewardTracking.ts"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P16-CA01",
+          "dado": "que se definan y habiliten los permisos y campos",
+          "cuando": "el emprendedor registra seguimiento válido",
+          "entonces": "el donador puede consultar el enlace o número autorizado de su recompensa."
+        },
+        {
+          "id": "HU-P16-CA02",
+          "dado": "que el donador reporta una incidencia mediante el futuro formulario",
+          "cuando": "se registra correctamente",
+          "entonces": "puede identificar su reporte y el responsable puede consultarlo según la política acordada."
+        },
+        {
+          "id": "HU-P16-CA03",
+          "dado": "que la recompensa está cancelada o el aporte fue reembolsado",
+          "cuando": "intento una operación incompatible",
+          "entonces": "se rechaza conforme a la política de estados definida."
+        }
+      ]
+    },
+    {
+      "id": "HU-P17",
+      "rol": "Funciones pendientes",
+      "actor": "usuario con cuenta",
+      "titulo": "Verificar mi correo mediante un proceso web",
+      "historia": "Como usuario con cuenta, quiero confirmar que controlo mi dirección de correo para acreditar ese dato de mi cuenta.",
+      "acceso": "Sin solicitud ni confirmación de verificación conectadas en la web.",
+      "diagramas": [
+        "C01",
+        "C06"
+      ],
+      "estado": "Pendiente",
+      "limites": "El indicador Verificado / Sin verificar ya puede mostrarse en Configuración. El canal de entrega, vigencia y reenvío del futuro proceso requieren definición.",
+      "dependencias": [],
+      "fuentes": [
+        "web/app/Http/Controllers/AuthController.php",
+        "web/frontend/src/pages/AccountSettingsPage.tsx",
+        "web/frontend/src/pages/RegisterPage.tsx",
+        "web/routes/api.php"
+      ],
+      "criterios": [
+        {
+          "id": "HU-P17-CA01",
+          "dado": "que se habilite el proceso y mi correo no esté verificado",
+          "cuando": "solicito verificarlo desde el acceso definido",
+          "entonces": "recibo las instrucciones para confirmar la dirección sin que la solicitud por sí sola cambie el estado a Verificado."
+        },
+        {
+          "id": "HU-P17-CA02",
+          "dado": "que recibí un enlace o código válido",
+          "cuando": "completo su confirmación",
+          "entonces": "la cuenta correspondiente pasa a correo verificado."
+        },
+        {
+          "id": "HU-P17-CA03",
+          "dado": "que el enlace o código sea inválido o haya vencido",
+          "cuando": "intento confirmar",
+          "entonces": "el correo no se marca como verificado y se aplica el proceso de reenvío definido."
+        }
+      ]
+    }
+  ]
+}

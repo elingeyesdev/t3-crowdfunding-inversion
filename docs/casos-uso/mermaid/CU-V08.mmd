@@ -1,0 +1,25 @@
+%% CU-V08 · Consultar Plan de Fondos e hitos
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Visitante: Selecciona Transparencia y Fondos."]
+  N0 --> N1
+  N2{"A1 · ¿Un submenú queda oculto por el ancho de la barra?"}
+  A2["A1 · La persona desplaza horizontalmente la barra de submenús.<br/>Continuidad: Retomar el paso 2 o 3."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Presenta Plan de Fondos, Auditoría y Movimientos, Hitos del Proyecto, Evidencias y Bitácora."]
+  N2 -->|No| N3
+  N4["2 · Visitante: Selecciona Plan de Fondos."]
+  N3 --> N4
+  N5["2 · UniFundme: Muestra las categorías y la distribución que presenta la interfaz."]
+  N4 --> N5
+  N6["3 · Visitante: Selecciona Hitos del Proyecto."]
+  N5 --> N6
+  N7{"A2 · ¿Prefiere consultar hitos y novedades juntos?"}
+  A7["A2 · Selecciona Hitos y Avances en la barra principal y consulta ambas secciones.<br/>Continuidad: Terminar."]
+  N7 -->|Sí| A7
+  N6 --> N7
+  N8["3 · UniFundme: Muestra las etapas y sus estados visibles."]
+  N7 -->|No| N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

@@ -1,0 +1,29 @@
+%% CU-E09 · Enviar una campaña a revisión
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Emprendedor: Abre Vista Previa y revisa la propuesta guardada."]
+  N0 --> N1
+  N2{"A1 · ¿Usa el formulario desde Mi Perfil?"}
+  A2["A1 · Enviar a Revisión permite guardar y enviar si la operación completa es correcta.<br/>Continuidad: Continuar en el paso 3."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3{"A2 · ¿Usa el formulario de Mis Campañas sin botón de envío directo?"}
+  A3["A2 · Guarda primero con Guardar Borrador y envía desde la tarjeta o Vista Previa.<br/>Continuidad: Retomar el paso 2."]
+  N3 -->|Sí| A3
+  N2 -->|No| N3
+  N4["1 · UniFundme: Presenta datos y acciones disponibles de la campaña."]
+  N3 -->|No| N4
+  N5["2 · Emprendedor: Pulsa Enviar Revisión."]
+  N4 --> N5
+  N6{"A3 · ¿Faltan requisitos o la campaña ya está pendiente?"}
+  A6["A3 · El envío no equivale a una nueva aprobación; se deben corregir requisitos o esperar la decisión según el estado.<br/>Continuidad: Corregir en CU-E08 o esperar; tras rechazo puede leer motivo, editar y reenviar."]
+  N6 -->|Sí| A6
+  N5 --> N6
+  N7["2 · UniFundme: Valida el envío y registra la campaña como pendiente de revisión con su historial."]
+  N6 -->|No| N7
+  N8["3 · Emprendedor: Consulta el estado tras el envío."]
+  N7 --> N8
+  N9["3 · UniFundme: Mantiene la espera de una decisión administrativa; no publica la campaña."]
+  N8 --> N9
+  N10(["Fin del recorrido principal"])
+  N9 --> N10

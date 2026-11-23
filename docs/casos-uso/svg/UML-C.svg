@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 1860" role="img" aria-labelledby="title desc">
+<title id="title">Casos de uso · Acceso y funciones compartidas</title><desc id="desc">Diagrama UML: actor fuera del límite UniFundme web; óvalos dentro del sistema y líneas de asociación. La disposición es vertical, no representa una secuencia.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#546b7b"/></marker></defs>
+<rect width="1050" height="1860" fill="white"/>
+<text x="525" y="34" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#203a4a">Casos de uso · Acceso y funciones compartidas</text>
+<text x="525" y="70" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" font-weight="400" fill="#203a4a">Visitante: registro y acceso. Usuario con cuenta: acciones autorizadas. Comentarios y contacto: Donador o Emprendedor.</text>
+<rect x="345" y="140" width="665" height="1685" rx="0" fill="#ffffff" stroke="#6c8a9e"/>
+<text x="677" y="168" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#203a4a">UniFundme · aplicación web</text>
+<ellipse cx="110.0" cy="205.5" rx="18.0" ry="18.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<polyline points="110,223.5 110,277.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<polyline points="65,242.5 155,242.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<polyline points="110,277.5 75,320.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<polyline points="110,277.5 145,320.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<text x="110" y="345.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#203a4a">Visitante</text>
+<ellipse cx="110.0" cy="813.0" rx="18.0" ry="18.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<polyline points="110,831 110,885" fill="none" stroke="#546b7b" stroke-width="2"/>
+<polyline points="65,850 155,850" fill="none" stroke="#546b7b" stroke-width="2"/>
+<polyline points="110,885 75,928" fill="none" stroke="#546b7b" stroke-width="2"/>
+<polyline points="110,885 145,928" fill="none" stroke="#546b7b" stroke-width="2"/>
+<text x="110" y="953" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#203a4a">Usuario con cuenta</text>
+<ellipse cx="680.0" cy="242.5" rx="275.0" ry="48.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<text x="680" y="247.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">CU-C01 · Crear una cuenta por correo</text>
+<polyline points="155,242.5 405,242.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<ellipse cx="680.0" cy="377.5" rx="275.0" ry="48.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<text x="680" y="382.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">CU-C02 · Iniciar sesión por correo</text>
+<polyline points="155,242.5 405,377.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<ellipse cx="680.0" cy="512.5" rx="275.0" ry="48.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<text x="680" y="517.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">CU-C03 · Cerrar sesión</text>
+<polyline points="155,850 405,512.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<ellipse cx="680.0" cy="647.5" rx="275.0" ry="48.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<text x="680" y="652.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">CU-C04 · Cambiar la contraseña local</text>
+<polyline points="155,850 405,647.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<ellipse cx="680.0" cy="782.5" rx="275.0" ry="48.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<text x="680" y="787.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">CU-C05 · Contactar al emprendedor</text>
+<polyline points="155,850 405,782.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<ellipse cx="680.0" cy="917.5" rx="275.0" ry="48.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<text x="680" y="922.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">CU-C06 · Continuar conversaciones</text>
+<polyline points="155,850 405,917.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<ellipse cx="680.0" cy="1052.5" rx="275.0" ry="48.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<text x="680" y="1057.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">CU-C07 · Consultar notificaciones</text>
+<polyline points="155,850 405,1052.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<ellipse cx="680.0" cy="1187.5" rx="275.0" ry="48.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<text x="680" y="1192.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">CU-C08 · Gestionar notificaciones</text>
+<polyline points="155,850 405,1187.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<ellipse cx="680.0" cy="1322.5" rx="275.0" ry="48.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<text x="680" y="1315.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">CU-C09 · Configurar preferencias de notificación</text>
+<text x="680" y="1339.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">[Parcial]</text>
+<polyline points="155,850 405,1322.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<ellipse cx="680.0" cy="1457.5" rx="275.0" ry="48.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<text x="680" y="1462.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">CU-C10 · Publicar comentarios</text>
+<polyline points="155,850 405,1457.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<ellipse cx="680.0" cy="1592.5" rx="275.0" ry="48.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<text x="680" y="1597.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">CU-C11 · Marcar Me gusta en comentarios</text>
+<polyline points="155,850 405,1592.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<ellipse cx="680.0" cy="1727.5" rx="275.0" ry="48.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<text x="680" y="1732.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">CU-C12 · Consultar la configuración de mi cuenta</text>
+<polyline points="155,850 405,1727.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<text x="525" y="1846" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">Las asociaciones indican participación; los pasos y excepciones se describen en cada ficha.</text>
+</svg>

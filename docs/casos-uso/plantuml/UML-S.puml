@@ -1,0 +1,17 @@
+@startuml
+top to bottom direction
+skinparam shadowing false
+title Casos de uso · Superadministrador
+actor "Superadministrador" as Actor0
+rectangle "UniFundme · aplicación web" {
+  usecase "CU-S01 · Consultar administradores" as CU_S01
+  usecase "CU-S02 · Crear un administrador" as CU_S02
+  usecase "CU-S03 · Revocar permisos administrativos" as CU_S03
+}
+Actor0 -- CU_S01
+Actor0 -- CU_S02
+Actor0 -- CU_S03
+note bottom
+El Superadministrador también posee los casos del Administrador; este diagrama muestra sus funciones exclusivas.
+end note
+@enduml

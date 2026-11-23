@@ -1,0 +1,17 @@
+%% CU-C12 · Consultar la configuración de mi cuenta
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Usuario con cuenta: Abre Configuración → Configuración de Cuenta."]
+  N0 --> N1
+  N2["1 · UniFundme: Muestra correo, indicador Verificado o Sin verificar y Último acceso según los datos disponibles."]
+  N1 --> N2
+  N3["2 · Usuario con cuenta: Consulta Mi Perfil y selecciona Perfil de Donador o Perfil de Emprendedor cuando corresponde."]
+  N2 --> N3
+  N4{"A1 · ¿Prefiere gestionar su acceso?"}
+  A4["A1 · Usa Seguridad y Acceso para cambiar la contraseña local o cerrar sesión mediante sus acciones disponibles.<br/>Continuidad: Continuar en CU-C04 o CU-C03."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Abre el perfil asociado a su rol."]
+  N4 -->|No| N5
+  N6(["Fin del recorrido principal"])
+  N5 --> N6

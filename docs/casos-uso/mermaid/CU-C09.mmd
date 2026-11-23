@@ -1,0 +1,21 @@
+%% CU-C09 · Configurar preferencias de notificación
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Usuario con cuenta: Abre Preferencias."]
+  N0 --> N1
+  N2{"A1 · ¿No se pudieron cargar los valores actuales?"}
+  A2["A1 · No permite guardar valores de reemplazo sin haber cargado la configuración.<br/>Continuidad: Volver a abrir Preferencias o terminar."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Carga los valores actuales de configuración."]
+  N2 -->|No| N3
+  N4["2 · Usuario con cuenta: Cambia los interruptores disponibles y guarda."]
+  N3 --> N4
+  N5["2 · UniFundme: Persiste los valores, confirma y cierra el diálogo si la operación termina correctamente."]
+  N4 --> N5
+  N6["3 · Usuario con cuenta: Vuelve a consultar las preferencias o recibe eventos cubiertos posteriormente."]
+  N5 --> N6
+  N7["3 · UniFundme: Conserva los valores y aplica las preferencias a la generación de avisos correspondiente."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

@@ -1,0 +1,21 @@
+%% CU-V12 · Reproducir la presentación de una campaña
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Visitante: Pulsa Ver Pitch sobre la portada."]
+  N0 --> N1
+  N2{"A1 · ¿La campaña no tiene enlace de video?"}
+  A2["A1 · No ofrece Ver Pitch.<br/>Continuidad: Terminar."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Despliega el reproductor asociado a esa campaña."]
+  N2 -->|No| N3
+  N4["2 · Visitante: Consulta la presentación."]
+  N3 --> N4
+  N5["2 · UniFundme: Ofrece el contenido del video mediante el reproductor disponible."]
+  N4 --> N5
+  N6["3 · Visitante: Pulsa Ocultar Pitch."]
+  N5 --> N6
+  N7["3 · UniFundme: Oculta la sección del reproductor."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

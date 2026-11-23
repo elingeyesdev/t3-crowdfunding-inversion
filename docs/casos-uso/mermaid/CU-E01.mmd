@@ -1,0 +1,21 @@
+%% CU-E01 · Completar mi perfil de emprendedor
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Emprendedor: Abre Mi Perfil y la edición de la sección deseada."]
+  N0 --> N1
+  N2["1 · UniFundme: Presenta los datos actuales o permite completar el perfil inicial."]
+  N1 --> N2
+  N3["2 · Emprendedor: Introduce datos válidos y guarda."]
+  N2 --> N3
+  N4{"A1 · ¿Faltan requisitos para crear campañas?"}
+  A4["A1 · El perfil puede seguir completándose; el indicador no sustituye la aprobación de identidad.<br/>Continuidad: Continuar en CU-E04."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Valida y conserva los cambios de esa sección."]
+  N4 -->|No| N5
+  N6["3 · Emprendedor: Consulta Información, Datos Bancarios y el indicador de avance."]
+  N5 --> N6
+  N7["3 · UniFundme: Presenta sus datos; Datos Bancarios ofrece Editar y el indicador muestra el avance del perfil."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

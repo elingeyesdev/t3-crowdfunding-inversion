@@ -1,0 +1,17 @@
+%% CU-V01 · Conocer la plataforma y acceder al catálogo
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Visitante: Abre Inicio."]
+  N0 --> N1
+  N2["1 · UniFundme: Presenta la propuesta de la plataforma y los accesos públicos."]
+  N1 --> N2
+  N3["2 · Visitante: Selecciona Explorar."]
+  N2 --> N3
+  N4{"A1 · ¿Prefiere acceder a su cuenta?"}
+  A4["A1 · Selecciona Iniciar Sesión y se abre el formulario de acceso.<br/>Continuidad: Continuar en CU-C02."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Abre el catálogo de campañas públicas."]
+  N4 -->|No| N5
+  N6(["Fin del recorrido principal"])
+  N5 --> N6

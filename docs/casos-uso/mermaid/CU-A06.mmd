@@ -1,0 +1,21 @@
+%% CU-A06 · Revisar documentos de campaña
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Administrador: En el detalle administrativo abre Documentación y Ver Documento."]
+  N0 --> N1
+  N2["1 · UniFundme: Presenta archivo autorizado y justificación."]
+  N1 --> N2
+  N3["2 · Administrador: Revisa el respaldo y selecciona Aprobar."]
+  N2 --> N3
+  N4{"A1 · ¿Decide Rechazar?"}
+  A4["A1 · Escribe el motivo solicitado y confirma; registra Rechazado con observaciones para el emprendedor.<br/>Continuidad: Terminar con rechazo."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Registra Aprobado y actualiza la lista, sin publicarlo automáticamente."]
+  N4 -->|No| N5
+  N6["3 · Administrador: Consulta el estado del documento en la lista actualizada."]
+  N5 --> N6
+  N7["3 · UniFundme: Presenta el resultado de la revisión."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

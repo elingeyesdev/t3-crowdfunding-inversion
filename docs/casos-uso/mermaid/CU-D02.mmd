@@ -1,0 +1,21 @@
+%% CU-D02 · Personalizar mis imágenes
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Donador: Abre el control de foto o portada en Mi Perfil."]
+  N0 --> N1
+  N2["1 · UniFundme: Permite seleccionar una imagen."]
+  N1 --> N2
+  N3["2 · Donador: Selecciona JPG/JPEG, PNG, WEBP o AVIF de hasta 10 MB y completa la carga."]
+  N2 --> N3
+  N4{"A1 · ¿Cancela o el formato/tamaño no está permitido?"}
+  A4["A1 · No sustituye la imagen anterior por la selección cancelada o rechazada.<br/>Continuidad: Elegir otro archivo en el paso 2 o terminar."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Valida el archivo y actualiza la imagen correspondiente si la carga es correcta."]
+  N4 -->|No| N5
+  N6["3 · Donador: Vuelve a consultar el perfil."]
+  N5 --> N6
+  N7["3 · UniFundme: Presenta la imagen guardada."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

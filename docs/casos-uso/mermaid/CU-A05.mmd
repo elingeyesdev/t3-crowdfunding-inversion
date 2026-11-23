@@ -1,0 +1,29 @@
+%% CU-A05 · Revisar solicitudes KYC
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Administrador: Abre Verificaciones KYC y pulsa Revisar."]
+  N0 --> N1
+  N2["1 · UniFundme: Presenta datos, documento de identidad y validación facial autorizados."]
+  N1 --> N2
+  N3["2 · Administrador: Consulta los archivos y la información presentada."]
+  N2 --> N3
+  N4{"A1 · ¿El enlace de un archivo caducó?"}
+  A4["A1 · Usa la renovación o descarga permitida para intentar recuperar el archivo sin hacerlo público.<br/>Continuidad: Retomar el paso 2."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Permite su revisión privada."]
+  N4 -->|No| N5
+  N6["3 · Administrador: Aprueba la solicitud."]
+  N5 --> N6
+  N7{"A2 · ¿Decide rechazar?"}
+  A7["A2 · Registra rechazo con motivo; el emprendedor puede reenviar documentación.<br/>Continuidad: Terminar con rechazo."]
+  N7 -->|Sí| A7
+  N6 --> N7
+  N8{"A3 · ¿La solicitud ya fue resuelta o está desactualizada?"}
+  A8["A3 · Impide decidir nuevamente sobre ese estado y requiere actualizar la lista.<br/>Continuidad: Volver al paso 1."]
+  N8 -->|Sí| A8
+  N7 -->|No| N8
+  N9["3 · UniFundme: Guarda la revisión, verifica el perfil y retira la solicitud de pendientes."]
+  N8 -->|No| N9
+  N10(["Fin del recorrido principal"])
+  N9 --> N10

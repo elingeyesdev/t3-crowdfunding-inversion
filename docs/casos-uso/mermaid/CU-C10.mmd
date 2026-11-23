@@ -1,0 +1,29 @@
+%% CU-C10 · Publicar comentarios
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Donador o Emprendedor: Selecciona Comentarios, cuarta pestaña principal después de Hitos y Avances."]
+  N0 --> N1
+  N2{"A1 · ¿Comentarios queda fuera del ancho visible?"}
+  A2["A1 · La persona desplaza la barra principal horizontalmente a la derecha.<br/>Continuidad: Retomar el paso 1."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3{"A3 · ¿La campaña está cerrada?"}
+  A3["A3 · Permite leer comentarios pero no muestra el cuadro para publicar.<br/>Continuidad: Terminar con consulta de solo lectura."]
+  N3 -->|Sí| A3
+  N2 -->|No| N3
+  N4["1 · UniFundme: Presenta los comentarios y, si la campaña admite participación, el cuadro Escribe un comentario..."]
+  N3 -->|No| N4
+  N5["2 · Donador o Emprendedor: Escribe un comentario no vacío de hasta 2000 caracteres y usa el icono de enviar."]
+  N4 --> N5
+  N6{"A2 · ¿No hay sesión o el texto está vacío?"}
+  A6["A2 · Solicita Inicia sesión o impide el envío vacío, según corresponda.<br/>Continuidad: Iniciar sesión en CU-C02 o corregir en el paso 2."]
+  N6 -->|Sí| A6
+  N5 --> N6
+  N7["2 · UniFundme: Valida la participación y registra el comentario en esa campaña."]
+  N6 -->|No| N7
+  N8["3 · Donador o Emprendedor: Consulta la lista actualizada."]
+  N7 --> N8
+  N9["3 · UniFundme: Presenta el comentario publicado."]
+  N8 --> N9
+  N10(["Fin del recorrido principal"])
+  N9 --> N10

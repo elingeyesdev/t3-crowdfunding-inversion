@@ -1,0 +1,25 @@
+%% CU-S03 · Revocar permisos administrativos
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Superadministrador: En Gestión de Admins pulsa Revocar sobre el administrador elegido."]
+  N0 --> N1
+  N2["1 · UniFundme: Solicita confirmar la revocación."]
+  N1 --> N2
+  N3["2 · Superadministrador: Confirma la operación."]
+  N2 --> N3
+  N4{"A1 · ¿Cancela la confirmación?"}
+  A4["A1 · Mantiene los privilegios anteriores.<br/>Continuidad: Terminar."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5{"A2 · ¿Intenta revocar su propia cuenta o un Superadministrador?"}
+  A5["A2 · Bloquea la operación.<br/>Continuidad: Terminar sin cambiar permisos."]
+  N5 -->|Sí| A5
+  N4 -->|No| N5
+  N6["2 · UniFundme: Comprueba restricciones y retira sus permisos administrativos."]
+  N5 -->|No| N6
+  N7["3 · Superadministrador: Consulta el listado actualizado."]
+  N6 --> N7
+  N8["3 · UniFundme: Refleja el retiro de permisos conservando la cuenta de usuario."]
+  N7 --> N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

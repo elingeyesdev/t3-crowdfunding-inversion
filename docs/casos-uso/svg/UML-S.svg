@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 645" role="img" aria-labelledby="title desc">
+<title id="title">Casos de uso · Superadministrador</title><desc id="desc">Diagrama UML: actor fuera del límite UniFundme web; óvalos dentro del sistema y líneas de asociación. La disposición es vertical, no representa una secuencia.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#546b7b"/></marker></defs>
+<rect width="1050" height="645" fill="white"/>
+<text x="525" y="34" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#203a4a">Casos de uso · Superadministrador</text>
+<text x="525" y="70" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" font-weight="400" fill="#203a4a">El Superadministrador también posee los casos del Administrador; este diagrama muestra sus funciones exclusivas.</text>
+<rect x="345" y="140" width="665" height="470" rx="0" fill="#ffffff" stroke="#6c8a9e"/>
+<text x="677" y="168" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#203a4a">UniFundme · aplicación web</text>
+<ellipse cx="110.0" cy="340.5" rx="18.0" ry="18.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<polyline points="110,358.5 110,412.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<polyline points="65,377.5 155,377.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<polyline points="110,412.5 75,455.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<polyline points="110,412.5 145,455.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<text x="110" y="480.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#203a4a">Superadministrador</text>
+<ellipse cx="680.0" cy="242.5" rx="275.0" ry="48.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<text x="680" y="247.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">CU-S01 · Consultar administradores</text>
+<polyline points="155,377.5 405,242.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<ellipse cx="680.0" cy="377.5" rx="275.0" ry="48.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<text x="680" y="382.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">CU-S02 · Crear un administrador</text>
+<polyline points="155,377.5 405,377.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<ellipse cx="680.0" cy="512.5" rx="275.0" ry="48.0" fill="#f0f6fa" stroke="#6c8a9e"/>
+<text x="680" y="517.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">CU-S03 · Revocar permisos administrativos</text>
+<polyline points="155,377.5 405,512.5" fill="none" stroke="#546b7b" stroke-width="2"/>
+<text x="525" y="631" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">Las asociaciones indican participación; los pasos y excepciones se describen en cada ficha.</text>
+</svg>

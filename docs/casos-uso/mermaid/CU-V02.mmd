@@ -1,0 +1,29 @@
+%% CU-V02 · Buscar y filtrar campañas
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Visitante: Escribe un término y lo envía con Enter o Ver todos los resultados."]
+  N0 --> N1
+  N2{"A1 · ¿Selecciona una sugerencia de búsqueda?"}
+  A2["A1 · Abre directamente la campaña sugerida.<br/>Continuidad: Continuar en CU-V03."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Solicita y presenta las campañas coincidentes."]
+  N2 -->|No| N3
+  N4["2 · Visitante: Selecciona una categoría en Sector."]
+  N3 --> N4
+  N5{"A2 · ¿No hay coincidencias?"}
+  A5["A2 · Presenta Sin Resultados; Limpiar filtros elimina búsqueda y sector. Todos los sectores retira solo el sector.<br/>Continuidad: Retomar el paso 1 o 2."]
+  N5 -->|Sí| A5
+  N4 --> N5
+  N6["2 · UniFundme: Limita el catálogo a la categoría seleccionada."]
+  N5 -->|No| N6
+  N7["3 · Visitante: Recorre las páginas de resultados disponibles."]
+  N6 --> N7
+  N8["3 · UniFundme: Muestra la página elegida dentro de los límites de la lista."]
+  N7 --> N8
+  N9["4 · Visitante: Selecciona una campaña."]
+  N8 --> N9
+  N10["4 · UniFundme: Abre la ficha de ese proyecto."]
+  N9 --> N10
+  N11(["Fin del recorrido principal"])
+  N10 --> N11

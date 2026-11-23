@@ -1,0 +1,25 @@
+%% CU-A07 · Autorizar la publicación de evidencias
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Administrador: Abre Documentación del detalle administrativo."]
+  N0 --> N1
+  N2["1 · UniFundme: Presenta estado y control Publicar evidencia cuando corresponde."]
+  N1 --> N2
+  N3["2 · Administrador: Pulsa Publicar evidencia."]
+  N2 --> N3
+  N4{"A1 · ¿La evidencia ya está publicada y decide retirarla?"}
+  A4["A1 · Usa Retirar publicación; deja de estar accesible por su publicación pública.<br/>Continuidad: Terminar con publicación retirada."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5{"A2 · ¿El documento no está aprobado?"}
+  A5["A2 · No autoriza publicarlo como evidencia válida.<br/>Continuidad: Revisar el documento en CU-A06 o terminar."]
+  N5 -->|Sí| A5
+  N4 -->|No| N5
+  N6["2 · UniFundme: Guarda la autorización pública si cumple las condiciones."]
+  N5 -->|No| N6
+  N7["3 · Administrador: Consulta Evidencias de la campaña pública."]
+  N6 --> N7
+  N8["3 · UniFundme: El documento autorizado queda disponible para su consulta pública."]
+  N7 --> N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

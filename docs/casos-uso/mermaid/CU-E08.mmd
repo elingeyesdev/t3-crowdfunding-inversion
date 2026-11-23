@@ -1,0 +1,25 @@
+%% CU-E08 · Buscar y editar mis campañas
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Emprendedor: Abre Mis Campañas y busca por título o selecciona una pestaña de estado."]
+  N0 --> N1
+  N2["1 · UniFundme: Filtra la lista cargada; alternar tarjetas/lista solo cambia la presentación."]
+  N1 --> N2
+  N3["2 · Emprendedor: Abre Vista Previa de un Borrador o una Rechazada y selecciona Editar."]
+  N2 --> N3
+  N4{"A1 · ¿La campaña está en otro estado?"}
+  A4["A1 · No ofrece la edición mediante el formulario de borrador.<br/>Continuidad: Terminar o consultar la campaña sin editar."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Presenta el formulario editable de esa campaña."]
+  N4 -->|No| N5
+  N6["3 · Emprendedor: Modifica datos válidos y guarda con el respaldo requerido."]
+  N5 --> N6
+  N7{"A2 · ¿Prefiere abandonar cambios?"}
+  A7["A2 · Usa Descartar y confirma la salida sin guardar las modificaciones del formulario.<br/>Continuidad: Terminar sin guardar."]
+  N7 -->|Sí| A7
+  N6 --> N7
+  N8["3 · UniFundme: Conserva los cambios correctos y permite comprobarlos en Vista Previa."]
+  N7 -->|No| N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

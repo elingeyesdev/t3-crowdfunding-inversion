@@ -1,0 +1,25 @@
+%% CU-D06 · Consultar Mis Aportes
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Donador: Abre Mi Panel → Mis Aportes."]
+  N0 --> N1
+  N2["1 · UniFundme: Presenta sus campañas, fechas, montos y estados."]
+  N1 --> N2
+  N3["2 · Donador: Busca por proyecto y aplica estado, fecha u orden disponibles."]
+  N2 --> N3
+  N4{"A2 · ¿No tiene aportes coincidentes?"}
+  A4["A2 · La consulta no agrega registros; la persona puede cambiar los filtros.<br/>Continuidad: Retomar el paso 2 o terminar."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Muestra las coincidencias con el orden elegido."]
+  N4 -->|No| N5
+  N6["3 · Donador: Selecciona Ver proyecto."]
+  N5 --> N6
+  N7{"A1 · ¿Prefiere obtener un recibo?"}
+  A7["A1 · Recibo se ofrece solo en aportes completados.<br/>Continuidad: Continuar en CU-D07."]
+  N7 -->|Sí| A7
+  N6 --> N7
+  N8["3 · UniFundme: Abre la ficha si la campaña conserva acceso público."]
+  N7 -->|No| N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

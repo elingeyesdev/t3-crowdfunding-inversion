@@ -1,0 +1,21 @@
+%% CU-V06 · Consultar historias recientes
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Visitante: Selecciona un avatar de la barra de historias."]
+  N0 --> N1
+  N2{"A1 · ¿No hay historias recientes?"}
+  A2["A1 · La persona sigue consultando el catálogo; no se generan historias ficticias.<br/>Continuidad: Terminar o continuar en CU-V02."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Abre las novedades recientes de esa campaña en el visor."]
+  N2 -->|No| N3
+  N4["2 · Visitante: Utiliza la navegación anterior o siguiente disponible."]
+  N3 --> N4
+  N5["2 · UniFundme: Presenta la historia correspondiente."]
+  N4 --> N5
+  N6["3 · Visitante: Cierra el visor o pulsa Escape."]
+  N5 --> N6
+  N7["3 · UniFundme: Vuelve al catálogo."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

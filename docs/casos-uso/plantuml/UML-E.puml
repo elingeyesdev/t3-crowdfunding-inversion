@@ -1,0 +1,41 @@
+@startuml
+top to bottom direction
+skinparam shadowing false
+title Casos de uso · Emprendedor
+actor "Emprendedor" as Actor0
+rectangle "UniFundme · aplicación web" {
+  usecase "CU-E01 · Completar mi perfil de emprendedor" as CU_E01
+  usecase "CU-E02 · Actualizar mis imágenes" as CU_E02
+  usecase "CU-E03 · Solicitar verificación de identidad" as CU_E03
+  usecase "CU-E04 · Conocer los requisitos para crear una campaña" as CU_E04
+  usecase "CU-E05 · Crear un borrador de campaña [Parcial]" as CU_E05
+  usecase "CU-E06 · Definir niveles de recompensa" as CU_E06
+  usecase "CU-E07 · Adjuntar y consultar respaldo de campaña [Parcial]" as CU_E07
+  usecase "CU-E08 · Buscar y editar mis campañas [Parcial]" as CU_E08
+  usecase "CU-E09 · Enviar una campaña a revisión" as CU_E09
+  usecase "CU-E10 · Publicar una campaña aprobada [Parcial]" as CU_E10
+  usecase "CU-E11 · Consultar resultados y donadores" as CU_E11
+  usecase "CU-E12 · Actualizar el seguimiento de recompensas" as CU_E12
+  usecase "CU-E13 · Publicar novedades" as CU_E13
+  usecase "CU-E14 · Finalizar una campaña publicada [Parcial]" as CU_E14
+  usecase "CU-E15 · Eliminar borradores o campañas rechazadas" as CU_E15
+}
+Actor0 -- CU_E01
+Actor0 -- CU_E02
+Actor0 -- CU_E03
+Actor0 -- CU_E04
+Actor0 -- CU_E05
+Actor0 -- CU_E06
+Actor0 -- CU_E07
+Actor0 -- CU_E08
+Actor0 -- CU_E09
+Actor0 -- CU_E10
+Actor0 -- CU_E11
+Actor0 -- CU_E12
+Actor0 -- CU_E13
+Actor0 -- CU_E14
+Actor0 -- CU_E15
+note bottom
+Requiere cuenta Emprendedor y propiedad de la campaña. Aplican requisitos y estados de cada ficha.
+end note
+@enduml

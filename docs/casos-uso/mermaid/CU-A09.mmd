@@ -1,0 +1,21 @@
+%% CU-A09 · Comparar presupuesto y ejecución
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Administrador: Pulsa el icono Auditar Plan de Fondos de la Campaña."]
+  N0 --> N1
+  N2["1 · UniFundme: Abre Auditoría Presupuestaria de la Campaña correspondiente."]
+  N1 --> N2
+  N3["2 · Administrador: Consulta categorías, Presupuestado, Ejecutado, Varianza, Comprobantes Faltantes y Estado."]
+  N2 --> N3
+  N4{"A1 · ¿No hay registros suficientes para una comparación completa?"}
+  A4["A1 · La consulta se limita a los registros disponibles; no genera datos financieros ni indicadores de hitos.<br/>Continuidad: Terminar la consulta con Cerrar Auditoría."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Presenta la comparación basada en los registros disponibles."]
+  N4 -->|No| N5
+  N6["3 · Administrador: Consulta los movimientos sin categoría si existen y pulsa Cerrar Auditoría."]
+  N5 --> N6
+  N7["3 · UniFundme: Los muestra en una sección separada y regresa al listado al cerrar."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

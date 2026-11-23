@@ -1,0 +1,29 @@
+%% CU-A03 · Consultar y eliminar campañas sin actividad financiera
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Administrador: Abre Gestión de Campañas; busca por título, creador o correo y selecciona un estado."]
+  N0 --> N1
+  N2["1 · UniFundme: Filtra las campañas y permite recargarlas con Actualizar."]
+  N1 --> N2
+  N3["2 · Administrador: Abre una campaña."]
+  N2 --> N3
+  N4{"A2 · ¿Desea decidir una solicitud pendiente?"}
+  A4["A2 · Los botones de aprobación de Gestión de Campañas no están conectados; debe usar Revisión de Campañas.<br/>Continuidad: Continuar en CU-A04."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Presenta sus datos, historial, documentos y pestañas habilitadas."]
+  N4 -->|No| N5
+  N6["3 · Administrador: Solicita y confirma eliminar una campaña sin actividad financiera."]
+  N5 --> N6
+  N7{"A1 · ¿Existen aportes, movimientos o recompensas que impiden eliminar?"}
+  A7["A1 · Bloquea la operación y conserva la campaña.<br/>Continuidad: Terminar."]
+  N7 -->|Sí| A7
+  N6 --> N7
+  N8{"A3 · ¿Solo desea consultar o cancela eliminar?"}
+  A8["A3 · Conserva el registro.<br/>Continuidad: Terminar sin eliminar."]
+  N8 -->|Sí| A8
+  N7 -->|No| N8
+  N9["3 · UniFundme: Comprueba restricciones y la elimina si corresponde."]
+  N8 -->|No| N9
+  N10(["Fin del recorrido principal"])
+  N9 --> N10

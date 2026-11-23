@@ -1,0 +1,21 @@
+%% CU-V05 · Descubrir campañas en DonaTok
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Visitante: Abre DonaTok desde la barra superior."]
+  N0 --> N1
+  N2{"A1 · ¿No hay campañas con video o falla la carga?"}
+  A2["A1 · Presenta el estado vacío o de error correspondiente; la persona puede volver a Explorar.<br/>Continuidad: Terminar o continuar en CU-V02."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Carga campañas con video y presenta video y resumen."]
+  N2 -->|No| N3
+  N4["2 · Visitante: Se desplaza verticalmente para cambiar de proyecto."]
+  N3 --> N4
+  N5["2 · UniFundme: Presenta la campaña correspondiente al video seleccionado."]
+  N4 --> N5
+  N6["3 · Visitante: Pulsa Ver Campaña y Donar."]
+  N5 --> N6
+  N7["3 · UniFundme: Abre la ficha pública de esa campaña."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

@@ -1,0 +1,25 @@
+%% CU-E14 · Finalizar una campaña publicada
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Emprendedor: Pulsa Finalizar Campaña en Mis Campañas."]
+  N0 --> N1
+  N2{"A2 · ¿La campaña está Financiada o Parcialmente financiada?"}
+  A2["A2 · La tarjeta no ofrece esta acción aunque el servidor admita finalizar; no hay recorrido web completo aquí.<br/>Continuidad: Terminar; recorrido pendiente HU-P07."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Solicita confirmar la finalización."]
+  N2 -->|No| N3
+  N4["2 · Emprendedor: Confirma la operación."]
+  N3 --> N4
+  N5{"A1 · ¿Cancela la confirmación?"}
+  A5["A1 · No realiza la finalización.<br/>Continuidad: Terminar."]
+  N5 -->|Sí| A5
+  N4 --> N5
+  N6["2 · UniFundme: Procesa la finalización y actualiza el estado y su historial."]
+  N5 -->|No| N6
+  N7["3 · Emprendedor: Consulta el resultado cuando la recaudación es insuficiente."]
+  N6 --> N7
+  N8["3 · UniFundme: La campaña queda Fallida, reembolsa los aportes completados al saldo simulado y cancela sus recompensas."]
+  N7 --> N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

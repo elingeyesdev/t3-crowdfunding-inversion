@@ -1,0 +1,29 @@
+%% CU-E15 · Eliminar borradores o campañas rechazadas
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Emprendedor: En Mis Campañas usa Eliminar Campaña o el menú Eliminar."]
+  N0 --> N1
+  N2{"A3 · ¿La campaña está en otro estado?"}
+  A2["A3 · No ofrece esta eliminación de propuesta desde la tarjeta.<br/>Continuidad: Terminar."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Solicita confirmación de eliminación."]
+  N2 -->|No| N3
+  N4["2 · Emprendedor: Confirma la eliminación."]
+  N3 --> N4
+  N5{"A1 · ¿Cancela la confirmación?"}
+  A5["A1 · Conserva la campaña.<br/>Continuidad: Terminar."]
+  N5 -->|Sí| A5
+  N4 --> N5
+  N6{"A2 · ¿Existe actividad financiera que impide eliminar?"}
+  A6["A2 · Bloquea la operación y conserva la campaña.<br/>Continuidad: Terminar."]
+  N6 -->|Sí| A6
+  N5 -->|No| N6
+  N7["2 · UniFundme: Comprueba permisos, estado y ausencia de actividad que la bloquee."]
+  N6 -->|No| N7
+  N8["3 · Emprendedor: Consulta nuevamente sus campañas."]
+  N7 --> N8
+  N9["3 · UniFundme: La campaña eliminada correctamente deja de aparecer."]
+  N8 --> N9
+  N10(["Fin del recorrido principal"])
+  N9 --> N10

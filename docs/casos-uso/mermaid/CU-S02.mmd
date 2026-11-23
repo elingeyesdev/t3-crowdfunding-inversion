@@ -1,0 +1,21 @@
+%% CU-S02 · Crear un administrador
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Superadministrador: Abre Gestión de Admins → Crear Administrador."]
+  N0 --> N1
+  N2["1 · UniFundme: Presenta los campos de correo y contraseña."]
+  N1 --> N2
+  N3["2 · Superadministrador: Introduce correo y contraseña válida y pulsa Crear Administrador."]
+  N2 --> N3
+  N4{"A1 · ¿Los datos son inválidos o el correo ya existe?"}
+  A4["A1 · Rechaza la creación sin duplicar cuentas.<br/>Continuidad: Corregir y retomar el paso 2."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Valida datos y que el correo no esté registrado."]
+  N4 -->|No| N5
+  N6["3 · Superadministrador: Consulta el listado tras la creación correcta."]
+  N5 --> N6
+  N7["3 · UniFundme: Muestra la nueva cuenta de Administrador común."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

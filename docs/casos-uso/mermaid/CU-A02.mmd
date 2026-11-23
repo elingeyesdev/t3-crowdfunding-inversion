@@ -1,0 +1,29 @@
+%% CU-A02 · Consultar y suspender usuarios
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Administrador: Abre Gestión de Usuarios y busca por correo."]
+  N0 --> N1
+  N2{"A3 · ¿Solo desea consultar?"}
+  A2["A3 · No realiza acciones de suspensión.<br/>Continuidad: Terminar tras el paso 1."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Lista coincidencias con correo, identificador abreviado, Fecha de Registro y estado Activo o Suspendido."]
+  N2 -->|No| N3
+  N4["2 · Administrador: Selecciona la suspensión de una cuenta activa y confirma."]
+  N3 --> N4
+  N5{"A1 · ¿Cancela la confirmación?"}
+  A5["A1 · Conserva el estado anterior.<br/>Continuidad: Terminar."]
+  N5 -->|Sí| A5
+  N4 --> N5
+  N6{"A2 · ¿Intenta suspender su propia cuenta o un Superadministrador?"}
+  A6["A2 · Bloquea la operación.<br/>Continuidad: Terminar sin suspender."]
+  N6 -->|Sí| A6
+  N5 -->|No| N6
+  N7["2 · UniFundme: Comprueba las restricciones y desactiva la cuenta si está permitido."]
+  N6 -->|No| N7
+  N8["3 · Administrador: Consulta la lista actualizada."]
+  N7 --> N8
+  N9["3 · UniFundme: Presenta la cuenta Suspendida; no puede iniciar sesión."]
+  N8 --> N9
+  N10(["Fin del recorrido principal"])
+  N9 --> N10
