@@ -18,13 +18,15 @@ const { createRoot } = await import('react-dom/client');
 const navbarModule = new URL('./__notification_preferences_navbar.mjs', import.meta.url).href;
 registerHooks({
   resolve(specifier, context, nextResolve) {
+    if (specifier.endsWith('/RequestErrorNotice')) return nextResolve(specifier + '.tsx', context);
+    if (specifier.endsWith('/apiError')) return nextResolve(specifier + '.ts', context);
     if (specifier.endsWith('/Navbar')) return { url: navbarModule, shortCircuit: true };
     if (specifier.endsWith('/notifications.api')) return nextResolve(specifier + '.ts', context);
     return nextResolve(specifier, context);
   },
   load(url, context, nextLoad) {
     if (url === navbarModule) return { format: 'module', shortCircuit: true, source: 'export function Navbar() { return null; }' };
-    if (!url.endsWith('/NotificationsPage.tsx')) return nextLoad(url, context);
+    if (!['/NotificationsPage.tsx', '/RequestErrorNotice.tsx'].some(path => url.endsWith(path))) return nextLoad(url, context);
     return { format: 'module', shortCircuit: true, source: ts.transpileModule(readFileSync(new URL(url), 'utf8'), {
       compilerOptions: { module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2023 },
     }).outputText };

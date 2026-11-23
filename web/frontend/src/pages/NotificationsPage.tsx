@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
+import { RequestErrorNotice } from '../components/RequestErrorNotice';
 import {
   getMyNotifications,
   markNotificationAsRead,
@@ -130,6 +131,10 @@ export function NotificationsPage() {
   const reloadNotifications = useRef<(() => Promise<void>) | null>(null);
   const deletionPending = useRef(false);
   const [deleting, setDeleting] = useState(false);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const [loadedQuery, setLoadedQuery] = useState<string | null>(null);
+  const queryKey = JSON.stringify([page, filterStatus, searchTerm, categoryFilter]);
+  const hasCurrentData = loadedQuery === queryKey;
 
   // Preferences modal state
   const [showPreferences, setShowPreferences] = useState(false);
@@ -143,9 +148,16 @@ export function NotificationsPage() {
   });
   const [savingPrefs, setSavingPrefs] = useState(false);
   const [prefsSuccess, setPrefsSuccess] = useState(false);
+  const [loadingPrefs, setLoadingPrefs] = useState(false);
+  const [prefsLoaded, setPrefsLoaded] = useState(false);
+  const [prefsLoadError, setPrefsLoadError] = useState<unknown>(null);
+  const [prefsSaveError, setPrefsSaveError] = useState<unknown>(null);
+  const prefsRequest = useRef(0);
+  const prefsCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchNotifications = useCallback(async () => {
     const requestId = ++latestRequest.current;
+    setLoadError(null);
     try {
       setLoading(true);
       const isUnread = filterStatus === 'unread' ? true : filterStatus === 'read' ? false : undefined;
@@ -169,8 +181,9 @@ export function NotificationsPage() {
       setUnreadCount(res.unreadCount || 0);
       setTotalPages(pages);
       setTotalCount(res.total ?? res.notifications.length);
+      setLoadedQuery(JSON.stringify([page, filterStatus, searchTerm, categoryFilter]));
     } catch (err) {
-      if (requestId === latestRequest.current) console.error('Error cargando notificaciones:', err);
+      if (requestId === latestRequest.current) setLoadError(err);
     } finally {
       if (requestId === latestRequest.current) {
         setLoading(false);
@@ -193,30 +206,61 @@ export function NotificationsPage() {
     setUnreadCount(unreadCount);
   }), []);
 
-  const handleOpenPreferences = async () => {
-    setShowPreferences(true);
+  const closePreferences = () => {
+    prefsRequest.current++;
+    if (prefsCloseTimer.current) clearTimeout(prefsCloseTimer.current);
+    setShowPreferences(false);
+  };
+
+  useEffect(() => () => {
+    prefsRequest.current++;
+    if (prefsCloseTimer.current) clearTimeout(prefsCloseTimer.current);
+  }, []);
+
+  const loadPreferences = async () => {
+    const requestId = ++prefsRequest.current;
+    setLoadingPrefs(true);
+    setPrefsLoadError(null);
     try {
       const prefs = await getNotificationPreferences();
-      if (prefs) setPreferences(prefs);
+      if (requestId !== prefsRequest.current) return;
+      setPreferences(prefs);
+      setPrefsLoaded(true);
     } catch (e) {
-      console.warn('Could not load preferences:', e);
+      if (requestId === prefsRequest.current) setPrefsLoadError(e);
+    } finally {
+      if (requestId === prefsRequest.current) setLoadingPrefs(false);
     }
+  };
+
+  const handleOpenPreferences = () => {
+    if (prefsCloseTimer.current) clearTimeout(prefsCloseTimer.current);
+    setShowPreferences(true);
+    setPrefsSuccess(false);
+    setSavingPrefs(false);
+    setPrefsLoaded(false);
+    setPrefsSaveError(null);
+    void loadPreferences();
   };
 
   const handleSavePreferences = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!prefsLoaded || loadingPrefs || savingPrefs || prefsSuccess) return;
+    const requestId = prefsRequest.current;
     setSavingPrefs(true);
+    setPrefsSaveError(null);
+    setPrefsSuccess(false);
     try {
       await updateNotificationPreferences(preferences);
+      if (requestId !== prefsRequest.current) return;
       setPrefsSuccess(true);
-      setTimeout(() => {
-        setPrefsSuccess(false);
-        setShowPreferences(false);
+      prefsCloseTimer.current = setTimeout(() => {
+        if (requestId === prefsRequest.current) closePreferences();
       }, 1200);
     } catch (err) {
-      console.error('Error saving notification preferences:', err);
+      if (requestId === prefsRequest.current) setPrefsSaveError(err);
     } finally {
-      setSavingPrefs(false);
+      if (requestId === prefsRequest.current) setSavingPrefs(false);
     }
   };
 
@@ -317,9 +361,10 @@ export function NotificationsPage() {
               <span>Preferencias</span>
             </button>
 
-            {unreadCount > 0 && (
+            {unreadCount > 0 && loadedQuery !== null && (
               <button
                 onClick={handleMarkAll}
+                disabled={loading || loadError !== null}
                 className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#72B626] hover:bg-[#5e9620] text-xs font-bold text-white transition-colors cursor-pointer shadow-sm border-none"
               >
                 <CheckCheck size={15} strokeWidth={2.5} />
@@ -345,7 +390,7 @@ export function NotificationsPage() {
                     : 'text-gray-500 hover:text-gray-800 bg-transparent'
                 }`}
               >
-                Todas ({totalCount})
+                Todas ({hasCurrentData ? totalCount : '—'})
               </button>
               <button
                 onClick={() => {
@@ -381,10 +426,10 @@ export function NotificationsPage() {
             </div>
 
             {/* Actions for read notifications */}
-            {notifications.some((n) => n.isRead) && (
+            {hasCurrentData && notifications.some((n) => n.isRead) && (
               <button
                 onClick={handleClearRead}
-                disabled={deleting || loading}
+                disabled={deleting || loading || loadError !== null}
                 className="text-xs font-semibold text-gray-400 hover:text-rose-600 transition-colors flex items-center gap-1 self-end sm:self-auto cursor-pointer bg-transparent border-none"
               >
                 <Trash2 size={14} />
@@ -433,12 +478,13 @@ export function NotificationsPage() {
         </div>
 
         {/* Notifications Feed */}
+        {loadError !== null && <RequestErrorNotice error={loadError} fallback="No se pudieron cargar las notificaciones. Intenta nuevamente." onRetry={() => void fetchNotifications()} stale={loadedQuery !== null} retrying={loading} />}
         {loading ? (
           <div className="py-24 flex flex-col items-center justify-center space-y-3 bg-white rounded-2xl border border-gray-200">
             <div className="w-10 h-10 border-4 border-gray-200 border-t-[#72B626] rounded-full animate-spin"></div>
             <p className="text-gray-400 font-bold uppercase tracking-wider text-xs">Cargando notificaciones...</p>
           </div>
-        ) : notifications.length === 0 ? (
+        ) : loadError !== null && (!hasCurrentData || notifications.length === 0) ? null : notifications.length === 0 ? (
           <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
             <div className="w-14 h-14 rounded-2xl bg-[#f0f9e0] text-[#72B626] flex items-center justify-center mx-auto mb-3.5">
               <BellRing size={26} strokeWidth={2} />
@@ -470,7 +516,7 @@ export function NotificationsPage() {
               return (
                 <div
                   key={notif.id}
-                  onClick={() => handleMarkOne(notif)}
+                  onClick={() => { if (loadError === null) void handleMarkOne(notif); }}
                   className={`p-4 sm:p-5 rounded-2xl border transition-all duration-200 cursor-pointer group flex items-start gap-4 ${
                     notif.isRead
                       ? 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-xs'
@@ -517,7 +563,7 @@ export function NotificationsPage() {
                         <button
                           type="button"
                           onClick={(e) => handleDelete(e, notif.id)}
-                          disabled={deleting}
+                          disabled={deleting || loadError !== null}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer border-none bg-transparent"
                           title="Eliminar notificación"
                         >
@@ -533,7 +579,7 @@ export function NotificationsPage() {
         )}
 
         {/* Pagination controls */}
-        {totalPages > 1 && (
+        {hasCurrentData && !loading && totalPages > 1 && (
           <div className="mt-8 flex items-center justify-between bg-white px-4 py-3 rounded-2xl border border-gray-200">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -570,7 +616,8 @@ export function NotificationsPage() {
                 <h3 className="text-base font-bold text-gray-900">Preferencias de Notificación</h3>
               </div>
               <button
-                onClick={() => setShowPreferences(false)}
+                onClick={closePreferences}
+                aria-label="Cerrar preferencias"
                 className="text-gray-400 hover:text-gray-600 p-1 rounded-lg cursor-pointer border-none bg-transparent"
               >
                 <X size={18} />
@@ -578,6 +625,10 @@ export function NotificationsPage() {
             </div>
 
             <form onSubmit={handleSavePreferences} className="py-4 space-y-4">
+              {loadingPrefs && <p role="status">Cargando preferencias...</p>}
+              {prefsLoadError !== null && <RequestErrorNotice error={prefsLoadError} fallback="No se pudieron cargar las preferencias. Intenta nuevamente." onRetry={() => void loadPreferences()} retrying={loadingPrefs} />}
+              {prefsSaveError !== null && <RequestErrorNotice error={prefsSaveError} fallback="No se pudieron guardar las preferencias. Conservamos tus cambios para que puedas volver a intentarlo." />}
+              <fieldset disabled={!prefsLoaded || loadingPrefs || savingPrefs || prefsSuccess} className="space-y-4 disabled:opacity-60">
               <div className="space-y-3">
                 <label className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100 cursor-pointer">
                   <div>
@@ -658,6 +709,7 @@ export function NotificationsPage() {
                 />
               </label>
 
+              </fieldset>
               {prefsSuccess && (
                 <div className="p-3 bg-green-50 border border-green-200 text-green-700 text-xs font-bold rounded-xl flex items-center gap-2">
                   <Check size={16} /> Preferencias guardadas correctamente.
@@ -667,14 +719,14 @@ export function NotificationsPage() {
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
                 <button
                   type="button"
-                  onClick={() => setShowPreferences(false)}
+                  onClick={closePreferences}
                   className="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 cursor-pointer border-none bg-transparent"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={savingPrefs}
+                  disabled={!prefsLoaded || loadingPrefs || savingPrefs || prefsSuccess}
                   className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#72B626] hover:bg-[#5e9620] cursor-pointer shadow-sm border-none disabled:opacity-50"
                 >
                   {savingPrefs ? 'Guardando...' : 'Guardar Cambios'}
