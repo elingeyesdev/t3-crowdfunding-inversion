@@ -15,8 +15,10 @@ flowchart TD
   B4["Revisar el error: corregir datos o ir a Iniciar sesión si la cuenta ya existe"]
   N4 -->|"No"| B4
   B4 --> N3
-  N5["Donador: abrir Mi Panel; emprendedor: abrir Mi Perfil"]
-  N5 --> N6
-  N6["Completar el perfil del rol: D01 o E01"]
+  N5{"¿Elegiste Donador?"}
+  N5 -->|"Sí"| N6
+  B5(["Se abre Mi Perfil de emprendedor; continuar en E01"])
+  N5 -->|"No"| B5
+  N6["Se abre Mi Panel; completar Mi Perfil con D01"]
   N6 --> N7
   N7(["Fin"])

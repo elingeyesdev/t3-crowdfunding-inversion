@@ -1,54 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 1090" role="img" aria-labelledby="title desc">
-<title id="title">C08 · Acceder con Google</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 640" role="img" aria-labelledby="title desc">
+<title id="title">C08 · Acceso con Google: no disponible</title>
 <desc id="desc">Flujo vertical. Seguir las flechas de arriba hacia abajo; cada decisión tiene una alternativa rotulada. Los pasos enlazados llevan a otro diagrama de la guía.</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526578"/></marker></defs>
 <style>text{font-family:Arial,sans-serif;fill:#193449;font-size:18px} .label{font-size:16px;fill:#42596b} .edge{fill:none;stroke:#526578;stroke-width:1.8;marker-end:url(#arrow)} a:hover rect,a:hover polygon{stroke:#176941;stroke-width:3}</style>
 <path class="edge" d="M 290 115.0 V 195.0"/>
 <path class="edge" d="M 290 265.0 V 345.0"/>
-<path class="edge" d="M 290 415.0 V 465.0"/>
-<path class="edge" d="M 290 595.0 V 645.0"/>
-<text class="label" x="305" y="625.0">Sí</text>
-<path class="edge" d="M 485 530 H 590"/>
-<text class="label" x="535" y="520" text-anchor="middle">No</text>
-<a href="../index.html#C02" aria-label="Ir a C02">
-<rect x="590.0" y="495.0" width="390" height="70" rx="8" fill="#fff8ef" stroke="#a9bdca"/>
-<text x="785" y="525" text-anchor="middle">
-<tspan x="785" dy="0">Volver al login, leer el error y</tspan>
-<tspan x="785" dy="22">reintentar o usar correo</tspan>
-</text>
-</a>
-<path class="edge" d="M 290 715.0 V 795.0"/>
-<path class="edge" d="M 290 865.0 V 945.0"/>
+<path class="edge" d="M 290 415.0 V 495.0"/>
 <rect x="95.0" y="45.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
 <text x="290" y="86" text-anchor="middle">
 <tspan x="290" dy="0">Inicio</tspan>
 </text>
 <rect x="95.0" y="195.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
-<text x="290" y="236" text-anchor="middle">
-<tspan x="290" dy="0">Pulsar Continuar con Google</tspan>
+<text x="290" y="225" text-anchor="middle">
+<tspan x="290" dy="0">El acceso con Google no está</tspan>
+<tspan x="290" dy="22">disponible por el momento</tspan>
 </text>
-<rect x="95.0" y="345.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<a href="../index.html#C02" aria-label="Ir a C02">
+<rect x="95.0" y="345.0" width="390" height="70" rx="8" fill="#e7f3ea" stroke="#a9bdca"/>
 <text x="290" y="375" text-anchor="middle">
-<tspan x="290" dy="0">Elegir una cuenta de Google y</tspan>
-<tspan x="290" dy="22">autorizar el acceso</tspan>
+<tspan x="290" dy="0">Para iniciar sesión con correo y</tspan>
+<tspan x="290" dy="22">contraseña, continuar en C02</tspan>
 </text>
-<polygon points="290,465.0 485.0,530 290,595.0 95.0,530" fill="#fff6df" stroke="#a38b49"/>
-<text x="290" y="525" text-anchor="middle">
-<tspan x="290" dy="0">¿La autenticación fue</tspan>
-<tspan x="290" dy="22">aceptada?</tspan>
-</text>
-<rect x="95.0" y="645.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
-<text x="290" y="675" text-anchor="middle">
-<tspan x="290" dy="0">UniFundme recibe el resultado de</tspan>
-<tspan x="290" dy="22">Google y abre la sesión</tspan>
-</text>
-<rect x="95.0" y="795.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
-<text x="290" y="825" text-anchor="middle">
-<tspan x="290" dy="0">Abrir el destino del rol: Mi Panel o</tspan>
-<tspan x="290" dy="22">perfil de emprendedor</tspan>
-</text>
-<rect x="95.0" y="945.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
-<text x="290" y="986" text-anchor="middle">
+</a>
+<rect x="95.0" y="495.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
+<text x="290" y="536" text-anchor="middle">
 <tspan x="290" dy="0">Fin</tspan>
 </text>
 </svg>

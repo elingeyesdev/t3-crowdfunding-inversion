@@ -1,58 +1,89 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 1240" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 1540" role="img" aria-labelledby="title desc">
 <title id="title">E08 · Consultar recompensas y actualizar sus entregas</title>
 <desc id="desc">Flujo vertical. Seguir las flechas de arriba hacia abajo; cada decisión tiene una alternativa rotulada. Los pasos enlazados llevan a otro diagrama de la guía.</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526578"/></marker></defs>
 <style>text{font-family:Arial,sans-serif;fill:#193449;font-size:18px} .label{font-size:16px;fill:#42596b} .edge{fill:none;stroke:#526578;stroke-width:1.8;marker-end:url(#arrow)} a:hover rect,a:hover polygon{stroke:#176941;stroke-width:3}</style>
 <path class="edge" d="M 290 115.0 V 195.0"/>
 <path class="edge" d="M 290 265.0 V 345.0"/>
-<path class="edge" d="M 290 415.0 V 495.0"/>
-<path class="edge" d="M 290 565.0 V 645.0"/>
+<path class="edge" d="M 290 415.0 V 465.0"/>
+<path class="edge" d="M 290 595.0 V 645.0"/>
+<text class="label" x="305" y="625.0">Sí</text>
+<path class="edge" d="M 485 530 H 590"/>
+<text class="label" x="535" y="520" text-anchor="middle">No</text>
+<rect x="590.0" y="488.0" width="390" height="84" rx="35" fill="#fff8ef" stroke="#a9bdca"/>
+<text x="785" y="514" text-anchor="middle">
+<tspan x="785" dy="0">No hay entregas para actualizar;</tspan>
+<tspan x="785" dy="22">volver cuando exista un aporte con</tspan>
+<tspan x="785" dy="22">recompensa</tspan>
+</text>
 <path class="edge" d="M 290 715.0 V 765.0"/>
 <path class="edge" d="M 290 895.0 V 945.0"/>
 <text class="label" x="305" y="925.0">Sí</text>
 <path class="edge" d="M 485 830 H 590"/>
 <text class="label" x="535" y="820" text-anchor="middle">No</text>
-<path class="edge" d="M 980 830 H 1010 V 680 H 485"/>
-<rect x="590.0" y="795.0" width="390" height="70" rx="8" fill="#fff8ef" stroke="#a9bdca"/>
-<text x="785" y="825" text-anchor="middle">
-<tspan x="785" dy="0">Revisar el error y cargar el estado</tspan>
-<tspan x="785" dy="22">vigente antes de reintentar</tspan>
+<rect x="590.0" y="788.0" width="390" height="84" rx="35" fill="#fff8ef" stroke="#a9bdca"/>
+<text x="785" y="814" text-anchor="middle">
+<tspan x="785" dy="0">Consultar solamente: no hay</tspan>
+<tspan x="785" dy="22">transiciones disponibles para ese</tspan>
+<tspan x="785" dy="22">registro</tspan>
 </text>
-<path class="edge" d="M 290 1015.0 V 1095.0"/>
+<path class="edge" d="M 290 1015.0 V 1065.0"/>
+<path class="edge" d="M 290 1195.0 V 1245.0"/>
+<text class="label" x="305" y="1225.0">Sí</text>
+<path class="edge" d="M 485 1130 H 590"/>
+<text class="label" x="535" y="1120" text-anchor="middle">No</text>
+<path class="edge" d="M 980 1130 H 1010 V 980 H 485"/>
+<rect x="590.0" y="1088.0" width="390" height="84" rx="8" fill="#fff8ef" stroke="#a9bdca"/>
+<text x="785" y="1114" text-anchor="middle">
+<tspan x="785" dy="0">Revisar el error; la lista intenta</tspan>
+<tspan x="785" dy="22">recargar el estado vigente antes de</tspan>
+<tspan x="785" dy="22">reintentar</tspan>
+</text>
+<path class="edge" d="M 290 1315.0 V 1395.0"/>
 <rect x="95.0" y="45.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
 <text x="290" y="86" text-anchor="middle">
 <tspan x="290" dy="0">Inicio</tspan>
 </text>
 <rect x="95.0" y="195.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="236" text-anchor="middle">
-<tspan x="290" dy="0">Abrir Recompensas desde Vista previa</tspan>
+<tspan x="290" dy="0">Abrir Recompensas desde Vista Previa</tspan>
 </text>
 <rect x="95.0" y="345.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="375" text-anchor="middle">
 <tspan x="290" dy="0">Consultar título, descripción y rango</tspan>
 <tspan x="290" dy="22">de cada nivel</tspan>
 </text>
-<rect x="95.0" y="495.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<polygon points="290,465.0 485.0,530 290,595.0 95.0,530" fill="#fff6df" stroke="#a38b49"/>
 <text x="290" y="525" text-anchor="middle">
-<tspan x="290" dy="0">Para entregas: desplegar Donadores</tspan>
-<tspan x="290" dy="22">con Recompensas</tspan>
+<tspan x="290" dy="0">¿Hay donadores con</tspan>
+<tspan x="290" dy="22">recompensas?</tspan>
 </text>
 <rect x="95.0" y="645.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="675" text-anchor="middle">
-<tspan x="290" dy="0">Elegir en cada registro uno de los</tspan>
-<tspan x="290" dy="22">estados de seguimiento permitidos</tspan>
+<tspan x="290" dy="0">Para entregas: desplegar Donadores</tspan>
+<tspan x="290" dy="22">con Recompensas</tspan>
 </text>
 <polygon points="290,765.0 485.0,830 290,895.0 95.0,830" fill="#fff6df" stroke="#a38b49"/>
-<text x="290" y="836" text-anchor="middle">
-<tspan x="290" dy="0">¿Se guardó el nuevo estado?</tspan>
+<text x="290" y="825" text-anchor="middle">
+<tspan x="290" dy="0">¿El selector permite cambiar</tspan>
+<tspan x="290" dy="22">el estado?</tspan>
 </text>
 <rect x="95.0" y="945.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="975" text-anchor="middle">
+<tspan x="290" dy="0">Elegir en cada registro uno de los</tspan>
+<tspan x="290" dy="22">estados de seguimiento permitidos</tspan>
+</text>
+<polygon points="290,1065.0 485.0,1130 290,1195.0 95.0,1130" fill="#fff6df" stroke="#a38b49"/>
+<text x="290" y="1136" text-anchor="middle">
+<tspan x="290" dy="0">¿Se guardó el nuevo estado?</tspan>
+</text>
+<rect x="95.0" y="1245.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="1275" text-anchor="middle">
 <tspan x="290" dy="0">El donador consulta el estado</tspan>
 <tspan x="290" dy="22">actualizado en D07</tspan>
 </text>
-<rect x="95.0" y="1095.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
-<text x="290" y="1136" text-anchor="middle">
+<rect x="95.0" y="1395.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
+<text x="290" y="1436" text-anchor="middle">
 <tspan x="290" dy="0">Fin</tspan>
 </text>
 </svg>

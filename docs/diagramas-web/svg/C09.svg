@@ -1,65 +1,102 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 1090" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 1690" role="img" aria-labelledby="title desc">
 <title id="title">C09 · Publicar comentarios y marcar Me gusta</title>
 <desc id="desc">Flujo vertical. Seguir las flechas de arriba hacia abajo; cada decisión tiene una alternativa rotulada. Los pasos enlazados llevan a otro diagrama de la guía.</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526578"/></marker></defs>
 <style>text{font-family:Arial,sans-serif;fill:#193449;font-size:18px} .label{font-size:16px;fill:#42596b} .edge{fill:none;stroke:#526578;stroke-width:1.8;marker-end:url(#arrow)} a:hover rect,a:hover polygon{stroke:#176941;stroke-width:3}</style>
-<path class="edge" d="M 290 115.0 V 195.0"/>
-<path class="edge" d="M 290 265.0 V 315.0"/>
-<path class="edge" d="M 290 445.0 V 495.0"/>
-<text class="label" x="305" y="475.0">Sí</text>
-<path class="edge" d="M 485 380 H 590"/>
-<text class="label" x="535" y="370" text-anchor="middle">No</text>
-<a href="../index.html#C02" aria-label="Ir a C02">
-<rect x="590.0" y="345.0" width="390" height="70" rx="8" fill="#fff8ef" stroke="#a9bdca"/>
-<text x="785" y="375" text-anchor="middle">
-<tspan x="785" dy="0">Iniciar sesión con un rol permitido</tspan>
-<tspan x="785" dy="22">para participar</tspan>
-</text>
-</a>
+<path class="edge" d="M 290 115.0 V 188.0"/>
+<path class="edge" d="M 290 272.0 V 338.0"/>
+<path class="edge" d="M 290 422.0 V 495.0"/>
 <path class="edge" d="M 290 565.0 V 615.0"/>
-<path class="edge" d="M 290 745.0 V 788.0"/>
-<text class="label" x="305" y="771.5">Sí</text>
+<path class="edge" d="M 290 745.0 V 765.0"/>
+<text class="label" x="305" y="760.0">Sí</text>
 <path class="edge" d="M 485 680 H 590"/>
 <text class="label" x="535" y="670" text-anchor="middle">No</text>
-<path class="edge" d="M 980 680 H 1010 V 530 H 485"/>
-<rect x="590.0" y="645.0" width="390" height="70" rx="8" fill="#fff8ef" stroke="#a9bdca"/>
-<text x="785" y="675" text-anchor="middle">
-<tspan x="785" dy="0">Corregir el texto o revisar el acceso</tspan>
-<tspan x="785" dy="22">e intentar de nuevo</tspan>
+<rect x="590.0" y="638.0" width="390" height="84" rx="35" fill="#fff8ef" stroke="#a9bdca"/>
+<text x="785" y="664" text-anchor="middle">
+<tspan x="785" dy="0">La campaña está cerrada: sus</tspan>
+<tspan x="785" dy="22">comentarios se conservan solo para</tspan>
+<tspan x="785" dy="22">consulta</tspan>
 </text>
-<path class="edge" d="M 290 872.0 V 945.0"/>
+<path class="edge" d="M 290 895.0 V 938.0"/>
+<text class="label" x="305" y="921.5">Sí</text>
+<path class="edge" d="M 485 830 H 590"/>
+<text class="label" x="535" y="820" text-anchor="middle">No</text>
+<a href="../index.html#C02" aria-label="Ir a C02">
+<rect x="590.0" y="795.0" width="390" height="70" rx="8" fill="#fff8ef" stroke="#a9bdca"/>
+<text x="785" y="825" text-anchor="middle">
+<tspan x="785" dy="0">Pulsar Inicia sesión y seguir C02;</tspan>
+<tspan x="785" dy="22">después regresar a Comentarios</tspan>
+</text>
+</a>
+<path class="edge" d="M 290 1022.0 V 1088.0"/>
+<path class="edge" d="M 290 1172.0 V 1215.0"/>
+<path class="edge" d="M 290 1345.0 V 1388.0"/>
+<text class="label" x="305" y="1371.5">Sí</text>
+<path class="edge" d="M 485 1280 H 590"/>
+<text class="label" x="535" y="1270" text-anchor="middle">No</text>
+<path class="edge" d="M 980 1280 H 1010 V 980 H 485"/>
+<rect x="590.0" y="1238.0" width="390" height="84" rx="8" fill="#fff8ef" stroke="#a9bdca"/>
+<text x="785" y="1264" text-anchor="middle">
+<tspan x="785" dy="0">Comprobar el resultado; corregir el</tspan>
+<tspan x="785" dy="22">texto o revisar el acceso e intentar</tspan>
+<tspan x="785" dy="22">de nuevo</tspan>
+</text>
+<path class="edge" d="M 290 1472.0 V 1545.0"/>
 <rect x="95.0" y="45.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
 <text x="290" y="86" text-anchor="middle">
 <tspan x="290" dy="0">Inicio</tspan>
 </text>
-<rect x="95.0" y="195.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
-<text x="290" y="225" text-anchor="middle">
-<tspan x="290" dy="0">Abrir la pestaña Comentarios de la</tspan>
-<tspan x="290" dy="22">campaña</tspan>
+<rect x="95.0" y="188.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="214" text-anchor="middle">
+<tspan x="290" dy="0">Abrir la campaña y localizar la barra</tspan>
+<tspan x="290" dy="22">de Historia y Proyecto, Transparencia</tspan>
+<tspan x="290" dy="22">y Fondos e Hitos y Avances</tspan>
 </text>
-<polygon points="290,315.0 485.0,380 290,445.0 95.0,380" fill="#fff6df" stroke="#a38b49"/>
-<text x="290" y="375" text-anchor="middle">
-<tspan x="290" dy="0">¿Hay una sesión de donador o</tspan>
-<tspan x="290" dy="22">emprendedor?</tspan>
+<rect x="95.0" y="338.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="364" text-anchor="middle">
+<tspan x="290" dy="0">Desplazar esa barra horizontalmente a</tspan>
+<tspan x="290" dy="22">la derecha, si hace falta, y pulsar</tspan>
+<tspan x="290" dy="22">Comentarios</tspan>
 </text>
 <rect x="95.0" y="495.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="525" text-anchor="middle">
-<tspan x="290" dy="0">Escribir un comentario y publicarlo;</tspan>
-<tspan x="290" dy="22">o pulsar Me gusta en uno existente</tspan>
+<tspan x="290" dy="0">Leer los comentarios existentes en la</tspan>
+<tspan x="290" dy="22">sección Comentarios</tspan>
 </text>
 <polygon points="290,615.0 485.0,680 290,745.0 95.0,680" fill="#fff6df" stroke="#a38b49"/>
 <text x="290" y="675" text-anchor="middle">
-<tspan x="290" dy="0">¿El servidor acepta la</tspan>
-<tspan x="290" dy="22">acción?</tspan>
+<tspan x="290" dy="0">¿La campaña permite</tspan>
+<tspan x="290" dy="22">participar?</tspan>
 </text>
-<rect x="95.0" y="788.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
-<text x="290" y="814" text-anchor="middle">
+<polygon points="290,765.0 485.0,830 290,895.0 95.0,830" fill="#fff6df" stroke="#a38b49"/>
+<text x="290" y="825" text-anchor="middle">
+<tspan x="290" dy="0">¿Hay una sesión de donador o</tspan>
+<tspan x="290" dy="22">emprendedor?</tspan>
+</text>
+<rect x="95.0" y="938.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="964" text-anchor="middle">
+<tspan x="290" dy="0">Si quieres comentar: escribir en</tspan>
+<tspan x="290" dy="22">Escribe un comentario... y pulsar el</tspan>
+<tspan x="290" dy="22">icono de enviar</tspan>
+</text>
+<rect x="95.0" y="1088.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="1114" text-anchor="middle">
+<tspan x="290" dy="0">Si quieres marcar Me gusta: pulsar el</tspan>
+<tspan x="290" dy="22">icono de pulgar arriba del comentario</tspan>
+<tspan x="290" dy="22">elegido</tspan>
+</text>
+<polygon points="290,1215.0 485.0,1280 290,1345.0 95.0,1280" fill="#fff6df" stroke="#a38b49"/>
+<text x="290" y="1286" text-anchor="middle">
+<tspan x="290" dy="0">¿Se registró la acción?</tspan>
+</text>
+<rect x="95.0" y="1388.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="1414" text-anchor="middle">
 <tspan x="290" dy="0">Ver el comentario o el contador</tspan>
 <tspan x="290" dy="22">actualizado; otro clic alterna el Me</tspan>
 <tspan x="290" dy="22">gusta</tspan>
 </text>
-<rect x="95.0" y="945.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
-<text x="290" y="986" text-anchor="middle">
+<rect x="95.0" y="1545.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
+<text x="290" y="1586" text-anchor="middle">
 <tspan x="290" dy="0">Fin</tspan>
 </text>
 </svg>

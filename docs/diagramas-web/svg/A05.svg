@@ -15,8 +15,8 @@
 <tspan x="785" dy="0">Indicar el motivo y rechazar;</tspan>
 <tspan x="785" dy="22">actualizar la lista de documentos</tspan>
 </text>
-<path class="edge" d="M 290 715.0 V 795.0"/>
-<path class="edge" d="M 290 865.0 V 915.0"/>
+<path class="edge" d="M 290 715.0 V 788.0"/>
+<path class="edge" d="M 290 872.0 V 915.0"/>
 <path class="edge" d="M 290 1045.0 V 1095.0"/>
 <text class="label" x="305" y="1075.0">Sí</text>
 <path class="edge" d="M 485 980 H 590"/>
@@ -43,17 +43,19 @@
 <tspan x="290" dy="22">archivo</tspan>
 </text>
 <polygon points="290,465.0 485.0,530 290,595.0 95.0,530" fill="#fff6df" stroke="#a38b49"/>
-<text x="290" y="536" text-anchor="middle">
-<tspan x="290" dy="0">¿El documento se aprueba?</tspan>
+<text x="290" y="525" text-anchor="middle">
+<tspan x="290" dy="0">¿El documento pendiente se</tspan>
+<tspan x="290" dy="22">aprueba?</tspan>
 </text>
 <rect x="95.0" y="645.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="686" text-anchor="middle">
 <tspan x="290" dy="0">Pulsar Aprobar y comprobar el estado</tspan>
 </text>
-<rect x="95.0" y="795.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
-<text x="290" y="825" text-anchor="middle">
-<tspan x="290" dy="0">Elegir si el documento aprobado debe</tspan>
-<tspan x="290" dy="22">publicarse u ocultarse</tspan>
+<rect x="95.0" y="788.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="814" text-anchor="middle">
+<tspan x="290" dy="0">En un documento aprobado, usar</tspan>
+<tspan x="290" dy="22">Publicar evidencia o Retirar</tspan>
+<tspan x="290" dy="22">publicación</tspan>
 </text>
 <polygon points="290,915.0 485.0,980 290,1045.0 95.0,980" fill="#fff6df" stroke="#a38b49"/>
 <text x="290" y="986" text-anchor="middle">

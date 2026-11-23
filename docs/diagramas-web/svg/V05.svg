@@ -3,8 +3,8 @@
 <desc id="desc">Flujo vertical. Seguir las flechas de arriba hacia abajo; cada decisión tiene una alternativa rotulada. Los pasos enlazados llevan a otro diagrama de la guía.</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526578"/></marker></defs>
 <style>text{font-family:Arial,sans-serif;fill:#193449;font-size:18px} .label{font-size:16px;fill:#42596b} .edge{fill:none;stroke:#526578;stroke-width:1.8;marker-end:url(#arrow)} a:hover rect,a:hover polygon{stroke:#176941;stroke-width:3}</style>
-<path class="edge" d="M 290 115.0 V 195.0"/>
-<path class="edge" d="M 290 265.0 V 315.0"/>
+<path class="edge" d="M 290 115.0 V 188.0"/>
+<path class="edge" d="M 290 272.0 V 315.0"/>
 <path class="edge" d="M 290 445.0 V 495.0"/>
 <text class="label" x="305" y="475.0">Sí</text>
 <path class="edge" d="M 485 380 H 590"/>
@@ -21,10 +21,11 @@
 <text x="290" y="86" text-anchor="middle">
 <tspan x="290" dy="0">Inicio</tspan>
 </text>
-<rect x="95.0" y="195.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
-<text x="290" y="225" text-anchor="middle">
-<tspan x="290" dy="0">Pulsar el botón Compartir de la</tspan>
-<tspan x="290" dy="22">campaña</tspan>
+<rect x="95.0" y="188.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="214" text-anchor="middle">
+<tspan x="290" dy="0">Pulsar Compartir Campaña en la ficha,</tspan>
+<tspan x="290" dy="22">o el icono de compartir de su tarjeta</tspan>
+<tspan x="290" dy="22">en Explorar</tspan>
 </text>
 <polygon points="290,315.0 485.0,380 290,445.0 95.0,380" fill="#fff6df" stroke="#a38b49"/>
 <text x="290" y="386" text-anchor="middle">

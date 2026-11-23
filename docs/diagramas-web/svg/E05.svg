@@ -29,8 +29,8 @@
 </text>
 <rect x="95.0" y="345.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="375" text-anchor="middle">
-<tspan x="290" dy="0">Abrir Vista previa y pulsar Lanzar, o</tspan>
-<tspan x="290" dy="22">usar la acción de la tarjeta</tspan>
+<tspan x="290" dy="0">En Vista Previa pulsar Lanzar, o</tspan>
+<tspan x="290" dy="22">pulsar Publicar Campaña en la tarjeta</tspan>
 </text>
 <polygon points="290,465.0 485.0,530 290,595.0 95.0,530" fill="#fff6df" stroke="#a38b49"/>
 <text x="290" y="536" text-anchor="middle">

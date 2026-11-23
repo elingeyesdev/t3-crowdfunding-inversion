@@ -4,8 +4,8 @@
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526578"/></marker></defs>
 <style>text{font-family:Arial,sans-serif;fill:#193449;font-size:18px} .label{font-size:16px;fill:#42596b} .edge{fill:none;stroke:#526578;stroke-width:1.8;marker-end:url(#arrow)} a:hover rect,a:hover polygon{stroke:#176941;stroke-width:3}</style>
 <path class="edge" d="M 290 115.0 V 195.0"/>
-<path class="edge" d="M 290 265.0 V 345.0"/>
-<path class="edge" d="M 290 415.0 V 465.0"/>
+<path class="edge" d="M 290 265.0 V 338.0"/>
+<path class="edge" d="M 290 422.0 V 465.0"/>
 <path class="edge" d="M 290 595.0 V 645.0"/>
 <text class="label" x="305" y="625.0">Sí</text>
 <path class="edge" d="M 485 530 H 590"/>
@@ -27,9 +27,9 @@
 </text>
 <rect x="95.0" y="338.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="364" text-anchor="middle">
-<tspan x="290" dy="0">Escribir una búsqueda; ajustar</tspan>
-<tspan x="290" dy="22">categoría, filtros y orden</tspan>
-<tspan x="290" dy="22">disponibles</tspan>
+<tspan x="290" dy="0">Escribir una búsqueda y enviarla con</tspan>
+<tspan x="290" dy="22">Enter; seleccionar una categoría en</tspan>
+<tspan x="290" dy="22">Sector</tspan>
 </text>
 <polygon points="290,465.0 485.0,530 290,595.0 95.0,530" fill="#fff6df" stroke="#a38b49"/>
 <text x="290" y="536" text-anchor="middle">

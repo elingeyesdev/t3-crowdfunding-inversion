@@ -1,22 +1,30 @@
 %% E08 · Consultar recompensas y actualizar sus entregas
 %% Rol: Emprendedor
-%% Entrada: Mis Campañas → Vista previa → Recompensas
+%% Entrada: Mis Campañas → Vista Previa → Recompensas
 flowchart TD
   N0(["Inicio"])
   N0 --> N1
-  N1["Abrir Recompensas desde Vista previa"]
+  N1["Abrir Recompensas desde Vista Previa"]
   N1 --> N2
   N2["Consultar título, descripción y rango de cada nivel"]
   N2 --> N3
-  N3["Para entregas: desplegar Donadores con Recompensas"]
-  N3 --> N4
-  N4["Elegir en cada registro uno de los estados de seguimiento permitidos"]
+  N3{"¿Hay donadores con recompensas?"}
+  N3 -->|"Sí"| N4
+  B3(["No hay entregas para actualizar; volver cuando exista un aporte con recompensa"])
+  N3 -->|"No"| B3
+  N4["Para entregas: desplegar Donadores con Recompensas"]
   N4 --> N5
-  N5{"¿Se guardó el nuevo estado?"}
+  N5{"¿El selector permite cambiar el estado?"}
   N5 -->|"Sí"| N6
-  B5["Revisar el error y cargar el estado vigente antes de reintentar"]
+  B5(["Consultar solamente: no hay transiciones disponibles para ese registro"])
   N5 -->|"No"| B5
-  B5 --> N4
-  N6["El donador consulta el estado actualizado en D07"]
+  N6["Elegir en cada registro uno de los estados de seguimiento permitidos"]
   N6 --> N7
-  N7(["Fin"])
+  N7{"¿Se guardó el nuevo estado?"}
+  N7 -->|"Sí"| N8
+  B7["Revisar el error; la lista intenta recargar el estado vigente antes de reintentar"]
+  N7 -->|"No"| B7
+  B7 --> N6
+  N8["El donador consulta el estado actualizado en D07"]
+  N8 --> N9
+  N9(["Fin"])

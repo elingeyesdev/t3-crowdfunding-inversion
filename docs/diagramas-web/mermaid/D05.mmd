@@ -4,11 +4,11 @@
 flowchart TD
   N0(["Inicio"])
   N0 --> N1
-  N1["Abrir Comprobantes y buscar el aporte"]
+  N1["Abrir Comprobantes y buscar por proyecto o código de recibo"]
   N1 --> N2
   N2{"¿Se encontró un comprobante?"}
   N2 -->|"Sí"| N3
-  B2(["Revisar los filtros o realizar un aporte primero"])
+  B2(["Limpiar la búsqueda; si no hay aportes completados, realizar uno"])
   N2 -->|"No"| B2
   N3["Pulsar Descargar PDF"]
   N3 --> N4

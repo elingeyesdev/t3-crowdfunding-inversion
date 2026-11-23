@@ -10,13 +10,13 @@ flowchart TD
   N2 -->|"Sí"| N3
   B2(["Completar perfil o solicitar KYC; volver cuando esté aprobado"])
   N2 -->|"No"| B2
-  N3["Completar título, descripción, categorías, meta y fecha de cierre"]
+  N3["Completar título, eslogan, descripción, categorías, meta y fecha de cierre si corresponde"]
   N3 --> N4
   N4["Agregar portada o video si se desea; definir recompensas si corresponde"]
   N4 --> N5
-  N5["Adjuntar al menos un documento de respaldo con su justificación"]
+  N5["Seleccionar respaldo, escribir justificación y pulsar Añadir Documento"]
   N5 --> N6
-  N6["Elegir Guardar como borrador y confirmar"]
+  N6["Pulsar Guardar Borrador y confirmar"]
   N6 --> N7
   N7{"¿Se creó correctamente?"}
   N7 -->|"Sí"| N8

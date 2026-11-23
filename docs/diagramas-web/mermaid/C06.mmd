@@ -8,7 +8,7 @@ flowchart TD
   N1 --> N2
   N2{"¿La cuenta tiene contraseña local?"}
   N2 -->|"Sí"| N3
-  B2(["La pantalla indica usar Google; finalizar este flujo"])
+  B2(["Esta cuenta no permite cambiar la contraseña desde esta pantalla"])
   N2 -->|"No"| B2
   N3["Ingresar contraseña actual, nueva contraseña y confirmación"]
   N3 --> N4

@@ -1,22 +1,32 @@
 %% C09 · Publicar comentarios y marcar Me gusta
 %% Rol: Acceso y funciones compartidas
-%% Entrada: Ficha de campaña → Comentarios
+%% Entrada: Ficha de campaña → barra principal → Comentarios, a la derecha de Hitos y Avances
 flowchart TD
   N0(["Inicio"])
   N0 --> N1
-  N1["Abrir la pestaña Comentarios de la campaña"]
+  N1["Abrir la campaña y localizar la barra de Historia y Proyecto, Transparencia y Fondos e Hitos y Avances"]
   N1 --> N2
-  N2{"¿Hay una sesión de donador o emprendedor?"}
-  N2 -->|"Sí"| N3
-  B2(["Iniciar sesión con un rol permitido para participar"])
-  N2 -->|"No"| B2
-  N3["Escribir un comentario y publicarlo; o pulsar Me gusta en uno existente"]
+  N2["Desplazar esa barra horizontalmente a la derecha, si hace falta, y pulsar Comentarios"]
+  N2 --> N3
+  N3["Leer los comentarios existentes en la sección Comentarios"]
   N3 --> N4
-  N4{"¿El servidor acepta la acción?"}
+  N4{"¿La campaña permite participar?"}
   N4 -->|"Sí"| N5
-  B4["Corregir el texto o revisar el acceso e intentar de nuevo"]
+  B4(["La campaña está cerrada: sus comentarios se conservan solo para consulta"])
   N4 -->|"No"| B4
-  B4 --> N3
-  N5["Ver el comentario o el contador actualizado; otro clic alterna el Me gusta"]
-  N5 --> N6
-  N6(["Fin"])
+  N5{"¿Hay una sesión de donador o emprendedor?"}
+  N5 -->|"Sí"| N6
+  B5(["Pulsar Inicia sesión y seguir C02; después regresar a Comentarios"])
+  N5 -->|"No"| B5
+  N6["Si quieres comentar: escribir en Escribe un comentario... y pulsar el icono de enviar"]
+  N6 --> N7
+  N7["Si quieres marcar Me gusta: pulsar el icono de pulgar arriba del comentario elegido"]
+  N7 --> N8
+  N8{"¿Se registró la acción?"}
+  N8 -->|"Sí"| N9
+  B8["Comprobar el resultado; corregir el texto o revisar el acceso e intentar de nuevo"]
+  N8 -->|"No"| B8
+  B8 --> N6
+  N9["Ver el comentario o el contador actualizado; otro clic alterna el Me gusta"]
+  N9 --> N10
+  N10(["Fin"])

@@ -1,19 +1,11 @@
-%% C08 · Acceder con Google
+%% C08 · Acceso con Google: no disponible
 %% Rol: Acceso y funciones compartidas
-%% Entrada: Login o registro → botón de Google
+%% Entrada: Inicio de sesión o registro
 flowchart TD
   N0(["Inicio"])
   N0 --> N1
-  N1["Pulsar Continuar con Google"]
+  N1["El acceso con Google no está disponible por el momento"]
   N1 --> N2
-  N2["Elegir una cuenta de Google y autorizar el acceso"]
+  N2["Para iniciar sesión con correo y contraseña, continuar en C02"]
   N2 --> N3
-  N3{"¿La autenticación fue aceptada?"}
-  N3 -->|"Sí"| N4
-  B3(["Volver al login, leer el error y reintentar o usar correo"])
-  N3 -->|"No"| B3
-  N4["UniFundme recibe el resultado de Google y abre la sesión"]
-  N4 --> N5
-  N5["Abrir el destino del rol: Mi Panel o perfil de emprendedor"]
-  N5 --> N6
-  N6(["Fin"])
+  N3(["Fin"])

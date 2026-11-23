@@ -46,8 +46,8 @@
 <rect x="95.0" y="788.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="814" text-anchor="middle">
 <tspan x="290" dy="0">Opcional: cambiar foto o portada y</tspan>
-<tspan x="290" dy="22">consultar Información, fondos o</tspan>
-<tspan x="290" dy="22">finanzas</tspan>
+<tspan x="290" dy="22">consultar Información, Datos</tspan>
+<tspan x="290" dy="22">Bancarios o Finanzas</tspan>
 </text>
 <a href="../index.html#E02" aria-label="Ir a E02">
 <rect x="95.0" y="945.0" width="390" height="70" rx="8" fill="#e7f3ea" stroke="#a9bdca"/>

@@ -6,7 +6,7 @@ flowchart TD
   N0 --> N1
   N1["Abrir Mi Panel y seleccionar Mis Aportes"]
   N1 --> N2
-  N2["Buscar y filtrar el listado por las opciones disponibles"]
+  N2["Buscar por campaña; filtrar Todos, Completados o Pendientes y elegir un orden"]
   N2 --> N3
   N3{"¿Hay aportes coincidentes?"}
   N3 -->|"Sí"| N4
@@ -14,6 +14,6 @@ flowchart TD
   N3 -->|"No"| B3
   N4["Revisar campaña, fecha, monto y estado de cada aporte"]
   N4 --> N5
-  N5["Abrir la campaña o descargar el comprobante del aporte"]
+  N5["Pulsar Ver Proyecto; si el aporte está completado, descargar su Recibo"]
   N5 --> N6
   N6(["Fin"])

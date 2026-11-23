@@ -1,10 +1,10 @@
 %% C03 · Iniciar o continuar una conversación
 %% Rol: Acceso y funciones compartidas
-%% Entrada: Ficha → contacto del creador; barra superior → Mensajes · /chat
+%% Entrada: Historia y Proyecto → Sobre el Emprendedor → Contactar Emprendedor; para conversaciones existentes: Mensajes
 flowchart TD
   N0(["Inicio"])
   N0 --> N1
-  N1["Para contactar al creador, abrir su campaña y pulsar el botón de mensaje"]
+  N1["En Historia y Proyecto, bajar hasta Sobre el Emprendedor y pulsar Contactar Emprendedor"]
   N1 --> N2
   N2{"¿Hay una sesión iniciada?"}
   N2 -->|"Sí"| N3
@@ -12,9 +12,9 @@ flowchart TD
   N2 -->|"No"| B2
   N3["Abrir o recuperar la conversación; también se puede elegir una en Mensajes"]
   N3 --> N4
-  N4["Leer el historial; subir en la conversación para cargar mensajes anteriores"]
+  N4["Leer el historial; subir o pulsar Ver mensajes anteriores cuando aparezca"]
   N4 --> N5
-  N5["Escribir el mensaje y pulsar Enviar"]
+  N5["Escribir el mensaje y pulsar el botón con el icono de enviar"]
   N5 --> N6
   N6{"¿Se envió correctamente?"}
   N6 -->|"Sí"| N7

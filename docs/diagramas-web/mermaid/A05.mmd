@@ -8,13 +8,13 @@ flowchart TD
   N1 --> N2
   N2["Entrar en Documentación y abrir el archivo"]
   N2 --> N3
-  N3{"¿El documento se aprueba?"}
+  N3{"¿El documento pendiente se aprueba?"}
   N3 -->|"Sí"| N4
   B3(["Indicar el motivo y rechazar; actualizar la lista de documentos"])
   N3 -->|"No"| B3
   N4["Pulsar Aprobar y comprobar el estado"]
   N4 --> N5
-  N5["Elegir si el documento aprobado debe publicarse u ocultarse"]
+  N5["En un documento aprobado, usar Publicar evidencia o Retirar publicación"]
   N5 --> N6
   N6{"¿El cambio se guardó?"}
   N6 -->|"Sí"| N7

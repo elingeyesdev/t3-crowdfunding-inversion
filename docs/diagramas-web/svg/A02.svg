@@ -33,7 +33,7 @@
 <rect x="95.0" y="195.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="225" text-anchor="middle">
 <tspan x="290" dy="0">Abrir Gestión de Usuarios y buscar</tspan>
-<tspan x="290" dy="22">por los datos disponibles</tspan>
+<tspan x="290" dy="22">por correo electrónico</tspan>
 </text>
 <rect x="95.0" y="345.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="375" text-anchor="middle">

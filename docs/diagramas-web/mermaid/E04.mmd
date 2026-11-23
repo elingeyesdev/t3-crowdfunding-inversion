@@ -1,10 +1,10 @@
 %% E04 · Enviar una campaña a revisión y corregir rechazos
 %% Rol: Emprendedor
-%% Entrada: Mis Campañas → Vista previa → Enviar Revisión
+%% Entrada: Mis Campañas → Vista Previa → Enviar Revisión
 flowchart TD
   N0(["Inicio"])
   N0 --> N1
-  N1["Buscar la campaña y abrir Vista previa"]
+  N1["Buscar la campaña y abrir Vista Previa"]
   N1 --> N2
   N2["Revisar Detalles de Proyecto, Documentación e historial"]
   N2 --> N3
@@ -18,9 +18,8 @@ flowchart TD
   N5 --> N6
   N6{"¿La campaña fue aprobada?"}
   N6 -->|"Sí"| N7
-  B6["Si sigue pendiente, esperar; si fue rechazada, leer el motivo, editar y reenviar"]
+  B6(["Pendiente: esperar. Rechazada: leer el motivo, corregir con E06 y reenviar"])
   N6 -->|"No"| B6
-  B6 --> N1
   N7["Continuar con E05 para lanzarla públicamente"]
   N7 --> N8
   N8(["Fin"])

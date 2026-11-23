@@ -1,19 +1,13 @@
-%% E12 · Eliminar el perfil de emprendedor
+%% E12 · Eliminar perfil: no disponible
 %% Rol: Emprendedor
-%% Entrada: Mi Perfil → Eliminar perfil
+%% Entrada: Mi Perfil de emprendedor
 flowchart TD
   N0(["Inicio"])
   N0 --> N1
-  N1["Abrir Mi Perfil y elegir Eliminar perfil"]
+  N1["Consultar Mi Perfil de emprendedor"]
   N1 --> N2
-  N2{"¿Confirmar la eliminación?"}
-  N2 -->|"Sí"| N3
-  B2(["Cancelar y conservar el perfil"])
-  N2 -->|"No"| B2
-  N3{"¿El servidor permite eliminarlo?"}
-  N3 -->|"Sí"| N4
-  B3(["Leer el bloqueo: si tiene campañas, no puede eliminarse"])
-  N3 -->|"No"| B3
-  N4["Eliminar los datos del perfil; la cuenta permanece activa"]
-  N4 --> N5
-  N5(["Fin"])
+  N2["La pantalla no muestra un botón para eliminar el perfil"]
+  N2 --> N3
+  N3["No se puede iniciar esta operación desde la web actual"]
+  N3 --> N4
+  N4(["Fin"])

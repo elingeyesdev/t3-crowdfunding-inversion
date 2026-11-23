@@ -23,13 +23,14 @@
 <text class="label" x="305" y="1075.0">Sí</text>
 <path class="edge" d="M 485 980 H 590"/>
 <text class="label" x="535" y="970" text-anchor="middle">No</text>
-<path class="edge" d="M 980 980 H 1010 V 230 H 485"/>
+<a href="../index.html#E06" aria-label="Ir a E06">
 <rect x="590.0" y="938.0" width="390" height="84" rx="8" fill="#fff8ef" stroke="#a9bdca"/>
 <text x="785" y="964" text-anchor="middle">
-<tspan x="785" dy="0">Si sigue pendiente, esperar; si fue</tspan>
-<tspan x="785" dy="22">rechazada, leer el motivo, editar y</tspan>
+<tspan x="785" dy="0">Pendiente: esperar. Rechazada: leer</tspan>
+<tspan x="785" dy="22">el motivo, corregir con E06 y</tspan>
 <tspan x="785" dy="22">reenviar</tspan>
 </text>
+</a>
 <path class="edge" d="M 290 1165.0 V 1245.0"/>
 <rect x="95.0" y="45.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
 <text x="290" y="86" text-anchor="middle">
@@ -38,7 +39,7 @@
 <rect x="95.0" y="195.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="225" text-anchor="middle">
 <tspan x="290" dy="0">Buscar la campaña y abrir Vista</tspan>
-<tspan x="290" dy="22">previa</tspan>
+<tspan x="290" dy="22">Previa</tspan>
 </text>
 <rect x="95.0" y="345.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="375" text-anchor="middle">

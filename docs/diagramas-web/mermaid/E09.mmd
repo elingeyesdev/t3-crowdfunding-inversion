@@ -1,12 +1,12 @@
 %% E09 · Publicar una actualización con texto, imagen o video
 %% Rol: Emprendedor
-%% Entrada: Mis Campañas → campaña publicada → Publicar novedad
+%% Entrada: Mis Campañas → campaña publicada → Publicar Novedad
 flowchart TD
   N0(["Inicio"])
   N0 --> N1
-  N1["Elegir Publicar novedad en la campaña"]
+  N1["Elegir Publicar Novedad en la campaña"]
   N1 --> N2
-  N2["Ingresar título y contenido"]
+  N2["Ingresar título de al menos 3 caracteres y contenido de al menos 10"]
   N2 --> N3
   N3["Elegir texto, imagen o video; adjuntar el archivo si corresponde"]
   N3 --> N4
@@ -22,6 +22,6 @@ flowchart TD
   B6["Leer el error y volver a intentar"]
   N6 -->|"No"| B6
   B6 --> N2
-  N7["Consultar la novedad en la campaña; los donadores la ven en sus actualizaciones"]
+  N7["Abrir la campaña y pulsar Hitos y Avances; los donadores también la ven en Mi Panel → Novedades"]
   N7 --> N8
   N8(["Fin"])

@@ -5,8 +5,8 @@
 <style>text{font-family:Arial,sans-serif;fill:#193449;font-size:18px} .label{font-size:16px;fill:#42596b} .edge{fill:none;stroke:#526578;stroke-width:1.8;marker-end:url(#arrow)} a:hover rect,a:hover polygon{stroke:#176941;stroke-width:3}</style>
 <path class="edge" d="M 290 115.0 V 195.0"/>
 <path class="edge" d="M 290 265.0 V 315.0"/>
-<path class="edge" d="M 290 445.0 V 495.0"/>
-<text class="label" x="305" y="475.0">Sí</text>
+<path class="edge" d="M 290 445.0 V 488.0"/>
+<text class="label" x="305" y="471.5">Sí</text>
 <path class="edge" d="M 485 380 H 590"/>
 <text class="label" x="535" y="370" text-anchor="middle">No</text>
 <a href="../index.html#E01" aria-label="Ir a E01">
@@ -16,9 +16,9 @@
 <tspan x="785" dy="22">volver cuando esté aprobado</tspan>
 </text>
 </a>
-<path class="edge" d="M 290 565.0 V 645.0"/>
-<path class="edge" d="M 290 715.0 V 795.0"/>
-<path class="edge" d="M 290 865.0 V 945.0"/>
+<path class="edge" d="M 290 572.0 V 645.0"/>
+<path class="edge" d="M 290 715.0 V 788.0"/>
+<path class="edge" d="M 290 872.0 V 945.0"/>
 <path class="edge" d="M 290 1015.0 V 1065.0"/>
 <path class="edge" d="M 290 1195.0 V 1245.0"/>
 <text class="label" x="305" y="1225.0">Sí</text>
@@ -45,25 +45,26 @@
 <tspan x="290" dy="0">¿El perfil cumple los</tspan>
 <tspan x="290" dy="22">requisitos?</tspan>
 </text>
-<rect x="95.0" y="495.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
-<text x="290" y="525" text-anchor="middle">
-<tspan x="290" dy="0">Completar título, descripción,</tspan>
-<tspan x="290" dy="22">categorías, meta y fecha de cierre</tspan>
+<rect x="95.0" y="488.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="514" text-anchor="middle">
+<tspan x="290" dy="0">Completar título, eslogan,</tspan>
+<tspan x="290" dy="22">descripción, categorías, meta y fecha</tspan>
+<tspan x="290" dy="22">de cierre si corresponde</tspan>
 </text>
 <rect x="95.0" y="645.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="675" text-anchor="middle">
 <tspan x="290" dy="0">Agregar portada o video si se desea;</tspan>
 <tspan x="290" dy="22">definir recompensas si corresponde</tspan>
 </text>
-<rect x="95.0" y="795.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
-<text x="290" y="825" text-anchor="middle">
-<tspan x="290" dy="0">Adjuntar al menos un documento de</tspan>
-<tspan x="290" dy="22">respaldo con su justificación</tspan>
+<rect x="95.0" y="788.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="814" text-anchor="middle">
+<tspan x="290" dy="0">Seleccionar respaldo, escribir</tspan>
+<tspan x="290" dy="22">justificación y pulsar Añadir</tspan>
+<tspan x="290" dy="22">Documento</tspan>
 </text>
 <rect x="95.0" y="945.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
-<text x="290" y="975" text-anchor="middle">
-<tspan x="290" dy="0">Elegir Guardar como borrador y</tspan>
-<tspan x="290" dy="22">confirmar</tspan>
+<text x="290" y="986" text-anchor="middle">
+<tspan x="290" dy="0">Pulsar Guardar Borrador y confirmar</tspan>
 </text>
 <polygon points="290,1065.0 485.0,1130 290,1195.0 95.0,1130" fill="#fff6df" stroke="#a38b49"/>
 <text x="290" y="1136" text-anchor="middle">

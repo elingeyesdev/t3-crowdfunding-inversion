@@ -37,13 +37,14 @@
 </text>
 <rect x="95.0" y="188.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="214" text-anchor="middle">
-<tspan x="290" dy="0">Consultar el resumen y filtrar por</tspan>
-<tspan x="290" dy="22">campaña, estado, origen, fechas y</tspan>
-<tspan x="290" dy="22">demás opciones</tspan>
+<tspan x="290" dy="0">Buscar por concepto, factura, notas o</tspan>
+<tspan x="290" dy="22">campaña; filtrar tipo, estado y</tspan>
+<tspan x="290" dy="22">comprobante</tspan>
 </text>
 <rect x="95.0" y="345.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
-<text x="290" y="386" text-anchor="middle">
-<tspan x="290" dy="0">Abrir la auditoría de un movimiento</tspan>
+<text x="290" y="375" text-anchor="middle">
+<tspan x="290" dy="0">Pulsar Revisar en el movimiento; usar</tspan>
+<tspan x="290" dy="22">las páginas si hay más resultados</tspan>
 </text>
 <rect x="95.0" y="495.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="525" text-anchor="middle">
@@ -56,8 +57,9 @@
 <tspan x="290" dy="22">revisión?</tspan>
 </text>
 <rect x="95.0" y="795.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
-<text x="290" y="836" text-anchor="middle">
-<tspan x="290" dy="0">Elegir Aprobar, Observar o Rechazar</tspan>
+<text x="290" y="825" text-anchor="middle">
+<tspan x="290" dy="0">Elegir Aprobar / Verificado, Marcar</tspan>
+<tspan x="290" dy="22">Observado o Rechazar</tspan>
 </text>
 <rect x="95.0" y="945.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="975" text-anchor="middle">
@@ -66,7 +68,7 @@
 </text>
 <rect x="95.0" y="1095.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="1136" text-anchor="middle">
-<tspan x="290" dy="0">Guardar la revisión</tspan>
+<tspan x="290" dy="0">Pulsar Confirmar Dictamen</tspan>
 </text>
 <polygon points="290,1215.0 485.0,1280 290,1345.0 95.0,1280" fill="#fff6df" stroke="#a38b49"/>
 <text x="290" y="1275" text-anchor="middle">

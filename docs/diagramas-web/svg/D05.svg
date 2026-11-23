@@ -12,8 +12,8 @@
 <a href="../index.html#D03" aria-label="Ir a D03">
 <rect x="590.0" y="345.0" width="390" height="70" rx="8" fill="#fff8ef" stroke="#a9bdca"/>
 <text x="785" y="375" text-anchor="middle">
-<tspan x="785" dy="0">Revisar los filtros o realizar un</tspan>
-<tspan x="785" dy="22">aporte primero</tspan>
+<tspan x="785" dy="0">Limpiar la búsqueda; si no hay</tspan>
+<tspan x="785" dy="22">aportes completados, realizar uno</tspan>
 </text>
 </a>
 <path class="edge" d="M 290 565.0 V 615.0"/>
@@ -32,8 +32,9 @@
 <tspan x="290" dy="0">Inicio</tspan>
 </text>
 <rect x="95.0" y="195.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
-<text x="290" y="236" text-anchor="middle">
-<tspan x="290" dy="0">Abrir Comprobantes y buscar el aporte</tspan>
+<text x="290" y="225" text-anchor="middle">
+<tspan x="290" dy="0">Abrir Comprobantes y buscar por</tspan>
+<tspan x="290" dy="22">proyecto o código de recibo</tspan>
 </text>
 <polygon points="290,315.0 485.0,380 290,445.0 95.0,380" fill="#fff6df" stroke="#a38b49"/>
 <text x="290" y="386" text-anchor="middle">

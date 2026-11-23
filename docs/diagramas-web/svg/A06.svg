@@ -3,8 +3,8 @@
 <desc id="desc">Flujo vertical. Seguir las flechas de arriba hacia abajo; cada decisión tiene una alternativa rotulada. Los pasos enlazados llevan a otro diagrama de la guía.</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526578"/></marker></defs>
 <style>text{font-family:Arial,sans-serif;fill:#193449;font-size:18px} .label{font-size:16px;fill:#42596b} .edge{fill:none;stroke:#526578;stroke-width:1.8;marker-end:url(#arrow)} a:hover rect,a:hover polygon{stroke:#176941;stroke-width:3}</style>
-<path class="edge" d="M 290 115.0 V 195.0"/>
-<path class="edge" d="M 290 265.0 V 338.0"/>
+<path class="edge" d="M 290 115.0 V 188.0"/>
+<path class="edge" d="M 290 272.0 V 338.0"/>
 <path class="edge" d="M 290 422.0 V 465.0"/>
 <path class="edge" d="M 290 595.0 V 638.0"/>
 <text class="label" x="305" y="621.5">Sí</text>
@@ -30,14 +30,15 @@
 <text x="290" y="86" text-anchor="middle">
 <tspan x="290" dy="0">Inicio</tspan>
 </text>
-<rect x="95.0" y="195.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
-<text x="290" y="225" text-anchor="middle">
-<tspan x="290" dy="0">Abrir Gestión de Campañas y filtrar</tspan>
-<tspan x="290" dy="22">el listado</tspan>
+<rect x="95.0" y="188.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="214" text-anchor="middle">
+<tspan x="290" dy="0">Buscar por título, creador o correo;</tspan>
+<tspan x="290" dy="22">seleccionar un estado y usar</tspan>
+<tspan x="290" dy="22">Actualizar si hace falta</tspan>
 </text>
 <rect x="95.0" y="338.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="364" text-anchor="middle">
-<tspan x="290" dy="0">Abrir Vista previa para consultar</tspan>
+<tspan x="290" dy="0">Abrir Vista Previa para consultar</tspan>
 <tspan x="290" dy="22">detalles, progreso, historial y</tspan>
 <tspan x="290" dy="22">documentos</tspan>
 </text>

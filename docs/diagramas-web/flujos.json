@@ -15,7 +15,7 @@
         "kind": "process"
       },
       {
-        "text": "Escribir una búsqueda; ajustar categoría, filtros y orden disponibles",
+        "text": "Escribir una búsqueda y enviarla con Enter; seleccionar una categoría en Sector",
         "kind": "process"
       },
       {
@@ -47,7 +47,7 @@
       "web/frontend/src/hooks/usePublicCampaigns.ts",
       "web/app/Http/Controllers/CampaignController.php"
     ],
-    "note": "",
+    "note": "Sector permite elegir una categoría o Todos los sectores. No hay un selector visible de orden. Se puede abrir una sugerencia de búsqueda directamente o usar Ver todos los resultados. La paginación aparece cuando hay más de una página.",
     "related": [
       "V02",
       "V03",
@@ -81,21 +81,96 @@
         }
       },
       {
-        "text": "Leer Historia, meta, recaudación, fecha de cierre y creador",
+        "text": "Leer el título, resumen, creador, Recaudado, Meta, Donantes y Días Restantes",
         "kind": "process"
       },
       {
-        "text": "Abrir Transparencia, Actualizaciones o Comentarios",
+        "text": "Localizar Historia y Proyecto, Transparencia y Fondos e Hitos y Avances",
         "kind": "process"
       },
       {
-        "text": "Revisar recompensas y condiciones del aporte",
+        "text": "Si Comentarios no aparece, desplazar horizontalmente esa misma barra hacia la derecha",
         "kind": "process"
       },
       {
-        "text": "Elegir otra acción: donar D03, compartir V05 o contactar C03",
+        "text": "¿Quieres conocer el proyecto?",
+        "kind": "decision",
+        "main": "No",
+        "branch": {
+          "text": "Pulsar Historia y Proyecto; leer Historia del Proyecto, recompensas y Sobre el Emprendedor",
+          "target": null,
+          "label": "Sí"
+        }
+      },
+      {
+        "text": "¿Quieres consultar fondos y evidencias?",
+        "kind": "decision",
+        "main": "No",
+        "branch": {
+          "text": "Pulsar Transparencia y Fondos; continuar con sus opciones en V06",
+          "target": null,
+          "label": "Sí",
+          "link": "V06"
+        }
+      },
+      {
+        "text": "¿Quieres consultar los avances?",
+        "kind": "decision",
+        "main": "No",
+        "branch": {
+          "text": "Pulsar Hitos y Avances; consultar los hitos y las novedades publicadas",
+          "target": null,
+          "label": "Sí"
+        }
+      },
+      {
+        "text": "¿Quieres leer o publicar comentarios?",
+        "kind": "decision",
+        "main": "No",
+        "branch": {
+          "text": "Pulsar Comentarios, a la derecha de Hitos y Avances; para participar, seguir C09",
+          "target": null,
+          "label": "Sí",
+          "link": "C09"
+        }
+      },
+      {
+        "text": "¿Quieres realizar un aporte?",
+        "kind": "decision",
+        "main": "No",
+        "branch": {
+          "text": "Consultar las condiciones del aporte y continuar con D03",
+          "target": null,
+          "label": "Sí",
+          "link": "D03"
+        }
+      },
+      {
+        "text": "¿Quieres compartir la campaña?",
+        "kind": "decision",
+        "main": "No",
+        "branch": {
+          "text": "Pulsar Compartir Campaña y continuar con V05",
+          "target": null,
+          "label": "Sí",
+          "link": "V05"
+        }
+      },
+      {
+        "text": "¿Quieres contactar al creador?",
+        "kind": "decision",
+        "main": "No",
+        "branch": {
+          "text": "En Historia y Proyecto, bajar hasta Sobre el Emprendedor; continuar con C03",
+          "target": null,
+          "label": "Sí",
+          "link": "C03"
+        }
+      },
+      {
+        "text": "Volver a Explorar para consultar otra campaña",
         "kind": "connector",
-        "link": "D03"
+        "link": "V01"
       },
       {
         "text": "Fin",
@@ -106,9 +181,10 @@
       "web/frontend/src/pages/CampaignDetailPage.tsx",
       "web/app/Models/Campaign.php"
     ],
-    "note": "Las campañas históricas pueden consultarse, aunque ya no acepten donaciones. :id representa el identificador de la campaña.",
+    "note": "La barra principal tiene cuatro pestañas. Comentarios está a la derecha de Hitos y Avances y puede quedar fuera de la zona visible; desplaza la barra horizontalmente para encontrarlo. Después de consultar una sección, puedes elegir otra pestaña. Las campañas cerradas conservan la información pública y los comentarios para consulta, pero ya no permiten nuevos aportes ni participación en comentarios.",
     "related": [
       "V06",
+      "C09",
       "V05",
       "C03",
       "D03"
@@ -236,7 +312,7 @@
     "id": "V05",
     "role": "Visitante y consulta pública",
     "title": "Compartir una campaña",
-    "entry": "Explorar o ficha de campaña → Compartir",
+    "entry": "Ficha de campaña → Compartir Campaña; en Explorar → icono de compartir",
     "pre": "Campaña disponible en el catálogo público.",
     "nodes": [
       {
@@ -244,7 +320,7 @@
         "kind": "terminal"
       },
       {
-        "text": "Pulsar el botón Compartir de la campaña",
+        "text": "Pulsar Compartir Campaña en la ficha, o el icono de compartir de su tarjeta en Explorar",
         "kind": "process"
       },
       {
@@ -287,8 +363,8 @@
   {
     "id": "V06",
     "role": "Visitante y consulta pública",
-    "title": "Consultar transparencia y documentos públicos",
-    "entry": "Ficha → Transparencia / Actualizaciones",
+    "title": "Consultar fondos, evidencias e hitos",
+    "entry": "Ficha de campaña → Transparencia y Fondos",
     "pre": "No requiere sesión; solo se muestran los documentos autorizados para publicación.",
     "nodes": [
       {
@@ -296,33 +372,57 @@
         "kind": "terminal"
       },
       {
-        "text": "Abrir una campaña y seleccionar Transparencia",
+        "text": "En la barra principal de la campaña, pulsar Transparencia y Fondos",
         "kind": "process"
       },
       {
-        "text": "Abrir Plan de Fondos o Auditoría y Movimientos",
+        "text": "Localizar Plan de Fondos, Auditoría y Movimientos, Hitos del Proyecto, Evidencias y Bitácora",
         "kind": "process"
       },
       {
-        "text": "Revisar gráficos, filtrar aportes y consultar Hitos del Proyecto",
+        "text": "Si alguna opción no aparece, desplazar horizontalmente la barra de submenús hacia la derecha",
         "kind": "process"
       },
       {
-        "text": "¿Hay documentos públicos?",
+        "text": "Pulsar Plan de Fondos para consultar la distribución prevista del dinero",
+        "kind": "process"
+      },
+      {
+        "text": "Pulsar Auditoría y Movimientos para consultar recaudación, gráficos y aportes recientes",
+        "kind": "process"
+      },
+      {
+        "text": "En los aportes recientes, elegir Todos, Directos o Recompensas",
+        "kind": "process"
+      },
+      {
+        "text": "Pulsar Hitos del Proyecto para consultar las etapas y su estado",
+        "kind": "process"
+      },
+      {
+        "text": "Pulsar Evidencias; el número junto al nombre indica cuántos documentos hay",
+        "kind": "process"
+      },
+      {
+        "text": "¿Hay evidencias públicas?",
         "kind": "decision",
         "main": "Sí",
         "branch": {
-          "text": "Continuar con la información pública disponible",
-          "target": 6,
+          "text": "La sección muestra No hay evidencias públicas disponibles; continuar con Bitácora",
+          "target": 11,
           "label": "No"
         }
       },
       {
-        "text": "En Evidencias, abrir el documento público desde su enlace",
+        "text": "Pulsar Abrir documento en la evidencia elegida; se abre en otra pestaña",
         "kind": "process"
       },
       {
-        "text": "Abrir Bitácora o Actualizaciones para consultar las novedades",
+        "text": "Volver a la campaña y pulsar Bitácora para consultar las novedades publicadas",
+        "kind": "process"
+      },
+      {
+        "text": "Para ver hitos y novedades juntos, pulsar Hitos y Avances en la barra principal",
         "kind": "process"
       },
       {
@@ -346,38 +446,20 @@
   {
     "id": "V07",
     "role": "Visitante y consulta pública",
-    "title": "Consultar al asistente de soporte",
-    "entry": "Inicio → botón flotante de soporte",
-    "pre": "No requiere una cuenta; requiere disponibilidad del proveedor de IA.",
+    "title": "Asistente IA: no disponible",
+    "entry": "Inicio",
+    "pre": "El asistente IA todavía no está disponible.",
     "nodes": [
       {
         "text": "Inicio",
         "kind": "terminal"
       },
       {
-        "text": "Abrir Inicio y desplegar el chat de soporte",
+        "text": "El asistente IA no está disponible por el momento",
         "kind": "process"
       },
       {
-        "text": "Escribir una consulta o elegir una sugerencia",
-        "kind": "process"
-      },
-      {
-        "text": "Enviar y esperar la respuesta",
-        "kind": "process"
-      },
-      {
-        "text": "¿Llegó una respuesta?",
-        "kind": "decision",
-        "main": "Sí",
-        "branch": {
-          "text": "Revisar el mensaje de error e intentar nuevamente",
-          "target": 2,
-          "label": "No"
-        }
-      },
-      {
-        "text": "Leer la orientación y continuar la conversación o cerrar el chat",
+        "text": "Consultar el índice de esta guía y elegir la funcionalidad que necesitas",
         "kind": "process"
       },
       {
@@ -390,7 +472,7 @@
       "web/frontend/src/components/AISupportChat.tsx",
       "web/app/Http/Controllers/AiController.php"
     ],
-    "note": "El asistente orienta; la consulta no equivale a crear una solicitud atendida por un administrador.",
+    "note": "Aunque aparezca un botón de chat en Inicio, el asistente IA no está habilitado actualmente. Puedes consultar los diagramas de esta guía para conocer cómo usar la plataforma.",
     "related": []
   },
   {
@@ -427,11 +509,18 @@
         }
       },
       {
-        "text": "Donador: abrir Mi Panel; emprendedor: abrir Mi Perfil",
-        "kind": "process"
+        "text": "¿Elegiste Donador?",
+        "kind": "decision",
+        "main": "Sí",
+        "branch": {
+          "text": "Se abre Mi Perfil de emprendedor; continuar en E01",
+          "target": null,
+          "label": "No",
+          "link": "E01"
+        }
       },
       {
-        "text": "Completar el perfil del rol: D01 o E01",
+        "text": "Se abre Mi Panel; completar Mi Perfil con D01",
         "kind": "connector",
         "link": "D01"
       },
@@ -519,40 +608,22 @@
   {
     "id": "C08",
     "role": "Acceso y funciones compartidas",
-    "title": "Acceder con Google",
-    "entry": "Login o registro → botón de Google",
-    "pre": "Servicio de Google configurado y disponible.",
+    "title": "Acceso con Google: no disponible",
+    "entry": "Inicio de sesión o registro",
+    "pre": "El acceso con Google todavía no está disponible.",
     "nodes": [
       {
         "text": "Inicio",
         "kind": "terminal"
       },
       {
-        "text": "Pulsar Continuar con Google",
+        "text": "El acceso con Google no está disponible por el momento",
         "kind": "process"
       },
       {
-        "text": "Elegir una cuenta de Google y autorizar el acceso",
-        "kind": "process"
-      },
-      {
-        "text": "¿La autenticación fue aceptada?",
-        "kind": "decision",
-        "main": "Sí",
-        "branch": {
-          "text": "Volver al login, leer el error y reintentar o usar correo",
-          "target": null,
-          "label": "No",
-          "link": "C02"
-        }
-      },
-      {
-        "text": "UniFundme recibe el resultado de Google y abre la sesión",
-        "kind": "process"
-      },
-      {
-        "text": "Abrir el destino del rol: Mi Panel o perfil de emprendedor",
-        "kind": "process"
+        "text": "Para iniciar sesión con correo y contraseña, continuar en C02",
+        "kind": "connector",
+        "link": "C02"
       },
       {
         "text": "Fin",
@@ -565,18 +636,17 @@
       "web/frontend/src/pages/OAuthCallbackPage.tsx",
       "web/app/Http/Controllers/AuthController.php"
     ],
-    "note": "El botón del login solicita el rol donador; el registro envía el rol seleccionado. La cuenta de Google debe tener el correo verificado.",
+    "note": "Aunque aparezca el botón de Google, utiliza el acceso con correo y contraseña. Si aún no tienes una cuenta, puedes crearla con tu correo en C01.",
     "related": [
-      "D01",
-      "E01",
-      "C02"
+      "C02",
+      "C01"
     ]
   },
   {
     "id": "C03",
     "role": "Acceso y funciones compartidas",
     "title": "Iniciar o continuar una conversación",
-    "entry": "Ficha → contacto del creador; barra superior → Mensajes · /chat",
+    "entry": "Historia y Proyecto → Sobre el Emprendedor → Contactar Emprendedor; para conversaciones existentes: Mensajes",
     "pre": "Sesión iniciada. Para una nueva conversación se selecciona al creador de una campaña.",
     "nodes": [
       {
@@ -584,7 +654,7 @@
         "kind": "terminal"
       },
       {
-        "text": "Para contactar al creador, abrir su campaña y pulsar el botón de mensaje",
+        "text": "En Historia y Proyecto, bajar hasta Sobre el Emprendedor y pulsar Contactar Emprendedor",
         "kind": "process"
       },
       {
@@ -603,11 +673,11 @@
         "kind": "process"
       },
       {
-        "text": "Leer el historial; subir en la conversación para cargar mensajes anteriores",
+        "text": "Leer el historial; subir o pulsar Ver mensajes anteriores cuando aparezca",
         "kind": "process"
       },
       {
-        "text": "Escribir el mensaje y pulsar Enviar",
+        "text": "Escribir el mensaje y pulsar el botón con el icono de enviar",
         "kind": "process"
       },
       {
@@ -730,7 +800,7 @@
         }
       },
       {
-        "text": "Cerrar la ventana y volver al centro de notificaciones",
+        "text": "Ver la confirmación; la ventana se cierra y regresa al centro",
         "kind": "process"
       },
       {
@@ -752,7 +822,7 @@
     "role": "Acceso y funciones compartidas",
     "title": "Cambiar la contraseña",
     "entry": "Barra superior → Configuración · /account-settings",
-    "pre": "Sesión iniciada y cuenta con contraseña local.",
+    "pre": "Sesión iniciada; la edición requiere contraseña local.",
     "nodes": [
       {
         "text": "Inicio",
@@ -767,7 +837,7 @@
         "kind": "decision",
         "main": "Sí",
         "branch": {
-          "text": "La pantalla indica usar Google; finalizar este flujo",
+          "text": "Esta cuenta no permite cambiar la contraseña desde esta pantalla",
           "target": null,
           "label": "No"
         }
@@ -1004,7 +1074,7 @@
         }
       },
       {
-        "text": "Ingresar el monto y, opcionalmente, seleccionar una recompensa",
+        "text": "Ingresar el monto; opcionalmente elegir un nivel en Historia y Proyecto → Niveles de Recompensa",
         "kind": "process"
       },
       {
@@ -1018,7 +1088,7 @@
         }
       },
       {
-        "text": "Pulsar Donar y revisar el resumen de confirmación",
+        "text": "Pulsar Donar Bs. [monto] y revisar la ventana Confirmar Aporte",
         "kind": "process"
       },
       {
@@ -1042,7 +1112,7 @@
         }
       },
       {
-        "text": "Ver éxito, saldo y recaudación actualizados; descargar comprobante o ir a Mi Panel",
+        "text": "Ver el aporte confirmado; descargar el PDF o abrir Mi Panel para consultar el saldo",
         "kind": "process"
       },
       {
@@ -1080,7 +1150,7 @@
         "kind": "process"
       },
       {
-        "text": "Buscar y filtrar el listado por las opciones disponibles",
+        "text": "Buscar por campaña; filtrar Todos, Completados o Pendientes y elegir un orden",
         "kind": "process"
       },
       {
@@ -1099,7 +1169,7 @@
         "kind": "process"
       },
       {
-        "text": "Abrir la campaña o descargar el comprobante del aporte",
+        "text": "Pulsar Ver Proyecto; si el aporte está completado, descargar su Recibo",
         "kind": "process"
       },
       {
@@ -1124,14 +1194,14 @@
     "role": "Donador",
     "title": "Descargar comprobantes PDF",
     "entry": "Mi Panel → Comprobantes · /dashboard?tab=receipts",
-    "pre": "Tener una donación registrada; el comprobante solo está disponible para su titular.",
+    "pre": "Tener una donación completada; esta pestaña solo lista esos aportes y solo el titular descarga sus recibos.",
     "nodes": [
       {
         "text": "Inicio",
         "kind": "terminal"
       },
       {
-        "text": "Abrir Comprobantes y buscar el aporte",
+        "text": "Abrir Comprobantes y buscar por proyecto o código de recibo",
         "kind": "process"
       },
       {
@@ -1139,7 +1209,7 @@
         "kind": "decision",
         "main": "Sí",
         "branch": {
-          "text": "Revisar los filtros o realizar un aporte primero",
+          "text": "Limpiar la búsqueda; si no hay aportes completados, realizar uno",
           "target": null,
           "label": "No",
           "link": "D03"
@@ -1212,7 +1282,7 @@
         "kind": "process"
       },
       {
-        "text": "Cambiar de página o abrir la campaña para ver su detalle",
+        "text": "Usar Anterior o Siguiente si aparecen, o pulsar Ver Campaña para abrir el proyecto",
         "kind": "process"
       },
       {
@@ -1342,39 +1412,61 @@
     "id": "C09",
     "role": "Acceso y funciones compartidas",
     "title": "Publicar comentarios y marcar Me gusta",
-    "entry": "Ficha de campaña → Comentarios",
-    "pre": "Donador o emprendedor con sesión iniciada; la lectura es pública.",
+    "entry": "Ficha de campaña → barra principal → Comentarios, a la derecha de Hitos y Avances",
+    "pre": "La lectura es pública. Para participar, la campaña debe admitir comentarios y debes iniciar sesión como donador o emprendedor.",
     "nodes": [
       {
         "text": "Inicio",
         "kind": "terminal"
       },
       {
-        "text": "Abrir la pestaña Comentarios de la campaña",
+        "text": "Abrir la campaña y localizar la barra de Historia y Proyecto, Transparencia y Fondos e Hitos y Avances",
         "kind": "process"
+      },
+      {
+        "text": "Desplazar esa barra horizontalmente a la derecha, si hace falta, y pulsar Comentarios",
+        "kind": "process"
+      },
+      {
+        "text": "Leer los comentarios existentes en la sección Comentarios",
+        "kind": "process"
+      },
+      {
+        "text": "¿La campaña permite participar?",
+        "kind": "decision",
+        "main": "Sí",
+        "branch": {
+          "text": "La campaña está cerrada: sus comentarios se conservan solo para consulta",
+          "target": null,
+          "label": "No"
+        }
       },
       {
         "text": "¿Hay una sesión de donador o emprendedor?",
         "kind": "decision",
         "main": "Sí",
         "branch": {
-          "text": "Iniciar sesión con un rol permitido para participar",
+          "text": "Pulsar Inicia sesión y seguir C02; después regresar a Comentarios",
           "target": null,
           "label": "No",
           "link": "C02"
         }
       },
       {
-        "text": "Escribir un comentario y publicarlo; o pulsar Me gusta en uno existente",
+        "text": "Si quieres comentar: escribir en Escribe un comentario... y pulsar el icono de enviar",
         "kind": "process"
       },
       {
-        "text": "¿El servidor acepta la acción?",
+        "text": "Si quieres marcar Me gusta: pulsar el icono de pulgar arriba del comentario elegido",
+        "kind": "process"
+      },
+      {
+        "text": "¿Se registró la acción?",
         "kind": "decision",
         "main": "Sí",
         "branch": {
-          "text": "Corregir el texto o revisar el acceso e intentar de nuevo",
-          "target": 3,
+          "text": "Comprobar el resultado; corregir el texto o revisar el acceso e intentar de nuevo",
+          "target": 6,
           "label": "No"
         }
       },
@@ -1388,10 +1480,11 @@
       }
     ],
     "sources": [
+      "web/frontend/src/pages/CampaignDetailPage.tsx",
       "web/frontend/src/components/campaign-detail/CampaignComments.tsx",
       "web/app/Http/Controllers/CommunityController.php"
     ],
-    "note": "La interfaz revisada permite publicar comentarios y alternar Me gusta; no se documenta edición, borrado o respuestas anidadas.",
+    "note": "Comentarios es una cuarta pestaña principal; no está dentro de Transparencia y Fondos. El cuadro admite hasta 2000 caracteres. Puedes comentar o marcar Me gusta de forma independiente. La lectura no exige iniciar sesión, pero las campañas cerradas no permiten publicar ni dar Me gusta.",
     "related": [
       "V02",
       "C02"
@@ -1431,7 +1524,7 @@
         }
       },
       {
-        "text": "Opcional: cambiar foto o portada y consultar Información, fondos o finanzas",
+        "text": "Opcional: cambiar foto o portada y consultar Información, Datos Bancarios o Finanzas",
         "kind": "process"
       },
       {
@@ -1460,15 +1553,15 @@
     "id": "E02",
     "role": "Emprendedor",
     "title": "Solicitar verificación de identidad KYC",
-    "entry": "Mi Perfil → verificación de identidad; también desde Mis Campañas",
-    "pre": "Perfil de emprendedor creado. KYC significa verificación de identidad.",
+    "entry": "Mi Perfil → Iniciar Verificación; Mis Campañas → Verificar Identidad / Reintentar KYC",
+    "pre": "Perfil de emprendedor creado; no tener una solicitud ya pendiente. KYC significa verificación de identidad.",
     "nodes": [
       {
         "text": "Inicio",
         "kind": "terminal"
       },
       {
-        "text": "Abrir Verificación de Identidad",
+        "text": "Pulsar Iniciar Verificación, Verificar Identidad o Reintentar KYC según la pantalla",
         "kind": "process"
       },
       {
@@ -1490,7 +1583,7 @@
         }
       },
       {
-        "text": "Enviar los documentos y esperar la revisión administrativa A04",
+        "text": "Pulsar Enviar a Revisión y esperar la revisión administrativa A04",
         "kind": "process"
       },
       {
@@ -1498,9 +1591,10 @@
         "kind": "decision",
         "main": "Sí",
         "branch": {
-          "text": "Si está pendiente, esperar; si fue rechazada, leer el motivo y reenviar",
-          "target": 1,
-          "label": "No"
+          "text": "Pendiente: esperar. Rechazada: leer el motivo y volver a E02 para reenviar",
+          "target": null,
+          "label": "No",
+          "link": "E02"
         }
       },
       {
@@ -1553,7 +1647,7 @@
         }
       },
       {
-        "text": "Completar título, descripción, categorías, meta y fecha de cierre",
+        "text": "Completar título, eslogan, descripción, categorías, meta y fecha de cierre si corresponde",
         "kind": "process"
       },
       {
@@ -1561,11 +1655,11 @@
         "kind": "process"
       },
       {
-        "text": "Adjuntar al menos un documento de respaldo con su justificación",
+        "text": "Seleccionar respaldo, escribir justificación y pulsar Añadir Documento",
         "kind": "process"
       },
       {
-        "text": "Elegir Guardar como borrador y confirmar",
+        "text": "Pulsar Guardar Borrador y confirmar",
         "kind": "process"
       },
       {
@@ -1593,7 +1687,7 @@
       "web/frontend/src/hooks/useCampaigns.ts",
       "web/app/Http/Controllers/CampaignController.php"
     ],
-    "note": "En Mis Campañas el formulario no recibe la función para enviar a revisión: usar primero Guardar como borrador y luego E04. La creación puede continuar aunque falle una carga posterior: comprobar portada y documentos.",
+    "note": "El formulario exige título de 5–50 caracteres, eslogan de 10–50, descripción de 50–800, meta de al menos Bs. 100 y una categoría. La fecha puede omitirse al guardar, pero se requiere una fecha futura para publicar. El video opcional es de YouTube o TikTok. En Mis Campañas se usa Guardar Borrador y luego E04; desde Mi Perfil → Campañas también existe Enviar a Revisión. Añadir al menos un respaldo es obligatorio. Comprobar portada y documentos: una carga posterior puede fallar aunque se haya creado el borrador.",
     "related": [
       "E01",
       "E02",
@@ -1605,7 +1699,7 @@
     "id": "E04",
     "role": "Emprendedor",
     "title": "Enviar una campaña a revisión y corregir rechazos",
-    "entry": "Mis Campañas → Vista previa → Enviar Revisión",
+    "entry": "Mis Campañas → Vista Previa → Enviar Revisión",
     "pre": "Campaña propia en borrador o rechazada.",
     "nodes": [
       {
@@ -1613,7 +1707,7 @@
         "kind": "terminal"
       },
       {
-        "text": "Buscar la campaña y abrir Vista previa",
+        "text": "Buscar la campaña y abrir Vista Previa",
         "kind": "process"
       },
       {
@@ -1644,9 +1738,10 @@
         "kind": "decision",
         "main": "Sí",
         "branch": {
-          "text": "Si sigue pendiente, esperar; si fue rechazada, leer el motivo, editar y reenviar",
-          "target": 1,
-          "label": "No"
+          "text": "Pendiente: esperar. Rechazada: leer el motivo, corregir con E06 y reenviar",
+          "target": null,
+          "label": "No",
+          "link": "E06"
         }
       },
       {
@@ -1688,7 +1783,7 @@
         "kind": "process"
       },
       {
-        "text": "Abrir Vista previa y pulsar Lanzar, o usar la acción de la tarjeta",
+        "text": "En Vista Previa pulsar Lanzar, o pulsar Publicar Campaña en la tarjeta",
         "kind": "process"
       },
       {
@@ -1739,11 +1834,11 @@
         "kind": "terminal"
       },
       {
-        "text": "Buscar por título y elegir filtros de estado, orden y página",
+        "text": "Buscar por título y elegir una pestaña de estado; alternar vista de tarjetas o lista",
         "kind": "process"
       },
       {
-        "text": "Abrir la campaña en Vista previa",
+        "text": "Abrir la campaña en Vista Previa",
         "kind": "process"
       },
       {
@@ -1789,7 +1884,7 @@
       "web/frontend/src/components/CampaignForm.tsx",
       "web/app/Http/Controllers/CampaignController.php"
     ],
-    "note": "El formulario exige adjuntar respaldo incluso al editar. Cancelar permite volver; si hay cambios, el formulario puede pedir confirmación para descartarlos.",
+    "note": "Mis Campañas filtra las campañas cargadas y no muestra controles de orden ni de paginación. El formulario exige agregar respaldo incluso al editar. El botón visible es Guardar Borrador; Descartar pide confirmación. Para reemplazar la portada, usar la edición de campaña; el acceso Actualizar Portada de la vista previa se conecta desde Mi Perfil, no desde Mis Campañas.",
     "related": [
       "E04",
       "E07",
@@ -1801,7 +1896,7 @@
     "id": "E07",
     "role": "Emprendedor",
     "title": "Consultar recaudación, estadísticas y donadores",
-    "entry": "Mis Campañas → Vista previa → Progreso Económico / Donadores Activos",
+    "entry": "Mis Campañas → Vista Previa → Progreso Económico / Donadores Activos",
     "pre": "Campaña propia publicada o financiada para estas pestañas.",
     "nodes": [
       {
@@ -1809,7 +1904,7 @@
         "kind": "terminal"
       },
       {
-        "text": "Abrir Vista previa de la campaña",
+        "text": "Abrir Vista Previa de la campaña",
         "kind": "process"
       },
       {
@@ -1858,7 +1953,7 @@
     "id": "E08",
     "role": "Emprendedor",
     "title": "Consultar recompensas y actualizar sus entregas",
-    "entry": "Mis Campañas → Vista previa → Recompensas",
+    "entry": "Mis Campañas → Vista Previa → Recompensas",
     "pre": "Campaña propia; la pestaña se muestra cuando la campaña ya tiene niveles de recompensa.",
     "nodes": [
       {
@@ -1866,7 +1961,7 @@
         "kind": "terminal"
       },
       {
-        "text": "Abrir Recompensas desde Vista previa",
+        "text": "Abrir Recompensas desde Vista Previa",
         "kind": "process"
       },
       {
@@ -1874,8 +1969,28 @@
         "kind": "process"
       },
       {
+        "text": "¿Hay donadores con recompensas?",
+        "kind": "decision",
+        "main": "Sí",
+        "branch": {
+          "text": "No hay entregas para actualizar; volver cuando exista un aporte con recompensa",
+          "target": null,
+          "label": "No"
+        }
+      },
+      {
         "text": "Para entregas: desplegar Donadores con Recompensas",
         "kind": "process"
+      },
+      {
+        "text": "¿El selector permite cambiar el estado?",
+        "kind": "decision",
+        "main": "Sí",
+        "branch": {
+          "text": "Consultar solamente: no hay transiciones disponibles para ese registro",
+          "target": null,
+          "label": "No"
+        }
       },
       {
         "text": "Elegir en cada registro uno de los estados de seguimiento permitidos",
@@ -1886,8 +2001,8 @@
         "kind": "decision",
         "main": "Sí",
         "branch": {
-          "text": "Revisar el error y cargar el estado vigente antes de reintentar",
-          "target": 4,
+          "text": "Revisar el error; la lista intenta recargar el estado vigente antes de reintentar",
+          "target": 6,
           "label": "No"
         }
       },
@@ -1917,7 +2032,7 @@
     "id": "E09",
     "role": "Emprendedor",
     "title": "Publicar una actualización con texto, imagen o video",
-    "entry": "Mis Campañas → campaña publicada → Publicar novedad",
+    "entry": "Mis Campañas → campaña publicada → Publicar Novedad",
     "pre": "Campaña propia publicada; usar la acción disponible de la tarjeta.",
     "nodes": [
       {
@@ -1925,11 +2040,11 @@
         "kind": "terminal"
       },
       {
-        "text": "Elegir Publicar novedad en la campaña",
+        "text": "Elegir Publicar Novedad en la campaña",
         "kind": "process"
       },
       {
-        "text": "Ingresar título y contenido",
+        "text": "Ingresar título de al menos 3 caracteres y contenido de al menos 10",
         "kind": "process"
       },
       {
@@ -1961,7 +2076,7 @@
         }
       },
       {
-        "text": "Consultar la novedad en la campaña; los donadores la ven en sus actualizaciones",
+        "text": "Abrir la campaña y pulsar Hitos y Avances; los donadores también la ven en Mi Panel → Novedades",
         "kind": "process"
       },
       {
@@ -1984,16 +2099,16 @@
   {
     "id": "E10",
     "role": "Emprendedor",
-    "title": "Finalizar una campaña y determinar reembolsos",
-    "entry": "Mis Campañas → tarjeta publicada → Finalizar",
-    "pre": "La tarjeta web ofrece Finalizar cuando el estado es Publicada.",
+    "title": "Finalizar una campaña desde la web",
+    "entry": "Mis Campañas → tarjeta publicada → Finalizar Campaña",
+    "pre": "La tarjeta web ofrece Finalizar Campaña cuando el estado es Publicada.",
     "nodes": [
       {
         "text": "Inicio",
         "kind": "terminal"
       },
       {
-        "text": "Localizar la campaña publicada y pulsar Finalizar",
+        "text": "Localizar la campaña publicada y pulsar Finalizar Campaña",
         "kind": "process"
       },
       {
@@ -2007,25 +2122,25 @@
         }
       },
       {
-        "text": "El sistema comprueba el estado y la recaudación actual",
+        "text": "El sistema comprueba el estado y procesa la finalización",
         "kind": "process"
       },
       {
-        "text": "¿Se alcanzó la meta?",
+        "text": "¿La finalización fue aceptada?",
         "kind": "decision",
         "main": "Sí",
         "branch": {
-          "text": "Registrar Fallida, reembolsar aportes completados al saldo simulado y cancelar recompensas",
+          "text": "Leer el error en Mis Campañas y volver a cargar antes de intentar otra acción",
           "target": null,
           "label": "No"
         }
       },
       {
-        "text": "Registrar Completada sin devolución por falta de meta",
+        "text": "Consultar el estado actualizado y abrir Vista Previa para ver el historial",
         "kind": "process"
       },
       {
-        "text": "Consultar estado, historial y notificaciones de la finalización",
+        "text": "Si quedó Fallida, los donadores consultan la devolución en Mis Aportes y Mi Panel",
         "kind": "process"
       },
       {
@@ -2038,7 +2153,7 @@
       "web/frontend/src/hooks/useCampaigns.ts",
       "web/app/Services/InvestmentEngine.php"
     ],
-    "note": "Límite actual: al alcanzar la meta la campaña pasa a Financiada y la tarjeta oculta Finalizar. El servidor admite finalizar Publicada, Parcialmente financiada y Financiada; la rama con éxito existe en el servidor, pero no tiene una acción web directa en esos dos últimos estados. El vencimiento por sí solo no ejecuta este flujo.",
+    "note": "Sin alcanzar la meta, el sistema marca Fallida, devuelve saldo simulado y cancela recompensas. Con la meta alcanzada, el servidor puede registrar Completada, pero la tarjeta ya no ofrece Finalizar al pasar a Financiada. No se presenta esa capacidad del servidor como una acción disponible en la web. El vencimiento por sí solo no ejecuta la finalización.",
     "related": [
       "D08",
       "D04",
@@ -2101,40 +2216,24 @@
   {
     "id": "E12",
     "role": "Emprendedor",
-    "title": "Eliminar el perfil de emprendedor",
-    "entry": "Mi Perfil → Eliminar perfil",
-    "pre": "Sesión de emprendedor; esta operación conserva la cuenta de acceso.",
+    "title": "Eliminar perfil: no disponible",
+    "entry": "Mi Perfil de emprendedor",
+    "pre": "La eliminación del perfil no está disponible en la versión web.",
     "nodes": [
       {
         "text": "Inicio",
         "kind": "terminal"
       },
       {
-        "text": "Abrir Mi Perfil y elegir Eliminar perfil",
+        "text": "Consultar Mi Perfil de emprendedor",
         "kind": "process"
       },
       {
-        "text": "¿Confirmar la eliminación?",
-        "kind": "decision",
-        "main": "Sí",
-        "branch": {
-          "text": "Cancelar y conservar el perfil",
-          "target": null,
-          "label": "No"
-        }
+        "text": "La pantalla no muestra un botón para eliminar el perfil",
+        "kind": "process"
       },
       {
-        "text": "¿El servidor permite eliminarlo?",
-        "kind": "decision",
-        "main": "Sí",
-        "branch": {
-          "text": "Leer el bloqueo: si tiene campañas, no puede eliminarse",
-          "target": null,
-          "label": "No"
-        }
-      },
-      {
-        "text": "Eliminar los datos del perfil; la cuenta permanece activa",
+        "text": "No se puede iniciar esta operación desde la web actual",
         "kind": "process"
       },
       {
@@ -2147,10 +2246,9 @@
       "web/frontend/src/components/entrepreneur-profile/ProfileSidebar.tsx",
       "web/app/Http/Controllers/ProfileController.php"
     ],
-    "note": "",
+    "note": "Puedes consultar o editar tus datos desde Mi Perfil siguiendo E01.",
     "related": [
-      "E01",
-      "E11"
+      "E01"
     ]
   },
   {
@@ -2212,7 +2310,7 @@
         "kind": "terminal"
       },
       {
-        "text": "Abrir Gestión de Usuarios y buscar por los datos disponibles",
+        "text": "Abrir Gestión de Usuarios y buscar por correo electrónico",
         "kind": "process"
       },
       {
@@ -2266,14 +2364,14 @@
     "role": "Administrador",
     "title": "Revisar, aprobar o rechazar campañas",
     "entry": "Panel → Revisión de Campañas · /admin/campaigns/review",
-    "pre": "Campañas pendientes o en revisión.",
+    "pre": "La pantalla carga campañas pendientes de revisión.",
     "nodes": [
       {
         "text": "Inicio",
         "kind": "terminal"
       },
       {
-        "text": "Buscar y filtrar campañas pendientes o en revisión",
+        "text": "Buscar por título o emprendedor con Enter; recorrer las páginas de pendientes",
         "kind": "process"
       },
       {
@@ -2324,7 +2422,7 @@
       "web/frontend/src/components/CampaignPreviewModal.tsx",
       "web/app/Http/Controllers/AdminController.php"
     ],
-    "note": "El listado también ofrece aprobación o rechazo rápido. Para rechazar, la interfaz pide un motivo.",
+    "note": "El listado solicita solo pendientes; no muestra un filtro para incluir En revisión. El detalle conectado permite Aprobar o Rechazar, con motivo obligatorio para rechazar. Las acciones rápidas del listado usan confirmación o solicitud de motivo. Gestión de Campañas muestra botones de decisión en algunos detalles sin conectar sus acciones: decidir desde Revisión de Campañas.",
     "related": [
       "A05",
       "E04",
@@ -2372,11 +2470,11 @@
         }
       },
       {
-        "text": "Aprobar la identidad",
+        "text": "Pulsar Aprobar KYC y aceptar la confirmación; cancelar conserva la solicitud",
         "kind": "process"
       },
       {
-        "text": "Guardar revisión, notificar y retirar la solicitud de la lista pendiente",
+        "text": "El sistema guarda la revisión y notifica; comprobar que ya no figure como pendiente",
         "kind": "process"
       },
       {
@@ -2416,7 +2514,7 @@
         "kind": "process"
       },
       {
-        "text": "¿El documento se aprueba?",
+        "text": "¿El documento pendiente se aprueba?",
         "kind": "decision",
         "main": "Sí",
         "branch": {
@@ -2430,7 +2528,7 @@
         "kind": "process"
       },
       {
-        "text": "Elegir si el documento aprobado debe publicarse u ocultarse",
+        "text": "En un documento aprobado, usar Publicar evidencia o Retirar publicación",
         "kind": "process"
       },
       {
@@ -2457,7 +2555,7 @@
       "web/app/Http/Controllers/AdminController.php",
       "web/app/Http/Controllers/CampaignReadController.php"
     ],
-    "note": "Rechazar una campaña y rechazar un documento son decisiones distintas. El archivo aprobado debe existir para autorizar su publicación.",
+    "note": "Usar Ver Documento para abrir el archivo. Los botones Aprobar y Rechazar aparecen solo en documentos pendientes; los aprobados tienen el control de publicación y los rechazados se consultan. Aprobar un documento no lo publica automáticamente. El archivo debe existir para publicarlo.",
     "related": [
       "A03",
       "A06",
@@ -2476,11 +2574,11 @@
         "kind": "terminal"
       },
       {
-        "text": "Abrir Gestión de Campañas y filtrar el listado",
+        "text": "Buscar por título, creador o correo; seleccionar un estado y usar Actualizar si hace falta",
         "kind": "process"
       },
       {
-        "text": "Abrir Vista previa para consultar detalles, progreso, historial y documentos",
+        "text": "Abrir Vista Previa para consultar detalles, progreso, historial y documentos",
         "kind": "process"
       },
       {
@@ -2539,11 +2637,11 @@
         "kind": "terminal"
       },
       {
-        "text": "Consultar el resumen y filtrar por campaña, estado, origen, fechas y demás opciones",
+        "text": "Buscar por concepto, factura, notas o campaña; filtrar tipo, estado y comprobante",
         "kind": "process"
       },
       {
-        "text": "Abrir la auditoría de un movimiento",
+        "text": "Pulsar Revisar en el movimiento; usar las páginas si hay más resultados",
         "kind": "process"
       },
       {
@@ -2561,7 +2659,7 @@
         }
       },
       {
-        "text": "Elegir Aprobar, Observar o Rechazar",
+        "text": "Elegir Aprobar / Verificado, Marcar Observado o Rechazar",
         "kind": "process"
       },
       {
@@ -2569,7 +2667,7 @@
         "kind": "process"
       },
       {
-        "text": "Guardar la revisión",
+        "text": "Pulsar Confirmar Dictamen",
         "kind": "process"
       },
       {
@@ -2619,7 +2717,7 @@
         "kind": "process"
       },
       {
-        "text": "Pulsar el acceso a Auditoría Presupuestaria de la Campaña",
+        "text": "En un movimiento, pulsar el icono de gráfico: Auditar Plan de Fondos de la Campaña",
         "kind": "process"
       },
       {
@@ -2627,7 +2725,7 @@
         "kind": "process"
       },
       {
-        "text": "Consultar gastos sin presupuesto, observaciones e indicadores de hitos",
+        "text": "Revisar varianza, comprobantes faltantes, sobregiros y gastos en categorías no planificadas",
         "kind": "process"
       },
       {
@@ -2712,7 +2810,7 @@
         "kind": "process"
       },
       {
-        "text": "Enviar el formulario",
+        "text": "Pulsar Crear Administrador",
         "kind": "process"
       },
       {
@@ -2770,7 +2868,7 @@
         }
       },
       {
-        "text": "Elegir quitar permisos",
+        "text": "Pulsar Revocar",
         "kind": "process"
       },
       {

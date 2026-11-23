@@ -1,10 +1,10 @@
 %% E02 · Solicitar verificación de identidad KYC
 %% Rol: Emprendedor
-%% Entrada: Mi Perfil → verificación de identidad; también desde Mis Campañas
+%% Entrada: Mi Perfil → Iniciar Verificación; Mis Campañas → Verificar Identidad / Reintentar KYC
 flowchart TD
   N0(["Inicio"])
   N0 --> N1
-  N1["Abrir Verificación de Identidad"]
+  N1["Pulsar Iniciar Verificación, Verificar Identidad o Reintentar KYC según la pantalla"]
   N1 --> N2
   N2["Paso 1: adjuntar documento oficial legible en formato permitido"]
   N2 --> N3
@@ -15,13 +15,12 @@ flowchart TD
   B4["Revisar formato, tamaño o permisos de cámara y reemplazar el archivo"]
   N4 -->|"No"| B4
   B4 --> N2
-  N5["Enviar los documentos y esperar la revisión administrativa A04"]
+  N5["Pulsar Enviar a Revisión y esperar la revisión administrativa A04"]
   N5 --> N6
   N6{"¿La identidad fue aprobada?"}
   N6 -->|"Sí"| N7
-  B6["Si está pendiente, esperar; si fue rechazada, leer el motivo y reenviar"]
+  B6(["Pendiente: esperar. Rechazada: leer el motivo y volver a E02 para reenviar"])
   N6 -->|"No"| B6
-  B6 --> N1
   N7["Ver el estado verificado y continuar con la creación de campañas"]
   N7 --> N8
   N8(["Fin"])

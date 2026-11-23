@@ -17,8 +17,8 @@ flowchart TD
   N4 -->|"Sí"| N5
   B4(["Ingresar motivo y rechazar; el emprendedor recibe aviso y puede reenviar"])
   N4 -->|"No"| B4
-  N5["Aprobar la identidad"]
+  N5["Pulsar Aprobar KYC y aceptar la confirmación; cancelar conserva la solicitud"]
   N5 --> N6
-  N6["Guardar revisión, notificar y retirar la solicitud de la lista pendiente"]
+  N6["El sistema guarda la revisión y notifica; comprobar que ya no figure como pendiente"]
   N6 --> N7
   N7(["Fin"])

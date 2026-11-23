@@ -6,6 +6,7 @@ from pathlib import Path
 import math
 import re
 import sys
+import time
 import xml.etree.ElementTree as ET
 from PIL import Image, ImageDraw, ImageFont
 
@@ -53,5 +54,13 @@ for diagram_id in (sys.argv[1:] or ['D03']):
                     draw.text((float(part.attrib['x']),y),part.text or '',font=font,fill='#193449',anchor='ms')
             else:
                 draw.text((float(a['x']),y),node.text or '',font=label_font,fill='#42596b',anchor='ms' if a.get('text-anchor')=='middle' else 'ls')
-    image.save(root/'png'/f'{diagram_id}.png')
+    # Windows puede mantener el archivo ocupado brevemente durante su indexación.
+    for attempt in range(5):
+        try:
+            image.save(root/'png'/f'{diagram_id}.png')
+            break
+        except OSError as error:
+            if error.errno not in (13, 22) or attempt == 4:
+                raise
+            time.sleep(0.2)
     print(f'{diagram_id}.png: {image.width} x {image.height}')

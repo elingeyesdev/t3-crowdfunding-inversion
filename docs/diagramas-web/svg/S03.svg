@@ -42,7 +42,7 @@
 </text>
 <rect x="95.0" y="495.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
 <text x="290" y="536" text-anchor="middle">
-<tspan x="290" dy="0">Elegir quitar permisos</tspan>
+<tspan x="290" dy="0">Pulsar Revocar</tspan>
 </text>
 <polygon points="290,615.0 485.0,680 290,745.0 95.0,680" fill="#fff6df" stroke="#a38b49"/>
 <text x="290" y="686" text-anchor="middle">
