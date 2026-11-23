@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
+import { RequestErrorNotice } from '../../components/RequestErrorNotice';
 import { getAllUsers, softDeleteUser } from '../../api/admin.api';
 import type { SystemUser } from '../../types/admin.types';
 import { 
@@ -18,6 +19,11 @@ export function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const [actionError, setActionError] = useState<unknown>(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const latestRequest = useRef(0);
+  const mounted = useRef(false);
 
   // Dialog state
   const [dialog, setDialog] = useState<{
@@ -26,23 +32,29 @@ export function AdminUsersPage() {
     userEmail: string;
   } | null>(null);
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
+    const requestId = ++latestRequest.current;
+    setLoadError(null);
     try {
       setLoading(true);
       const data = await getAllUsers();
+      if (requestId !== latestRequest.current) return;
       // Sort users by registration date descending if possible
       const sorted = [...data].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       setUsers(sorted);
+      setHasLoaded(true);
     } catch (error) {
-      console.error('Error loading users:', error);
+      if (requestId === latestRequest.current) setLoadError(error);
     } finally {
-      setLoading(false);
+      if (requestId === latestRequest.current) setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    mounted.current = true;
+    void loadUsers();
+    return () => { mounted.current = false; latestRequest.current++; };
+  }, [loadUsers]);
 
   const handleDeleteClick = (id: string, email: string) => {
     setDialog({
@@ -57,15 +69,15 @@ export function AdminUsersPage() {
     const { userId } = dialog;
     setDialog(null);
     setActionLoading(userId);
+    setActionError(null);
     try {
       await softDeleteUser(userId);
       // Reload users to see updated status
-      await loadUsers();
+      if (mounted.current) await loadUsers();
     } catch (error) {
-      console.error('Error disabling user:', error);
-      alert('Ocurrió un error al suspender al usuario.');
+      if (mounted.current) setActionError(error);
     } finally {
-      setActionLoading(null);
+      if (mounted.current) setActionLoading(null);
     }
   };
 
@@ -91,7 +103,7 @@ export function AdminUsersPage() {
           <div className="bg-white border border-gray-200 px-4 py-2.5 rounded-xl flex items-center gap-2.5 shadow-sm">
             <Users size={16} className="text-[#72B626]" />
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Usuarios:</span>
-            <span className="text-sm font-bold text-gray-800">{users.length}</span>
+            <span className="text-sm font-bold text-gray-800">{hasLoaded ? users.length : '—'}</span>
           </div>
         </div>
 
@@ -109,6 +121,7 @@ export function AdminUsersPage() {
           </div>
           <button 
             onClick={loadUsers}
+            disabled={loading}
             className="px-4 py-2 bg-[#72B626] hover:bg-[#4a7f1a] text-white font-semibold rounded-lg transition-all active:scale-95 cursor-pointer border-none text-[13px]"
           >
             Actualizar Lista
@@ -116,6 +129,8 @@ export function AdminUsersPage() {
         </div>
 
         {/* Users Table */}
+        {loadError !== null && <RequestErrorNotice error={loadError} fallback="No se pudieron cargar los usuarios. Intenta nuevamente." onRetry={() => void loadUsers()} stale={hasLoaded} retrying={loading} />}
+        {actionError !== null && <RequestErrorNotice error={actionError} fallback="No se pudo suspender al usuario. Puedes volver a intentarlo desde su cuenta." />}
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
           {loading ? (
             <div className="py-24 flex flex-col items-center justify-center space-y-3">
@@ -181,7 +196,7 @@ export function AdminUsersPage() {
                         {user.is_active ? (
                           <button 
                             onClick={() => handleDeleteClick(user.id, user.email)}
-                            disabled={actionLoading === user.id}
+                            disabled={actionLoading !== null || loading || loadError !== null}
                             className="px-3 py-1.5 bg-white border border-gray-200 text-gray-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 rounded-lg transition-all active:scale-95 shadow-sm inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                             title="Suspender Cuenta"
                           >
@@ -197,7 +212,7 @@ export function AdminUsersPage() {
                 </tbody>
               </table>
             </div>
-          ) : (
+          ) : loadError !== null ? null : (
             <div className="py-20 flex flex-col items-center justify-center text-center px-6">
               <div className="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 mb-4">
                 <Users size={28} />
