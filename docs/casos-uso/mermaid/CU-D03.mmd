@@ -1,0 +1,21 @@
+%% CU-D03 · Consultar y aumentar mi capital simulado
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Donador: Abre Mi Panel."]
+  N0 --> N1
+  N2["1 · UniFundme: Presenta Capital Disponible, Total Donado, número de donaciones y Aumentar Capital."]
+  N1 --> N2
+  N3["2 · Donador: Selecciona Aumentar Capital y elige un monto sugerido o escribe uno; añade notas opcionales."]
+  N2 --> N3
+  N4{"A1 · ¿El monto es menor a Bs. 100?"}
+  A4["A1 · El formulario no permite enviar el aumento.<br/>Continuidad: Corregir el monto en el paso 2."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Presenta la confirmación y exige un monto mínimo de Bs. 100 en el formulario."]
+  N4 -->|No| N5
+  N6["3 · Donador: Confirma un monto permitido."]
+  N5 --> N6
+  N7["3 · UniFundme: Aumenta capital configurado y disponible por ese importe si la operación es correcta."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

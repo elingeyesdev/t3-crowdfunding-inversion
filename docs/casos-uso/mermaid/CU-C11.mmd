@@ -1,0 +1,25 @@
+%% CU-C11 · Marcar Me gusta en comentarios
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Donador o Emprendedor: Abre Comentarios y localiza un comentario."]
+  N0 --> N1
+  N2{"A3 · ¿La campaña está cerrada?"}
+  A2["A3 · Mantiene deshabilitado el control de Me gusta.<br/>Continuidad: Terminar sin cambiar marcas."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Muestra el icono de pulgar arriba y su contador."]
+  N2 -->|No| N3
+  N4["2 · Donador o Emprendedor: Pulsa el pulgar arriba."]
+  N3 --> N4
+  N5{"A1 · ¿Ya había marcado ese comentario?"}
+  A5["A1 · Retira su marca y ajusta el contador; no acumula marcas de la misma cuenta.<br/>Continuidad: Terminar."]
+  N5 -->|Sí| A5
+  N4 --> N5
+  N6{"A2 · ¿No ha iniciado sesión?"}
+  A6["A2 · Solicita iniciar sesión antes de marcar.<br/>Continuidad: Continuar en CU-C02 y volver al paso 2."]
+  N6 -->|Sí| A6
+  N5 -->|No| N6
+  N7["2 · UniFundme: Registra su Me gusta y actualiza el contador."]
+  N6 -->|No| N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

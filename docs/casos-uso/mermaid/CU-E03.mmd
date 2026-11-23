@@ -1,0 +1,33 @@
+%% CU-E03 · Solicitar verificación de identidad
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Emprendedor: Usa Iniciar Verificación, Verificar Identidad o Reintentar KYC según el acceso disponible."]
+  N0 --> N1
+  N2{"A3 · ¿Ya tiene una solicitud pendiente o una rechazada?"}
+  A2["A3 · La pendiente no se reenvía como nueva; la rechazada permite consultar motivo y reintentar.<br/>Continuidad: Esperar decisión o retomar el paso 2 tras el rechazo."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Abre el proceso de verificación de identidad."]
+  N2 -->|No| N3
+  N4["2 · Emprendedor: Adjunta documento de identidad y pulsa Siguiente."]
+  N3 --> N4
+  N5{"A2 · ¿El archivo no cumple formato o tamaño?"}
+  A5["A2 · Rechaza la carga no válida.<br/>Continuidad: Sustituir el archivo en el paso correspondiente."]
+  N5 -->|Sí| A5
+  N4 --> N5
+  N6["2 · UniFundme: Valida PDF, JPG/JPEG, PNG o WEBP de hasta 10 MB y abre validación facial."]
+  N5 -->|No| N6
+  N7["3 · Emprendedor: Toma una foto con la cámara o adjunta un archivo facial permitido."]
+  N6 --> N7
+  N8{"A1 · ¿La cámara no funciona o no tiene permiso?"}
+  A8["A1 · Permite seleccionar un archivo en lugar de capturar con cámara.<br/>Continuidad: Retomar el paso 3."]
+  N8 -->|Sí| A8
+  N7 --> N8
+  N9["3 · UniFundme: Admite JPG/JPEG, PNG, WEBP, MP4, WEBM o MOV de hasta 50 MB."]
+  N8 -->|No| N9
+  N10["4 · Emprendedor: Pulsa Enviar a Revisión."]
+  N9 --> N10
+  N11["4 · UniFundme: Registra la solicitud pendiente si el envío es correcto; espera una decisión administrativa."]
+  N10 --> N11
+  N12(["Fin del recorrido principal"])
+  N11 --> N12

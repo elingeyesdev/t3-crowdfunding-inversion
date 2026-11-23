@@ -1,0 +1,25 @@
+%% CU-C05 · Contactar al emprendedor
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Donador o Emprendedor: Abre Historia y Proyecto y baja hasta Sobre el Emprendedor."]
+  N0 --> N1
+  N2{"A2 · ¿La campaña pertenece a la propia persona?"}
+  A2["A2 · No ofrece una conversación consigo misma.<br/>Continuidad: Terminar."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Presenta Contactar Emprendedor cuando el creador no es la propia persona."]
+  N2 -->|No| N3
+  N4["2 · Donador o Emprendedor: Pulsa Contactar Emprendedor."]
+  N3 --> N4
+  N5{"A1 · ¿No ha iniciado sesión?"}
+  A5["A1 · Abre Iniciar Sesión; tras acceder la persona puede regresar y volver a usar el contacto.<br/>Continuidad: Continuar en CU-C02 y retomar el paso 2."]
+  N5 -->|Sí| A5
+  N4 --> N5
+  N6["2 · UniFundme: Abre o recupera la conversación asociada al destinatario y campaña."]
+  N5 -->|No| N6
+  N7["3 · Donador o Emprendedor: Consulta la conversación abierta."]
+  N6 --> N7
+  N8["3 · UniFundme: Presenta el chat para continuar con el intercambio de mensajes."]
+  N7 --> N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

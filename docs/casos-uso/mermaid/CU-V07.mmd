@@ -1,0 +1,25 @@
+%% CU-V07 · Compartir campañas
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Visitante: Pulsa Compartir Campaña en la ficha o el icono de compartir en Explorar."]
+  N0 --> N1
+  N2["1 · UniFundme: Abre el diálogo con enlace y opciones WhatsApp, Facebook, X y LinkedIn."]
+  N1 --> N2
+  N3["2 · Visitante: Selecciona Copiar enlace."]
+  N2 --> N3
+  N4{"A1 · ¿Prefiere una red social?"}
+  A4["A1 · Abre el enlace de compartir del servicio elegido con la URL de la campaña; la publicación se completa allí.<br/>Continuidad: Volver a la web y retomar el paso 3."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5{"A2 · ¿Decide salir sin compartir?"}
+  A5["A2 · Cierra el diálogo sin modificar la campaña ni sus aportes.<br/>Continuidad: Terminar."]
+  N5 -->|Sí| A5
+  N4 -->|No| N5
+  N6["2 · UniFundme: Copia la URL de la campaña y confirma la copia."]
+  N5 -->|No| N6
+  N7["3 · Visitante: Cierra el diálogo."]
+  N6 --> N7
+  N8["3 · UniFundme: Devuelve a la campaña o al catálogo."]
+  N7 --> N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

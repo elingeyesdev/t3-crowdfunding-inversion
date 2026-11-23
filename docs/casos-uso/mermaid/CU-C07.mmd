@@ -1,0 +1,21 @@
+%% CU-C07 · Consultar notificaciones
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Usuario con cuenta: Abre la campana o el centro de notificaciones."]
+  N0 --> N1
+  N2["1 · UniFundme: Carga sus avisos y el indicador de no leídas."]
+  N1 --> N2
+  N3["2 · Usuario con cuenta: Aplica los filtros disponibles y recorre las páginas."]
+  N2 --> N3
+  N4{"A1 · ¿No hay avisos coincidentes?"}
+  A4["A1 · Presenta el estado vacío y Restablecer filtros permite quitar las selecciones.<br/>Continuidad: Retomar el paso 2 o terminar."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Muestra los avisos coincidentes de su cuenta."]
+  N4 -->|No| N5
+  N6["3 · Usuario con cuenta: Abre una notificación."]
+  N5 --> N6
+  N7["3 · UniFundme: Registra la lectura y navega al destino si el aviso tiene uno asociado."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

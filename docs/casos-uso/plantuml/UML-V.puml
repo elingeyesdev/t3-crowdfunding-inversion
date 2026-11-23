@@ -1,0 +1,37 @@
+@startuml
+top to bottom direction
+skinparam shadowing false
+title Casos de uso · Visitante
+actor "Visitante" as Actor0
+rectangle "UniFundme · aplicación web" {
+  usecase "CU-V01 · Conocer la plataforma y acceder al catálogo" as CU_V01
+  usecase "CU-V02 · Buscar y filtrar campañas" as CU_V02
+  usecase "CU-V03 · Navegar por el detalle de una campaña" as CU_V03
+  usecase "CU-V04 · Consultar Historia y Proyecto" as CU_V04
+  usecase "CU-V05 · Descubrir campañas en DonaTok" as CU_V05
+  usecase "CU-V06 · Consultar historias recientes" as CU_V06
+  usecase "CU-V07 · Compartir campañas" as CU_V07
+  usecase "CU-V08 · Consultar Plan de Fondos e hitos [Parcial]" as CU_V08
+  usecase "CU-V09 · Consultar la recaudación pública" as CU_V09
+  usecase "CU-V10 · Consultar evidencias públicas" as CU_V10
+  usecase "CU-V11 · Consultar novedades de una campaña" as CU_V11
+  usecase "CU-V12 · Reproducir la presentación de una campaña" as CU_V12
+  usecase "CU-V13 · Abrir proyectos relacionados" as CU_V13
+}
+Actor0 -- CU_V01
+Actor0 -- CU_V02
+Actor0 -- CU_V03
+Actor0 -- CU_V04
+Actor0 -- CU_V05
+Actor0 -- CU_V06
+Actor0 -- CU_V07
+Actor0 -- CU_V08
+Actor0 -- CU_V09
+Actor0 -- CU_V10
+Actor0 -- CU_V11
+Actor0 -- CU_V12
+Actor0 -- CU_V13
+note bottom
+La consulta pública también está disponible para personas con sesión.
+end note
+@enduml

@@ -1,0 +1,21 @@
+%% CU-D01 · Crear y editar mi perfil
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Donador: Abre Mi Perfil."]
+  N0 --> N1
+  N2["1 · UniFundme: Presenta su perfil o propone completar los datos básicos si todavía no existe."]
+  N1 --> N2
+  N3["2 · Donador: Usa la edición de la sección deseada y guarda datos válidos."]
+  N2 --> N3
+  N4{"A1 · ¿Intenta reducir el capital máximo por debajo del total ya invertido?"}
+  A4["A1 · Rechaza el cambio sin reducir el capital bajo ese límite.<br/>Continuidad: Corregir y retomar el paso 2."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Valida y conserva los cambios de esa sección."]
+  N4 -->|No| N5
+  N6["3 · Donador: Consulta Donaciones, Información o Capital / Fondos."]
+  N5 --> N6
+  N7["3 · UniFundme: Muestra el contenido correspondiente con los datos guardados."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

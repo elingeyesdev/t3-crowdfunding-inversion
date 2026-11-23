@@ -1,0 +1,25 @@
+%% CU-C08 · Gestionar notificaciones
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Usuario con cuenta: Usa la opción de marcar todas como leídas."]
+  N0 --> N1
+  N2{"A2 · ¿Solo desea retirar un aviso concreto?"}
+  A2["A2 · Omite marcar todas y usa directamente el control de eliminación del aviso.<br/>Continuidad: Continuar en el paso 2."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Marca sus notificaciones existentes y actualiza el contador."]
+  N2 -->|No| N3
+  N4["2 · Usuario con cuenta: Elimina un aviso con su control disponible."]
+  N3 --> N4
+  N5{"A1 · ¿Prefiere limpiar todas las leídas?"}
+  A5["A1 · Usa la opción de limpiar las leídas; retira solo esas y conserva las no leídas.<br/>Continuidad: Retomar el paso 3."]
+  N5 -->|Sí| A5
+  N4 --> N5
+  N6["2 · UniFundme: Retira ese aviso de su cuenta si la operación se completa."]
+  N5 -->|No| N6
+  N7["3 · Usuario con cuenta: Consulta la campana o el centro de notificaciones."]
+  N6 --> N7
+  N8["3 · UniFundme: Refleja los avisos y contadores actualizados."]
+  N7 --> N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

@@ -1,0 +1,25 @@
+%% CU-C04 · Cambiar la contraseña local
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Usuario con cuenta: Abre Configuración → Seguridad y Acceso."]
+  N0 --> N1
+  N2{"A2 · ¿La cuenta no tiene contraseña local?"}
+  A2["A2 · No ofrece este formulario; Google continúa no disponible.<br/>Continuidad: Terminar."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Presenta el formulario de cambio de contraseña local."]
+  N2 -->|No| N3
+  N4["2 · Usuario con cuenta: Introduce contraseña actual, nueva válida y confirmación; pulsa Actualizar contraseña."]
+  N3 --> N4
+  N5{"A1 · ¿La actual es incorrecta, la nueva es inválida, no coincide o es igual a la anterior?"}
+  A5["A1 · Rechaza el cambio y muestra el error; no sustituye la contraseña.<br/>Continuidad: Corregir y retomar el paso 2."]
+  N5 -->|Sí| A5
+  N4 --> N5
+  N6["2 · UniFundme: Valida contraseña actual, coincidencia, requisitos y que la nueva sea distinta."]
+  N5 -->|No| N6
+  N7["3 · Usuario con cuenta: Continúa después de la confirmación correcta."]
+  N6 --> N7
+  N8["3 · UniFundme: Guarda la nueva contraseña, conserva la sesión actual y revoca las demás."]
+  N7 --> N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

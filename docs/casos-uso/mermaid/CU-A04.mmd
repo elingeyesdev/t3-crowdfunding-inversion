@@ -1,0 +1,25 @@
+%% CU-A04 · Aprobar o rechazar solicitudes de campaña
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Administrador: Abre Revisión de Campañas, busca por título o emprendedor y recorre sus páginas."]
+  N0 --> N1
+  N2["1 · UniFundme: Lista las solicitudes pendientes coincidentes."]
+  N1 --> N2
+  N3["2 · Administrador: Abre la propuesta y revisa propietario, documentos e historial."]
+  N2 --> N3
+  N4["2 · UniFundme: Presenta los datos necesarios para su decisión."]
+  N3 --> N4
+  N5["3 · Administrador: Selecciona Aprobar en el detalle; si usa la aprobación rápida del listado, confirma su diálogo."]
+  N4 --> N5
+  N6{"A1 · ¿Decide rechazar?"}
+  A6["A1 · Escribe un motivo y confirma; registra Rechazada y deja el motivo disponible para corregir y reenviar.<br/>Continuidad: Terminar con rechazo."]
+  N6 -->|Sí| A6
+  N5 --> N6
+  N7{"A2 · ¿Intenta rechazar sin motivo?"}
+  A7["A2 · La interfaz impide completar el rechazo.<br/>Continuidad: Completar motivo y retomar el paso 3."]
+  N7 -->|Sí| A7
+  N6 -->|No| N7
+  N8["3 · UniFundme: Registra Aprobada; el emprendedor todavía debe publicarla."]
+  N7 -->|No| N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

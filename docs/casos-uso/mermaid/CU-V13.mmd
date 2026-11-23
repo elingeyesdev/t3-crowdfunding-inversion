@@ -1,0 +1,17 @@
+%% CU-V13 · Abrir proyectos relacionados
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Visitante: Consulta También te puede interesar."]
+  N0 --> N1
+  N2{"A1 · ¿No hay sugerencias disponibles?"}
+  A2["A1 · No muestra esa sección; la persona puede seguir buscando en Explorar.<br/>Continuidad: Continuar en CU-V02 o terminar."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Puede mostrar hasta tres campañas de la misma categoría, excluyendo la actual."]
+  N2 -->|No| N3
+  N4["2 · Visitante: Selecciona una sugerencia."]
+  N3 --> N4
+  N5["2 · UniFundme: Abre la ficha de la campaña elegida."]
+  N4 --> N5
+  N6(["Fin del recorrido principal"])
+  N5 --> N6

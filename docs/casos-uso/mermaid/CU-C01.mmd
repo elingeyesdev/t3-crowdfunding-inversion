@@ -1,0 +1,21 @@
+%% CU-C01 · Crear una cuenta por correo
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Visitante: Abre Iniciar Sesión → Crea tu cuenta."]
+  N0 --> N1
+  N2["1 · UniFundme: Presenta el formulario de registro."]
+  N1 --> N2
+  N3["2 · Visitante: Elige Donador o Emprendedor e introduce correo y contraseña válidos."]
+  N2 --> N3
+  N4{"A1 · ¿Los datos son inválidos o el correo ya está registrado?"}
+  A4["A1 · Rechaza el registro e informa el problema, sin crear otra cuenta.<br/>Continuidad: Corregir y retomar el paso 2."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Valida los datos y la disponibilidad del correo al enviar el formulario."]
+  N4 -->|No| N5
+  N6["3 · Visitante: Envía el registro."]
+  N5 --> N6
+  N7["3 · UniFundme: Crea la cuenta, inicia sesión y abre Mi Panel para Donador o Mi Perfil para Emprendedor."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

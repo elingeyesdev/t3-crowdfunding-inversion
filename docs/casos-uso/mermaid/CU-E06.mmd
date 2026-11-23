@@ -1,0 +1,25 @@
+%% CU-E06 · Definir niveles de recompensa
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Emprendedor: Abre Estructura de Recompensas y usa Agregar Nivel."]
+  N0 --> N1
+  N2["1 · UniFundme: Presenta los campos del nivel."]
+  N1 --> N2
+  N3["2 · Emprendedor: Completa título, descripción y porcentajes válidos."]
+  N2 --> N3
+  N4{"A1 · ¿Desea cambiar o quitar una definición antes de guardar?"}
+  A4["A1 · Editar Nivel o Eliminar Nivel modifica la lista del formulario.<br/>Continuidad: Retomar el paso 2 o 3."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5{"A2 · ¿El rango de porcentajes es inválido?"}
+  A5["A2 · No incorpora el nivel con esos porcentajes.<br/>Continuidad: Corregir y retomar el paso 2."]
+  N5 -->|Sí| A5
+  N4 -->|No| N5
+  N6["2 · UniFundme: Añade el nivel a la lista del formulario si 0 ≤ mínimo &lt; máximo ≤ 100."]
+  N5 -->|No| N6
+  N7["3 · Emprendedor: Guarda la campaña."]
+  N6 --> N7
+  N8["3 · UniFundme: Conserva las definiciones guardadas y permite consultarlas en Recompensas de Vista Previa cuando existen niveles."]
+  N7 --> N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

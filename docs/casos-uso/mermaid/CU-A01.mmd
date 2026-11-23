@@ -1,0 +1,17 @@
+%% CU-A01 · Consultar el panel de estadísticas
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Administrador: Abre el panel → Estadísticas."]
+  N0 --> N1
+  N2{"A1 · ¿La cuenta no tiene permisos administrativos?"}
+  A2["A1 · Rechaza el acceso a datos administrativos aunque conozca la dirección.<br/>Continuidad: Terminar sin acceso."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Carga indicadores disponibles de usuarios, campañas y pendientes."]
+  N2 -->|No| N3
+  N4["2 · Administrador: Selecciona un acceso de Usuarios, Campañas, Verificación KYC, Revisión o Auditoría."]
+  N3 --> N4
+  N5["2 · UniFundme: Abre el módulo administrativo correspondiente."]
+  N4 --> N5
+  N6(["Fin del recorrido principal"])
+  N5 --> N6

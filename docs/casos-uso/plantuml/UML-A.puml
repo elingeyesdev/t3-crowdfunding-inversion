@@ -1,0 +1,29 @@
+@startuml
+top to bottom direction
+skinparam shadowing false
+title Casos de uso · Administrador
+actor "Administrador" as Actor0
+rectangle "UniFundme · aplicación web" {
+  usecase "CU-A01 · Consultar el panel de estadísticas" as CU_A01
+  usecase "CU-A02 · Consultar y suspender usuarios" as CU_A02
+  usecase "CU-A03 · Consultar y eliminar campañas sin actividad financiera [Parcial]" as CU_A03
+  usecase "CU-A04 · Aprobar o rechazar solicitudes de campaña" as CU_A04
+  usecase "CU-A05 · Revisar solicitudes KYC" as CU_A05
+  usecase "CU-A06 · Revisar documentos de campaña" as CU_A06
+  usecase "CU-A07 · Autorizar la publicación de evidencias" as CU_A07
+  usecase "CU-A08 · Auditar movimientos financieros" as CU_A08
+  usecase "CU-A09 · Comparar presupuesto y ejecución" as CU_A09
+}
+Actor0 -- CU_A01
+Actor0 -- CU_A02
+Actor0 -- CU_A03
+Actor0 -- CU_A04
+Actor0 -- CU_A05
+Actor0 -- CU_A06
+Actor0 -- CU_A07
+Actor0 -- CU_A08
+Actor0 -- CU_A09
+note bottom
+También disponible para Superadministrador. Cada operación respeta sus restricciones.
+end note
+@enduml

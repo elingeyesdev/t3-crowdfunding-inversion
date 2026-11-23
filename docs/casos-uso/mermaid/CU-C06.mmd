@@ -1,0 +1,21 @@
+%% CU-C06 · Continuar conversaciones
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Usuario con cuenta: Abre Mensajes y selecciona una conversación."]
+  N0 --> N1
+  N2["1 · UniFundme: Muestra el destinatario y el historial autorizado."]
+  N1 --> N2
+  N3["2 · Usuario con cuenta: Consulta mensajes anteriores con el desplazamiento o Ver mensajes anteriores cuando aparece."]
+  N2 --> N3
+  N4["2 · UniFundme: Carga el historial previo sin duplicar lo ya mostrado."]
+  N3 --> N4
+  N5["3 · Usuario con cuenta: Escribe un texto y usa el icono Enviar mensaje o Enter."]
+  N4 --> N5
+  N6{"A1 · ¿Falla el envío?"}
+  A6["A1 · Informa que no se pudo enviar y permite intentar de nuevo; no lo confirma como entregado.<br/>Continuidad: Reintentar el paso 3."]
+  N6 -->|Sí| A6
+  N5 --> N6
+  N7["3 · UniFundme: Envía el mensaje y lo incorpora a la conversación si la operación se completa."]
+  N6 -->|No| N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

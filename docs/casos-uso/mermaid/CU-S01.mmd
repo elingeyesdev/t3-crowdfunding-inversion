@@ -1,0 +1,17 @@
+%% CU-S01 · Consultar administradores
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Superadministrador: Abre Gestión de Admins."]
+  N0 --> N1
+  N2{"A1 · ¿Una cuenta sin nivel Superadministrador intenta acceder?"}
+  A2["A1 · Rechaza la gestión de administradores.<br/>Continuidad: Terminar sin acceso."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Lista correo, nivel y estado de las cuentas administrativas."]
+  N2 -->|No| N3
+  N4["2 · Superadministrador: Consulta las cuentas o elige otro módulo administrativo en la barra lateral."]
+  N3 --> N4
+  N5["2 · UniFundme: Permite continuar con las funciones del Administrador que también posee."]
+  N4 --> N5
+  N6(["Fin del recorrido principal"])
+  N5 --> N6

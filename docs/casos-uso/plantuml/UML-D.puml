@@ -1,0 +1,33 @@
+@startuml
+top to bottom direction
+skinparam shadowing false
+title Casos de uso · Donador
+actor "Donador" as Actor0
+rectangle "UniFundme · aplicación web" {
+  usecase "CU-D01 · Crear y editar mi perfil" as CU_D01
+  usecase "CU-D02 · Personalizar mis imágenes" as CU_D02
+  usecase "CU-D03 · Consultar y aumentar mi capital simulado" as CU_D03
+  usecase "CU-D04 · Donar a una campaña" as CU_D04
+  usecase "CU-D05 · Elegir una recompensa al aportar" as CU_D05
+  usecase "CU-D06 · Consultar Mis Aportes" as CU_D06
+  usecase "CU-D07 · Descargar mis comprobantes" as CU_D07
+  usecase "CU-D08 · Consultar novedades de proyectos apoyados" as CU_D08
+  usecase "CU-D09 · Seguir mis recompensas" as CU_D09
+  usecase "CU-D10 · Consultar rendimiento y reembolsos" as CU_D10
+}
+Actor0 -- CU_D01
+Actor0 -- CU_D02
+Actor0 -- CU_D03
+Actor0 -- CU_D04
+Actor0 -- CU_D05
+Actor0 -- CU_D06
+Actor0 -- CU_D07
+Actor0 -- CU_D08
+Actor0 -- CU_D09
+Actor0 -- CU_D10
+CU_D05 ..> CU_D04 : <<extend>>
+
+note bottom
+Requiere cuenta Donador. El capital es simulado. Elegir una recompensa es opcional al donar.
+end note
+@enduml

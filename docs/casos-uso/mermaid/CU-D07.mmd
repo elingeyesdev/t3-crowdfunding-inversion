@@ -1,0 +1,25 @@
+%% CU-D07 · Descargar mis comprobantes
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Donador: Abre Mi Panel → Comprobantes y busca por proyecto o código de recibo."]
+  N0 --> N1
+  N2{"A1 · ¿Accede desde Recibo en Mis Aportes o desde la confirmación del aporte?"}
+  A2["A1 · Solicita el comprobante de ese mismo aporte completado.<br/>Continuidad: Continuar en el paso 2."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Lista sus aportes completados disponibles para comprobante."]
+  N2 -->|No| N3
+  N4["2 · Donador: Selecciona Descargar PDF en el aporte elegido."]
+  N3 --> N4
+  N5{"A2 · ¿El aporte no es propio, no está completado o falla la generación?"}
+  A5["A2 · No permite una descarga no autorizada; si falla la generación informa el error y permite intentar nuevamente.<br/>Continuidad: Terminar si no está autorizado; reintentar el paso 2 si falló la generación."]
+  N5 -->|Sí| A5
+  N4 --> N5
+  N6["2 · UniFundme: Verifica propiedad y estado y genera el comprobante individual."]
+  N5 -->|No| N6
+  N7["3 · Donador: Recibe la descarga del navegador."]
+  N6 --> N7
+  N8["3 · UniFundme: Entrega el archivo correspondiente a ese aporte."]
+  N7 --> N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

@@ -1,0 +1,25 @@
+%% CU-V03 · Navegar por el detalle de una campaña
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Visitante: Abre la campaña desde Explorar o su enlace."]
+  N0 --> N1
+  N2{"A1 · ¿La campaña no está disponible o falla la carga?"}
+  A2["A1 · Presenta el error y permite volver; Reintentar solicita nuevamente la ficha si hubo un fallo de carga.<br/>Continuidad: Reintentar el paso 1 o terminar."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Carga la ficha con título, resumen, creador, Recaudado, Meta, Donantes y Días Restantes si corresponde."]
+  N2 -->|No| N3
+  N4["2 · Visitante: Localiza la barra principal de la ficha."]
+  N3 --> N4
+  N5{"A2 · ¿Comentarios queda fuera del ancho visible?"}
+  A5["A2 · La barra permite desplazar horizontalmente hacia la derecha hasta la cuarta pestaña.<br/>Continuidad: Retomar el paso 3."]
+  N5 -->|Sí| A5
+  N4 --> N5
+  N6["2 · UniFundme: Ofrece Historia y Proyecto, Transparencia y Fondos, Hitos y Avances y Comentarios."]
+  N5 -->|No| N6
+  N7["3 · Visitante: Selecciona la pestaña que desea consultar."]
+  N6 --> N7
+  N8["3 · UniFundme: Muestra el contenido de esa sección y mantiene la navegación de la campaña."]
+  N7 --> N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

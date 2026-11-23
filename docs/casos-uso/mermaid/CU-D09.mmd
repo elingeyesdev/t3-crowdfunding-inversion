@@ -1,0 +1,21 @@
+%% CU-D09 · Seguir mis recompensas
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Donador: Abre Mi Panel → Recompensas."]
+  N0 --> N1
+  N2["1 · UniFundme: Carga las recompensas vinculadas a sus contribuciones."]
+  N1 --> N2
+  N3["2 · Donador: Busca por proyecto o recompensa y aplica estado y orden disponibles."]
+  N2 --> N3
+  N4["2 · UniFundme: Presenta las coincidencias con su estado registrado."]
+  N3 --> N4
+  N5["3 · Donador: Selecciona el enlace de seguimiento cuando existe."]
+  N4 --> N5
+  N6{"A1 · ¿No hay enlace de seguimiento?"}
+  A6["A1 · No inventa un destino ni presenta una recompensa cancelada como entregada.<br/>Continuidad: Terminar."]
+  N6 -->|Sí| A6
+  N5 --> N6
+  N7["3 · UniFundme: Abre el destino de seguimiento guardado."]
+  N6 -->|No| N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

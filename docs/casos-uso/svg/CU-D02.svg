@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 1301" role="img" aria-labelledby="title desc">
+<title id="title">CU-D02 · Personalizar mis imágenes</title><desc id="desc">Actividad vertical del caso de uso. El recorrido principal baja por No en cada alternativa. Sí conduce a su respuesta y a la continuidad indicada por número de paso o caso.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#546b7b"/></marker></defs>
+<rect width="1050" height="1301" fill="white"/>
+<text x="525" y="32" text-anchor="middle" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#203a4a">CU-D02 · Personalizar mis imágenes</text>
+<text x="525" y="57" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="400" fill="#203a4a">Recorrido principal hacia abajo · Alternativas a la derecha</text>
+<rect x="40" y="99.0" width="520" height="64" rx="30" fill="#e5f2df" stroke="#9bafbe"/>
+<text x="300" y="136.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Inicio</text>
+<polyline points="300,163.0 300,215.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="215.0" width="520" height="64" rx="10" fill="#eef4fa" stroke="#9bafbe"/>
+<text x="300" y="252.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">1 · Donador: Abre el control de foto o portada en Mi Perfil.</text>
+<polyline points="300,279.0 300,331.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="331.0" width="520" height="64" rx="10" fill="#eaf5ef" stroke="#9bafbe"/>
+<text x="300" y="368.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">1 · UniFundme: Permite seleccionar una imagen.</text>
+<polyline points="300,395.0 300,447.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="447.0" width="520" height="80" rx="10" fill="#eef4fa" stroke="#9bafbe"/>
+<text x="300" y="480.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">2 · Donador: Selecciona JPG/JPEG, PNG, WEBP o AVIF</text>
+<text x="300" y="504.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">de hasta 10 MB y completa la carga.</text>
+<polyline points="300,527.0 300,579.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<polygon points="300,579.0 560,659.0 300,739.0 40,659.0" fill="#fff3d8" stroke="#aa8533"/>
+<text x="300" y="652.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">A1 · ¿Cancela o el formato/tamaño no</text>
+<text x="300" y="676.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">está permitido?</text>
+<polyline points="560,659.0 655,659.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="609" y="647.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">Sí</text>
+<rect x="655" y="581.0" width="355" height="156" rx="10" fill="#fff7e9" stroke="#b9944a"/>
+<text x="832" y="616.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">A1 · No sustituye la imagen anterior</text>
+<text x="832" y="640.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">por la selección cancelada o</text>
+<text x="832" y="664.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">rechazada.</text>
+<text x="832" y="688.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Continuidad: Elegir otro archivo en el</text>
+<text x="832" y="712.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">paso 2 o terminar.</text>
+<polyline points="300,739.0 300,791.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="323" y="763.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">No</text>
+<rect x="40" y="791.0" width="520" height="80" rx="10" fill="#eaf5ef" stroke="#9bafbe"/>
+<text x="300" y="824.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">2 · UniFundme: Valida el archivo y actualiza la imagen</text>
+<text x="300" y="848.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">correspondiente si la carga es correcta.</text>
+<polyline points="300,871.0 300,923.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="923.0" width="520" height="64" rx="10" fill="#eef4fa" stroke="#9bafbe"/>
+<text x="300" y="960.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">3 · Donador: Vuelve a consultar el perfil.</text>
+<polyline points="300,987.0 300,1039.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="1039.0" width="520" height="64" rx="10" fill="#eaf5ef" stroke="#9bafbe"/>
+<text x="300" y="1076.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">3 · UniFundme: Presenta la imagen guardada.</text>
+<polyline points="300,1103.0 300,1155.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="1155.0" width="520" height="64" rx="30" fill="#e5f2df" stroke="#9bafbe"/>
+<text x="300" y="1192.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Fin del recorrido principal</text>
+<text x="525" y="1271" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">Las alternativas indican dónde retomar o terminar; no todas concluyen en éxito.</text>
+</svg>

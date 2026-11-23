@@ -1,0 +1,29 @@
+%% CU-V10 · Consultar evidencias públicas
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Visitante: Selecciona Transparencia y Fondos → Evidencias."]
+  N0 --> N1
+  N2{"A1 · ¿No existen evidencias públicas?"}
+  A2["A1 · Muestra No hay evidencias públicas disponibles.<br/>Continuidad: Terminar."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3{"A2 · ¿Falla la carga?"}
+  A3["A2 · Presenta el error y Reintentar.<br/>Continuidad: Reintentar el paso 1."]
+  N3 -->|Sí| A3
+  N2 -->|No| N3
+  N4["1 · UniFundme: Lista las evidencias públicas con su nombre y justificación disponible."]
+  N3 -->|No| N4
+  N5["2 · Visitante: Pulsa Abrir documento en la evidencia elegida."]
+  N4 --> N5
+  N6{"A3 · ¿El documento dejó de estar publicado?"}
+  A6["A3 · No permite obtenerlo por su acceso público.<br/>Continuidad: Volver al paso 1 o terminar."]
+  N6 -->|Sí| A6
+  N5 --> N6
+  N7["2 · UniFundme: Comprueba su acceso público y abre el archivo en otra pestaña."]
+  N6 -->|No| N7
+  N8["3 · Visitante: Regresa a la pestaña de la campaña."]
+  N7 --> N8
+  N9["3 · UniFundme: Conserva la ficha para seguir consultándola."]
+  N8 --> N9
+  N10(["Fin del recorrido principal"])
+  N9 --> N10

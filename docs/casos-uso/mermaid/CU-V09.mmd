@@ -1,0 +1,25 @@
+%% CU-V09 · Consultar la recaudación pública
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Visitante: Selecciona Transparencia y Fondos → Auditoría y Movimientos."]
+  N0 --> N1
+  N2{"A2 · ¿Falla la carga de la sección?"}
+  A2["A2 · Muestra el error y Reintentar; el error no equivale a recaudación cero.<br/>Continuidad: Reintentar el paso 1."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Carga los indicadores y gráficos de recaudación disponibles."]
+  N2 -->|No| N3
+  N4["2 · Visitante: Selecciona Todos, Directos o Recompensas."]
+  N3 --> N4
+  N5{"A1 · ¿No existen aportes del tipo elegido?"}
+  A5["A1 · Presenta la ausencia de transacciones para ese filtro.<br/>Continuidad: Cambiar el filtro en el paso 2 o terminar."]
+  N5 -->|Sí| A5
+  N4 --> N5
+  N6["2 · UniFundme: Filtra la tabla de aportes recientes por el tipo elegido."]
+  N5 -->|No| N6
+  N7["3 · Visitante: Lee los indicadores y aportes visibles."]
+  N6 --> N7
+  N8["3 · UniFundme: Mantiene la consulta limitada a la campaña seleccionada."]
+  N7 --> N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

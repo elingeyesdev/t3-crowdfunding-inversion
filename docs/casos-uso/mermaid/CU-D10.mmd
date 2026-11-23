@@ -1,0 +1,17 @@
+%% CU-D10 · Consultar rendimiento y reembolsos
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Donador: Abre Mi Panel → Rendimiento."]
+  N0 --> N1
+  N2{"A1 · ¿No hay aportes completados, incluso si todos fueron reembolsados?"}
+  A2["A1 · Rendimiento puede mostrar el estado inicial; Mis Aportes y el capital permiten comprobar devoluciones.<br/>Continuidad: Continuar en el paso 2."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Presenta aporte promedio, monto reembolsado y evolución acumulada según sus registros."]
+  N2 -->|No| N3
+  N4["2 · Donador: Consulta Mis Aportes y Capital Disponible cuando hay devoluciones."]
+  N3 --> N4
+  N5["2 · UniFundme: Refleja los aportes reembolsados y el saldo simulado devuelto."]
+  N4 --> N5
+  N6(["Fin del recorrido principal"])
+  N5 --> N6

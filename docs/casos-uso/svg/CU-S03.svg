@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 1529" role="img" aria-labelledby="title desc">
+<title id="title">CU-S03 · Revocar permisos administrativos</title><desc id="desc">Actividad vertical del caso de uso. El recorrido principal baja por No en cada alternativa. Sí conduce a su respuesta y a la continuidad indicada por número de paso o caso.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#546b7b"/></marker></defs>
+<rect width="1050" height="1529" fill="white"/>
+<text x="525" y="32" text-anchor="middle" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#203a4a">CU-S03 · Revocar permisos administrativos</text>
+<text x="525" y="57" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="400" fill="#203a4a">Recorrido principal hacia abajo · Alternativas a la derecha</text>
+<rect x="40" y="99.0" width="520" height="64" rx="30" fill="#e5f2df" stroke="#9bafbe"/>
+<text x="300" y="136.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Inicio</text>
+<polyline points="300,163.0 300,215.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="215.0" width="520" height="80" rx="10" fill="#eef4fa" stroke="#9bafbe"/>
+<text x="300" y="248.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">1 · Superadministrador: En Gestión de Admins pulsa</text>
+<text x="300" y="272.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Revocar sobre el administrador elegido.</text>
+<polyline points="300,295.0 300,347.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="347.0" width="520" height="64" rx="10" fill="#eaf5ef" stroke="#9bafbe"/>
+<text x="300" y="384.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">1 · UniFundme: Solicita confirmar la revocación.</text>
+<polyline points="300,411.0 300,463.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="463.0" width="520" height="64" rx="10" fill="#eef4fa" stroke="#9bafbe"/>
+<text x="300" y="500.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">2 · Superadministrador: Confirma la operación.</text>
+<polyline points="300,527.0 300,579.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<polygon points="300,579.0 560,659.0 300,739.0 40,659.0" fill="#fff3d8" stroke="#aa8533"/>
+<text x="300" y="664.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">A1 · ¿Cancela la confirmación?</text>
+<polyline points="560,659.0 655,659.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="609" y="647.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">Sí</text>
+<rect x="655" y="605.0" width="355" height="108" rx="10" fill="#fff7e9" stroke="#b9944a"/>
+<text x="832" y="640.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">A1 · Mantiene los privilegios</text>
+<text x="832" y="664.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">anteriores.</text>
+<text x="832" y="688.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Continuidad: Terminar.</text>
+<polyline points="300,739.0 300,791.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="323" y="763.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">No</text>
+<polygon points="300,791.0 560,871.0 300,951.0 40,871.0" fill="#fff3d8" stroke="#aa8533"/>
+<text x="300" y="864.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">A2 · ¿Intenta revocar su propia cuenta</text>
+<text x="300" y="888.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">o un Superadministrador?</text>
+<polyline points="560,871.0 655,871.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="609" y="859.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">Sí</text>
+<rect x="655" y="817.0" width="355" height="108" rx="10" fill="#fff7e9" stroke="#b9944a"/>
+<text x="832" y="852.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">A2 · Bloquea la operación.</text>
+<text x="832" y="876.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Continuidad: Terminar sin cambiar</text>
+<text x="832" y="900.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">permisos.</text>
+<polyline points="300,951.0 300,1003.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="323" y="975.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">No</text>
+<rect x="40" y="1003.0" width="520" height="80" rx="10" fill="#eaf5ef" stroke="#9bafbe"/>
+<text x="300" y="1036.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">2 · UniFundme: Comprueba restricciones y retira sus</text>
+<text x="300" y="1060.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">permisos administrativos.</text>
+<polyline points="300,1083.0 300,1135.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="1135.0" width="520" height="64" rx="10" fill="#eef4fa" stroke="#9bafbe"/>
+<text x="300" y="1172.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">3 · Superadministrador: Consulta el listado actualizado.</text>
+<polyline points="300,1199.0 300,1251.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="1251.0" width="520" height="80" rx="10" fill="#eaf5ef" stroke="#9bafbe"/>
+<text x="300" y="1284.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">3 · UniFundme: Refleja el retiro de permisos conservando</text>
+<text x="300" y="1308.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">la cuenta de usuario.</text>
+<polyline points="300,1331.0 300,1383.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="1383.0" width="520" height="64" rx="30" fill="#e5f2df" stroke="#9bafbe"/>
+<text x="300" y="1420.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Fin del recorrido principal</text>
+<text x="525" y="1499" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">Las alternativas indican dónde retomar o terminar; no todas concluyen en éxito.</text>
+</svg>

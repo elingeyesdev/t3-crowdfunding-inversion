@@ -1,0 +1,25 @@
+%% CU-E11 · Consultar resultados y donadores
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Emprendedor: Abre Vista Previa → Progreso Económico."]
+  N0 --> N1
+  N2{"A1 · ¿Prefiere la consulta desde Mi Perfil?"}
+  A2["A1 · En Finanzas selecciona una de sus campañas y consulta sus métricas.<br/>Continuidad: Terminar tras la consulta."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3["1 · UniFundme: Presenta recaudación, evolución y desglose; las proyecciones son estimaciones."]
+  N2 -->|No| N3
+  N4["2 · Emprendedor: Abre Donadores Activos y recorre sus páginas."]
+  N3 --> N4
+  N5["2 · UniFundme: Lista los donadores vinculados a su campaña."]
+  N4 --> N5
+  N6["3 · Emprendedor: Selecciona una ficha de donador."]
+  N5 --> N6
+  N7{"A2 · ¿Intenta contactar desde Enviar Mensaje?"}
+  A7["A2 · El control anuncia Próximamente; no inicia una conversación operativa.<br/>Continuidad: Terminar; función pendiente HU-P05."]
+  N7 -->|Sí| A7
+  N6 --> N7
+  N8["3 · UniFundme: Muestra la información que ofrece el sistema para esa ficha."]
+  N7 -->|No| N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

@@ -1,0 +1,25 @@
+%% CU-E12 · Actualizar el seguimiento de recompensas
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Emprendedor: Abre Vista Previa → Recompensas → Donadores con Recompensas."]
+  N0 --> N1
+  N2["1 · UniFundme: Lista donador, recompensa, monto y estado de cada registro."]
+  N1 --> N2
+  N3["2 · Emprendedor: Abre el selector de un registro y elige una transición permitida."]
+  N2 --> N3
+  N4{"A1 · ¿El registro ya está entregado, cancelado o reembolsado?"}
+  A4["A1 · No ofrece reactivarlo ni cambiar su estado.<br/>Continuidad: Terminar sin modificarlo."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Ofrece pendiente a preparación, preparación a enviada, enviada a entregada, o cancelación cuando está habilitada."]
+  N4 -->|No| N5
+  N6["3 · Emprendedor: Completa el cambio."]
+  N5 --> N6
+  N7{"A2 · ¿Falla la actualización?"}
+  A7["A2 · Muestra el error e intenta recuperar el estado vigente; no confirma un cambio fallido.<br/>Continuidad: Revisar el estado y volver al paso 2 si todavía corresponde."]
+  N7 -->|Sí| A7
+  N6 --> N7
+  N8["3 · UniFundme: Guarda el estado; el donador puede consultarlo desde Mi Panel → Recompensas."]
+  N7 -->|No| N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

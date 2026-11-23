@@ -1,0 +1,36 @@
+@startuml
+top to bottom direction
+skinparam shadowing false
+title Casos de uso · Acceso y funciones compartidas
+actor "Visitante" as Actor0
+actor "Usuario con cuenta" as Actor1
+rectangle "UniFundme · aplicación web" {
+  usecase "CU-C01 · Crear una cuenta por correo" as CU_C01
+  usecase "CU-C02 · Iniciar sesión por correo" as CU_C02
+  usecase "CU-C03 · Cerrar sesión" as CU_C03
+  usecase "CU-C04 · Cambiar la contraseña local" as CU_C04
+  usecase "CU-C05 · Contactar al emprendedor" as CU_C05
+  usecase "CU-C06 · Continuar conversaciones" as CU_C06
+  usecase "CU-C07 · Consultar notificaciones" as CU_C07
+  usecase "CU-C08 · Gestionar notificaciones" as CU_C08
+  usecase "CU-C09 · Configurar preferencias de notificación [Parcial]" as CU_C09
+  usecase "CU-C10 · Publicar comentarios" as CU_C10
+  usecase "CU-C11 · Marcar Me gusta en comentarios" as CU_C11
+  usecase "CU-C12 · Consultar la configuración de mi cuenta" as CU_C12
+}
+Actor0 -- CU_C01
+Actor0 -- CU_C02
+Actor1 -- CU_C03
+Actor1 -- CU_C04
+Actor1 -- CU_C05
+Actor1 -- CU_C06
+Actor1 -- CU_C07
+Actor1 -- CU_C08
+Actor1 -- CU_C09
+Actor1 -- CU_C10
+Actor1 -- CU_C11
+Actor1 -- CU_C12
+note bottom
+Visitante: registro y acceso. Usuario con cuenta: acciones autorizadas. Comentarios y contacto: Donador o Emprendedor.
+end note
+@enduml

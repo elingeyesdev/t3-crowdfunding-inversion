@@ -1,0 +1,25 @@
+%% CU-V04 · Consultar Historia y Proyecto
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Visitante: Selecciona Historia y Proyecto."]
+  N0 --> N1
+  N2["1 · UniFundme: Presenta Historia del Proyecto y Sobre el Emprendedor."]
+  N1 --> N2
+  N3["2 · Visitante: Lee la descripción y los datos disponibles del creador."]
+  N2 --> N3
+  N4{"A2 · ¿La campaña no tiene recompensas?"}
+  A4["A2 · La lectura del proyecto continúa sin niveles de recompensa.<br/>Continuidad: Retomar el paso 3 o terminar."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Muestra además Niveles de Recompensa cuando existen niveles."]
+  N4 -->|No| N5
+  N6["3 · Visitante: Selecciona Ver Transparencia."]
+  N5 --> N6
+  N7{"A1 · ¿Prefiere contactar al creador?"}
+  A7["A1 · Usa Contactar Emprendedor en Sobre el Emprendedor; el contacto requiere sesión y no se ofrece para sí mismo.<br/>Continuidad: Continuar en CU-C05."]
+  N7 -->|Sí| A7
+  N6 --> N7
+  N8["3 · UniFundme: Cambia a Transparencia y Fondos."]
+  N7 -->|No| N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

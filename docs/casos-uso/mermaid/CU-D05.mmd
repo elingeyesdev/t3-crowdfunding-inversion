@@ -1,0 +1,25 @@
+%% CU-D05 · Elegir una recompensa al aportar
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Donador: Consulta Historia y Proyecto → Niveles de Recompensa y selecciona un nivel."]
+  N0 --> N1
+  N2["1 · UniFundme: Refleja el nivel elegido y su monto sugerido en el formulario de aporte."]
+  N1 --> N2
+  N3["2 · Donador: Ajusta el monto dentro del rango del nivel y abre Confirmar Aporte."]
+  N2 --> N3
+  N4{"A2 · ¿Prefiere aportar sin recompensa?"}
+  A4["A2 · Usa Aportar sin recompensa y retira la selección.<br/>Continuidad: Continuar en CU-D04 sin recompensa."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Presenta la recompensa exacta seleccionada."]
+  N4 -->|No| N5
+  N6["3 · Donador: Confirma el aporte."]
+  N5 --> N6
+  N7{"A1 · ¿El nivel venció, no tiene cupos o el monto no satisface sus condiciones?"}
+  A7["A1 · Rechaza la operación sin sustituir silenciosamente la recompensa por otra.<br/>Continuidad: Ajustar monto o selección en el paso 1 o 2."]
+  N7 -->|Sí| A7
+  N6 --> N7
+  N8["3 · UniFundme: Comprueba rango, moneda, vigencia y cupos y asocia exactamente ese nivel al aporte correcto."]
+  N7 -->|No| N8
+  N9(["Fin del recorrido principal"])
+  N8 --> N9

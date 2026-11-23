@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 1577" role="img" aria-labelledby="title desc">
+<title id="title">CU-C05 · Contactar al emprendedor</title><desc id="desc">Actividad vertical del caso de uso. El recorrido principal baja por No en cada alternativa. Sí conduce a su respuesta y a la continuidad indicada por número de paso o caso.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#546b7b"/></marker></defs>
+<rect width="1050" height="1577" fill="white"/>
+<text x="525" y="32" text-anchor="middle" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#203a4a">CU-C05 · Contactar al emprendedor</text>
+<text x="525" y="57" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="400" fill="#203a4a">Recorrido principal hacia abajo · Alternativas a la derecha</text>
+<rect x="40" y="99.0" width="520" height="64" rx="30" fill="#e5f2df" stroke="#9bafbe"/>
+<text x="300" y="136.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Inicio</text>
+<polyline points="300,163.0 300,215.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="215.0" width="520" height="80" rx="10" fill="#eef4fa" stroke="#9bafbe"/>
+<text x="300" y="248.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">1 · Donador o Emprendedor: Abre Historia y Proyecto y</text>
+<text x="300" y="272.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">baja hasta Sobre el Emprendedor.</text>
+<polyline points="300,295.0 300,347.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<polygon points="300,347.0 560,427.0 300,507.0 40,427.0" fill="#fff3d8" stroke="#aa8533"/>
+<text x="300" y="420.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">A2 · ¿La campaña pertenece a la</text>
+<text x="300" y="444.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">propia persona?</text>
+<polyline points="560,427.0 655,427.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="609" y="415.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">Sí</text>
+<rect x="655" y="373.0" width="355" height="108" rx="10" fill="#fff7e9" stroke="#b9944a"/>
+<text x="832" y="408.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">A2 · No ofrece una conversación</text>
+<text x="832" y="432.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">consigo misma.</text>
+<text x="832" y="456.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Continuidad: Terminar.</text>
+<polyline points="300,507.0 300,559.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="323" y="531.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">No</text>
+<rect x="40" y="559.0" width="520" height="80" rx="10" fill="#eaf5ef" stroke="#9bafbe"/>
+<text x="300" y="592.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">1 · UniFundme: Presenta Contactar Emprendedor cuando</text>
+<text x="300" y="616.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">el creador no es la propia persona.</text>
+<polyline points="300,639.0 300,691.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="691.0" width="520" height="80" rx="10" fill="#eef4fa" stroke="#9bafbe"/>
+<text x="300" y="724.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">2 · Donador o Emprendedor: Pulsa Contactar</text>
+<text x="300" y="748.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Emprendedor.</text>
+<polyline points="300,771.0 300,823.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<polygon points="300,823.0 560,903.0 300,983.0 40,903.0" fill="#fff3d8" stroke="#aa8533"/>
+<text x="300" y="908.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">A1 · ¿No ha iniciado sesión?</text>
+<polyline points="560,903.0 655,903.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="609" y="891.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">Sí</text>
+<rect x="655" y="825.0" width="355" height="156" rx="10" fill="#fff7e9" stroke="#b9944a"/>
+<text x="832" y="860.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">A1 · Abre Iniciar Sesión; tras acceder</text>
+<text x="832" y="884.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">la persona puede regresar y volver a</text>
+<text x="832" y="908.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">usar el contacto.</text>
+<text x="832" y="932.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Continuidad: Continuar en CU-C02 y</text>
+<text x="832" y="956.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">retomar el paso 2.</text>
+<polyline points="300,983.0 300,1035.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="323" y="1007.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">No</text>
+<rect x="40" y="1035.0" width="520" height="80" rx="10" fill="#eaf5ef" stroke="#9bafbe"/>
+<text x="300" y="1068.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">2 · UniFundme: Abre o recupera la conversación asociada</text>
+<text x="300" y="1092.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">al destinatario y campaña.</text>
+<polyline points="300,1115.0 300,1167.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="1167.0" width="520" height="80" rx="10" fill="#eef4fa" stroke="#9bafbe"/>
+<text x="300" y="1200.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">3 · Donador o Emprendedor: Consulta la conversación</text>
+<text x="300" y="1224.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">abierta.</text>
+<polyline points="300,1247.0 300,1299.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="1299.0" width="520" height="80" rx="10" fill="#eaf5ef" stroke="#9bafbe"/>
+<text x="300" y="1332.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">3 · UniFundme: Presenta el chat para continuar con el</text>
+<text x="300" y="1356.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">intercambio de mensajes.</text>
+<polyline points="300,1379.0 300,1431.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="1431.0" width="520" height="64" rx="30" fill="#e5f2df" stroke="#9bafbe"/>
+<text x="300" y="1468.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Fin del recorrido principal</text>
+<text x="525" y="1547" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">Las alternativas indican dónde retomar o terminar; no todas concluyen en éxito.</text>
+</svg>

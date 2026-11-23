@@ -1,0 +1,21 @@
+%% CU-E02 · Actualizar mis imágenes
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Emprendedor: Abre el control de foto o portada en Mi Perfil."]
+  N0 --> N1
+  N2["1 · UniFundme: Permite seleccionar la imagen correspondiente."]
+  N1 --> N2
+  N3["2 · Emprendedor: Selecciona JPG/JPEG, PNG, WEBP o AVIF de hasta 10 MB y completa la carga."]
+  N2 --> N3
+  N4{"A1 · ¿Cancela la selección o el archivo es rechazado por tipo o tamaño?"}
+  A4["A1 · Mantiene la imagen anterior.<br/>Continuidad: Elegir otro archivo en el paso 2 o terminar."]
+  N4 -->|Sí| A4
+  N3 --> N4
+  N5["2 · UniFundme: Valida y guarda la imagen si la carga es correcta."]
+  N4 -->|No| N5
+  N6["3 · Emprendedor: Consulta nuevamente el perfil."]
+  N5 --> N6
+  N7["3 · UniFundme: Presenta la foto o portada guardada."]
+  N6 --> N7
+  N8(["Fin del recorrido principal"])
+  N7 --> N8

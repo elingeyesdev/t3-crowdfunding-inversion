@@ -1,0 +1,21 @@
+%% CU-V11 · Consultar novedades de una campaña
+flowchart TD
+  N0(["Inicio"])
+  N1["1 · Visitante: Selecciona Hitos y Avances o Transparencia y Fondos → Bitácora."]
+  N0 --> N1
+  N2{"A1 · ¿La campaña no tiene novedades?"}
+  A2["A1 · Presenta el estado sin novedades.<br/>Continuidad: Terminar."]
+  N2 -->|Sí| A2
+  N1 --> N2
+  N3{"A2 · ¿Falla la consulta?"}
+  A3["A2 · Presenta el error y permite Reintentar para la misma campaña.<br/>Continuidad: Reintentar el paso 1."]
+  N3 -->|Sí| A3
+  N2 -->|No| N3
+  N4["1 · UniFundme: Solicita las novedades de esa campaña."]
+  N3 -->|No| N4
+  N5["2 · Visitante: Lee las publicaciones y sus adjuntos disponibles."]
+  N4 --> N5
+  N6["2 · UniFundme: Presenta el contenido público asociado al proyecto."]
+  N5 --> N6
+  N7(["Fin del recorrido principal"])
+  N6 --> N7

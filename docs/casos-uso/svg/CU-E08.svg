@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 1577" role="img" aria-labelledby="title desc">
+<title id="title">CU-E08 · Buscar y editar mis campañas</title><desc id="desc">Actividad vertical del caso de uso. El recorrido principal baja por No en cada alternativa. Sí conduce a su respuesta y a la continuidad indicada por número de paso o caso.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#546b7b"/></marker></defs>
+<rect width="1050" height="1577" fill="white"/>
+<text x="525" y="32" text-anchor="middle" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#203a4a">CU-E08 · Buscar y editar mis campañas</text>
+<text x="525" y="57" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="400" fill="#203a4a">Recorrido principal hacia abajo · Alternativas a la derecha</text>
+<rect x="40" y="99.0" width="520" height="64" rx="30" fill="#e5f2df" stroke="#9bafbe"/>
+<text x="300" y="136.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Inicio</text>
+<polyline points="300,163.0 300,215.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="215.0" width="520" height="80" rx="10" fill="#eef4fa" stroke="#9bafbe"/>
+<text x="300" y="248.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">1 · Emprendedor: Abre Mis Campañas y busca por título o</text>
+<text x="300" y="272.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">selecciona una pestaña de estado.</text>
+<polyline points="300,295.0 300,347.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="347.0" width="520" height="80" rx="10" fill="#eaf5ef" stroke="#9bafbe"/>
+<text x="300" y="380.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">1 · UniFundme: Filtra la lista cargada; alternar tarjetas/lista</text>
+<text x="300" y="404.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">solo cambia la presentación.</text>
+<polyline points="300,427.0 300,479.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="479.0" width="520" height="80" rx="10" fill="#eef4fa" stroke="#9bafbe"/>
+<text x="300" y="512.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">2 · Emprendedor: Abre Vista Previa de un Borrador o una</text>
+<text x="300" y="536.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Rechazada y selecciona Editar.</text>
+<polyline points="300,559.0 300,611.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<polygon points="300,611.0 560,691.0 300,771.0 40,691.0" fill="#fff3d8" stroke="#aa8533"/>
+<text x="300" y="696.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">A1 · ¿La campaña está en otro estado?</text>
+<polyline points="560,691.0 655,691.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="609" y="679.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">Sí</text>
+<rect x="655" y="625.0" width="355" height="132" rx="10" fill="#fff7e9" stroke="#b9944a"/>
+<text x="832" y="660.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">A1 · No ofrece la edición mediante el</text>
+<text x="832" y="684.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">formulario de borrador.</text>
+<text x="832" y="708.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Continuidad: Terminar o consultar la</text>
+<text x="832" y="732.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">campaña sin editar.</text>
+<polyline points="300,771.0 300,823.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="323" y="795.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">No</text>
+<rect x="40" y="823.0" width="520" height="80" rx="10" fill="#eaf5ef" stroke="#9bafbe"/>
+<text x="300" y="856.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">2 · UniFundme: Presenta el formulario editable de esa</text>
+<text x="300" y="880.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">campaña.</text>
+<polyline points="300,903.0 300,955.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="955.0" width="520" height="80" rx="10" fill="#eef4fa" stroke="#9bafbe"/>
+<text x="300" y="988.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">3 · Emprendedor: Modifica datos válidos y guarda con el</text>
+<text x="300" y="1012.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">respaldo requerido.</text>
+<polyline points="300,1035.0 300,1087.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<polygon points="300,1087.0 560,1167.0 300,1247.0 40,1167.0" fill="#fff3d8" stroke="#aa8533"/>
+<text x="300" y="1172.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">A2 · ¿Prefiere abandonar cambios?</text>
+<polyline points="560,1167.0 655,1167.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="609" y="1155.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">Sí</text>
+<rect x="655" y="1101.0" width="355" height="132" rx="10" fill="#fff7e9" stroke="#b9944a"/>
+<text x="832" y="1136.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">A2 · Usa Descartar y confirma la</text>
+<text x="832" y="1160.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">salida sin guardar las modificaciones</text>
+<text x="832" y="1184.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">del formulario.</text>
+<text x="832" y="1208.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Continuidad: Terminar sin guardar.</text>
+<polyline points="300,1247.0 300,1299.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="323" y="1271.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">No</text>
+<rect x="40" y="1299.0" width="520" height="80" rx="10" fill="#eaf5ef" stroke="#9bafbe"/>
+<text x="300" y="1332.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">3 · UniFundme: Conserva los cambios correctos y permite</text>
+<text x="300" y="1356.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">comprobarlos en Vista Previa.</text>
+<polyline points="300,1379.0 300,1431.0" fill="none" stroke="#546b7b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="1431.0" width="520" height="64" rx="30" fill="#e5f2df" stroke="#9bafbe"/>
+<text x="300" y="1468.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#203a4a">Fin del recorrido principal</text>
+<text x="525" y="1547" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="400" fill="#203a4a">Las alternativas indican dónde retomar o terminar; no todas concluyen en éxito.</text>
+</svg>
