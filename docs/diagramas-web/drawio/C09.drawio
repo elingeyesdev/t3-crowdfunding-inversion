@@ -1,0 +1,103 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" type="device" compressed="false">
+  <diagram id="C09" name="C09 · Publicar comentarios y marcar Me gusta">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="C09 · Publicar comentarios y marcar Me gusta" vertex="1" parent="1" style="text;html=0;align=left;verticalAlign=middle;fontSize=22;fontStyle=1;whiteSpace=wrap;">
+          <mxGeometry as="geometry" x="60" y="20" width="1180" height="70" />
+        </mxCell>
+        <mxCell id="N0" value="Inicio" vertex="1" parent="1" style="rounded=1;arcSize=50;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#d5e8d4;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="130.0" width="420" height="70" />
+        </mxCell>
+        <mxCell id="N1" value="Abrir la campaña y localizar la barra de Historia y Proyecto, Transparencia y Fondos e Hitos y Avances" vertex="1" parent="1" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#dae8fc;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="285.0" width="420" height="97" />
+        </mxCell>
+        <mxCell id="N2" value="Desplazar esa barra horizontalmente a la derecha, si hace falta, y pulsar Comentarios" vertex="1" parent="1" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#dae8fc;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="467.0" width="420" height="97" />
+        </mxCell>
+        <mxCell id="N3" value="Leer los comentarios existentes en la sección Comentarios" vertex="1" parent="1" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#dae8fc;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="649.0" width="420" height="74" />
+        </mxCell>
+        <mxCell id="N4" value="¿La campaña permite participar?" vertex="1" parent="1" style="rhombus;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#fff2cc;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="808.0" width="420" height="160" />
+        </mxCell>
+        <mxCell id="B4" value="La campaña está cerrada: sus comentarios se conservan solo para consulta" vertex="1" parent="1" style="rounded=1;arcSize=50;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#fff4e6;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="680" y="851.0" width="420" height="74" />
+        </mxCell>
+        <mxCell id="N5" value="¿Hay una sesión de donador o emprendedor?" vertex="1" parent="1" style="rhombus;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#fff2cc;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="1053.0" width="420" height="160" />
+        </mxCell>
+        <mxCell id="B5" value="Pulsar Inicia sesión y seguir C02; después regresar a Comentarios" vertex="1" parent="1" style="rounded=1;arcSize=50;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#fff4e6;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="680" y="1096.0" width="420" height="74" />
+        </mxCell>
+        <mxCell id="N6" value="Si quieres comentar: escribir en Escribe un comentario... y pulsar el icono de enviar" vertex="1" parent="1" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#dae8fc;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="1298.0" width="420" height="97" />
+        </mxCell>
+        <mxCell id="N7" value="Si quieres marcar Me gusta: pulsar el icono de pulgar arriba del comentario elegido" vertex="1" parent="1" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#dae8fc;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="1480.0" width="420" height="97" />
+        </mxCell>
+        <mxCell id="N8" value="¿Se registró la acción?" vertex="1" parent="1" style="rhombus;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#fff2cc;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="1662.0" width="420" height="160" />
+        </mxCell>
+        <mxCell id="B8" value="Comprobar el resultado; corregir el texto o revisar el acceso e intentar de nuevo" vertex="1" parent="1" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#fff4e6;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="680" y="1705.0" width="420" height="74" />
+        </mxCell>
+        <mxCell id="N9" value="Ver el comentario o el contador actualizado; otro clic alterna el Me gusta" vertex="1" parent="1" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#dae8fc;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="1907.0" width="420" height="74" />
+        </mxCell>
+        <mxCell id="N10" value="Fin" vertex="1" parent="1" style="rounded=1;arcSize=50;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#d5e8d4;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="2066.0" width="420" height="70" />
+        </mxCell>
+        <mxCell id="edge0" value="" edge="1" parent="1" source="N0" target="N1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge1" value="" edge="1" parent="1" source="N1" target="N2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge2" value="" edge="1" parent="1" source="N2" target="N3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge3" value="" edge="1" parent="1" source="N3" target="N4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge4" value="Sí" edge="1" parent="1" source="N4" target="N5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge5" value="No" edge="1" parent="1" source="N4" target="B4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge6" value="Sí" edge="1" parent="1" source="N5" target="N6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge7" value="No" edge="1" parent="1" source="N5" target="B5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge8" value="" edge="1" parent="1" source="N6" target="N7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge9" value="" edge="1" parent="1" source="N7" target="N8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge10" value="Sí" edge="1" parent="1" source="N8" target="N9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge11" value="No" edge="1" parent="1" source="N8" target="B8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge12" value="" edge="1" parent="1" source="B8" target="N6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=1;exitY=0.5;entryX=1;entryY=0.5;">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="1272" y="1742.0" />
+              <mxPoint x="1272" y="1346.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge13" value="" edge="1" parent="1" source="N9" target="N10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

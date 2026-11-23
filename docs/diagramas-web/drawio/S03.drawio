@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" type="device" compressed="false">
+  <diagram id="S03" name="S03 · Retirar permisos de un administrador">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="S03 · Retirar permisos de un administrador" vertex="1" parent="1" style="text;html=0;align=left;verticalAlign=middle;fontSize=22;fontStyle=1;whiteSpace=wrap;">
+          <mxGeometry as="geometry" x="60" y="20" width="1180" height="70" />
+        </mxCell>
+        <mxCell id="N0" value="Inicio" vertex="1" parent="1" style="rounded=1;arcSize=50;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#d5e8d4;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="130.0" width="420" height="70" />
+        </mxCell>
+        <mxCell id="N1" value="Seleccionar al administrador en Gestión de Admins" vertex="1" parent="1" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#dae8fc;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="285.0" width="420" height="74" />
+        </mxCell>
+        <mxCell id="N2" value="¿Es otro administrador común?" vertex="1" parent="1" style="rhombus;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#fff2cc;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="444.0" width="420" height="160" />
+        </mxCell>
+        <mxCell id="B2" value="Bloquear la acción: no se retiran los propios permisos ni los de un superadministrador" vertex="1" parent="1" style="rounded=1;arcSize=50;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#fff4e6;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="680" y="475.5" width="420" height="97" />
+        </mxCell>
+        <mxCell id="N3" value="Pulsar Revocar" vertex="1" parent="1" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#dae8fc;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="689.0" width="420" height="70" />
+        </mxCell>
+        <mxCell id="N4" value="¿Confirmar la operación?" vertex="1" parent="1" style="rhombus;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#fff2cc;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="844.0" width="420" height="160" />
+        </mxCell>
+        <mxCell id="B4" value="Cancelar y conservar los permisos" vertex="1" parent="1" style="rounded=1;arcSize=50;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#fff4e6;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="680" y="889.0" width="420" height="70" />
+        </mxCell>
+        <mxCell id="N5" value="Retirar perfil y roles administrativos; conservar la cuenta" vertex="1" parent="1" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#dae8fc;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="1089.0" width="420" height="74" />
+        </mxCell>
+        <mxCell id="N6" value="Comprobar la lista de administradores actualizada" vertex="1" parent="1" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#dae8fc;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="1248.0" width="420" height="74" />
+        </mxCell>
+        <mxCell id="N7" value="Fin" vertex="1" parent="1" style="rounded=1;arcSize=50;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=17;align=center;verticalAlign=middle;spacing=12;fillColor=#d5e8d4;strokeColor=#8296a6;">
+          <mxGeometry as="geometry" x="60" y="1407.0" width="420" height="70" />
+        </mxCell>
+        <mxCell id="edge0" value="" edge="1" parent="1" source="N0" target="N1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge1" value="" edge="1" parent="1" source="N1" target="N2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge2" value="Sí" edge="1" parent="1" source="N2" target="N3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge3" value="No" edge="1" parent="1" source="N2" target="B2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge4" value="" edge="1" parent="1" source="N3" target="N4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge5" value="Sí" edge="1" parent="1" source="N4" target="N5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge6" value="No" edge="1" parent="1" source="N4" target="B4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge7" value="" edge="1" parent="1" source="N5" target="N6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge8" value="" edge="1" parent="1" source="N6" target="N7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;endFill=1;fontSize=15;labelBackgroundColor=#ffffff;strokeColor=#526578;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
