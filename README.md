@@ -61,6 +61,24 @@ La API conserva `/api/v1` y los contratos usados por React, incluyendo paginaci�
 
 Los endpoints temporales de creación de superadministrador y publicación de historias de prueba se sustituyeron por operaciones locales y autenticadas. KYC y documentos nuevos se guardan fuera de `public/` y se sirven con enlaces firmados de 15 minutos.
 
+## Recuperación de contraseña web
+
+Desde «Olvidé mi contraseña» en el login se solicita un enlace en `/forgot-password`. El correo abre `/reset-password`; el enlace caduca a los 60 minutos y solo se puede usar una vez. Cambiar la contraseña revoca todos los tokens de acceso y las sesiones de base de datos de esa cuenta. Las cuentas que utilizan exclusivamente Google deben continuar con Google; las cuentas vinculadas a Google que también tienen contraseña local sí pueden recuperarla.
+
+La solicitud responde con el mismo mensaje para cualquier dirección válida. El envío se procesa en una cola separada para que la respuesta no revele si existe la cuenta. Además de Laravel, Vite y Reverb, inicia este trabajador desde `web/`:
+
+```powershell
+php artisan queue:work database --queue=password-recovery --sleep=1 --tries=3
+```
+
+`PASSWORD_RESET_QUEUE_CONNECTION` selecciona la conexión del trabajador (por defecto `database`); si la cambias, usa esa conexión en el comando. No admite `sync`. Ejecuta las migraciones habituales para disponer de las tablas de cola y recuperación. En producción mantén el trabajador mediante el supervisor de procesos y reinícialo con `php artisan queue:restart` después de desplegar cambios. Los envíos fallidos se reintentan hasta tres veces; revisa `php artisan queue:failed` antes de reintentarlos con `queue:retry`.
+
+El valor predeterminado `MAIL_MAILER=log` registra el correo en el log y **no entrega mensajes**. Para un capturador SMTP local configura `MAIL_MAILER=smtp`, `MAIL_HOST=127.0.0.1` y `MAIL_PORT=1025`, con credenciales vacías. Para entregar a buzones reales configura los datos SMTP del proveedor, un remitente autorizado y su transporte seguro. `APP_URL` debe apuntar al origen público correcto (HTTPS en producción), ya que determina el enlace del correo. Tras cambiar configuración en un despliegue con caché, ejecuta `php artisan config:cache` y reinicia el trabajador.
+
+La API pública ofrece `POST /api/v1/auth/forgot-password` (`email`) y `POST /api/v1/auth/reset-password` (`email`, `token`, `password`, `password_confirmation`). Exige contraseñas de 8 a 128 caracteres, con mayúscula y número. Limita solicitudes de enlace a una por minuto por correo y cinco por minuto por IP, y restablecimientos a diez por minuto por IP. Solicitar otro enlace después del período de espera invalida el anterior.
+
+La prueba `php artisan test --filter=PasswordRecovery` usa una base SQLite en memoria y un capturador SMTP efímero en `127.0.0.1`, sin envío externo; comprueba el correo recibido y utiliza su enlace para restablecer la contraseña.
+
 ## Datos originales y migración a otra base
 
 La migración local conserva **13 usuarios, 10 campañas, 36 inversiones y 36 transacciones**, además de perfiles, comentarios, recompensas, actualizaciones y notificaciones. Los UUID y hashes de contraseña se conservan. `legacy_records` guarda una copia íntegra de cada fila del origen, incluyendo los campos y tablas históricos que no utiliza la aplicación activa. El respaldo original está en `storage/app/private/legacy-export.json`, excluido de Git y del servidor público.

@@ -118,6 +118,7 @@ export function LoginPage() {
           </p>
 
           {/* Error */}
+          {searchParams.get('passwordReset') === 'success' && <p role="status" className="mb-6 rounded-xl bg-green-50 p-4 text-sm text-green-800">Tu contraseña fue actualizada. Inicia sesión con la nueva contraseña.</p>}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 p-3.5 rounded-xl text-sm font-medium mb-6 flex items-center gap-2.5">
               <AlertCircle size={18} strokeWidth={2} className="shrink-0 text-red-500" />
@@ -220,6 +221,7 @@ export function LoginPage() {
             </button>
           </form>
 
+          <Link to="/forgot-password" className="mt-4 inline-block text-sm font-semibold text-[#4a7f1a] underline">Olvidé mi contraseña</Link>
           {/* Separador OR */}
           <div className="flex items-center gap-3 mt-6">
             <div className="flex-1 h-px bg-gray-200" />

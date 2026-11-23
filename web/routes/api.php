@@ -10,6 +10,7 @@ use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\InvestmentController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PasswordRecoveryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RewardController;
 use Illuminate\Http\Request;
@@ -18,6 +19,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('users/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
 Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+Route::post('auth/forgot-password', [PasswordRecoveryController::class, 'requestLink'])->middleware('throttle:password-recovery');
+Route::post('auth/reset-password', [PasswordRecoveryController::class, 'reset'])->middleware('throttle:10,1');
 Route::get('categories', [CampaignController::class, 'categories']);
 Route::get('campaigns/public', [CampaignController::class, 'publicIndex']);
 Route::get('campaigns/public/updates/recent', [CampaignController::class, 'stories']);

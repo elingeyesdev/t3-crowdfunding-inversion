@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPasswordLink;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasUuids, \Illuminate\Database\Eloquent\Factories\HasFactory;
+    use HasApiTokens, HasUuids, \Illuminate\Database\Eloquent\Factories\HasFactory, Notifiable;
 
     protected $guarded = ['id'];
 
@@ -29,6 +31,11 @@ class User extends Authenticatable
     public function getAuthPasswordName(): string
     {
         return 'password_hash';
+    }
+
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        $this->notify(new ResetPasswordLink($token));
     }
 
     public function roles()
