@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 1090" role="img" aria-labelledby="title desc">
+<title id="title">D06 · Seguir novedades de proyectos apoyados</title>
+<desc id="desc">Flujo vertical. Seguir las flechas de arriba hacia abajo; cada decisión tiene una alternativa rotulada. Los pasos enlazados llevan a otro diagrama de la guía.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526578"/></marker></defs>
+<style>text{font-family:Arial,sans-serif;fill:#193449;font-size:18px} .label{font-size:16px;fill:#42596b} .edge{fill:none;stroke:#526578;stroke-width:1.8;marker-end:url(#arrow)} a:hover rect,a:hover polygon{stroke:#176941;stroke-width:3}</style>
+<path class="edge" d="M 290 115.0 V 195.0"/>
+<path class="edge" d="M 290 265.0 V 345.0"/>
+<path class="edge" d="M 290 415.0 V 465.0"/>
+<path class="edge" d="M 290 595.0 V 645.0"/>
+<text class="label" x="305" y="625.0">Sí</text>
+<path class="edge" d="M 485 530 H 590"/>
+<text class="label" x="535" y="520" text-anchor="middle">No</text>
+<path class="edge" d="M 980 530 H 1010 V 380 H 485"/>
+<rect x="590.0" y="495.0" width="390" height="70" rx="8" fill="#fff8ef" stroke="#a9bdca"/>
+<text x="785" y="525" text-anchor="middle">
+<tspan x="785" dy="0">Mostrar el estado sin novedades;</tspan>
+<tspan x="785" dy="22">cambiar filtro o volver más tarde</tspan>
+</text>
+<path class="edge" d="M 290 715.0 V 788.0"/>
+<path class="edge" d="M 290 872.0 V 945.0"/>
+<rect x="95.0" y="45.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
+<text x="290" y="86" text-anchor="middle">
+<tspan x="290" dy="0">Inicio</tspan>
+</text>
+<rect x="95.0" y="195.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="236" text-anchor="middle">
+<tspan x="290" dy="0">Abrir Novedades en Mi Panel</tspan>
+</text>
+<rect x="95.0" y="345.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="375" text-anchor="middle">
+<tspan x="290" dy="0">Elegir todos los proyectos o una</tspan>
+<tspan x="290" dy="22">campaña concreta</tspan>
+</text>
+<polygon points="290,465.0 485.0,530 290,595.0 95.0,530" fill="#fff6df" stroke="#a38b49"/>
+<text x="290" y="536" text-anchor="middle">
+<tspan x="290" dy="0">¿Hay novedades publicadas?</tspan>
+</text>
+<rect x="95.0" y="645.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="675" text-anchor="middle">
+<tspan x="290" dy="0">Leer las publicaciones y consultar</tspan>
+<tspan x="290" dy="22">sus imágenes o videos</tspan>
+</text>
+<rect x="95.0" y="788.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="814" text-anchor="middle">
+<tspan x="290" dy="0">Usar Anterior o Siguiente si</tspan>
+<tspan x="290" dy="22">aparecen, o pulsar Ver Campaña para</tspan>
+<tspan x="290" dy="22">abrir el proyecto</tspan>
+</text>
+<rect x="95.0" y="945.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
+<text x="290" y="986" text-anchor="middle">
+<tspan x="290" dy="0">Fin</tspan>
+</text>
+</svg>

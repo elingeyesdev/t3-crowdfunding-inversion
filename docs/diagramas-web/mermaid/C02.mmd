@@ -1,0 +1,24 @@
+%% C02 · Iniciar sesión con correo
+%% Rol: Acceso y funciones compartidas
+%% Entrada: Barra superior → Iniciar Sesión · /login
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Iniciar sesión e ingresar correo y contraseña"]
+  N1 --> N2
+  N2["Opcional: marcar Recordarme para conservar el correo"]
+  N2 --> N3
+  N3["Enviar el formulario"]
+  N3 --> N4
+  N4{"¿Las credenciales y la cuenta son válidas?"}
+  N4 -->|"Sí"| N5
+  B4["Leer el error, corregir los datos y volver a intentar"]
+  N4 -->|"No"| B4
+  B4 --> N1
+  N5{"¿Es una cuenta administrativa?"}
+  N5 -->|"Sí"| N6
+  B5(["Volver a la ruta solicitada; si no hay una, abrir Mi Panel o Mi Perfil"])
+  N5 -->|"No"| B5
+  N6["Administrador: /admin; superadministrador: /superadmin"]
+  N6 --> N7
+  N7(["Fin"])

@@ -1,0 +1,34 @@
+%% D03 · Donar a una campaña
+%% Rol: Donador
+%% Entrada: Ficha de campaña → formulario de donación
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir la campaña elegida"]
+  N1 --> N2
+  N2{"¿Acepta donaciones y sigue vigente?"}
+  N2 -->|"Sí"| N3
+  B2(["Elegir otra campaña: esta está cerrada, financiada o no disponible"])
+  N2 -->|"No"| B2
+  N3["Ingresar el monto; opcionalmente elegir un nivel en Historia y Proyecto → Niveles de Recompensa"]
+  N3 --> N4
+  N4{"¿Cumple monto y condiciones de recompensa?"}
+  N4 -->|"Sí"| N5
+  B4["Ajustar monto o recompensa: revisar mínimos, máximos, vigencia y cupos"]
+  N4 -->|"No"| B4
+  B4 --> N3
+  N5["Pulsar Donar Bs. [monto] y revisar la ventana Confirmar Aporte"]
+  N5 --> N6
+  N6{"¿Confirmar el aporte?"}
+  N6 -->|"Sí"| N7
+  B6["Cancelar y volver al formulario"]
+  N6 -->|"No"| B6
+  B6 --> N3
+  N7{"¿El servidor acepta el aporte?"}
+  N7 -->|"Sí"| N8
+  B7["Leer el error: revisar rol, perfil, saldo, meta restante o recompensa; corregir y reintentar"]
+  N7 -->|"No"| B7
+  B7 --> N3
+  N8["Ver el aporte confirmado; descargar el PDF o abrir Mi Panel para consultar el saldo"]
+  N8 --> N9
+  N9(["Fin"])

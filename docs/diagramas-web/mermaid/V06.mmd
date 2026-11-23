@@ -1,0 +1,34 @@
+%% V06 · Consultar fondos, evidencias e hitos
+%% Rol: Visitante y consulta pública
+%% Entrada: Ficha de campaña → Transparencia y Fondos
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["En la barra principal de la campaña, pulsar Transparencia y Fondos"]
+  N1 --> N2
+  N2["Localizar Plan de Fondos, Auditoría y Movimientos, Hitos del Proyecto, Evidencias y Bitácora"]
+  N2 --> N3
+  N3["Si alguna opción no aparece, desplazar horizontalmente la barra de submenús hacia la derecha"]
+  N3 --> N4
+  N4["Pulsar Plan de Fondos para consultar la distribución prevista del dinero"]
+  N4 --> N5
+  N5["Pulsar Auditoría y Movimientos para consultar recaudación, gráficos y aportes recientes"]
+  N5 --> N6
+  N6["En los aportes recientes, elegir Todos, Directos o Recompensas"]
+  N6 --> N7
+  N7["Pulsar Hitos del Proyecto para consultar las etapas y su estado"]
+  N7 --> N8
+  N8["Pulsar Evidencias; el número junto al nombre indica cuántos documentos hay"]
+  N8 --> N9
+  N9{"¿Hay evidencias públicas?"}
+  N9 -->|"Sí"| N10
+  B9["La sección muestra No hay evidencias públicas disponibles; continuar con Bitácora"]
+  N9 -->|"No"| B9
+  B9 --> N11
+  N10["Pulsar Abrir documento en la evidencia elegida; se abre en otra pestaña"]
+  N10 --> N11
+  N11["Volver a la campaña y pulsar Bitácora para consultar las novedades publicadas"]
+  N11 --> N12
+  N12["Para ver hitos y novedades juntos, pulsar Hitos y Avances en la barra principal"]
+  N12 --> N13
+  N13(["Fin"])

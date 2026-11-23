@@ -1,0 +1,20 @@
+%% C05 · Configurar preferencias de notificación
+%% Rol: Acceso y funciones compartidas
+%% Entrada: Centro de notificaciones → Preferencias
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir el centro y pulsar Preferencias"]
+  N1 --> N2
+  N2["Activar o desactivar las opciones disponibles de notificaciones"]
+  N2 --> N3
+  N3["Guardar preferencias"]
+  N3 --> N4
+  N4{"¿Se guardaron los cambios?"}
+  N4 -->|"Sí"| N5
+  B4["Revisar el error y volver a guardar"]
+  N4 -->|"No"| B4
+  B4 --> N2
+  N5["Ver la confirmación; la ventana se cierra y regresa al centro"]
+  N5 --> N6
+  N6(["Fin"])

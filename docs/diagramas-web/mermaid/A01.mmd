@@ -1,0 +1,15 @@
+%% A01 · Consultar el panel administrativo
+%% Rol: Administrador
+%% Entrada: Login → panel administrativo · /admin
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Estadísticas en la barra lateral"]
+  N1 --> N2
+  N2["Consultar indicadores de usuarios, campañas y tareas pendientes"]
+  N2 --> N3
+  N3["Elegir un acceso: usuarios, campañas, KYC, revisión o auditoría de gastos"]
+  N3 --> N4
+  N4["Continuar en el flujo administrativo correspondiente"]
+  N4 --> N5
+  N5(["Fin"])

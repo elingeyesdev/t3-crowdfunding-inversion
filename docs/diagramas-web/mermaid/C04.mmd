@@ -1,0 +1,20 @@
+%% C04 · Leer y gestionar notificaciones
+%% Rol: Acceso y funciones compartidas
+%% Entrada: Campana → centro de notificaciones · /notifications
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Pulsar la campana y abrir el centro de notificaciones"]
+  N1 --> N2
+  N2["Buscar y filtrar por estado y categoría; recorrer las páginas"]
+  N2 --> N3
+  N3{"¿Hay notificaciones coincidentes?"}
+  N3 -->|"Sí"| N4
+  B3["Restablecer filtros o volver más tarde"]
+  N3 -->|"No"| B3
+  B3 --> N2
+  N4["Abrir una notificación: se marca leída y navega a su destino si tiene enlace"]
+  N4 --> N5
+  N5["Volver al centro para marcar todas como leídas, eliminar una o limpiar las leídas"]
+  N5 --> N6
+  N6(["Fin"])

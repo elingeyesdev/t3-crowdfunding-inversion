@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 1240" role="img" aria-labelledby="title desc">
+<title id="title">C06 · Cambiar la contraseña</title>
+<desc id="desc">Flujo vertical. Seguir las flechas de arriba hacia abajo; cada decisión tiene una alternativa rotulada. Los pasos enlazados llevan a otro diagrama de la guía.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526578"/></marker></defs>
+<style>text{font-family:Arial,sans-serif;fill:#193449;font-size:18px} .label{font-size:16px;fill:#42596b} .edge{fill:none;stroke:#526578;stroke-width:1.8;marker-end:url(#arrow)} a:hover rect,a:hover polygon{stroke:#176941;stroke-width:3}</style>
+<path class="edge" d="M 290 115.0 V 195.0"/>
+<path class="edge" d="M 290 265.0 V 315.0"/>
+<path class="edge" d="M 290 445.0 V 495.0"/>
+<text class="label" x="305" y="475.0">Sí</text>
+<path class="edge" d="M 485 380 H 590"/>
+<text class="label" x="535" y="370" text-anchor="middle">No</text>
+<rect x="590.0" y="345.0" width="390" height="70" rx="35" fill="#fff8ef" stroke="#a9bdca"/>
+<text x="785" y="375" text-anchor="middle">
+<tspan x="785" dy="0">Esta cuenta no permite cambiar la</tspan>
+<tspan x="785" dy="22">contraseña desde esta pantalla</tspan>
+</text>
+<path class="edge" d="M 290 565.0 V 645.0"/>
+<path class="edge" d="M 290 715.0 V 765.0"/>
+<path class="edge" d="M 290 895.0 V 945.0"/>
+<text class="label" x="305" y="925.0">Sí</text>
+<path class="edge" d="M 485 830 H 590"/>
+<text class="label" x="535" y="820" text-anchor="middle">No</text>
+<path class="edge" d="M 980 830 H 1010 V 530 H 485"/>
+<rect x="590.0" y="795.0" width="390" height="70" rx="8" fill="#fff8ef" stroke="#a9bdca"/>
+<text x="785" y="825" text-anchor="middle">
+<tspan x="785" dy="0">Corregir contraseña actual,</tspan>
+<tspan x="785" dy="22">requisitos o coincidencia y reenviar</tspan>
+</text>
+<path class="edge" d="M 290 1015.0 V 1095.0"/>
+<rect x="95.0" y="45.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
+<text x="290" y="86" text-anchor="middle">
+<tspan x="290" dy="0">Inicio</tspan>
+</text>
+<rect x="95.0" y="195.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="225" text-anchor="middle">
+<tspan x="290" dy="0">Abrir Configuración de Cuenta →</tspan>
+<tspan x="290" dy="22">Seguridad y Acceso</tspan>
+</text>
+<polygon points="290,315.0 485.0,380 290,445.0 95.0,380" fill="#fff6df" stroke="#a38b49"/>
+<text x="290" y="375" text-anchor="middle">
+<tspan x="290" dy="0">¿La cuenta tiene contraseña</tspan>
+<tspan x="290" dy="22">local?</tspan>
+</text>
+<rect x="95.0" y="495.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="525" text-anchor="middle">
+<tspan x="290" dy="0">Ingresar contraseña actual, nueva</tspan>
+<tspan x="290" dy="22">contraseña y confirmación</tspan>
+</text>
+<rect x="95.0" y="645.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="686" text-anchor="middle">
+<tspan x="290" dy="0">Pulsar Actualizar contraseña</tspan>
+</text>
+<polygon points="290,765.0 485.0,830 290,895.0 95.0,830" fill="#fff6df" stroke="#a38b49"/>
+<text x="290" y="836" text-anchor="middle">
+<tspan x="290" dy="0">¿Los datos son válidos?</tspan>
+</text>
+<rect x="95.0" y="945.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="975" text-anchor="middle">
+<tspan x="290" dy="0">Confirmar el éxito; la sesión actual</tspan>
+<tspan x="290" dy="22">continúa y se cierran las demás</tspan>
+</text>
+<rect x="95.0" y="1095.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
+<text x="290" y="1136" text-anchor="middle">
+<tspan x="290" dy="0">Fin</tspan>
+</text>
+</svg>

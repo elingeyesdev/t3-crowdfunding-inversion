@@ -1,0 +1,24 @@
+%% D02 · Consultar el panel y aumentar capital simulado
+%% Rol: Donador
+%% Entrada: Barra superior → Mi Panel · /dashboard
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Mi Panel y revisar capital disponible, total donado y donaciones"]
+  N1 --> N2
+  N2{"¿Aparece Aumentar Capital?"}
+  N2 -->|"Sí"| N3
+  B2(["Completar el perfil y configurar sus preferencias de capital"])
+  N2 -->|"No"| B2
+  N3["Pulsar Aumentar Capital"]
+  N3 --> N4
+  N4["Elegir o escribir un monto; agregar notas si se desea"]
+  N4 --> N5
+  N5{"¿El monto es al menos Bs. 100?"}
+  N5 -->|"Sí"| N6
+  B5["Corregir el monto"]
+  N5 -->|"No"| B5
+  B5 --> N4
+  N6["Enviar y comprobar la confirmación y el saldo actualizado"]
+  N6 --> N7
+  N7(["Fin"])

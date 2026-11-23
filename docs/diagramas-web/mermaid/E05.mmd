@@ -1,0 +1,20 @@
+%% E05 · Publicar una campaña aprobada
+%% Rol: Emprendedor
+%% Entrada: Mis Campañas → campaña aprobada → Lanzar
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Localizar la campaña en estado Aprobada"]
+  N1 --> N2
+  N2["En Vista Previa pulsar Lanzar, o pulsar Publicar Campaña en la tarjeta"]
+  N2 --> N3
+  N3{"¿Se permite la publicación?"}
+  N3 -->|"Sí"| N4
+  B3["Leer el error; revisar KYC y fecha de cierre antes de volver a intentar"]
+  N3 -->|"No"| B3
+  B3 --> N1
+  N4["Ver el estado Publicada"]
+  N4 --> N5
+  N5["Consultar la campaña en Explorar y compartirla"]
+  N5 --> N6
+  N6(["Fin"])

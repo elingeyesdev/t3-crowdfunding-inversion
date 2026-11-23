@@ -1,0 +1,24 @@
+%% C01 · Crear una cuenta
+%% Rol: Acceso y funciones compartidas
+%% Entrada: Iniciar sesión → registro · /register
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Crea tu cuenta"]
+  N1 --> N2
+  N2["Elegir Donador o Emprendedor"]
+  N2 --> N3
+  N3["Ingresar correo y contraseña; enviar el formulario"]
+  N3 --> N4
+  N4{"¿Se completaron registro e inicio de sesión?"}
+  N4 -->|"Sí"| N5
+  B4["Revisar el error: corregir datos o ir a Iniciar sesión si la cuenta ya existe"]
+  N4 -->|"No"| B4
+  B4 --> N3
+  N5{"¿Elegiste Donador?"}
+  N5 -->|"Sí"| N6
+  B5(["Se abre Mi Perfil de emprendedor; continuar en E01"])
+  N5 -->|"No"| B5
+  N6["Se abre Mi Panel; completar Mi Perfil con D01"]
+  N6 --> N7
+  N7(["Fin"])

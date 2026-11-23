@@ -1,0 +1,26 @@
+%% A05 · Revisar documentos y autorizar su publicación
+%% Rol: Administrador
+%% Entrada: Detalle administrativo de campaña → Documentación
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir la campaña desde Gestión o Revisión de Campañas"]
+  N1 --> N2
+  N2["Entrar en Documentación y abrir el archivo"]
+  N2 --> N3
+  N3{"¿El documento pendiente se aprueba?"}
+  N3 -->|"Sí"| N4
+  B3(["Indicar el motivo y rechazar; actualizar la lista de documentos"])
+  N3 -->|"No"| B3
+  N4["Pulsar Aprobar y comprobar el estado"]
+  N4 --> N5
+  N5["En un documento aprobado, usar Publicar evidencia o Retirar publicación"]
+  N5 --> N6
+  N6{"¿El cambio se guardó?"}
+  N6 -->|"Sí"| N7
+  B6["Leer el error, verificar que exista el archivo y recargar"]
+  N6 -->|"No"| B6
+  B6 --> N2
+  N7["Consultar estado y visibilidad; solo lo autorizado aparece públicamente"]
+  N7 --> N8
+  N8(["Fin"])

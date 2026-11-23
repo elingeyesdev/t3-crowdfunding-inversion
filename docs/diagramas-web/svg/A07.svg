@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 1690" role="img" aria-labelledby="title desc">
+<title id="title">A07 · Auditar movimientos financieros</title>
+<desc id="desc">Flujo vertical. Seguir las flechas de arriba hacia abajo; cada decisión tiene una alternativa rotulada. Los pasos enlazados llevan a otro diagrama de la guía.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526578"/></marker></defs>
+<style>text{font-family:Arial,sans-serif;fill:#193449;font-size:18px} .label{font-size:16px;fill:#42596b} .edge{fill:none;stroke:#526578;stroke-width:1.8;marker-end:url(#arrow)} a:hover rect,a:hover polygon{stroke:#176941;stroke-width:3}</style>
+<path class="edge" d="M 290 115.0 V 188.0"/>
+<path class="edge" d="M 290 272.0 V 345.0"/>
+<path class="edge" d="M 290 415.0 V 495.0"/>
+<path class="edge" d="M 290 565.0 V 615.0"/>
+<path class="edge" d="M 290 745.0 V 795.0"/>
+<text class="label" x="305" y="775.0">Sí</text>
+<path class="edge" d="M 485 680 H 590"/>
+<text class="label" x="535" y="670" text-anchor="middle">No</text>
+<rect x="590.0" y="638.0" width="390" height="84" rx="35" fill="#fff8ef" stroke="#a9bdca"/>
+<text x="785" y="664" text-anchor="middle">
+<tspan x="785" dy="0">Consultar solamente: los movimientos</tspan>
+<tspan x="785" dy="22">del sistema o bloqueados no son</tspan>
+<tspan x="785" dy="22">revisables</tspan>
+</text>
+<path class="edge" d="M 290 865.0 V 945.0"/>
+<path class="edge" d="M 290 1015.0 V 1095.0"/>
+<path class="edge" d="M 290 1165.0 V 1215.0"/>
+<path class="edge" d="M 290 1345.0 V 1395.0"/>
+<text class="label" x="305" y="1375.0">Sí</text>
+<path class="edge" d="M 485 1280 H 590"/>
+<text class="label" x="535" y="1270" text-anchor="middle">No</text>
+<path class="edge" d="M 980 1280 H 1010 V 380 H 485"/>
+<rect x="590.0" y="1245.0" width="390" height="70" rx="8" fill="#fff8ef" stroke="#a9bdca"/>
+<text x="785" y="1275" text-anchor="middle">
+<tspan x="785" dy="0">Leer el error; si cambió la versión,</tspan>
+<tspan x="785" dy="22">volver a cargar antes de revisar</tspan>
+</text>
+<path class="edge" d="M 290 1465.0 V 1545.0"/>
+<rect x="95.0" y="45.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
+<text x="290" y="86" text-anchor="middle">
+<tspan x="290" dy="0">Inicio</tspan>
+</text>
+<rect x="95.0" y="188.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="214" text-anchor="middle">
+<tspan x="290" dy="0">Buscar por concepto, factura, notas o</tspan>
+<tspan x="290" dy="22">campaña; filtrar tipo, estado y</tspan>
+<tspan x="290" dy="22">comprobante</tspan>
+</text>
+<rect x="95.0" y="345.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="375" text-anchor="middle">
+<tspan x="290" dy="0">Pulsar Revisar en el movimiento; usar</tspan>
+<tspan x="290" dy="22">las páginas si hay más resultados</tspan>
+</text>
+<rect x="95.0" y="495.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="525" text-anchor="middle">
+<tspan x="290" dy="0">Revisar importe, categoría,</tspan>
+<tspan x="290" dy="22">comprobante, versiones e historial</tspan>
+</text>
+<polygon points="290,615.0 485.0,680 290,745.0 95.0,680" fill="#fff6df" stroke="#a38b49"/>
+<text x="290" y="675" text-anchor="middle">
+<tspan x="290" dy="0">¿El movimiento permite</tspan>
+<tspan x="290" dy="22">revisión?</tspan>
+</text>
+<rect x="95.0" y="795.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="825" text-anchor="middle">
+<tspan x="290" dy="0">Elegir Aprobar / Verificado, Marcar</tspan>
+<tspan x="290" dy="22">Observado o Rechazar</tspan>
+</text>
+<rect x="95.0" y="945.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="975" text-anchor="middle">
+<tspan x="290" dy="0">Escribir notas; son obligatorias al</tspan>
+<tspan x="290" dy="22">observar o rechazar</tspan>
+</text>
+<rect x="95.0" y="1095.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="1136" text-anchor="middle">
+<tspan x="290" dy="0">Pulsar Confirmar Dictamen</tspan>
+</text>
+<polygon points="290,1215.0 485.0,1280 290,1345.0 95.0,1280" fill="#fff6df" stroke="#a38b49"/>
+<text x="290" y="1275" text-anchor="middle">
+<tspan x="290" dy="0">¿Se aceptó la revisión</tspan>
+<tspan x="290" dy="22">vigente?</tspan>
+</text>
+<rect x="95.0" y="1395.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="1425" text-anchor="middle">
+<tspan x="290" dy="0">Actualizar lista, resumen e historial</tspan>
+<tspan x="290" dy="22">de auditoría</tspan>
+</text>
+<rect x="95.0" y="1545.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
+<text x="290" y="1586" text-anchor="middle">
+<tspan x="290" dy="0">Fin</tspan>
+</text>
+</svg>

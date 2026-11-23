@@ -1,0 +1,24 @@
+%% C06 · Cambiar la contraseña
+%% Rol: Acceso y funciones compartidas
+%% Entrada: Barra superior → Configuración · /account-settings
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Configuración de Cuenta → Seguridad y Acceso"]
+  N1 --> N2
+  N2{"¿La cuenta tiene contraseña local?"}
+  N2 -->|"Sí"| N3
+  B2(["Esta cuenta no permite cambiar la contraseña desde esta pantalla"])
+  N2 -->|"No"| B2
+  N3["Ingresar contraseña actual, nueva contraseña y confirmación"]
+  N3 --> N4
+  N4["Pulsar Actualizar contraseña"]
+  N4 --> N5
+  N5{"¿Los datos son válidos?"}
+  N5 -->|"Sí"| N6
+  B5["Corregir contraseña actual, requisitos o coincidencia y reenviar"]
+  N5 -->|"No"| B5
+  B5 --> N3
+  N6["Confirmar el éxito; la sesión actual continúa y se cierran las demás"]
+  N6 --> N7
+  N7(["Fin"])

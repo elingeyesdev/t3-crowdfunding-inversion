@@ -1,0 +1,19 @@
+%% V05 · Compartir una campaña
+%% Rol: Visitante y consulta pública
+%% Entrada: Ficha de campaña → Compartir Campaña; en Explorar → icono de compartir
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Pulsar Compartir Campaña en la ficha, o el icono de compartir de su tarjeta en Explorar"]
+  N1 --> N2
+  N2{"¿Quieres copiar el enlace?"}
+  N2 -->|"Sí"| N3
+  B2(["Elegir WhatsApp, Facebook, X o LinkedIn; se abre el servicio externo"])
+  N2 -->|"Red social"| B2
+  N3["Pulsar Copiar enlace"]
+  N3 --> N4
+  N4["Comprobar la confirmación de copia y pegarlo donde corresponda"]
+  N4 --> N5
+  N5["Cerrar la ventana para seguir navegando"]
+  N5 --> N6
+  N6(["Fin"])

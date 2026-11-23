@@ -1,0 +1,19 @@
+%% V04 · Ver historias y novedades recientes
+%% Rol: Visitante y consulta pública
+%% Entrada: Explorar → barra de historias
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Explorar y localizar los avatares de historias"]
+  N1 --> N2
+  N2{"¿Hay historias disponibles?"}
+  N2 -->|"Sí"| N3
+  B2(["No hay historias recientes; consultar una campaña en V02"])
+  N2 -->|"No"| B2
+  N3["Seleccionar un avatar para abrir sus novedades"]
+  N3 --> N4
+  N4["Leer las novedades y avanzar o retroceder entre historias"]
+  N4 --> N5
+  N5["Cerrar el visor; para conocer el proyecto, buscar su campaña en Explorar"]
+  N5 --> N6
+  N6(["Fin"])

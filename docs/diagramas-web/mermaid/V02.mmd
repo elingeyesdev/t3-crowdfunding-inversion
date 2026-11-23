@@ -1,0 +1,49 @@
+%% V02 · Consultar una campaña
+%% Rol: Visitante y consulta pública
+%% Entrada: Explorar → seleccionar campaña · /campaign/:id
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir la ficha de la campaña"]
+  N1 --> N2
+  N2{"¿La campaña está disponible?"}
+  N2 -->|"Sí"| N3
+  B2(["Volver a Explorar; si falló la carga, usar Reintentar"])
+  N2 -->|"No"| B2
+  N3["Leer el título, resumen, creador, Recaudado, Meta, Donantes y Días Restantes"]
+  N3 --> N4
+  N4["Localizar Historia y Proyecto, Transparencia y Fondos e Hitos y Avances"]
+  N4 --> N5
+  N5["Si Comentarios no aparece, desplazar horizontalmente esa misma barra hacia la derecha"]
+  N5 --> N6
+  N6{"¿Quieres conocer el proyecto?"}
+  N6 -->|"No"| N7
+  B6(["Pulsar Historia y Proyecto; leer Historia del Proyecto, recompensas y Sobre el Emprendedor"])
+  N6 -->|"Sí"| B6
+  N7{"¿Quieres consultar fondos y evidencias?"}
+  N7 -->|"No"| N8
+  B7(["Pulsar Transparencia y Fondos; continuar con sus opciones en V06"])
+  N7 -->|"Sí"| B7
+  N8{"¿Quieres consultar los avances?"}
+  N8 -->|"No"| N9
+  B8(["Pulsar Hitos y Avances; consultar los hitos y las novedades publicadas"])
+  N8 -->|"Sí"| B8
+  N9{"¿Quieres leer o publicar comentarios?"}
+  N9 -->|"No"| N10
+  B9(["Pulsar Comentarios, a la derecha de Hitos y Avances; para participar, seguir C09"])
+  N9 -->|"Sí"| B9
+  N10{"¿Quieres realizar un aporte?"}
+  N10 -->|"No"| N11
+  B10(["Consultar las condiciones del aporte y continuar con D03"])
+  N10 -->|"Sí"| B10
+  N11{"¿Quieres compartir la campaña?"}
+  N11 -->|"No"| N12
+  B11(["Pulsar Compartir Campaña y continuar con V05"])
+  N11 -->|"Sí"| B11
+  N12{"¿Quieres contactar al creador?"}
+  N12 -->|"No"| N13
+  B12(["En Historia y Proyecto, bajar hasta Sobre el Emprendedor; continuar con C03"])
+  N12 -->|"Sí"| B12
+  N13["Volver a Explorar para consultar otra campaña"]
+  N13 --> N14
+  N14(["Fin"])
