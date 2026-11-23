@@ -9,4 +9,5 @@ Route::any('/storage/uploads/kyc/{path?}', fn () => abort(403))->where('path', '
 
 Route::get('/api/v1/auth/google', [AuthController::class, 'google']);
 Route::get('/api/v1/auth/google/callback', [AuthController::class, 'googleCallback']);
+Route::get('/reset-password', fn () => response()->view('app')->header('Referrer-Policy', 'no-referrer')->header('Cache-Control', 'no-store'));
 Route::view('/{path?}', 'app')->where('path', '^(?!api(?:/|$)|storage(?:/|$)|uploads(?:/|$)|build(?:/|$)).*');

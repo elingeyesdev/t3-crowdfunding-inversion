@@ -20,6 +20,7 @@ import { LandingPage } from './pages/LandingPage';
 import { OAuthCallbackPage } from './pages/OAuthCallbackPage';
 import { AccountSettingsPage } from './pages/AccountSettingsPage';
 import { NotificationsPage } from './pages/NotificationsPage';
+import { PasswordRecoveryPage } from './pages/PasswordRecoveryPage';
 
 // Guard simple: si no hay token, redirige a login con la ruta previa en el estado
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -33,6 +34,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<PasswordRecoveryPage />} />
+        <Route path="/reset-password" element={<PasswordRecoveryPage reset />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/auth/callback" element={<OAuthCallbackPage />} />
         <Route path="/explore" element={<ExploreCampaignsPage />} />

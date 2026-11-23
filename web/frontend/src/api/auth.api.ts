@@ -46,3 +46,15 @@ export async function changePassword(currentPassword: string, newPassword: strin
     { headers: { Authorization: `Bearer ${token}` } },
   );
 }
+
+export async function requestPasswordReset(email: string): Promise<string> {
+  const { data } = await axios.post('/api/v1/auth/forgot-password', { email }, { timeout: 15000 });
+  return data.data.message;
+}
+
+export async function resetPassword(input: { email: string; token: string; password: string; passwordConfirmation: string }): Promise<void> {
+  await axios.post('/api/v1/auth/reset-password', {
+    email: input.email, token: input.token, password: input.password,
+    password_confirmation: input.passwordConfirmation,
+  }, { timeout: 15000 });
+}
