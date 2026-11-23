@@ -1,0 +1,22 @@
+%% D05 · Descargar comprobantes PDF
+%% Rol: Donador
+%% Entrada: Mi Panel → Comprobantes · /dashboard?tab=receipts
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Comprobantes y buscar el aporte"]
+  N1 --> N2
+  N2{"¿Se encontró un comprobante?"}
+  N2 -->|"Sí"| N3
+  B2(["Revisar los filtros o realizar un aporte primero"])
+  N2 -->|"No"| B2
+  N3["Pulsar Descargar PDF"]
+  N3 --> N4
+  N4{"¿Se generó la descarga?"}
+  N4 -->|"Sí"| N5
+  B4["Leer el error y volver a intentar"]
+  N4 -->|"No"| B4
+  B4 --> N3
+  N5["Guardar o abrir el PDF desde las descargas del navegador"]
+  N5 --> N6
+  N6(["Fin"])

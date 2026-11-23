@@ -1,0 +1,15 @@
+%% C07 · Cerrar sesión
+%% Rol: Acceso y funciones compartidas
+%% Entrada: Barra superior → Salir; panel admin → Cerrar Sesión
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Pulsar Salir o Cerrar Sesión"]
+  N1 --> N2
+  N2["Si se usa Configuración, confirmar Cerrar sesión; cancelar conserva la sesión"]
+  N2 --> N3
+  N3["El sistema cierra la sesión y limpia el acceso local"]
+  N3 --> N4
+  N4["Volver al login; una pantalla privada requiere autenticarse de nuevo"]
+  N4 --> N5
+  N5(["Fin"])

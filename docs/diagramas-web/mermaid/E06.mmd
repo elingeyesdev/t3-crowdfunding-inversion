@@ -1,0 +1,26 @@
+%% E06 · Consultar, filtrar y editar campañas propias
+%% Rol: Emprendedor
+%% Entrada: Barra superior → Mis Campañas · /entrepreneur-campaigns
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Buscar por título y elegir filtros de estado, orden y página"]
+  N1 --> N2
+  N2["Abrir la campaña en Vista previa"]
+  N2 --> N3
+  N3["Consultar detalles, historial, documentos y las pestañas disponibles"]
+  N3 --> N4
+  N4{"¿Está en borrador o rechazada?"}
+  N4 -->|"Sí"| N5
+  B4(["La edición está bloqueada; continuar con consulta o gestión permitida"])
+  N4 -->|"No"| B4
+  N5["Pulsar Editar, modificar datos, adjuntar respaldo requerido y guardar"]
+  N5 --> N6
+  N6{"¿Se guardó correctamente?"}
+  N6 -->|"Sí"| N7
+  B6["Corregir el error y guardar nuevamente"]
+  N6 -->|"No"| B6
+  B6 --> N5
+  N7["Volver a la lista y comprobar el resultado"]
+  N7 --> N8
+  N8(["Fin"])

@@ -1,0 +1,23 @@
+%% E10 · Finalizar una campaña y determinar reembolsos
+%% Rol: Emprendedor
+%% Entrada: Mis Campañas → tarjeta publicada → Finalizar
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Localizar la campaña publicada y pulsar Finalizar"]
+  N1 --> N2
+  N2{"¿Confirmar la finalización?"}
+  N2 -->|"Sí"| N3
+  B2(["Cancelar y conservar la campaña sin finalizar"])
+  N2 -->|"No"| B2
+  N3["El sistema comprueba el estado y la recaudación actual"]
+  N3 --> N4
+  N4{"¿Se alcanzó la meta?"}
+  N4 -->|"Sí"| N5
+  B4(["Registrar Fallida, reembolsar aportes completados al saldo simulado y cancelar recompensas"])
+  N4 -->|"No"| B4
+  N5["Registrar Completada sin devolución por falta de meta"]
+  N5 --> N6
+  N6["Consultar estado, historial y notificaciones de la finalización"]
+  N6 --> N7
+  N7(["Fin"])

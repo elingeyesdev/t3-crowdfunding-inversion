@@ -1,0 +1,19 @@
+%% E11 · Eliminar un borrador o campaña rechazada
+%% Rol: Emprendedor
+%% Entrada: Mis Campañas → menú de la tarjeta → Eliminar
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir el menú de la campaña y elegir Eliminar"]
+  N1 --> N2
+  N2{"¿Confirmar la eliminación?"}
+  N2 -->|"Sí"| N3
+  B2(["Cancelar y regresar a la lista"])
+  N2 -->|"No"| B2
+  N3{"¿No tiene aportes ni movimientos con trazabilidad?"}
+  N3 -->|"Sí"| N4
+  B3(["El sistema bloquea la eliminación; conservar la campaña"])
+  N3 -->|"No"| B3
+  N4["Eliminar la campaña y comprobar que ya no aparece en la lista"]
+  N4 --> N5
+  N5(["Fin"])

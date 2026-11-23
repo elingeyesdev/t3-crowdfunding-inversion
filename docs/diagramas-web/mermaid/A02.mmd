@@ -1,0 +1,23 @@
+%% A02 · Buscar y suspender usuarios
+%% Rol: Administrador
+%% Entrada: Panel → Gestión de Usuarios · /admin/users
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Gestión de Usuarios y buscar por los datos disponibles"]
+  N1 --> N2
+  N2["Revisar correo, roles y estado del usuario"]
+  N2 --> N3
+  N3["Seleccionar la acción de suspensión"]
+  N3 --> N4
+  N4{"¿Confirmar la suspensión?"}
+  N4 -->|"Sí"| N5
+  B4(["Cancelar y volver a la lista"])
+  N4 -->|"No"| B4
+  N5{"¿La cuenta se puede suspender?"}
+  N5 -->|"Sí"| N6
+  B5(["Bloquear la operación: no se permite la propia cuenta ni un superadministrador"])
+  N5 -->|"No"| B5
+  N6["Desactivar la cuenta y comprobar la lista actualizada"]
+  N6 --> N7
+  N7(["Fin"])

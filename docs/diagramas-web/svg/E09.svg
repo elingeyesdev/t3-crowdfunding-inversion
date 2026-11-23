@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 1390" role="img" aria-labelledby="title desc">
+<title id="title">E09 · Publicar una actualización con texto, imagen o video</title>
+<desc id="desc">Flujo vertical. Seguir las flechas de arriba hacia abajo; cada decisión tiene una alternativa rotulada. Los pasos enlazados llevan a otro diagrama de la guía.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526578"/></marker></defs>
+<style>text{font-family:Arial,sans-serif;fill:#193449;font-size:18px} .label{font-size:16px;fill:#42596b} .edge{fill:none;stroke:#526578;stroke-width:1.8;marker-end:url(#arrow)} a:hover rect,a:hover polygon{stroke:#176941;stroke-width:3}</style>
+<path class="edge" d="M 290 115.0 V 195.0"/>
+<path class="edge" d="M 290 265.0 V 345.0"/>
+<path class="edge" d="M 290 415.0 V 495.0"/>
+<path class="edge" d="M 290 565.0 V 615.0"/>
+<path class="edge" d="M 290 745.0 V 795.0"/>
+<text class="label" x="305" y="775.0">Sí</text>
+<path class="edge" d="M 485 680 H 590"/>
+<text class="label" x="535" y="670" text-anchor="middle">No</text>
+<path class="edge" d="M 980 680 H 1010 V 380 H 485"/>
+<rect x="590.0" y="645.0" width="390" height="70" rx="8" fill="#fff8ef" stroke="#a9bdca"/>
+<text x="785" y="675" text-anchor="middle">
+<tspan x="785" dy="0">Completar título, contenido y archivo</tspan>
+<tspan x="785" dy="22">requerido</tspan>
+</text>
+<path class="edge" d="M 290 865.0 V 915.0"/>
+<path class="edge" d="M 290 1045.0 V 1088.0"/>
+<text class="label" x="305" y="1071.5">Sí</text>
+<path class="edge" d="M 485 980 H 590"/>
+<text class="label" x="535" y="970" text-anchor="middle">No</text>
+<path class="edge" d="M 980 980 H 1010 V 380 H 485"/>
+<rect x="590.0" y="945.0" width="390" height="70" rx="8" fill="#fff8ef" stroke="#a9bdca"/>
+<text x="785" y="986" text-anchor="middle">
+<tspan x="785" dy="0">Leer el error y volver a intentar</tspan>
+</text>
+<path class="edge" d="M 290 1172.0 V 1245.0"/>
+<rect x="95.0" y="45.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
+<text x="290" y="86" text-anchor="middle">
+<tspan x="290" dy="0">Inicio</tspan>
+</text>
+<rect x="95.0" y="195.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="236" text-anchor="middle">
+<tspan x="290" dy="0">Elegir Publicar novedad en la campaña</tspan>
+</text>
+<rect x="95.0" y="345.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="386" text-anchor="middle">
+<tspan x="290" dy="0">Ingresar título y contenido</tspan>
+</text>
+<rect x="95.0" y="495.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="525" text-anchor="middle">
+<tspan x="290" dy="0">Elegir texto, imagen o video;</tspan>
+<tspan x="290" dy="22">adjuntar el archivo si corresponde</tspan>
+</text>
+<polygon points="290,615.0 485.0,680 290,745.0 95.0,680" fill="#fff6df" stroke="#a38b49"/>
+<text x="290" y="675" text-anchor="middle">
+<tspan x="290" dy="0">¿Cumple los requisitos del</tspan>
+<tspan x="290" dy="22">formulario?</tspan>
+</text>
+<rect x="95.0" y="795.0" width="390" height="70" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="836" text-anchor="middle">
+<tspan x="290" dy="0">Publicar y esperar la confirmación</tspan>
+</text>
+<polygon points="290,915.0 485.0,980 290,1045.0 95.0,980" fill="#fff6df" stroke="#a38b49"/>
+<text x="290" y="986" text-anchor="middle">
+<tspan x="290" dy="0">¿Se publicó correctamente?</tspan>
+</text>
+<rect x="95.0" y="1088.0" width="390" height="84" rx="8" fill="#eef5f9" stroke="#a9bdca"/>
+<text x="290" y="1114" text-anchor="middle">
+<tspan x="290" dy="0">Consultar la novedad en la campaña;</tspan>
+<tspan x="290" dy="22">los donadores la ven en sus</tspan>
+<tspan x="290" dy="22">actualizaciones</tspan>
+</text>
+<rect x="95.0" y="1245.0" width="390" height="70" rx="35" fill="#e4f1df" stroke="#a9bdca"/>
+<text x="290" y="1286" text-anchor="middle">
+<tspan x="290" dy="0">Fin</tspan>
+</text>
+</svg>

@@ -1,0 +1,22 @@
+%% E01 · Crear o editar el perfil de emprendedor
+%% Rol: Emprendedor
+%% Entrada: Barra superior → Mi Perfil · /entrepreneur-profile
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Mi Perfil y crear los datos básicos si aún no existe"]
+  N1 --> N2
+  N2["Editar biografía, empresa, sitio web, LinkedIn y ubicación"]
+  N2 --> N3
+  N3["Guardar cada sección; completar también los datos bancarios si corresponde"]
+  N3 --> N4
+  N4{"¿Los datos se guardaron?"}
+  N4 -->|"Sí"| N5
+  B4["Corregir los campos indicados y guardar de nuevo"]
+  N4 -->|"No"| B4
+  B4 --> N2
+  N5["Opcional: cambiar foto o portada y consultar Información, fondos o finanzas"]
+  N5 --> N6
+  N6["Continuar con verificación de identidad E02"]
+  N6 --> N7
+  N7(["Fin"])

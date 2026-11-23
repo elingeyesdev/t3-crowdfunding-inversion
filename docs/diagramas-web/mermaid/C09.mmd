@@ -1,0 +1,22 @@
+%% C09 · Publicar comentarios y marcar Me gusta
+%% Rol: Acceso y funciones compartidas
+%% Entrada: Ficha de campaña → Comentarios
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir la pestaña Comentarios de la campaña"]
+  N1 --> N2
+  N2{"¿Hay una sesión de donador o emprendedor?"}
+  N2 -->|"Sí"| N3
+  B2(["Iniciar sesión con un rol permitido para participar"])
+  N2 -->|"No"| B2
+  N3["Escribir un comentario y publicarlo; o pulsar Me gusta en uno existente"]
+  N3 --> N4
+  N4{"¿El servidor acepta la acción?"}
+  N4 -->|"Sí"| N5
+  B4["Corregir el texto o revisar el acceso e intentar de nuevo"]
+  N4 -->|"No"| B4
+  B4 --> N3
+  N5["Ver el comentario o el contador actualizado; otro clic alterna el Me gusta"]
+  N5 --> N6
+  N6(["Fin"])

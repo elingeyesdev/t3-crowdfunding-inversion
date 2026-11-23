@@ -1,0 +1,20 @@
+%% V07 · Consultar al asistente de soporte
+%% Rol: Visitante y consulta pública
+%% Entrada: Inicio → botón flotante de soporte
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Inicio y desplegar el chat de soporte"]
+  N1 --> N2
+  N2["Escribir una consulta o elegir una sugerencia"]
+  N2 --> N3
+  N3["Enviar y esperar la respuesta"]
+  N3 --> N4
+  N4{"¿Llegó una respuesta?"}
+  N4 -->|"Sí"| N5
+  B4["Revisar el mensaje de error e intentar nuevamente"]
+  N4 -->|"No"| B4
+  B4 --> N2
+  N5["Leer la orientación y continuar la conversación o cerrar el chat"]
+  N5 --> N6
+  N6(["Fin"])

@@ -1,0 +1,19 @@
+%% D08 · Consultar estadísticas y reembolsos
+%% Rol: Donador
+%% Entrada: Mi Panel → Rendimiento · /dashboard?tab=analytics
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Rendimiento en Mi Panel"]
+  N1 --> N2
+  N2{"¿Existen donaciones completadas?"}
+  N2 -->|"Sí"| N3
+  B2(["Mostrar la invitación a realizar la primera donación"])
+  N2 -->|"No"| B2
+  N3["Consultar aporte promedio, monto reembolsado y evolución acumulada"]
+  N3 --> N4
+  N4["Para ver un reembolso concreto, abrir Mis Aportes"]
+  N4 --> N5
+  N5["Revisar estado Reembolsado y capital disponible actualizado"]
+  N5 --> N6
+  N6(["Fin"])

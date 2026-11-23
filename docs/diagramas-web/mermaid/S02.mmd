@@ -1,0 +1,20 @@
+%% S02 · Crear un administrador
+%% Rol: Superadministrador
+%% Entrada: Gestión de Admins → formulario de creación · /superadmin
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Gestión de Admins"]
+  N1 --> N2
+  N2["Ingresar correo y contraseña del nuevo administrador"]
+  N2 --> N3
+  N3["Enviar el formulario"]
+  N3 --> N4
+  N4{"¿Los datos y el correo son válidos?"}
+  N4 -->|"Sí"| N5
+  B4["Leer el error, corregir los datos y volver a enviar"]
+  N4 -->|"No"| B4
+  B4 --> N2
+  N5["Crear la cuenta administrativa y comprobar la lista actualizada"]
+  N5 --> N6
+  N6(["Fin"])

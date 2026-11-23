@@ -1,0 +1,19 @@
+%% D04 · Consultar donaciones e historial
+%% Rol: Donador
+%% Entrada: Mi Panel → Mis Aportes · /dashboard?tab=contributions
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Mi Panel y seleccionar Mis Aportes"]
+  N1 --> N2
+  N2["Buscar y filtrar el listado por las opciones disponibles"]
+  N2 --> N3
+  N3{"¿Hay aportes coincidentes?"}
+  N3 -->|"Sí"| N4
+  B3(["Limpiar filtros o explorar campañas para realizar el primero"])
+  N3 -->|"No"| B3
+  N4["Revisar campaña, fecha, monto y estado de cada aporte"]
+  N4 --> N5
+  N5["Abrir la campaña o descargar el comprobante del aporte"]
+  N5 --> N6
+  N6(["Fin"])

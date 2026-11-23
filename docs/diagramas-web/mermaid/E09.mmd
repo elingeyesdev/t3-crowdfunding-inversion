@@ -1,0 +1,27 @@
+%% E09 · Publicar una actualización con texto, imagen o video
+%% Rol: Emprendedor
+%% Entrada: Mis Campañas → campaña publicada → Publicar novedad
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Elegir Publicar novedad en la campaña"]
+  N1 --> N2
+  N2["Ingresar título y contenido"]
+  N2 --> N3
+  N3["Elegir texto, imagen o video; adjuntar el archivo si corresponde"]
+  N3 --> N4
+  N4{"¿Cumple los requisitos del formulario?"}
+  N4 -->|"Sí"| N5
+  B4["Completar título, contenido y archivo requerido"]
+  N4 -->|"No"| B4
+  B4 --> N2
+  N5["Publicar y esperar la confirmación"]
+  N5 --> N6
+  N6{"¿Se publicó correctamente?"}
+  N6 -->|"Sí"| N7
+  B6["Leer el error y volver a intentar"]
+  N6 -->|"No"| B6
+  B6 --> N2
+  N7["Consultar la novedad en la campaña; los donadores la ven en sus actualizaciones"]
+  N7 --> N8
+  N8(["Fin"])

@@ -1,0 +1,19 @@
+%% C08 · Acceder con Google
+%% Rol: Acceso y funciones compartidas
+%% Entrada: Login o registro → botón de Google
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Pulsar Continuar con Google"]
+  N1 --> N2
+  N2["Elegir una cuenta de Google y autorizar el acceso"]
+  N2 --> N3
+  N3{"¿La autenticación fue aceptada?"}
+  N3 -->|"Sí"| N4
+  B3(["Volver al login, leer el error y reintentar o usar correo"])
+  N3 -->|"No"| B3
+  N4["UniFundme recibe el resultado de Google y abre la sesión"]
+  N4 --> N5
+  N5["Abrir el destino del rol: Mi Panel o perfil de emprendedor"]
+  N5 --> N6
+  N6(["Fin"])

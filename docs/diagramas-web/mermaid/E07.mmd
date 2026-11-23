@@ -1,0 +1,21 @@
+%% E07 · Consultar recaudación, estadísticas y donadores
+%% Rol: Emprendedor
+%% Entrada: Mis Campañas → Vista previa → Progreso Económico / Donadores Activos
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Vista previa de la campaña"]
+  N1 --> N2
+  N2["Seleccionar Progreso Económico"]
+  N2 --> N3
+  N3["Consultar recaudación, evolución, desglose y proyección"]
+  N3 --> N4
+  N4["Seleccionar Donadores Activos"]
+  N4 --> N5
+  N5{"¿Hay donadores registrados?"}
+  N5 -->|"Sí"| N6
+  B5(["Mostrar el listado vacío; volver al progreso de la campaña"])
+  N5 -->|"No"| B5
+  N6["Recorrer las páginas y abrir la ficha de un donador para consultar sus datos"]
+  N6 --> N7
+  N7(["Fin"])

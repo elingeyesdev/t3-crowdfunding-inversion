@@ -1,0 +1,23 @@
+%% S03 · Retirar permisos de un administrador
+%% Rol: Superadministrador
+%% Entrada: Gestión de Admins → acción de quitar permisos
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Seleccionar al administrador en Gestión de Admins"]
+  N1 --> N2
+  N2{"¿Es otro administrador común?"}
+  N2 -->|"Sí"| N3
+  B2(["Bloquear la acción: no se retiran los propios permisos ni los de un superadministrador"])
+  N2 -->|"No"| B2
+  N3["Elegir quitar permisos"]
+  N3 --> N4
+  N4{"¿Confirmar la operación?"}
+  N4 -->|"Sí"| N5
+  B4(["Cancelar y conservar los permisos"])
+  N4 -->|"No"| B4
+  N5["Retirar perfil y roles administrativos; conservar la cuenta"]
+  N5 --> N6
+  N6["Comprobar la lista de administradores actualizada"]
+  N6 --> N7
+  N7(["Fin"])

@@ -1,0 +1,21 @@
+%% V02 · Consultar una campaña
+%% Rol: Visitante y consulta pública
+%% Entrada: Explorar → seleccionar campaña · /campaign/:id
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir la ficha de la campaña"]
+  N1 --> N2
+  N2{"¿La campaña está disponible?"}
+  N2 -->|"Sí"| N3
+  B2(["Volver a Explorar; si falló la carga, usar Reintentar"])
+  N2 -->|"No"| B2
+  N3["Leer Historia, meta, recaudación, fecha de cierre y creador"]
+  N3 --> N4
+  N4["Abrir Transparencia, Actualizaciones o Comentarios"]
+  N4 --> N5
+  N5["Revisar recompensas y condiciones del aporte"]
+  N5 --> N6
+  N6["Elegir otra acción: donar D03, compartir V05 o contactar C03"]
+  N6 --> N7
+  N7(["Fin"])

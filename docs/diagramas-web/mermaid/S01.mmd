@@ -1,0 +1,15 @@
+%% S01 · Consultar administradores y navegar la administración
+%% Rol: Superadministrador
+%% Entrada: Login de superadministrador → /superadmin
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Iniciar sesión y abrir Gestión de Admins"]
+  N1 --> N2
+  N2["Consultar la lista de administradores y sus niveles"]
+  N2 --> N3
+  N3["Elegir crear administrador S02 o retirar permisos S03"]
+  N3 --> N4
+  N4["Para gestionar el sistema, usar Estadísticas y los módulos A01–A08 en la barra lateral"]
+  N4 --> N5
+  N5(["Fin"])

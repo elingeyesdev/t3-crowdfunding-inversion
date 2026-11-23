@@ -1,0 +1,23 @@
+%% A06 · Consultar campañas y eliminarlas cuando se permite
+%% Rol: Administrador
+%% Entrada: Panel → Gestión de Campañas · /admin/campaigns
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Gestión de Campañas y filtrar el listado"]
+  N1 --> N2
+  N2["Abrir Vista previa para consultar detalles, progreso, historial y documentos"]
+  N2 --> N3
+  N3{"¿Se desea eliminar la campaña?"}
+  N3 -->|"Sí"| N4
+  B3(["Cerrar el detalle y continuar consultando"])
+  N3 -->|"No"| B3
+  N4["Elegir Eliminar en el listado y confirmar; cancelar conserva la campaña"]
+  N4 --> N5
+  N5{"¿No tiene aportes ni movimientos con trazabilidad?"}
+  N5 -->|"Sí"| N6
+  B5(["Bloquear la eliminación y conservar el registro"])
+  N5 -->|"No"| B5
+  N6["Eliminar y actualizar el listado"]
+  N6 --> N7
+  N7(["Fin"])

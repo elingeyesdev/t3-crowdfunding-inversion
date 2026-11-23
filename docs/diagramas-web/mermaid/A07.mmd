@@ -1,0 +1,30 @@
+%% A07 · Auditar movimientos financieros
+%% Rol: Administrador
+%% Entrada: Panel → Auditoría de Gastos · /admin/expenses
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Consultar el resumen y filtrar por campaña, estado, origen, fechas y demás opciones"]
+  N1 --> N2
+  N2["Abrir la auditoría de un movimiento"]
+  N2 --> N3
+  N3["Revisar importe, categoría, comprobante, versiones e historial"]
+  N3 --> N4
+  N4{"¿El movimiento permite revisión?"}
+  N4 -->|"Sí"| N5
+  B4(["Consultar solamente: los movimientos del sistema o bloqueados no son revisables"])
+  N4 -->|"No"| B4
+  N5["Elegir Aprobar, Observar o Rechazar"]
+  N5 --> N6
+  N6["Escribir notas; son obligatorias al observar o rechazar"]
+  N6 --> N7
+  N7["Guardar la revisión"]
+  N7 --> N8
+  N8{"¿Se aceptó la revisión vigente?"}
+  N8 -->|"Sí"| N9
+  B8["Leer el error; si cambió la versión, volver a cargar antes de revisar"]
+  N8 -->|"No"| B8
+  B8 --> N2
+  N9["Actualizar lista, resumen e historial de auditoría"]
+  N9 --> N10
+  N10(["Fin"])

@@ -1,0 +1,20 @@
+%% D07 · Consultar el seguimiento de recompensas
+%% Rol: Donador
+%% Entrada: Mi Panel → Recompensas · /dashboard?tab=rewards
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Recompensas en Mi Panel"]
+  N1 --> N2
+  N2["Buscar por recompensa o proyecto y filtrar por estado"]
+  N2 --> N3
+  N3{"¿Hay recompensas coincidentes?"}
+  N3 -->|"Sí"| N4
+  B3["Limpiar filtros; los aportes sin recompensa no generan seguimiento"]
+  N3 -->|"No"| B3
+  B3 --> N2
+  N4["Consultar el estado: espera, preparación, envío, entrega, incidencia o cancelación"]
+  N4 --> N5
+  N5["Abrir el seguimiento externo si existe o consultar la campaña"]
+  N5 --> N6
+  N6(["Fin"])

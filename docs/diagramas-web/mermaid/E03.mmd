@@ -1,0 +1,28 @@
+%% E03 · Crear una campaña y guardarla como borrador
+%% Rol: Emprendedor
+%% Entrada: Mis Campañas → Lanzar Campaña · /entrepreneur-campaigns
+flowchart TD
+  N0(["Inicio"])
+  N0 --> N1
+  N1["Abrir Mis Campañas y pulsar Lanzar Campaña"]
+  N1 --> N2
+  N2{"¿El perfil cumple los requisitos?"}
+  N2 -->|"Sí"| N3
+  B2(["Completar perfil o solicitar KYC; volver cuando esté aprobado"])
+  N2 -->|"No"| B2
+  N3["Completar título, descripción, categorías, meta y fecha de cierre"]
+  N3 --> N4
+  N4["Agregar portada o video si se desea; definir recompensas si corresponde"]
+  N4 --> N5
+  N5["Adjuntar al menos un documento de respaldo con su justificación"]
+  N5 --> N6
+  N6["Elegir Guardar como borrador y confirmar"]
+  N6 --> N7
+  N7{"¿Se creó correctamente?"}
+  N7 -->|"Sí"| N8
+  B7["Leer el error y corregir los datos antes de volver a guardar"]
+  N7 -->|"No"| B7
+  B7 --> N3
+  N8["Ver el borrador en Mis Campañas; abrir vista previa y comprobar archivos"]
+  N8 --> N9
+  N9(["Fin"])
