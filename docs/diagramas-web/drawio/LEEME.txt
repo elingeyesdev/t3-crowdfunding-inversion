@@ -1,0 +1,19 @@
+DIAGRAMAS EDITABLES PARA DRAW.IO
+
+Cada archivo .drawio corresponde al .mmd del mismo nombre en ../mermaid/.
+Contiene figuras, textos y conectores nativos editables, sin imágenes incrustadas.
+
+Para abrir: en https://app.diagrams.net/ elegir Archivo > Abrir desde > Dispositivo
+y seleccionar uno de los archivos .drawio de esta carpeta. También se pueden
+abrir con draw.io Desktop.
+
+La conversión se realiza directamente desde Mermaid a XML de draw.io.
+Se conservan los textos, las formas, las etiquetas de decisión y las conexiones.
+La distribución visual puede diferir de la importación automática de Mermaid.
+
+Para regenerar desde la raíz del proyecto:
+    python docs/diagramas-web/generar_drawio.py
+
+ATENCIÓN: regenerar reemplaza los .drawio de esta carpeta. Antes de hacerlo,
+guardar una copia de los archivos que se hayan editado manualmente.
+Los cambios en draw.io no se sincronizan con Mermaid, PNG, SVG ni la guía HTML.
