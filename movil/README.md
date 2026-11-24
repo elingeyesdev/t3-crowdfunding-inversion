@@ -1,23 +1,22 @@
 # UniFundMe — aplicación móvil
 
-Aplicación Android de UniFundMe. Incluye acceso y perfiles por rol. El catálogo,
-los aportes, su seguimiento, las actualizaciones del emprendedor y las
-notificaciones corresponden a los issues siguientes.
+Aplicación Android de UniFundMe. Incluye acceso, perfiles por rol, catálogo
+público y detalle de campañas. Los aportes, su seguimiento, las actualizaciones
+del emprendedor y las notificaciones corresponden a los issues siguientes.
 El issue [#24](https://github.com/elingeyesdev/t3-crowdfunding-inversion/issues/24)
 aportó la estructura, navegación, componentes comunes y cliente de API.
 
-**Estado revisado: 19 de noviembre de 2026.** El issue #24 está cerrado.
-La autenticación y las sesiones del #25 están versionadas en `5604e2a`.
-La consulta, creación y edición de perfiles del #25 están implementadas en el
-árbol de trabajo. El usuario reportó 301 pruebas correctas y las dos pruebas
-HTTP reales correctas en PowerShell 5.1. También confirmó el recorrido Android
-de ambos roles, la persistencia de sesión y el cambio de cuenta. Sigue pendiente
-incorporar Develop y revisar los cambios locales antes de su cierre.
-Consulta [el estado del issue #25](docs/issue-25-acceso-perfil.md).
-La recuperación de acceso requerida por RF-01 sigue pendiente: la API vigente
-no expone recuperación de contraseña. El #25 permanece abierto y su PR debe
-identificar esta dependencia. Los cambios adelantados del #26 se conservaron
-fuera del árbol de trabajo para mantener una entrega por issue.
+**Estado revisado: 24 de noviembre de 2026.** El acceso y los perfiles del #25
+están integrados mediante el PR #90. Su documento conserva evidencia histórica:
+[issue #25](docs/issue-25-acceso-perfil.md).
+El #26 se reconstruyó en `feature/26-catalogo-detalle-movil` desde Develop
+`768c95e`, usando los contratos Laravel actuales y las decisiones del desarrollo
+anterior. No depende de archivos guardados en la computadora anterior.
+La suite convencional pasó con 331 pruebas correctas y cuatro HTTP omitidas;
+las cuatro HTTP se ejecutaron aparte contra Laravel y una base temporal:
+cuatro correctas. El APK debug se compiló para ARM64. El recorrido en teléfono
+de esta versión sigue pendiente; consultar
+[el seguimiento del #26](docs/issue-26-catalogo-detalle.md).
 La [matriz del issue #24](docs/issue-24-cierre-tecnico.md) conserva evidencia histórica.
 
 El alcance de este producto son los issues #25–#30. Las modificaciones de
@@ -57,7 +56,7 @@ y controladores; el cliente HTTP y el almacenamiento seguro son compartidos.
 | `lib/app/router/` | Rutas centralizadas y vistas privadas de acceso provisional y ruta desconocida |
 | `lib/app/shell/main_shell.dart` | Contenedor y barra inferior Material 3 |
 | `lib/app/theme/app_theme.dart` | Único tema claro; morado provisional y fuente del sistema |
-| `lib/features/catalog/presentation/` | Entrada provisional a Explorar; implementación del #26 separada |
+| `lib/features/catalog/` | Contratos públicos, repositorio, controladores, catálogo, imágenes y detalle |
 | `lib/features/tracking/presentation/` | Seguimiento provisional |
 | `lib/features/notifications/presentation/` | Notificaciones provisionales |
 | `lib/features/account/` | Cuenta, consulta y edición de perfiles por rol, repositorio y controlador |
@@ -78,7 +77,8 @@ y controladores; el cliente HTTP y el almacenamiento seguro son compartidos.
 | Ruta | Comportamiento |
 |---|---|
 | `/` | Redirige a `/explorar` |
-| `/explorar` | Primera sección, pendiente de conectar en #26 |
+| `/explorar` | Catálogo público con búsqueda, categoría, refresco y paginación |
+| `/explorar/campanas/:id` | Detalle público fuera de las pestañas; retorno al catálogo |
 | `/seguimiento` | Sección provisional |
 | `/notificaciones` | Sección provisional |
 | `/cuenta` | Identidad, acceso a perfiles de los roles existentes y cierre de sesión |
@@ -129,10 +129,9 @@ flutter pub get
 ```
 
 `pub get` instala/resuelve dependencias y puede modificar cachés y el lockfile.
-Revisar cualquier diferencia imprevista. La auditoría detectó que los scripts y
-JAR del wrapper Gradle están ignorados: antes de integrar, comprobar el arranque
-desde una copia limpia o acordar su inclusión. No regenerar el proyecto encima
-del trabajo existente como solución automática.
+Revisar cualquier diferencia imprevista. En el clon nuevo, Flutter preparó el
+wrapper Gradle local y se logró compilar el APK; sus archivos generados continúan
+ignorados. No se forzó su inclusión ni se regeneró el proyecto encima de las fuentes.
 
 ```powershell
 dart format --output=none --set-exit-if-changed lib test
@@ -143,8 +142,8 @@ flutter test --no-pub
 
 El primer comando solo comprueba formato. Los analizadores y pruebas pueden
 generar archivos temporales. La suite ordinaria usa transporte simulado; las
-dos pruebas de HTTP real se omiten si no se proporciona una API de pruebas
-aislada, como se explica en el documento #25. No utilizar `pub upgrade` para una
+cuatro pruebas de HTTP real se omiten si no se proporciona una API de pruebas
+aislada, como se explica en los documentos #25 y #26. No utilizar `pub upgrade` para una
 validación ordinaria.
 
 ### Ejecutar sin API
@@ -171,8 +170,8 @@ flutter run --debug --no-pub --dart-define=APP_ENV=production "--dart-define=API
 
 El ejemplo selecciona el **entorno** producción sobre una compilación debug;
 no genera un APK release. También puede usarse `APP_ENV=development` con una
-URL aprobada. Acceso y perfiles utilizan sus respectivos repositorios. Explorar
-todavía es una entrada provisional en esta entrega del #25.
+URL aprobada. Acceso y perfiles utilizan sus respectivos repositorios. Con la
+API configurada, Explorar carga categorías y campañas mediante lecturas anónimas.
 
 ### APK debug
 
@@ -198,6 +197,8 @@ automáticamente `data` ni crear modelos.
 - `Accept: application/json` en operaciones JSON; Content-Type JSON con
   UTF-8 cuando hay cuerpo. La operación binaria pide octet-stream.
 - Proveedor opcional síncrono/asíncrono de Bearer; no almacena credenciales.
+- Las consultas públicas del catálogo usan GET con `authenticated: false`:
+  no consultan el proveedor de token ni envían Bearer, incluso con sesión iniciada.
 - Respuesta vacía/204: null. JSON inválido y contenido no JSON: error controlado.
 - Códigos HTTP no exitosos: ApiException con categoría y código, sin cuerpo
   sensible; el tratamiento por campo del 422 queda para la funcionalidad.
@@ -210,9 +211,9 @@ automáticamente `data` ni crear modelos.
 - Los bytes se acumulan en memoria; no hay descarga progresiva ni manejo de
   enlaces firmados absolutos externos al prefijo.
 
-Los contratos de acceso y perfiles se contrastaron con las rutas y
-controladores Laravel existentes. La integración HTTP de perfiles fue validada
-por el usuario contra una base temporal independiente.
+Los contratos de acceso, perfiles y catálogo se contrastaron con las rutas y
+controladores Laravel existentes. Las cuatro pruebas HTTP reales de catálogo
+y perfiles pasaron contra Laravel actualizado y una base temporal independiente.
 
 ## Android y límites de la entrega
 
@@ -225,12 +226,15 @@ por el usuario contra una base temporal independiente.
 - La configuración release todavía referencia firma debug: **no es una firma
   definitiva de distribución**. Firma y APK release siguen pendientes.
 - Acceso incluye autenticación y sesiones; el perfil tiene consulta y edición.
-  Catálogo, aportes, seguimiento, actualizaciones y notificaciones corresponden
-  a entregas posteriores. Recuperación de acceso depende de una API aún inexistente.
+  Catálogo y detalle están implementados en #26. Aportes, seguimiento,
+  actualizaciones y notificaciones corresponden a entregas posteriores.
 - El último resultado convencional reportado por el usuario es **301 pruebas
   superadas**, más dos HTTP y recorridos de perfiles en Samsung SM-N986N,
   Android 13. La ejecución independiente del #25 dentro del motor Flutter
   también obtuvo **301 correctas y dos omitidas**; no sustituye la validación nativa.
+- La reconstrucción del #26 pasó la suite convencional en Linux: **331 correctas
+  y cuatro HTTP omitidas**, más **cuatro HTTP reales correctas** por separado.
+  Esto no acredita un recorrido en teléfono físico de la nueva versión.
 
 ## Control de versiones y evidencia
 
@@ -241,7 +245,7 @@ del IDE. Los iconos PNG de origen sí forman parte del proyecto.
 
 La observación de base móvil sin seguimiento corresponde a la auditoría
 histórica del #24. Actualmente las fuentes existentes están versionadas; las
-adiciones de perfiles deben revisarse e incorporarse a Git después de su validación.
+adiciones del catálogo deben revisarse e incorporarse a Git después de su validación.
 No interpretar un commit previo como evidencia de los cambios actuales sin commit.
 La publicación de la rama y del PR no equivale al cierre del issue ni actualiza
 automáticamente el Contexto Maestro o los demás chats del proyecto.
