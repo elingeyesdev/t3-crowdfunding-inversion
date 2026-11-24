@@ -10,6 +10,7 @@ import '../../features/auth/presentation/login_page.dart';
 import '../../features/auth/presentation/register_page.dart';
 import '../../features/auth/presentation/session_status_view.dart';
 import '../../features/catalog/presentation/explore_page.dart';
+import '../../features/catalog/presentation/campaign_detail_page.dart';
 import '../../features/notifications/presentation/notifications_page.dart';
 import '../../features/tracking/presentation/tracking_page.dart';
 import '../../shared/widgets/feature_pending_view.dart';
@@ -22,7 +23,9 @@ abstract final class AppRouter {
     String initialLocation = AppRoutes.root,
   }) {
     final session = dependencies.session;
+    final rootNavigatorKey = GlobalKey<NavigatorState>();
     return GoRouter(
+      navigatorKey: rootNavigatorKey,
       initialLocation: initialLocation,
       refreshListenable: session,
       redirect: (context, state) {
@@ -112,7 +115,18 @@ abstract final class AppRouter {
                 GoRoute(
                   path: AppRoutes.explore,
                   name: AppRoutes.exploreName,
-                  builder: (_, _) => const ExplorePage(),
+                  builder: (_, _) => ExplorePage(dependencies: dependencies),
+                  routes: [
+                    GoRoute(
+                      parentNavigatorKey: rootNavigatorKey,
+                      path: 'campanas/:id',
+                      name: AppRoutes.campaignName,
+                      builder: (_, state) => CampaignDetailPage(
+                        dependencies: dependencies,
+                        campaignId: state.pathParameters['id']!,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

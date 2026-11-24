@@ -50,6 +50,9 @@ class AppDependencies {
   final bool _ownsClient;
   final AuthRepository auth;
   final SessionController session;
+
+  /// Comparte transporte; las consultas públicas nunca incorporan la sesión.
+  ApiClient get publicApi => ApiClient(client: _client, config: config);
   final ValueNotifier<LogoutResult?> logoutResult = ValueNotifier(null);
   Future<void>? _restoring;
   bool _disposed = false;

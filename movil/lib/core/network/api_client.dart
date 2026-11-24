@@ -32,8 +32,16 @@ class ApiClient {
   final bool ownsClient;
   bool _closed = false;
 
-  Future<Object?> get(String path, {Map<String, String>? queryParameters}) =>
-      _json('GET', path, queryParameters: queryParameters);
+  Future<Object?> get(
+    String path, {
+    Map<String, String>? queryParameters,
+    bool authenticated = true,
+  }) => _json(
+    'GET',
+    path,
+    queryParameters: queryParameters,
+    authenticated: authenticated,
+  );
 
   Future<Object?> post(
     String path, {

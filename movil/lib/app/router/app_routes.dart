@@ -15,13 +15,18 @@ abstract final class AppRoutes {
   static const accessName = 'access';
   static const registerName = 'register';
   static const sessionName = 'session';
+  static const campaignName = 'campaignDetail';
 
   static bool isPrivate(String path) =>
       path == tracking || path == notifications;
 
   // Nunca aceptar URLs externas, rutas arbitrarias ni consultas anidadas.
   static String safeReturn(String? value) =>
-      [explore, account, tracking, notifications].contains(value)
+      ([explore, account, tracking, notifications].contains(value) ||
+          (value != null &&
+              RegExp(
+                r'^/explorar/campanas/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+              ).hasMatch(value)))
       ? value!
       : account;
 }

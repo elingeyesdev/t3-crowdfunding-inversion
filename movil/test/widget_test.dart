@@ -92,10 +92,7 @@ void main() {
 
     expect(find.text('UniFundMe'), findsOneWidget);
     expect(find.byType(ExplorePage), findsOneWidget);
-    expect(
-      find.text('Esta funcionalidad estará disponible próximamente.'),
-      findsOneWidget,
-    );
+    expect(find.text('El servicio aún no está configurado.'), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsNothing);
     expect(find.text('Flutter Demo Home Page'), findsNothing);
     expect(find.text('0'), findsNothing);
@@ -120,7 +117,7 @@ void main() {
 
     expect(find.byType(ExplorePage), findsOneWidget);
     await tester.ensureVisible(
-      find.text('Esta funcionalidad estará disponible próximamente.'),
+      find.text('El servicio aún no está configurado.'),
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);

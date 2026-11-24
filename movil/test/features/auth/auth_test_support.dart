@@ -76,22 +76,37 @@ http.Response testResponse(Object? data, {int status = 200}) => http.Response(
 AppDependencies testDependencies({
   MemorySessionStore? store,
   bool configured = true,
+  bool includeCatalog = false,
   DateTime Function()? clock,
   Future<http.Response> Function(http.Request)? handler,
 }) {
-  final client = MockClient(
-    handler ??
-        (request) async {
-          if (request.url.path.endsWith('logout')) return testResponse(null);
-          if (request.url.path.endsWith('login')) {
-            return testResponse(testLoginData());
-          }
-          if (request.url.path.endsWith('register')) {
-            return testResponse(testUser(), status: 201);
-          }
-          return testResponse(testUser());
+  final client = MockClient((request) async {
+    // Aislar las consultas públicas del escenario de autenticación bajo prueba.
+    if (!includeCatalog && request.url.path == '/api/v1/categories') {
+      return testResponse([]);
+    }
+    if (!includeCatalog && request.url.path == '/api/v1/campaigns/public') {
+      return testResponse({
+        'data': [],
+        'meta': {
+          'totalItems': 0,
+          'itemCount': 0,
+          'itemsPerPage': 20,
+          'totalPages': 1,
+          'currentPage': 1,
         },
-  );
+      });
+    }
+    if (handler != null) return handler(request);
+    if (request.url.path.endsWith('logout')) return testResponse(null);
+    if (request.url.path.endsWith('login')) {
+      return testResponse(testLoginData());
+    }
+    if (request.url.path.endsWith('register')) {
+      return testResponse(testUser(), status: 201);
+    }
+    return testResponse(testUser());
+  });
   addTearDown(client.close);
   return AppDependencies.create(
     AppConfig.fromValues(
