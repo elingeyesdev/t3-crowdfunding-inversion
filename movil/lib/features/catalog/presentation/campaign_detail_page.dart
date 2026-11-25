@@ -113,6 +113,26 @@ class _CampaignDetailPageState extends State<CampaignDetailPage> {
                   Text(campaign.category!),
                 const SizedBox(height: 16),
                 CampaignProgress(campaign: campaign),
+                if ([
+                      'published',
+                      'partially_funded',
+                    ].contains(campaign.status) &&
+                    campaign.raised < campaign.goal &&
+                    (campaign.endDate == null ||
+                        campaign.endDate!.isAfter(DateTime.now()))) ...[
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    key: const Key('campaign.contribute'),
+                    onPressed: () async {
+                      await context.pushNamed(
+                        AppRoutes.contributionName,
+                        pathParameters: {'id': campaign.id},
+                      );
+                      if (mounted) await controller.load(widget.campaignId);
+                    },
+                    child: const Text('Aportar'),
+                  ),
+                ],
                 const SizedBox(height: 24),
                 Text(
                   'Responsable',

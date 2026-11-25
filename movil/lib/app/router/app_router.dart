@@ -11,6 +11,9 @@ import '../../features/auth/presentation/register_page.dart';
 import '../../features/auth/presentation/session_status_view.dart';
 import '../../features/catalog/presentation/explore_page.dart';
 import '../../features/catalog/presentation/campaign_detail_page.dart';
+import '../../features/contributions/presentation/contribution_page.dart';
+import '../../features/contributions/presentation/investor_gate.dart';
+import '../../features/contributions/presentation/receipt_page.dart';
 import '../../features/notifications/presentation/notifications_page.dart';
 import '../../features/tracking/presentation/tracking_page.dart';
 import '../../shared/widgets/feature_pending_view.dart';
@@ -104,6 +107,28 @@ abstract final class AppRouter {
           name: AppRoutes.sessionName,
           builder: (_, _) => _SessionPage(dependencies: dependencies),
         ),
+        GoRoute(
+          path: AppRoutes.receipts,
+          name: AppRoutes.receiptsName,
+          builder: (_, _) => InvestorGate(
+            dependencies: dependencies,
+            builder: () => ReceiptListPage(dependencies: dependencies),
+          ),
+          routes: [
+            GoRoute(
+              path: ':id',
+              name: AppRoutes.receiptName,
+              builder: (_, state) => InvestorGate(
+                dependencies: dependencies,
+                builder: () => ReceiptPage(
+                  key: ValueKey(state.pathParameters['id']),
+                  dependencies: dependencies,
+                  investmentId: state.pathParameters['id']!,
+                ),
+              ),
+            ),
+          ],
+        ),
         StatefulShellRoute.indexedStack(
           pageBuilder: (context, state, shell) => NoTransitionPage(
             key: state.pageKey,
@@ -125,6 +150,21 @@ abstract final class AppRouter {
                         dependencies: dependencies,
                         campaignId: state.pathParameters['id']!,
                       ),
+                      routes: [
+                        GoRoute(
+                          parentNavigatorKey: rootNavigatorKey,
+                          path: 'aportar',
+                          name: AppRoutes.contributionName,
+                          builder: (_, state) => InvestorGate(
+                            dependencies: dependencies,
+                            builder: () => ContributionPage(
+                              key: ValueKey(state.pathParameters['id']),
+                              dependencies: dependencies,
+                              campaignId: state.pathParameters['id']!,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
