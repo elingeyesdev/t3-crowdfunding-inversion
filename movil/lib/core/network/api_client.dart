@@ -78,12 +78,14 @@ class ApiClient {
   Future<Uint8List> getBytes(
     String path, {
     Map<String, String>? queryParameters,
+    int? maxBytes,
   }) async {
     final response = await _send(
       'GET',
       path,
       queryParameters: queryParameters,
       accept: 'application/octet-stream',
+      maxBytes: maxBytes,
     );
     return response.bodyBytes;
   }
@@ -155,7 +157,11 @@ class ApiClient {
     Map<String, String>? queryParameters,
     String accept = 'application/json',
     bool authenticated = true,
+    int? maxBytes,
   }) async {
+    if (maxBytes != null && maxBytes < 1) {
+      throw const ApiException(ApiErrorKind.invalidRequest);
+    }
     if (_closed) throw const ApiException(ApiErrorKind.closed);
     final uri = _buildUri(path, queryParameters);
     final request = http.Request(method, uri)
@@ -194,8 +200,29 @@ class ApiClient {
     try {
       response = await (() async {
         final streamed = await _client.send(request);
+        if (maxBytes != null) {
+          if ((streamed.contentLength ?? 0) > maxBytes) {
+            await streamed.stream.listen((_) {}).cancel();
+            throw const ApiException(ApiErrorKind.invalidResponse);
+          }
+          final builder = BytesBuilder(copy: false);
+          await for (final chunk in streamed.stream) {
+            if (builder.length + chunk.length > maxBytes) {
+              throw const ApiException(ApiErrorKind.invalidResponse);
+            }
+            builder.add(chunk);
+          }
+          return http.Response.bytes(
+            builder.takeBytes(),
+            streamed.statusCode,
+            headers: streamed.headers,
+            request: streamed.request,
+          );
+        }
         return http.Response.fromStream(streamed);
       })().timeout(timeout);
+    } on ApiException {
+      rethrow;
     } on TimeoutException {
       // Limita la espera; no garantiza cancelar una operación ya enviada.
       throw const ApiException(ApiErrorKind.timeout);

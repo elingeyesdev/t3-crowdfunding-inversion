@@ -79,6 +79,14 @@ class AccountPage extends StatelessWidget {
                             ),
                           ),
                         ),
+                    if (user.roles.contains('investor'))
+                      OutlinedButton.icon(
+                        key: const Key('account.receipts'),
+                        onPressed: () =>
+                            context.pushNamed(AppRoutes.receiptsName),
+                        icon: const Icon(Icons.receipt_long),
+                        label: const Text('Mis comprobantes'),
+                      ),
                     FilledButton(
                       key: const Key('account.logout'),
                       onPressed: () => dependencies.logout(),

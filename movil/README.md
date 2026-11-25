@@ -1,12 +1,13 @@
 # UniFundMe — aplicación móvil
 
 Aplicación Android de UniFundMe. Incluye acceso, perfiles por rol, catálogo
-público y detalle de campañas. Los aportes, su seguimiento, las actualizaciones
-del emprendedor y las notificaciones corresponden a los issues siguientes.
+público y detalle de campañas, aportes con saldo simulado, recompensas y
+comprobantes PDF. El seguimiento, las actualizaciones del emprendedor y las
+notificaciones corresponden a los issues siguientes.
 El issue [#24](https://github.com/elingeyesdev/t3-crowdfunding-inversion/issues/24)
 aportó la estructura, navegación, componentes comunes y cliente de API.
 
-**Estado revisado: 24 de noviembre de 2026.** El acceso y los perfiles del #25
+**Estado revisado: 25 de noviembre de 2026.** El acceso y los perfiles del #25
 están integrados mediante el PR #90. Su documento conserva evidencia histórica:
 [issue #25](docs/issue-25-acceso-perfil.md).
 El #26 se reconstruyó en `feature/26-catalogo-detalle-movil` desde Develop
@@ -18,6 +19,12 @@ cuatro correctas. El APK debug se compiló para ARM64. El recorrido en teléfono
 de esta versión sigue pendiente; consultar
 [el seguimiento del #26](docs/issue-26-catalogo-detalle.md).
 La [matriz del issue #24](docs/issue-24-cierre-tecnico.md) conserva evidencia histórica.
+
+El #27 está implementado en su rama desde Develop 116ef7b. La suite pasa con
+359 pruebas correctas y siete HTTP omitidas; sus tres HTTP se ejecutaron aparte:
+tres correctas. El APK debug ARM64 compila. La prueba nativa del PDF pasó en Samsung SM-N986N, Android 13.
+El recorrido completo de la app contra Laravel sigue pendiente. Consultar
+[el seguimiento del #27](docs/issue-27-aporte-recompensa-comprobante.md).
 
 El alcance de este producto son los issues #25–#30. Las modificaciones de
 Laravel/React corresponden al responsable web. Sus cambios se incorporan
@@ -142,8 +149,8 @@ flutter test --no-pub
 
 El primer comando solo comprueba formato. Los analizadores y pruebas pueden
 generar archivos temporales. La suite ordinaria usa transporte simulado; las
-cuatro pruebas de HTTP real se omiten si no se proporciona una API de pruebas
-aislada, como se explica en los documentos #25 y #26. No utilizar `pub upgrade` para una
+siete pruebas de HTTP real se omiten si no se proporciona una API de pruebas
+aislada, como se explica en los documentos #25, #26 y #27. No utilizar `pub upgrade` para una
 validación ordinaria.
 
 ### Ejecutar sin API
@@ -226,8 +233,9 @@ y perfiles pasaron contra Laravel actualizado y una base temporal independiente.
 - La configuración release todavía referencia firma debug: **no es una firma
   definitiva de distribución**. Firma y APK release siguen pendientes.
 - Acceso incluye autenticación y sesiones; el perfil tiene consulta y edición.
-  Catálogo y detalle están implementados en #26. Aportes, seguimiento,
-  actualizaciones y notificaciones corresponden a entregas posteriores.
+  Catálogo y detalle están implementados en #26. El #27 añade aportes con saldo
+  simulado, recompensas y PDF. Seguimiento, actualizaciones y notificaciones
+  corresponden a entregas posteriores.
 - El último resultado convencional reportado por el usuario es **301 pruebas
   superadas**, más dos HTTP y recorridos de perfiles en Samsung SM-N986N,
   Android 13. La ejecución independiente del #25 dentro del motor Flutter

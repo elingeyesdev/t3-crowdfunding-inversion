@@ -5,6 +5,8 @@ import '../../../core/config/app_config.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/flutter_encrypted_session_backend.dart';
 import '../../../core/storage/session_store.dart';
+import '../../../core/storage/secure_session_store.dart';
+import '../../contributions/data/contribution_ledger.dart';
 import '../data/auth_repository.dart';
 import 'session_controller.dart';
 import 'session_state.dart';
@@ -18,6 +20,7 @@ class AppDependencies {
     this._ownsClient,
     this.auth,
     this.session,
+    this.contributionLedger,
   );
 
   factory AppDependencies.create(
@@ -25,6 +28,7 @@ class AppDependencies {
     http.Client? client,
     SessionStore? store,
     DateTime Function()? clock,
+    EncryptedSessionBackend? contributionBackend,
   }) {
     final transport = client ?? http.Client();
     final auth = AuthRepository(ApiClient(client: transport, config: config));
@@ -42,7 +46,17 @@ class AppDependencies {
         ),
       ),
     );
-    return AppDependencies._(config, transport, client == null, auth, session);
+    return AppDependencies._(
+      config,
+      transport,
+      client == null,
+      auth,
+      session,
+      ContributionLedger(
+        contributionBackend ?? const FlutterEncryptedSessionBackend(),
+        config.hasApi ? StoredSession.identityFor(config) : 'unconfigured',
+      ),
+    );
   }
 
   final AppConfig config;
@@ -50,6 +64,7 @@ class AppDependencies {
   final bool _ownsClient;
   final AuthRepository auth;
   final SessionController session;
+  final ContributionLedger contributionLedger;
 
   /// Comparte transporte; las consultas públicas nunca incorporan la sesión.
   ApiClient get publicApi => ApiClient(client: _client, config: config);
