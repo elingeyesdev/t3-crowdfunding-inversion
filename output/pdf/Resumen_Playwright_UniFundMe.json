@@ -1,0 +1,444 @@
+{
+  "commitBase": "768c95e",
+  "cambiosLocales": true,
+  "fecha": "2026-11-24",
+  "counts": {
+    "passed": 62
+  },
+  "tests": [
+    {
+      "title": "HU-C01-CA01 registro por correo asigna rol público",
+      "file": "acceptance.spec.ts",
+      "line": 3,
+      "status": "passed",
+      "duration": 884
+    },
+    {
+      "title": "HU-C01-CA02 rechaza contraseña inválida short",
+      "file": "acceptance.spec.ts",
+      "line": 8,
+      "status": "passed",
+      "duration": 62
+    },
+    {
+      "title": "HU-C01-CA02 rechaza contraseña inválida password123",
+      "file": "acceptance.spec.ts",
+      "line": 8,
+      "status": "passed",
+      "duration": 48
+    },
+    {
+      "title": "HU-C01-CA02 rechaza contraseña inválida Password",
+      "file": "acceptance.spec.ts",
+      "line": 8,
+      "status": "passed",
+      "duration": 57
+    },
+    {
+      "title": "HU-C01-CA03 correo duplicado normalizado no crea otra cuenta",
+      "file": "acceptance.spec.ts",
+      "line": 12,
+      "status": "passed",
+      "duration": 49
+    },
+    {
+      "title": "HU-C02-CA01 login entrega sesión y rol sin contraseña",
+      "file": "acceptance.spec.ts",
+      "line": 15,
+      "status": "passed",
+      "duration": 420
+    },
+    {
+      "title": "HU-C02-CA04 contraseña incorrecta no genera acceso",
+      "file": "acceptance.spec.ts",
+      "line": 20,
+      "status": "passed",
+      "duration": 463
+    },
+    {
+      "title": "HU-C03-CA04 token revocado no permite volver a consultar cuenta",
+      "file": "acceptance.spec.ts",
+      "line": 23,
+      "status": "passed",
+      "duration": 125
+    },
+    {
+      "title": "HU-C04-CA01 cambio de contraseña valida actual y permite nuevo acceso",
+      "file": "acceptance.spec.ts",
+      "line": 27,
+      "status": "passed",
+      "duration": 2204
+    },
+    {
+      "title": "HU-D01-CA02 edición de perfil persiste por API",
+      "file": "acceptance.spec.ts",
+      "line": 33,
+      "status": "passed",
+      "duration": 132
+    },
+    {
+      "title": "HU-D03-CA01 saldo simulado inicial es coherente",
+      "file": "acceptance.spec.ts",
+      "line": 37,
+      "status": "passed",
+      "duration": 76
+    },
+    {
+      "title": "HU-D03-CA04 aumentar capital simulado actualiza disponible",
+      "file": "acceptance.spec.ts",
+      "line": 41,
+      "status": "passed",
+      "duration": 111
+    },
+    {
+      "title": "HU-D04-CA02 aporte conserva saldo recaudación e historial",
+      "file": "acceptance.spec.ts",
+      "line": 45,
+      "status": "passed",
+      "duration": 269
+    },
+    {
+      "title": "HU-D04-CA04 monto inválido 0 no descuenta saldo",
+      "file": "acceptance.spec.ts",
+      "line": 53,
+      "status": "passed",
+      "duration": 141
+    },
+    {
+      "title": "HU-D04-CA04 monto inválido -1 no descuenta saldo",
+      "file": "acceptance.spec.ts",
+      "line": 53,
+      "status": "passed",
+      "duration": 152
+    },
+    {
+      "title": "HU-D04-CA04 monto inválido 9.99 no descuenta saldo",
+      "file": "acceptance.spec.ts",
+      "line": 53,
+      "status": "passed",
+      "duration": 173
+    },
+    {
+      "title": "HU-D04-CA04 monto inválido 300.01 no descuenta saldo",
+      "file": "acceptance.spec.ts",
+      "line": 53,
+      "status": "passed",
+      "duration": 137
+    },
+    {
+      "title": "HU-D04-CA04 monto inválido 0.001 no descuenta saldo",
+      "file": "acceptance.spec.ts",
+      "line": 53,
+      "status": "passed",
+      "duration": 171
+    },
+    {
+      "title": "HU-D04-CA04 saldo insuficiente rechaza operación completa",
+      "file": "acceptance.spec.ts",
+      "line": 59,
+      "status": "passed",
+      "duration": 213
+    },
+    {
+      "title": "HU-D04-CA05 campaña expired no admite aporte",
+      "file": "acceptance.spec.ts",
+      "line": 65,
+      "status": "passed",
+      "duration": 49
+    },
+    {
+      "title": "HU-D04-CA05 campaña funded no admite aporte",
+      "file": "acceptance.spec.ts",
+      "line": 65,
+      "status": "passed",
+      "duration": 48
+    },
+    {
+      "title": "HU-D04-CA05 campaña completed no admite aporte",
+      "file": "acceptance.spec.ts",
+      "line": 65,
+      "status": "passed",
+      "duration": 53
+    },
+    {
+      "title": "HU-D04-CA05 campaña failed no admite aporte",
+      "file": "acceptance.spec.ts",
+      "line": 65,
+      "status": "passed",
+      "duration": 70
+    },
+    {
+      "title": "HU-D04-CA05 campaña draft no admite aporte",
+      "file": "acceptance.spec.ts",
+      "line": 65,
+      "status": "passed",
+      "duration": 58
+    },
+    {
+      "title": "HU-D05-CA02 conserva exactamente la recompensa elegida",
+      "file": "acceptance.spec.ts",
+      "line": 69,
+      "status": "passed",
+      "duration": 152
+    },
+    {
+      "title": "HU-D05-CA03 rewardExpired rechaza sin aporte ni descuento",
+      "file": "acceptance.spec.ts",
+      "line": 75,
+      "status": "passed",
+      "duration": 162
+    },
+    {
+      "title": "HU-D05-CA03 rewardFull rechaza sin aporte ni descuento",
+      "file": "acceptance.spec.ts",
+      "line": 75,
+      "status": "passed",
+      "duration": 183
+    },
+    {
+      "title": "HU-D05-CA04 aporte sin recompensa no crea entrega",
+      "file": "acceptance.spec.ts",
+      "line": 81,
+      "status": "passed",
+      "duration": 156
+    },
+    {
+      "title": "HU-D07-CA02 comprobante propio es PDF descargable",
+      "file": "acceptance.spec.ts",
+      "line": 86,
+      "status": "passed",
+      "duration": 640
+    },
+    {
+      "title": "HU-E09-CA01 enviar borrador a revisión registra transición",
+      "file": "acceptance.spec.ts",
+      "line": 93,
+      "status": "passed",
+      "duration": 149
+    },
+    {
+      "title": "HU-E10-CA01 publica campaña aprobada con KYC y vigencia",
+      "file": "acceptance.spec.ts",
+      "line": 98,
+      "status": "passed",
+      "duration": 183
+    },
+    {
+      "title": "HU-E10-CA02 aprobar no publica automáticamente",
+      "file": "acceptance.spec.ts",
+      "line": 103,
+      "status": "passed",
+      "duration": 188
+    },
+    {
+      "title": "HU-E10 regresión draft no puede omitir aprobación",
+      "file": "acceptance.spec.ts",
+      "line": 109,
+      "status": "passed",
+      "duration": 87
+    },
+    {
+      "title": "HU-E10 regresión rejected no puede omitir aprobación",
+      "file": "acceptance.spec.ts",
+      "line": 109,
+      "status": "passed",
+      "duration": 76
+    },
+    {
+      "title": "HU-E10 regresión pending_review no puede omitir aprobación",
+      "file": "acceptance.spec.ts",
+      "line": 109,
+      "status": "passed",
+      "duration": 49
+    },
+    {
+      "title": "HU-E10-CA03 revalida KYC al publicar",
+      "file": "acceptance.spec.ts",
+      "line": 113,
+      "status": "passed",
+      "duration": 83
+    },
+    {
+      "title": "HU-E14-CA02 cierre sin meta reembolsa y cancela recompensa una sola vez",
+      "file": "acceptance.spec.ts",
+      "line": 116,
+      "status": "passed",
+      "duration": 617
+    },
+    {
+      "title": "HU-E15-CA01 propietario elimina borrador sin actividad financiera",
+      "file": "acceptance.spec.ts",
+      "line": 125,
+      "status": "passed",
+      "duration": 127
+    },
+    {
+      "title": "HU-T01-CA01 anónimo no accede a /auth/me",
+      "file": "acceptance.spec.ts",
+      "line": 130,
+      "status": "passed",
+      "duration": 48
+    },
+    {
+      "title": "HU-T01-CA01 anónimo no accede a /investments/me",
+      "file": "acceptance.spec.ts",
+      "line": 130,
+      "status": "passed",
+      "duration": 60
+    },
+    {
+      "title": "HU-T01-CA01 anónimo no accede a /admin/users",
+      "file": "acceptance.spec.ts",
+      "line": 130,
+      "status": "passed",
+      "duration": 61
+    },
+    {
+      "title": "HU-T01-CA01 anónimo no accede a /notifications",
+      "file": "acceptance.spec.ts",
+      "line": 130,
+      "status": "passed",
+      "duration": 36
+    },
+    {
+      "title": "HU-T01-CA01 anónimo no accede a /chat/conversations",
+      "file": "acceptance.spec.ts",
+      "line": 130,
+      "status": "passed",
+      "duration": 69
+    },
+    {
+      "title": "HU-T01-CA02 donador no puede aprobar campañas",
+      "file": "acceptance.spec.ts",
+      "line": 134,
+      "status": "passed",
+      "duration": 81
+    },
+    {
+      "title": "HU-T01-CA03 tercero no edita campaña ni descarga comprobante ajeno",
+      "file": "acceptance.spec.ts",
+      "line": 137,
+      "status": "passed",
+      "duration": 335
+    },
+    {
+      "title": "HU-T01-CA04 documento KYC no se entrega por /uploads/kyc/secret.pdf",
+      "file": "acceptance.spec.ts",
+      "line": 144,
+      "status": "passed",
+      "duration": 164
+    },
+    {
+      "title": "HU-T01-CA04 documento KYC no se entrega por /storage/kyc/secret.pdf",
+      "file": "acceptance.spec.ts",
+      "line": 144,
+      "status": "passed",
+      "duration": 45
+    },
+    {
+      "title": "HU-T01-CA04 documento KYC no se entrega por /api/v1/private-files/kyc/secret.pdf",
+      "file": "acceptance.spec.ts",
+      "line": 144,
+      "status": "passed",
+      "duration": 76
+    },
+    {
+      "title": "HU-C05-CA01 conversación y mensajes quedan limitados a participantes",
+      "file": "acceptance.spec.ts",
+      "line": 148,
+      "status": "passed",
+      "duration": 191
+    },
+    {
+      "title": "HU-C10-CA02 comentario registrado conserva autor y contenido",
+      "file": "acceptance.spec.ts",
+      "line": 154,
+      "status": "passed",
+      "duration": 136
+    },
+    {
+      "title": "HU-C11-CA01 Me gusta alterna contador sin duplicarse",
+      "file": "acceptance.spec.ts",
+      "line": 160,
+      "status": "passed",
+      "duration": 203
+    },
+    {
+      "title": "HU-V01-CA01 portada permite entrar al catálogo",
+      "file": "browser.spec.ts",
+      "line": 7,
+      "status": "passed",
+      "duration": 1385
+    },
+    {
+      "title": "HU-V01-CA02 catálogo permite consulta sin registrarse",
+      "file": "browser.spec.ts",
+      "line": 13,
+      "status": "passed",
+      "duration": 765
+    },
+    {
+      "title": "HU-V03-CA01 abrir ficha pública desde catálogo",
+      "file": "browser.spec.ts",
+      "line": 18,
+      "status": "passed",
+      "duration": 1133
+    },
+    {
+      "title": "HU-C02-CA02 acceso privado regresa a la ruta solicitada",
+      "file": "browser.spec.ts",
+      "line": 24,
+      "status": "passed",
+      "duration": 1770
+    },
+    {
+      "title": "HU-C02-CA02 destino de donor respeta rol",
+      "file": "browser.spec.ts",
+      "line": 32,
+      "status": "passed",
+      "duration": 1598
+    },
+    {
+      "title": "HU-C02-CA02 destino de owner respeta rol",
+      "file": "browser.spec.ts",
+      "line": 32,
+      "status": "passed",
+      "duration": 1738
+    },
+    {
+      "title": "HU-C02-CA03 destino de admin respeta rol",
+      "file": "browser.spec.ts",
+      "line": 32,
+      "status": "passed",
+      "duration": 1666
+    },
+    {
+      "title": "HU-C02-CA03 destino de superadmin respeta rol",
+      "file": "browser.spec.ts",
+      "line": 32,
+      "status": "passed",
+      "duration": 1937
+    },
+    {
+      "title": "HU-C02-CA04 interfaz muestra credenciales inválidas sin entrar",
+      "file": "browser.spec.ts",
+      "line": 40,
+      "status": "passed",
+      "duration": 1662
+    },
+    {
+      "title": "HU-C02-CA05 recordar correo conserva y retira selección",
+      "file": "browser.spec.ts",
+      "line": 48,
+      "status": "passed",
+      "duration": 3190
+    },
+    {
+      "title": "HU-T01-CA01 ruta privada solicita autenticación",
+      "file": "browser.spec.ts",
+      "line": 62,
+      "status": "passed",
+      "duration": 638
+    }
+  ]
+}

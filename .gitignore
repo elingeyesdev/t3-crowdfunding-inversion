@@ -38,6 +38,8 @@ Thumbs.db
 # Testing
 coverage/
 .nyc_output/
+/web/playwright-report/
+/web/test-results/
 
 # NestJS specific
 dist/
