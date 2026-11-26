@@ -1,14 +1,20 @@
+import { lazy, useState } from 'react';
+import { AsyncContent } from '../AsyncContent.tsx';
 import type { BudgetCategory, FundingMilestone } from '../../types/campaign-content.types';
-import { useState } from 'react';
 import { FileText, Rocket, Sparkles, PieChart as PieIcon, Receipt } from 'lucide-react';
 import { FundAllocationPlan } from './transparency/FundAllocationPlan';
-import { PublicFinancialAuditing } from './transparency/PublicFinancialAuditing';
 import { ProjectMilestones } from './transparency/ProjectMilestones';
 import { PublicEvidenceDocuments } from './transparency/PublicEvidenceDocuments';
 import { usePublicCampaignDocuments } from '../../hooks/usePublicCampaignDocuments';
 import { usePublicCampaignUpdates } from '../../hooks/usePublicCampaignUpdates';
 import { CampaignUpdatesTimeline } from './transparency/CampaignUpdatesTimeline';
 import { usePublicCampaignFinance } from '../../hooks/usePublicCampaignFinance';
+
+const PublicFinancialAuditing = lazy(() =>
+  import('./transparency/PublicFinancialAuditing').then((module) => ({
+    default: module.PublicFinancialAuditing,
+  })),
+);
 
 export type TransparencySubTab = 'presupuesto' | 'auditoria' | 'hitos' | 'evidencias' | 'bitacora';
 
@@ -120,15 +126,17 @@ export function CampaignTransparencySection({
       )}
 
       {subTab === 'auditoria' && (
-        <PublicFinancialAuditing
-          campaignId={campaignId}
-          finance={finance}
-          loading={loading}
-          error={financeError}
-          onRetry={retryFinance}
-          startDate={startDate}
-          createdAt={createdAt}
-        />
+        <AsyncContent label="Cargando estadísticas...">
+          <PublicFinancialAuditing
+            campaignId={campaignId}
+            finance={finance}
+            loading={loading}
+            error={financeError}
+            onRetry={retryFinance}
+            startDate={startDate}
+            createdAt={createdAt}
+          />
+        </AsyncContent>
       )}
 
       {subTab === 'hitos' && (

@@ -1,0 +1,64 @@
+{
+  "toolchain": {
+    "node": "v24.20.0",
+    "vite": "8.3.4",
+    "lockSha256": "24fe695f3b394c6f26795b9ae0de18e2aee8e272cc2c645935b49b63df660499",
+    "gzipLevel": 9
+  },
+  "entryKeys": [
+    "frontend/src/main.tsx"
+  ],
+  "homeKeys": [
+    "frontend/src/main.tsx"
+  ],
+  "entryJs": {
+    "bytes": 1683333,
+    "gzipBytes": 439820,
+    "files": [
+      {
+        "file": "assets/main-Fjvu5gxZ.js",
+        "bytes": 1683333,
+        "gzipBytes": 439820
+      }
+    ],
+    "fileCount": 1
+  },
+  "homeJs": {
+    "bytes": 1683333,
+    "gzipBytes": 439820,
+    "files": [
+      {
+        "file": "assets/main-Fjvu5gxZ.js",
+        "bytes": 1683333,
+        "gzipBytes": 439820
+      }
+    ],
+    "fileCount": 1
+  },
+  "homeCss": {
+    "bytes": 143413,
+    "gzipBytes": 20935,
+    "files": [
+      {
+        "file": "assets/main-CLuDlj9i.css",
+        "bytes": 143413,
+        "gzipBytes": 20935
+      }
+    ],
+    "fileCount": 1
+  },
+  "allJs": {
+    "bytes": 1683333,
+    "gzipBytes": 439820,
+    "files": [
+      {
+        "file": "assets/main-Fjvu5gxZ.js",
+        "bytes": 1683333,
+        "gzipBytes": 439820
+      }
+    ],
+    "fileCount": 1
+  },
+  "revision": "b6aae4da0bea130a37901b4c6f4bd4e2791fc4df",
+  "command": "npm run build; node scripts/bundle-report.mjs --json"
+}

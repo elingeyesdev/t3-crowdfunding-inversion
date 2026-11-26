@@ -1,0 +1,436 @@
+{
+  "toolchain": {
+    "node": "v24.20.0",
+    "vite": "8.3.4",
+    "lockSha256": "24fe695f3b394c6f26795b9ae0de18e2aee8e272cc2c645935b49b63df660499",
+    "gzipLevel": 9
+  },
+  "entryKeys": [
+    "_icons-r7e06q7e.js",
+    "_rolldown-runtime-XKyaHtl9.js",
+    "frontend/src/main.tsx"
+  ],
+  "homeKeys": [
+    "_Footer-B2-0_Nah.js",
+    "_Navbar-bsJxyWHb.js",
+    "_apiError-CWWKwJJ3.js",
+    "_auth.api-D4UqAYNm.js",
+    "_axios-C654CTRf.js",
+    "_campaignType-DeuHWF2K.js",
+    "_categories.api-BrHXWGG6.js",
+    "_icons-r7e06q7e.js",
+    "_image.utils-DX6VK05W.js",
+    "_public-campaigns.api-K39clor2.js",
+    "_rolldown-runtime-XKyaHtl9.js",
+    "_useAsyncResource-6IRn6_4L.js",
+    "_useClock-CTSVBbKs.js",
+    "frontend/src/main.tsx",
+    "frontend/src/pages/LandingPage.tsx"
+  ],
+  "entryJs": {
+    "fileCount": 3,
+    "bytes": 301192,
+    "gzipBytes": 95554,
+    "files": [
+      {
+        "file": "assets/icons-r7e06q7e.js",
+        "bytes": 39802,
+        "gzipBytes": 13415
+      },
+      {
+        "file": "assets/main-BFXWYAJd.js",
+        "bytes": 260664,
+        "gzipBytes": 81710
+      },
+      {
+        "file": "assets/rolldown-runtime-XKyaHtl9.js",
+        "bytes": 726,
+        "gzipBytes": 429
+      }
+    ]
+  },
+  "homeJs": {
+    "fileCount": 15,
+    "bytes": 423665,
+    "gzipBytes": 133796,
+    "files": [
+      {
+        "file": "assets/Footer-B2-0_Nah.js",
+        "bytes": 2662,
+        "gzipBytes": 1212
+      },
+      {
+        "file": "assets/LandingPage-Jnn5twda.js",
+        "bytes": 40399,
+        "gzipBytes": 10280
+      },
+      {
+        "file": "assets/Navbar-bsJxyWHb.js",
+        "bytes": 23865,
+        "gzipBytes": 5326
+      },
+      {
+        "file": "assets/apiError-CWWKwJJ3.js",
+        "bytes": 560,
+        "gzipBytes": 344
+      },
+      {
+        "file": "assets/auth.api-D4UqAYNm.js",
+        "bytes": 1822,
+        "gzipBytes": 748
+      },
+      {
+        "file": "assets/axios-C654CTRf.js",
+        "bytes": 49868,
+        "gzipBytes": 18555
+      },
+      {
+        "file": "assets/campaignType-DeuHWF2K.js",
+        "bytes": 298,
+        "gzipBytes": 210
+      },
+      {
+        "file": "assets/categories.api-BrHXWGG6.js",
+        "bytes": 207,
+        "gzipBytes": 190
+      },
+      {
+        "file": "assets/icons-r7e06q7e.js",
+        "bytes": 39802,
+        "gzipBytes": 13415
+      },
+      {
+        "file": "assets/image.utils-DX6VK05W.js",
+        "bytes": 220,
+        "gzipBytes": 151
+      },
+      {
+        "file": "assets/main-BFXWYAJd.js",
+        "bytes": 260664,
+        "gzipBytes": 81710
+      },
+      {
+        "file": "assets/public-campaigns.api-K39clor2.js",
+        "bytes": 1102,
+        "gzipBytes": 470
+      },
+      {
+        "file": "assets/rolldown-runtime-XKyaHtl9.js",
+        "bytes": 726,
+        "gzipBytes": 429
+      },
+      {
+        "file": "assets/useAsyncResource-6IRn6_4L.js",
+        "bytes": 1195,
+        "gzipBytes": 544
+      },
+      {
+        "file": "assets/useClock-CTSVBbKs.js",
+        "bytes": 275,
+        "gzipBytes": 212
+      }
+    ]
+  },
+  "homeCss": {
+    "fileCount": 1,
+    "bytes": 143549,
+    "gzipBytes": 20957,
+    "files": [
+      {
+        "file": "assets/main-iS6HNyJ2.css",
+        "bytes": 143549,
+        "gzipBytes": 20957
+      }
+    ]
+  },
+  "allJs": {
+    "fileCount": 56,
+    "bytes": 1710394,
+    "gzipBytes": 486783,
+    "files": [
+      {
+        "file": "assets/AccountSettingsPage-CiDqD1VU.js",
+        "bytes": 13000,
+        "gzipBytes": 3819
+      },
+      {
+        "file": "assets/AdminCampaignsPage-Cf7e-Yso.js",
+        "bytes": 11271,
+        "gzipBytes": 3421
+      },
+      {
+        "file": "assets/AdminDashboardPage-BioXPiIc.js",
+        "bytes": 13824,
+        "gzipBytes": 2633
+      },
+      {
+        "file": "assets/AdminExpensesAuditPage-DxBWRkZV.js",
+        "bytes": 27357,
+        "gzipBytes": 6452
+      },
+      {
+        "file": "assets/AdminKycPage-MQwB-bDj.js",
+        "bytes": 14605,
+        "gzipBytes": 4512
+      },
+      {
+        "file": "assets/AdminLayout-wUGdCVDd.js",
+        "bytes": 5110,
+        "gzipBytes": 1602
+      },
+      {
+        "file": "assets/AdminUsersPage-DsPOqYK-.js",
+        "bytes": 13135,
+        "gzipBytes": 4087
+      },
+      {
+        "file": "assets/AreaChart-C9I8uyGQ.js",
+        "bytes": 367205,
+        "gzipBytes": 105887
+      },
+      {
+        "file": "assets/CampaignAnalyticsDashboard-D1SeVd1l.js",
+        "bytes": 9287,
+        "gzipBytes": 2960
+      },
+      {
+        "file": "assets/CampaignDetailPage-BstqPRkl.js",
+        "bytes": 83869,
+        "gzipBytes": 19287
+      },
+      {
+        "file": "assets/CampaignPreviewModal-CMjQyAPO.js",
+        "bytes": 63285,
+        "gzipBytes": 14363
+      },
+      {
+        "file": "assets/CampaignReviewPage-Bn1mgRq7.js",
+        "bytes": 15429,
+        "gzipBytes": 4385
+      },
+      {
+        "file": "assets/ChatPage-D9IKZS4L.js",
+        "bytes": 111482,
+        "gzipBytes": 31665
+      },
+      {
+        "file": "assets/EmailVerificationControls-C2rJHkRq.js",
+        "bytes": 1762,
+        "gzipBytes": 949
+      },
+      {
+        "file": "assets/EmailVerificationPage-DoktmXvW.js",
+        "bytes": 2439,
+        "gzipBytes": 1201
+      },
+      {
+        "file": "assets/EntrepreneurProfilePage-CAyrwlnf.js",
+        "bytes": 66072,
+        "gzipBytes": 14220
+      },
+      {
+        "file": "assets/ExploreCampaignsPage-3n6AvhkV.js",
+        "bytes": 30671,
+        "gzipBytes": 8416
+      },
+      {
+        "file": "assets/Footer-B2-0_Nah.js",
+        "bytes": 2662,
+        "gzipBytes": 1212
+      },
+      {
+        "file": "assets/InvestorDashboardAnalytics-bqMxOyJ1.js",
+        "bytes": 5181,
+        "gzipBytes": 1936
+      },
+      {
+        "file": "assets/InvestorDashboardPage-C04Dpn1M.js",
+        "bytes": 58229,
+        "gzipBytes": 12194
+      },
+      {
+        "file": "assets/InvestorProfilePage-CgPh4LRP.js",
+        "bytes": 52065,
+        "gzipBytes": 11515
+      },
+      {
+        "file": "assets/KYCUploadModal-Jg4tilWh.js",
+        "bytes": 165307,
+        "gzipBytes": 48608
+      },
+      {
+        "file": "assets/LandingPage-Jnn5twda.js",
+        "bytes": 40399,
+        "gzipBytes": 10280
+      },
+      {
+        "file": "assets/LoginPage-DJ44jRhO.js",
+        "bytes": 11384,
+        "gzipBytes": 3708
+      },
+      {
+        "file": "assets/MyCampaignsPage-DXB6TQK4.js",
+        "bytes": 31696,
+        "gzipBytes": 7937
+      },
+      {
+        "file": "assets/Navbar-bsJxyWHb.js",
+        "bytes": 23865,
+        "gzipBytes": 5326
+      },
+      {
+        "file": "assets/NotificationsPage-D-ioaIg1.js",
+        "bytes": 22176,
+        "gzipBytes": 5801
+      },
+      {
+        "file": "assets/OAuthCallbackPage-WoiQO1bq.js",
+        "bytes": 1474,
+        "gzipBytes": 857
+      },
+      {
+        "file": "assets/PasswordRecoveryPage-DwKkI_5h.js",
+        "bytes": 4354,
+        "gzipBytes": 1778
+      },
+      {
+        "file": "assets/PieChart-f0FazQlU.js",
+        "bytes": 17818,
+        "gzipBytes": 5653
+      },
+      {
+        "file": "assets/PitchFeedPage-D48qdyj2.js",
+        "bytes": 9247,
+        "gzipBytes": 3054
+      },
+      {
+        "file": "assets/PitchVideoPlayer-Brz-GoGq.js",
+        "bytes": 3462,
+        "gzipBytes": 1534
+      },
+      {
+        "file": "assets/PublicFinancialAuditing-BWmbOutw.js",
+        "bytes": 15379,
+        "gzipBytes": 3924
+      },
+      {
+        "file": "assets/RegisterPage-CpQf88Gm.js",
+        "bytes": 10993,
+        "gzipBytes": 3428
+      },
+      {
+        "file": "assets/RequestErrorNotice-CdRowSY3.js",
+        "bytes": 1451,
+        "gzipBytes": 759
+      },
+      {
+        "file": "assets/ShareModal-DrFmzhPn.js",
+        "bytes": 6528,
+        "gzipBytes": 2935
+      },
+      {
+        "file": "assets/SuperAdminDashboardPage-C7tYvrop.js",
+        "bytes": 8072,
+        "gzipBytes": 2497
+      },
+      {
+        "file": "assets/admin.api-Cu9V7N0X.js",
+        "bytes": 5410,
+        "gzipBytes": 1734
+      },
+      {
+        "file": "assets/apiError-CWWKwJJ3.js",
+        "bytes": 560,
+        "gzipBytes": 344
+      },
+      {
+        "file": "assets/auth.api-D4UqAYNm.js",
+        "bytes": 1822,
+        "gzipBytes": 748
+      },
+      {
+        "file": "assets/authRole-nwa4tb81.js",
+        "bytes": 194,
+        "gzipBytes": 154
+      },
+      {
+        "file": "assets/axios-C654CTRf.js",
+        "bytes": 49868,
+        "gzipBytes": 18555
+      },
+      {
+        "file": "assets/campaignStatus-Dkkn5Hkp.js",
+        "bytes": 1381,
+        "gzipBytes": 648
+      },
+      {
+        "file": "assets/campaignType-DeuHWF2K.js",
+        "bytes": 298,
+        "gzipBytes": 210
+      },
+      {
+        "file": "assets/categories.api-BrHXWGG6.js",
+        "bytes": 207,
+        "gzipBytes": 190
+      },
+      {
+        "file": "assets/icons-r7e06q7e.js",
+        "bytes": 39802,
+        "gzipBytes": 13415
+      },
+      {
+        "file": "assets/image.utils-DX6VK05W.js",
+        "bytes": 220,
+        "gzipBytes": 151
+      },
+      {
+        "file": "assets/investor.api-DE-1pfzm.js",
+        "bytes": 2084,
+        "gzipBytes": 823
+      },
+      {
+        "file": "assets/kycFiles-B6eyyOui.js",
+        "bytes": 1780,
+        "gzipBytes": 870
+      },
+      {
+        "file": "assets/main-BFXWYAJd.js",
+        "bytes": 260664,
+        "gzipBytes": 81710
+      },
+      {
+        "file": "assets/public-campaigns.api-K39clor2.js",
+        "bytes": 1102,
+        "gzipBytes": 470
+      },
+      {
+        "file": "assets/rewardTracking-cw_k-mhX.js",
+        "bytes": 779,
+        "gzipBytes": 459
+      },
+      {
+        "file": "assets/rolldown-runtime-XKyaHtl9.js",
+        "bytes": 726,
+        "gzipBytes": 429
+      },
+      {
+        "file": "assets/useAsyncResource-6IRn6_4L.js",
+        "bytes": 1195,
+        "gzipBytes": 544
+      },
+      {
+        "file": "assets/useClock-CTSVBbKs.js",
+        "bytes": 275,
+        "gzipBytes": 212
+      },
+      {
+        "file": "assets/useInvestorDashboard-o9XeHgx6.js",
+        "bytes": 482,
+        "gzipBytes": 322
+      }
+    ]
+  },
+  "baselineRevision": "b6aae4da0bea130a37901b4c6f4bd4e2791fc4df",
+  "measurement": "Issue 4.38 working tree, production build; no commit created.",
+  "command": "npm run build; node scripts/bundle-report.mjs --json"
+}

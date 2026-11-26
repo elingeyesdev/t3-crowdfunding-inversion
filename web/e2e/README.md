@@ -10,7 +10,11 @@ npm run test:e2e
 ```
 
 La suite usa Playwright Test para interfaz Chromium y API HTTP real de Laravel.
-No ejecuta PHPUnit como sustituto de Playwright. Cada título conserva la HU y,
+Para comprobar únicamente la carga del frontend compilado, ejecuta
+`npm run test:e2e -- bundle-loading.spec.ts` después de `npm run build`.
+Estos casos verifican aislamiento de módulos, rutas directas, recargas, descarga
+diferida de gráficos y recuperación de errores; se incluyen en GitHub Actions.
+No ejecuta PHPUnit como sustituto de Playwright. Los casos funcionales conservan la HU y,
 cuando corresponde, el criterio verificable; la matriz del plan distingue una
 prueba de servicio de la aceptación completa de interfaz.
 

@@ -4,6 +4,8 @@ El código de la interfaz está integrado con Laravel. Usa Node 24.15+ (la rama 
 
 La configuración activa de Vite y las dependencias están en `web/`. `frontend/src` conserva las pantallas y componentes originales. El chat usa Laravel Echo y Reverb. Consulta [la guía principal](../../README.md).
 
+Las rutas se cargan con `React.lazy` y las estadísticas al abrir su sección. Conserva esas fronteras al agregar pantallas: una importación estática puede llevar código privado o gráficos a la portada. `AsyncContent` proporciona los estados de carga y error. Después de `npm run build`, ejecuta `npm run bundle:check`; `npm run bundle:report` muestra los tamaños incluyendo dependencias compartidas. Consulta [la medición, los límites y las pruebas de navegación](../../docs/FRONTEND_BUNDLE.md).
+
 Desde `web/`, ejecuta `npm test` para todas las regresiones React y utilidades de `frontend/tests/*.test.mjs`. También puedes ejecutar `npm test` desde `web/frontend/`; delega al mismo comando. No hace falta iniciar Laravel, Vite, Reverb ni un navegador: las pruebas usan Node Test Runner, JSDOM y servicios simulados. Cada archivo se ejecuta en un proceso separado, con la concurrencia predeterminada de Node.
 
 Para ejecutar solo una prueba, desde `web/`: `node --test frontend/tests/kyc-preview.test.mjs`. Una aserción fallida produce un código de salida distinto de cero. Las pruebas deben exigir el comportamiento correcto y no considerar éxito reproducir un defecto. La compilación `npm run build` es una comprobación adicional y no sustituye estas regresiones.
