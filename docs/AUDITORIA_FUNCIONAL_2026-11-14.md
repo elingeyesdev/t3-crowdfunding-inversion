@@ -271,7 +271,9 @@ Los errores funcionales de lint se atienden junto con su paquete; la limpieza re
 
 Antes de incorporar nuevas funcionalidades: cerrar P0/P1, resolver los P2 del alcance acordado, completar los recorridos críticos y hacer pasar los controles de calidad acordados. La aprobación de un producto demostrativo no equivale a la preparación para manejar dinero real.
 
-## Repetir diagnósticos
+## Comandos utilizados en la auditoría histórica
+
+El archivo `AuditDiagnosticsTest.php` fue retirado, como indica la nota inicial. Este bloque registra la ejecución original y no es una guía vigente para un checkout limpio. Consulta los [comandos de regresión actuales](../README.md#verificación).
 
 Desde `web/`:
 

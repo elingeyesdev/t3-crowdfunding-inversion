@@ -1,5 +1,7 @@
 # Revisión funcional del sistema
 
+Nota de mantenimiento (issue 4.36): este documento conserva resultados históricos de octubre. `AuditBehaviorTest.php` no forma parte del repositorio ni es un requisito de verificación actual. Las correcciones de publicación, recompensas, visibilidad y correo cuentan con regresiones en `web/tests/Feature/`; el visor KYC también tiene cobertura en `web/frontend/tests/kyc-preview.test.mjs`. Consulta los [comandos vigentes](../README.md#verificación).
+
 Fecha: 15 de octubre de 2026. Alcance: código Laravel/React, contratos entre interfaz y API, pruebas aisladas en SQLite en memoria y análisis estático de React. No se modificaron los datos reales ni la lógica de la aplicación durante esta revisión.
 
 La suite existente pasa: 27 pruebas, 151 aserciones. Cuatro casos de diagnóstico adicionales reprodujeron errores que esa suite no cubre. Sus pruebas están en `storage/app/private/audit/AuditBehaviorTest.php`, fuera de la suite normal; describen el comportamiento defectuoso observado, no el resultado deseado.
@@ -76,7 +78,9 @@ Corrección propuesta: separar el estado de carga del componente que calcula las
 - **Estadísticas de portada:** `frontend/src/pages/LandingPage.tsx:457` utiliza valores fijos para likes y comentarios; también contiene textos fijos como «100+ donadores activos» y «94% campañas exitosas». No representan métricas calculadas desde la base.
 - **Google OAuth e IA:** tienen integración en código, pero su funcionamiento completo con proveedores externos y credenciales válidas sigue pendiente de validación. Esta revisión no realizó llamadas de pago ni autenticación externa.
 
-## Repetir las verificaciones
+## Comandos utilizados en la auditoría histórica
+
+Se conservan como registro; el archivo de diagnóstico local no se distribuye ni debe incorporarse a la suite de aceptación.
 
 ```powershell
 php artisan test
