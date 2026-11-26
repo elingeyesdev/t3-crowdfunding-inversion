@@ -4,6 +4,7 @@ import type { CapitalOverview } from '../../types/investor.types';
 import { getMyInvestments, downloadInvestmentReceipt } from '../../api/investor.api';
 import { getImageUrl } from '../../utils/image.utils';
 import type { InvestmentHistoryItem } from '../../api/investor.api';
+import { campaignTypeLabel } from '../../utils/campaignType.ts';
 import { 
   TrendingUp, 
   Wallet, 
@@ -23,10 +24,6 @@ interface Props {
   capitalData: CapitalOverview | null;
   capitalLoading: boolean;
 }
-
-const CAMPAIGN_TYPE_CONFIG: Record<string, { icon: any; color: string; label: string }> = {
-  donation: { icon: Heart, label: 'Donación', color: '#e91e63' },
-};
 
 const STATUS_CONFIG: Record<string, { icon: any; color: string; bg: string; label: string }> = {
   completed: { icon: CheckCircle2, color: '#72B626', bg: '#e8f5e9', label: 'Completada' },
@@ -48,8 +45,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
       try {
         setInvestmentsLoading(true);
         const data = await getMyInvestments();
-        const mappedData = data.map(inv => ({ ...inv, campaignType: 'donation' as const }));
-        setInvestments(mappedData);
+        setInvestments(data);
       } catch {
         // silently fail — will show empty state
       } finally {
@@ -71,7 +67,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
               <div className="w-10 h-10 bg-[#f0f9e0] text-[#72B626] rounded-xl flex items-center justify-center border border-gray-100 group-hover:scale-110 transition-transform">
                 <TrendingUp size={18} strokeWidth={2.5} />
               </div>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Donado</span>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Aportado</span>
             </div>
             <div className="text-[22px] sm:text-[28px] font-black text-[#1c2b1e] tracking-tighter leading-none relative z-10">
               Bs. {capitalData.totalInvested.toLocaleString('es-BO')}
@@ -147,7 +143,7 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
         ) : investments.length > 0 ? (
           <div className="flex flex-col gap-3">
             {investments.map((inv) => {
-              const typeConfig = CAMPAIGN_TYPE_CONFIG[inv.campaignType] || CAMPAIGN_TYPE_CONFIG.donation;
+              const typeConfig = { icon: inv.campaignType === 'reward' ? Gift : inv.campaignType === 'donation' ? Heart : FolderOpen, color: '#64748b', label: campaignTypeLabel(inv.campaignType) };
               const TypeIcon = typeConfig.icon;
               const statusConfig = STATUS_CONFIG[inv.investmentStatus] || STATUS_CONFIG.completed;
               const StatusIcon = statusConfig.icon;

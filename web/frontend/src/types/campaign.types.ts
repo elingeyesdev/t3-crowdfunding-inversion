@@ -12,7 +12,8 @@ export type CampaignStatus =
   | 'completed'
   | 'suspended';
 
-export type CampaignType = 'donation';
+export type { CampaignType } from '../utils/campaignType';
+import type { CampaignType, SupportedCampaignType } from '../utils/campaignType';
 
 export interface EntrepreneurCampaign {
   id: string;
@@ -169,6 +170,7 @@ export interface FinancialLedgerResponse {
 }
 
 export interface CreateCampaignDto {
+  campaignType?: SupportedCampaignType;
   title: string;
   description: string;
   shortDescription?: string;

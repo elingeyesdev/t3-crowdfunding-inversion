@@ -10,10 +10,12 @@ import { getImageUrl } from '../utils/image.utils';
 import { formatNumberSpanish } from '../utils/numberFormat';
 import { isFutureLocalDateTime, localDateTimeToUtc, toLocalDateTime } from '../utils/campaignDate';
 import { InfoHint } from './InfoHint';
+import { campaignTypeLabel, isSupportedCampaignType, SUPPORTED_CAMPAIGN_TYPES } from '../utils/campaignType.ts';
 
 
 
 const schema = (originalEndDate?: string | null) => z.object({
+  campaignType: z.string().refine((type): boolean => isSupportedCampaignType(type), 'Selecciona una modalidad disponible.'),
   title: z.string().min(5, 'El título debe tener entre 5 y 50 caracteres').max(50, 'El título debe tener entre 5 y 50 caracteres'),
   description: z.string().min(50, 'La descripción debe tener entre 50 y 800 caracteres').max(800, 'La descripción debe tener entre 50 y 800 caracteres'),
   shortDescription: z.string().min(10, 'El eslogan debe tener entre 10 y 50 caracteres').max(50, 'El eslogan debe tener entre 10 y 50 caracteres'),
@@ -53,6 +55,7 @@ export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCanc
   } = useForm<FormValues>({
     resolver: zodResolver(schema(initialData?.endDate)),
     defaultValues: {
+      campaignType: initialData ? initialData.campaignType ?? '' : 'donation',
       title: initialData?.title || '',
       description: initialData?.description || '',
       shortDescription: initialData?.shortDescription || '',
@@ -95,7 +98,6 @@ export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCanc
   // Sync rewards when editing
   useEffect(() => {
     if (initialData?.rewardTiers) {
-      console.log('CampaignForm: Loading rewards from initialData', initialData.rewardTiers);
       setRewards(initialData.rewardTiers.map(rt => ({
         title: rt.title,
         description: rt.description,
@@ -132,6 +134,7 @@ export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCanc
   useEffect(() => {
     if (!loadingCats && initialData) {
       reset({
+        campaignType: initialData.campaignType ?? '',
         title: initialData.title || '',
         description: initialData.description || '',
         shortDescription: initialData.shortDescription || '',
@@ -204,16 +207,20 @@ export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCanc
     }
   };
 
-  const buildDto = (data: FormValues): CreateCampaignDto => ({
-    title: data.title,
-    description: data.description,
-    shortDescription: data.shortDescription || undefined,
-    categoryIds: data.categoryIds,
-    goalAmount: data.goalAmount,
-    endDate: localDateTimeToUtc(data.endDate ?? '', initialData?.endDate),
-    rewards: rewards,
-    videoUrl: data.videoUrl || undefined,
-  });
+  const buildDto = (data: FormValues): CreateCampaignDto => {
+    if (!isSupportedCampaignType(data.campaignType)) throw new Error('La modalidad no está disponible.');
+    return {
+      campaignType: data.campaignType,
+      title: data.title,
+      description: data.description,
+      shortDescription: data.shortDescription || undefined,
+      categoryIds: data.categoryIds,
+      goalAmount: data.goalAmount,
+      endDate: localDateTimeToUtc(data.endDate ?? '', initialData?.endDate),
+      rewards: rewards,
+      videoUrl: data.videoUrl || undefined,
+    };
+  };
 
   const requestAction = (action: 'draft' | 'review', data: FormValues) => {
     if (documents.length === 0) {
@@ -250,6 +257,10 @@ export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCanc
   const labelClass = "text-[12px] font-black text-slate-500 mb-2 block uppercase tracking-wider ml-1";
   const errorClass = "border-[#c62828] focus:border-[#c62828] focus:ring-red-500/10 bg-red-50 focus:bg-red-50";
 
+  if (initialData && !isSupportedCampaignType(initialData.campaignType)) {
+    return <div className="rounded-2xl border bg-white p-8 space-y-4"><p role="alert">{campaignTypeLabel(initialData.campaignType)}. Este registro se conserva para consulta y no puede editarse desde el formulario.</p><button type="button" onClick={onCancel}>Volver</button></div>;
+  }
+
   return (
     <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-xl shadow-gray-900/5 border border-green-50 animate-in fade-in zoom-in-95 duration-500 font-['Plus Jakarta Sans',sans-serif]">
       <div className="mb-10">
@@ -271,6 +282,7 @@ export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCanc
       )}
 
       <form className="flex flex-col gap-8" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <div><label htmlFor="campaign-type" className={labelClass}>Modalidad de campaña</label><select id="campaign-type" {...register('campaignType')} disabled={saving} className={inputClass}>{SUPPORTED_CAMPAIGN_TYPES.map(type => <option key={type} value={type}>{campaignTypeLabel(type)}</option>)}</select><p className="mt-2 text-sm text-gray-500">Los aportes utilizan saldo simulado. Puedes configurar recompensas opcionales; ninguna modalidad ofrece participación accionaria.</p></div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Fila 1: Título (2/3) y Meta de Recaudación (1/3) */}
           <div className="flex flex-col md:col-span-2">

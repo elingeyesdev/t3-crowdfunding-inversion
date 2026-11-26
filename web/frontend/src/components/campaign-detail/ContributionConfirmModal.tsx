@@ -1,4 +1,5 @@
 import { campaignStatusLabel } from '../../utils/campaignStatus';
+import { campaignTypeLabel, isSupportedCampaignType } from '../../utils/campaignType.ts';
 import { useEffect } from 'react';
 import type { RewardTier } from '../../api/public-campaigns.api';
 import {
@@ -35,7 +36,6 @@ interface ContributionConfirmModalProps {
 }
 
 /* ── Campaign type badge ── */
-const DONATION_LABEL = { label: 'Donación', icon: Heart, color: '#e91e63', bgColor: '#fce4ec' };
 
 /* ───────────────────────────────────────────────── */
 /*  MODAL COMPONENT                                  */
@@ -49,7 +49,8 @@ export function ContributionConfirmModal({
   onConfirm,
   onCancel,
 }: ContributionConfirmModalProps) {
-  const typeInfo = DONATION_LABEL;
+  const supported = isSupportedCampaignType(campaign.campaignType);
+  const typeInfo = { label: campaignTypeLabel(campaign.campaignType), icon: !supported ? AlertTriangle : campaign.campaignType === 'reward' ? Gift : Heart, color: supported ? '#4a7f1a' : '#64748b', bgColor: supported ? '#f0f9e0' : '#f1f5f9' };
   const TypeIcon = typeInfo.icon;
   const currency = campaign.currency || 'BOB';
 
@@ -124,6 +125,7 @@ export function ContributionConfirmModal({
 
         {/* ── Body ── */}
         <div className="px-5 md:px-8 py-5 md:py-6 space-y-5 overflow-y-auto">
+          {!supported && <p role="alert" className="text-sm text-red-700">Esta modalidad no admite nuevos aportes. El registro conserva su tipo original.</p>}
 
           {/* Campaign info */}
           <div className="flex items-start gap-4">
@@ -248,8 +250,8 @@ export function ContributionConfirmModal({
             Cancelar
           </button>
           <button
-            onClick={onConfirm}
-            disabled={loading}
+            onClick={() => { if (supported && !loading) onConfirm(); }}
+            disabled={loading || !supported}
             className="flex-[1.5] py-3.5 md:py-4 rounded-2xl font-black text-[12px] md:text-[13px] uppercase tracking-widest border-none cursor-pointer transition-all active:scale-[0.97] disabled:cursor-not-allowed flex items-center justify-center gap-2 text-white"
             style={{
               background: loading

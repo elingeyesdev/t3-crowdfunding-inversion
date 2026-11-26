@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { campaignTypeLabel } from '../../utils/campaignType.ts';
 import { 
   Search, 
   Eye, 
@@ -326,11 +327,11 @@ export const CampaignReviewPage: React.FC = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
-                          campaign.type === 'reward' 
+                          campaign.campaign_type === 'reward'
                             ? 'bg-amber-50 text-amber-700 border-amber-200' 
                             : 'bg-green-50 text-emerald-700 border-emerald-200'
                         }`}>
-                          {campaign.type === 'reward' ? 'Recompensa' : 'Donación'}
+                          {campaignTypeLabel(campaign.campaign_type)}
                         </span>
                       </td>
                       <td className="px-6 py-4">
@@ -449,7 +450,7 @@ export const CampaignReviewPage: React.FC = () => {
               shortDescription: selectedCampaignDetail.short_description || '',
               description: selectedCampaignDetail.description || '',
               location: selectedCampaignDetail.location || 'Global',
-              campaignType: 'donation',
+              campaignType: selectedCampaignDetail.campaign_type,
               status: selectedCampaignDetail.status as any,
               goalAmount: parseFloat(selectedCampaignDetail.goal_amount || '0'),
               currentAmount: selectedCampaignDetail.current_amount || 0,

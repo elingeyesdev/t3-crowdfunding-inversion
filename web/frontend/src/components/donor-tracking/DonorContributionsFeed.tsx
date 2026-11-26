@@ -22,6 +22,7 @@ import { hasInvestmentReward, rewardTrackingLabel } from '../../utils/rewardTrac
 import { downloadInvestmentReceipt } from '../../api/investor.api';
 import { getImageUrl } from '../../utils/image.utils';
 import { ProgressBar } from '../ProgressBar';
+import { campaignTypeLabel } from '../../utils/campaignType.ts';
 
 interface Props {
   investments: InvestmentHistoryItem[];
@@ -181,7 +182,7 @@ export function DonorContributionsFeed({ investments, loading, onSelectTab }: Pr
                     )}
                     <div className="absolute top-1.5 left-1.5">
                       <span className="px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest">
-                        {inv.campaignType === 'donation' ? 'Donación' : 'Recompensa'}
+                        {campaignTypeLabel(inv.campaignType)}
                       </span>
                     </div>
                   </div>

@@ -61,12 +61,6 @@ export function InvestorDashboardPage() {
   useEffect(() => {
     if (data) {
       getMyInvestments()
-        .then((list) =>
-          list.map((inv) => ({
-            ...inv,
-            campaignType: inv.campaignType === 'equity' ? 'donation' : inv.campaignType,
-          }))
-        )
         .then(setInvestments)
         .catch(console.error)
         .finally(() => setLoadingInvestments(false));

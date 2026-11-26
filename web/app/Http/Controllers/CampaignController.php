@@ -14,6 +14,7 @@ use App\Services\Notifier;
 use App\Services\PrivateFileLinks;
 use App\Services\ProfileReadiness;
 use App\Support\Api;
+use App\Support\CampaignTypes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -40,6 +41,7 @@ class CampaignController extends Controller
 
     private function listing(Request $r, bool $public)
     {
+        $r->validate(['campaignType' => 'sometimes|nullable|string|max:100']);
         $query = Campaign::with(['creator.entrepreneur', 'category', 'categories', 'rewards', 'fundingPlan', 'milestones']);
         if ($public) {
             $query->whereIn('status', Campaign::PUBLIC_STATUSES);
@@ -120,14 +122,17 @@ class CampaignController extends Controller
             abort_if((bool) $missing, 422, 'Completa tu perfil para crear campañas. Falta: '.implode(', ', $missing));
         } else {
             self::authorizeOwner($r, $campaign);
+            CampaignTypes::requireSupported($campaign->campaign_type);
             abort_unless(in_array($campaign->status, ['draft', 'rejected']), 422, 'Solo se pueden editar campañas en borrador o rechazadas.');
         }
         $required = $creating ? 'required' : 'sometimes';
-        $data = $r->validate(['title' => "$required|string|min:5|max:200", 'description' => "$required|string|min:30|max:100000", 'shortDescription' => 'nullable|string|max:1000', 'goalAmount' => "$required|numeric|min:1|max:9999999999999.99|decimal:0,2", 'categoryId' => 'sometimes|uuid|exists:categories,id', 'categoryIds' => 'sometimes|array|max:10', 'categoryIds.*' => 'uuid|exists:categories,id', 'endDate' => 'nullable|date|after:now', 'videoUrl' => 'nullable|url:http,https|max:2048', 'campaignType' => 'sometimes|in:donation,reward,equity', 'location' => 'nullable|string|max:255', 'rewards' => 'sometimes|array|max:30', 'rewards.*.title' => 'required|string|max:255', 'rewards.*.description' => 'nullable|string|max:5000', 'rewards.*.minPercentage' => 'required|numeric|min:0|max:100', 'rewards.*.maxPercentage' => 'required|numeric|min:0|max:100|gte:rewards.*.minPercentage', 'fundingPlan' => 'sometimes|array|max:30', 'fundingPlan.*.category' => 'required|string|max:150', 'fundingPlan.*.description' => 'nullable|string|max:2000', 'fundingPlan.*.amount' => 'required|numeric|min:0.01|max:9999999999999.99|decimal:0,2', 'fundingPlan.*.percentage' => 'nullable|numeric|min:0|max:100', 'fundingPlan.*.sortOrder' => 'nullable|integer|min:0']);
+        $r->validate(['campaignType' => ['sometimes', 'required', Rule::in(CampaignTypes::SUPPORTED)], 'campaign_type' => 'prohibited', 'type' => 'prohibited'], ['campaignType.in' => 'Selecciona donación o campaña con recompensas. La inversión accionaria no está disponible.']);
+        $data = $r->validate(['title' => "$required|string|min:5|max:200", 'description' => "$required|string|min:30|max:100000", 'shortDescription' => 'nullable|string|max:1000', 'goalAmount' => "$required|numeric|min:1|max:9999999999999.99|decimal:0,2", 'categoryId' => 'sometimes|uuid|exists:categories,id', 'categoryIds' => 'sometimes|array|max:10', 'categoryIds.*' => 'uuid|exists:categories,id', 'endDate' => 'nullable|date|after:now', 'videoUrl' => 'nullable|url:http,https|max:2048', 'campaignType' => ['sometimes', Rule::in(CampaignTypes::SUPPORTED)], 'location' => 'nullable|string|max:255', 'rewards' => 'sometimes|array|max:30', 'rewards.*.title' => 'required|string|max:255', 'rewards.*.description' => 'nullable|string|max:5000', 'rewards.*.minPercentage' => 'required|numeric|min:0|max:100', 'rewards.*.maxPercentage' => 'required|numeric|min:0|max:100|gte:rewards.*.minPercentage', 'fundingPlan' => 'sometimes|array|max:30', 'fundingPlan.*.category' => 'required|string|max:150', 'fundingPlan.*.description' => 'nullable|string|max:2000', 'fundingPlan.*.amount' => 'required|numeric|min:0.01|max:9999999999999.99|decimal:0,2', 'fundingPlan.*.percentage' => 'nullable|numeric|min:0|max:100', 'fundingPlan.*.sortOrder' => 'nullable|integer|min:0']);
 
         return DB::transaction(function () use ($r, $data, $campaign, $creating) {
             if (! $creating) {
                 $campaign = Campaign::whereKey($campaign->id)->lockForUpdate()->firstOrFail();
+                CampaignTypes::requireSupported($campaign->campaign_type);
                 abort_unless(in_array($campaign->status, ['draft', 'rejected']), 422, 'Solo se pueden editar campañas en borrador o rechazadas.');
             }
             $attrs = Api::snake(collect($data)->except(['categoryIds', 'rewards', 'fundingPlan'])->all());
@@ -180,6 +185,7 @@ class CampaignController extends Controller
         return DB::transaction(function () use ($r, $campaign, $notifier, $publication) {
             $campaign = Campaign::whereKey($campaign->id)->lockForUpdate()->firstOrFail();
             self::authorizeOwner($r, $campaign);
+            CampaignTypes::requireSupported($campaign->campaign_type);
             $publish = str_ends_with($r->path(), '/publish');
             $allowed = $publish ? ['approved'] : ['draft', 'rejected'];
             abort_unless(in_array($campaign->status, $allowed), 422, 'La campaña no permite esta transición de estado.');

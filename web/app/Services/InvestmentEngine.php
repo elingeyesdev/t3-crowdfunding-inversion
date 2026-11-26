@@ -10,6 +10,7 @@ use App\Models\InvestorProfile;
 use App\Models\RewardClaim;
 use App\Models\RewardTier;
 use App\Models\Transaction;
+use App\Support\CampaignTypes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -27,6 +28,7 @@ class InvestmentEngine
         return DB::transaction(function () use ($userId, $data) {
             // All money operations lock the campaign before investor profiles.
             $c = Campaign::whereKey($data['campaignId'])->lockForUpdate()->firstOrFail();
+            CampaignTypes::requireSupported($c->campaign_type);
             $p = InvestorProfile::where('user_id', $userId)->lockForUpdate()->firstOrFail();
             $amount = $this->money($data['amount']);
             $balance = bcsub($this->money($p->max_investment), $this->money($p->total_invested), 2);

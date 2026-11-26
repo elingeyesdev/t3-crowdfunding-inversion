@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
 import { campaignDonorsLabel } from '../utils/campaignDonors';
+import { campaignTypeLabel } from '../utils/campaignType.ts';
 import { fetchPublicCampaigns, type PublicCampaign } from '../api/public-campaigns.api';
 import { getCategories } from '../api/categories.api';
 import { UniFoundMeLogo } from '../components/UniFoundMeLogo';
@@ -22,12 +23,6 @@ import {
 const UNI = '#8B1938';
 const GREEN = '#72B626';
 const GREEN_DARK = '#4a7f1a';
-
-const CAMPAIGN_TYPE = {
-  donation: { label: 'Donación', icon: Heart, color: '#e91e63', bg: '#fce4ec' },
-  reward: { label: 'Recompensa', icon: Gem, color: '#f9a825', bg: '#fff8e1' },
-  equity: { label: 'Equity', icon: TrendingUp, color: GREEN, bg: '#f0f9e0' },
-};
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 const HERO_FALLBACKS = [
@@ -183,7 +178,7 @@ function CampaignCard({ campaign }: { campaign: PublicCampaign }) {
     ? Math.min(Math.round((campaign.currentAmount / campaign.goalAmount) * 100), 100)
     : 0;
   const coverUrl = getImageUrl(campaign.coverImageUrl);
-  const typeInfo = CAMPAIGN_TYPE[campaign.campaignType] || CAMPAIGN_TYPE.donation;
+  const typeInfo = { label: campaignTypeLabel(campaign.campaignType), icon: campaign.campaignType === 'reward' ? Gem : campaign.campaignType === 'donation' ? Heart : Lock, color: campaign.campaignType === 'donation' ? '#e91e63' : campaign.campaignType === 'reward' ? '#f9a825' : '#64748b' };
   const TypeIcon = typeInfo.icon;
   let daysLeft: number | null = null;
   if (campaign.endDate) {
@@ -425,7 +420,7 @@ function YellowHelpSection() {
           Consigue lo que necesitas para que tu<br className="hidden md:block" /> campaña tenga éxito.
         </h2>
         <p className="text-[15px] text-gray-500 leading-relaxed mb-8 max-w-[580px] mx-auto">
-          Desde causas sociales y proyectos de arte hasta startups con equity.
+          Apoya causas sociales, proyectos de arte y emprendimientos mediante donaciones y campañas con recompensas.
           Siempre que necesites financiamiento, puedes solicitarlo aquí.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
