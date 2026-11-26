@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ActivityEmailDelivery;
 use App\Models\Campaign;
 use App\Models\CampaignMilestone;
 use App\Models\CampaignUpdate;
@@ -10,20 +11,11 @@ use App\Models\Investment;
 use App\Models\Notification;
 use App\Models\NotificationType;
 use App\Models\User;
+use App\Support\NotificationPreferences;
+use Illuminate\Support\Facades\DB;
 
 class Notifier
 {
-    private const CATEGORY_EVENTS = [
-        'investmentAlerts' => ['investment_confirmed', 'investment_received', 'investment_refunded'],
-        'commentAlerts' => ['new_comment', 'new_message'],
-        'campaignStatusUpdates' => [
-            'campaign_draft', 'campaign_pending_review', 'campaign_in_review', 'campaign_approved',
-            'campaign_rejected', 'campaign_published', 'campaign_partially_funded', 'campaign_funded',
-            'campaign_completed', 'campaign_failed', 'campaign_cancelled', 'campaign_suspended',
-        ],
-        'milestoneUpdates' => ['milestone_completed', 'campaign_update'],
-    ];
-
     /**
      * Send a notification to a specific user.
      */
@@ -43,53 +35,48 @@ class Notifier
             return null;
         }
 
-        // Check user notification preferences if configured
-        $prefs = $user->notification_preferences ?? [];
-        if (! empty($prefs)) {
-            if (isset($prefs['inAppEnabled']) && ! $prefs['inAppEnabled'] && $channel === 'in_app') {
+        return DB::transaction(function () use ($user, $userId, $code, $title, $body, $campaignId, $referenceType, $actionUrl, $data, $channel) {
+            $url = $actionUrl ?: ($campaignId ? '/campaign/'.$campaignId : null);
+            if (in_array($channel, ['in_app', 'email'], true) && NotificationPreferences::supportsEmail($code)
+                && NotificationPreferences::allows($user, $code, 'email') && app(ActivityMailChannel::class)->status($user)['available']) {
+                $delivery = ActivityEmailDelivery::create([
+                    'user_id' => $userId, 'email' => $user->email, 'type_code' => $code,
+                    'title' => $title, 'body' => $body, 'action_url' => $url,
+                ]);
+                DB::afterCommit(fn () => app(ActivityMailOutbox::class)->dispatch($delivery));
+            }
+            // Mail deliveries have their own history; they never inflate the bell or unread count.
+            if ($channel !== 'in_app' || ! NotificationPreferences::allows($user, $code, 'in_app')) {
                 return null;
             }
-            if (isset($prefs['emailEnabled']) && ! $prefs['emailEnabled'] && $channel === 'email') {
-                return null;
+            $typeId = null;
+            try {
+                $notifType = NotificationType::firstOrCreate(
+                    ['code' => $code],
+                    ['name' => ucwords(str_replace('_', ' ', $code))]
+                );
+                $typeId = $notifType->id;
+            } catch (\Throwable $e) {
+                // Keep going if notification_types table write fails
             }
-            foreach (self::CATEGORY_EVENTS as $preference => $events) {
-                if (in_array($code, $events, true) && isset($prefs[$preference]) && ! $prefs[$preference]) {
-                    return null;
-                }
-            }
-            if (isset($prefs['categories'][$code]) && ! $prefs['categories'][$code]) {
-                return null;
-            }
-        }
 
-        $typeId = null;
-        try {
-            $notifType = NotificationType::firstOrCreate(
-                ['code' => $code],
-                ['name' => ucwords(str_replace('_', ' ', $code))]
-            );
-            $typeId = $notifType->id;
-        } catch (\Throwable $e) {
-            // Keep going if notification_types table write fails
-        }
+            $refType = $referenceType ?: ($campaignId ? 'campaign' : null);
+            $refId = $campaignId;
 
-        $url = $actionUrl ?: ($campaignId ? '/campaign/'.$campaignId : null);
-        $refType = $referenceType ?: ($campaignId ? 'campaign' : null);
-        $refId = $campaignId;
-
-        return Notification::create([
-            'user_id' => $userId,
-            'type_id' => $typeId,
-            'type_code' => $code,
-            'title' => $title,
-            'body' => $body,
-            'channel' => $channel,
-            'is_read' => false,
-            'action_url' => $url,
-            'reference_type' => $refType,
-            'reference_id' => $refId,
-            'data' => $data,
-        ]);
+            return Notification::create([
+                'user_id' => $userId,
+                'type_id' => $typeId,
+                'type_code' => $code,
+                'title' => $title,
+                'body' => $body,
+                'channel' => $channel,
+                'is_read' => false,
+                'action_url' => $url,
+                'reference_type' => $refType,
+                'reference_id' => $refId,
+                'data' => $data,
+            ]);
+        });
     }
 
     /**

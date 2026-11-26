@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
+use App\Services\ActivityMailChannel;
 use App\Support\Api;
 use App\Support\NotificationCategories;
 use Illuminate\Http\Request;
@@ -153,7 +154,7 @@ class NotificationController extends Controller
 
         $current = $r->user()->notification_preferences ?? [];
 
-        return Api::ok(array_merge($defaultPreferences, $current), camel: false);
+        return Api::ok(array_merge($defaultPreferences, $current, ['emailChannel' => app(ActivityMailChannel::class)->status($r->user())]), camel: false);
     }
 
     public function updatePreferences(Request $r)
@@ -177,6 +178,6 @@ class NotificationController extends Controller
 
         $r->user()->update(['notification_preferences' => $merged]);
 
-        return Api::ok($merged, camel: false);
+        return Api::ok([...$merged, 'emailChannel' => app(ActivityMailChannel::class)->status($r->user())], camel: false);
     }
 }

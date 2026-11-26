@@ -106,3 +106,31 @@ test('the general switch can change without resetting disabled categories', asyn
   assert.equal(submitted.campaignStatusUpdates, true);
   await act(async () => t.mock.timers.tick(1200));
 });
+
+test('unavailable mail is explained while preserving editable preferences', async () => {
+  saved = { ...defaults, emailChannel: { available: false, reason: 'not_configured' } };
+  await open();
+  assert.match(container.textContent, /canal de correo no está disponible/);
+  assert.equal(checkbox('Notificaciones por correo').checked, true);
+  assert.equal(checkbox('Notificaciones por correo').disabled, false);
+  assert.doesNotMatch(container.textContent, /resúmenes y alertas críticas/);
+});
+
+test('an unverified address has a link to account settings', async () => {
+  saved = { ...defaults, emailChannel: { available: false, reason: 'unverified' } };
+  await open();
+  assert.match(container.textContent, /Verifica tu correo/);
+  assert.ok(container.querySelector('a[href="/account-settings"]'));
+});
+
+test('saving switches does not send server-owned channel metadata or reset categories', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  saved = { ...defaults, milestoneUpdates: false, emailChannel: { available: true, reason: 'available' } };
+  await open(); await click(checkbox('Notificaciones por correo'));
+  await act(async () => container.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
+  assert.equal(submitted.emailEnabled, false);
+  assert.equal(submitted.milestoneUpdates, false);
+  assert.equal(submitted.inAppEnabled, true);
+  assert.equal(Object.hasOwn(submitted, 'emailChannel'), false);
+  await act(async () => t.mock.timers.tick(1200));
+});
