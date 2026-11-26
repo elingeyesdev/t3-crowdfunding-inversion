@@ -1,3 +1,5 @@
+import { useClock } from '../hooks/useClock.ts';
+import { getApiErrorMessage } from '../utils/apiError.ts';
 import { campaignStatusLabel } from '../utils/campaignStatus';
 import { campaignTypeLabel, isSupportedCampaignType } from '../utils/campaignType.ts';
 import { rewardAmountRange, rewardSelectionError } from '../utils/rewardSelection';
@@ -7,10 +9,7 @@ import { useParams, useNavigate, useLocation, useSearchParams } from 'react-rout
 import { getImageUrl } from '../utils/image.utils';
 import { useCampaignDetail } from '../hooks/useCampaignDetail';
 import { usePublicCampaignUpdates } from '../hooks/usePublicCampaignUpdates';
-import {
-  fetchPublicCampaigns,
-  type PublicCampaign,
-} from '../api/public-campaigns.api';
+import { fetchPublicCampaigns, type PublicCampaign } from '../api/public-campaigns.api';
 import { Navbar } from '../components/Navbar';
 import { RewardTierCards } from '../components/campaign-detail/RewardTierCards';
 import { ContributionConfirmModal } from '../components/campaign-detail/ContributionConfirmModal';
@@ -45,8 +44,6 @@ import {
   Share2,
   FileText,
   ShieldCheck,
-  PieChart as PieIcon,
-  Layers,
 } from 'lucide-react';
 import { ShareModal } from '../components/ShareModal';
 
@@ -126,6 +123,7 @@ function DetailSkeleton() {
 /* ───────────────────────────────────────────────── */
 
 export function CampaignDetailPage() {
+  const now = useClock(1_000);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -135,20 +133,13 @@ export function CampaignDetailPage() {
 
   // ── Tab Navigation state ──
   const initialTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState<'historia' | 'transparencia' | 'actualizaciones' | 'comentarios'>(
-    initialTab === 'transparencia' || initialTab === 'actualizaciones' || initialTab === 'comentarios'
+  const activeTab = initialTab === 'transparencia' || initialTab === 'actualizaciones' || initialTab === 'comentarios'
       ? initialTab
-      : 'historia'
-  );
+      : 'historia';
   const { updates: publicUpdates, loading: updatesLoading, error: updatesError, retry: retryUpdates } = usePublicCampaignUpdates(id);
 
   // Sync tab with URL query parameter
-  useEffect(() => {
-    const tabParam = searchParams.get('tab');
-    if (tabParam && ['historia', 'transparencia', 'actualizaciones', 'comentarios'].includes(tabParam)) {
-      setActiveTab(tabParam as any);
-    }
-  }, [searchParams]);
+
 
   // ── Pitch video state ──
   const [showPitch, setShowPitch] = useState(false);
@@ -197,7 +188,7 @@ export function CampaignDetailPage() {
   }, [campaign?.categoryId, campaign?.id]);
 
   // Determine where to go back — preserve filter state
-  const backUrl = (location.state as any)?.from || '/explore';
+  const backUrl = (location.state as {from?: string} | null)?.from || '/explore';
 
   const handleGoBack = () => {
     navigate(backUrl);
@@ -251,12 +242,12 @@ export function CampaignDetailPage() {
 
   let daysRemaining: number | null = null;
   if (campaign.endDate) {
-    const ms = new Date(campaign.endDate).getTime() - Date.now();
+    const ms = new Date(campaign.endDate).getTime() - now;
     daysRemaining = Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
   }
 
 
-  const isExpired = !!campaign.endDate && new Date(campaign.endDate).getTime() <= Date.now();
+  const isExpired = !!campaign.endDate && new Date(campaign.endDate).getTime() <= now;
   const isHistorical = campaign.status === 'completed' || campaign.status === 'failed';
   const isFundedOrCompleted =
     campaign.status === 'funded' ||
@@ -373,7 +364,7 @@ export function CampaignDetailPage() {
           </div>
 
           {/* DonaTok pitch button */}
-          {(campaign as any).videoUrl && (campaign as any).videoUrl.trim() !== '' && (
+          {campaign.videoUrl && campaign.videoUrl.trim() !== '' && (
             <button
               onClick={() => setShowPitch(p => !p)}
               className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-black text-[9px] sm:text-[12px] uppercase tracking-widest transition-all active:scale-95 hover:brightness-110"
@@ -405,7 +396,7 @@ export function CampaignDetailPage() {
         </div>
 
         {/* ── Inline Video Pitch Player ── */}
-        {showPitch && (campaign as any).videoUrl && (
+        {showPitch && campaign.videoUrl && (
           <div
             className="mb-10 rounded-[28px] overflow-hidden shadow-2xl"
             style={{
@@ -417,7 +408,7 @@ export function CampaignDetailPage() {
             }}
           >
             <PitchVideoPlayer
-              videoUrl={(campaign as any).videoUrl}
+              videoUrl={campaign.videoUrl}
               isActive={showPitch}
             />
           </div>
@@ -465,7 +456,7 @@ export function CampaignDetailPage() {
             <div id="campaign-tabs-navigation" className="flex items-center gap-2 border-b border-slate-200/80 mb-6 overflow-x-auto scrollbar-none pb-1">
               <button
                 onClick={() => {
-                  setActiveTab('historia');
+
                   setSearchParams({ tab: 'historia' });
                 }}
                 className={`flex items-center gap-2 py-3 px-4 rounded-xl text-[12px] sm:text-[13px] font-black uppercase tracking-wider transition-all border-none cursor-pointer shrink-0 ${
@@ -480,7 +471,7 @@ export function CampaignDetailPage() {
 
               <button
                 onClick={() => {
-                  setActiveTab('transparencia');
+
                   setSearchParams({ tab: 'transparencia' });
                 }}
                 className={`flex items-center gap-2 py-3 px-4 rounded-xl text-[12px] sm:text-[13px] font-black uppercase tracking-wider transition-all border-none cursor-pointer shrink-0 ${
@@ -498,7 +489,7 @@ export function CampaignDetailPage() {
 
               <button
                 onClick={() => {
-                  setActiveTab('actualizaciones');
+
                   setSearchParams({ tab: 'actualizaciones' });
                 }}
                 className={`flex items-center gap-2 py-3 px-4 rounded-xl text-[12px] sm:text-[13px] font-black uppercase tracking-wider transition-all border-none cursor-pointer shrink-0 ${
@@ -518,7 +509,7 @@ export function CampaignDetailPage() {
 
               <button
                 onClick={() => {
-                  setActiveTab('comentarios');
+
                   setSearchParams({ tab: 'comentarios' });
                 }}
                 className={`flex items-center gap-2 py-3 px-4 rounded-xl text-[12px] sm:text-[13px] font-black uppercase tracking-wider transition-all border-none cursor-pointer shrink-0 ${
@@ -570,7 +561,7 @@ export function CampaignDetailPage() {
                   </div>
                   <button
                     onClick={() => {
-                      setActiveTab('transparencia');
+
                       setSearchParams({ tab: 'transparencia' });
                       const el = document.getElementById('campaign-tabs-navigation');
                       if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -680,8 +671,8 @@ export function CampaignDetailPage() {
                   createdAt={campaign.createdAt}
                   entrepreneurName={campaign.entrepreneurName}
                   entrepreneurAvatar={campaign.entrepreneurAvatar}
-                  customBudgetPlan={(campaign as any).metadata?.budget_plan || (campaign as any).metadata?.use_of_funds}
-                  customMilestones={(campaign as any).metadata?.milestones}
+                  customBudgetPlan={campaign.metadata?.budget_plan || campaign.metadata?.use_of_funds}
+                  customMilestones={campaign.metadata?.milestones}
                 />
               </div>
             )}
@@ -693,7 +684,7 @@ export function CampaignDetailPage() {
                   goalAmount={campaign.goalAmount}
                   currentAmount={campaign.currentAmount}
                   currency={campaign.currency}
-                  customMilestones={(campaign as any).metadata?.milestones}
+                  customMilestones={campaign.metadata?.milestones}
                 />
                 <CampaignUpdatesTimeline
                   updates={publicUpdates}
@@ -777,7 +768,7 @@ export function CampaignDetailPage() {
                 {/* ── Transparency Shortcut Button ── */}
                 <button
                   onClick={() => {
-                    setActiveTab('transparencia');
+
                     setSearchParams({ tab: 'transparencia' });
                     const el = document.getElementById('campaign-tabs-navigation');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -1076,7 +1067,7 @@ export function CampaignDetailPage() {
               const rcCover = getImageUrl(rc.coverImageUrl);
               let rcDays: number | null = null;
               if (rc.endDate) {
-                const ms = new Date(rc.endDate).getTime() - Date.now();
+                const ms = new Date(rc.endDate).getTime() - now;
                 rcDays = Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
               }
 
@@ -1190,14 +1181,14 @@ export function CampaignDetailPage() {
                 amount: parseFloat(customAmount),
                 rewardTierId: selectedTierId || undefined,
               });
-              const invId = (res as any)?.ticket?.id || (res as any)?.id || null;
+              const invId = res?.ticket?.id || res?.id || null;
               if (invId) setLastInvestmentId(invId);
               setShowConfirmModal(false);
               setInvestmentSuccess(true);
               // Recargar datos de la campaña en tiempo real
               refetch();
-            } catch (err: any) {
-              const msg = err?.response?.data?.message || 'Error al procesar la inversión. Intenta nuevamente.';
+            } catch (err: unknown) {
+              const msg = getApiErrorMessage(err, '') || 'Error al procesar la inversión. Intenta nuevamente.';
               setInvestmentError(typeof msg === 'string' ? msg : msg[0] || 'Error desconocido.');
               setShowConfirmModal(false);
               refetch();

@@ -1,13 +1,6 @@
-﻿import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import type { QueryCampaignsDto, CampaignFilterPreset } from '../types/campaign.types';
-import { 
-  Search, 
-  SlidersHorizontal, 
-  ChevronDown, 
-  ChevronUp, 
-  Zap, 
-  MoveRight 
-} from 'lucide-react';
+import { Search, SlidersHorizontal, ChevronDown, ChevronUp, Zap, MoveRight } from 'lucide-react';
 
 const PRESETS: {
   id: CampaignFilterPreset;
@@ -52,7 +45,7 @@ export function CampaignFilters({ query, onChange }: Props) {
   const [searchDraft, setSearchDraft] = useState(query.search ?? '');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+  useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
 
   const presetActive = query.filterPreset ?? 'all';
   const sortSelectValue = sortKeyFromQuery(query);
@@ -75,9 +68,11 @@ export function CampaignFilters({ query, onChange }: Props) {
     );
   }, [presetActive, query.search, hasExtraFilters, sortSelectValue]);
 
-  useEffect(() => {
+  const [sourceSearch, setSourceSearch] = useState(query.search);
+  if (sourceSearch !== query.search) {
+    setSourceSearch(query.search);
     setSearchDraft(query.search ?? '');
-  }, [query.search]);
+  }
 
   useEffect(() => {
     const t = window.setTimeout(() => {

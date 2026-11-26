@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { getApiErrorMessage } from '../utils/apiError.ts';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { submitKycDocuments } from '../api/entrepreneur.api';
 import type { EntrepreneurProfile } from '../types/entrepreneur.types';
 import { InfoHint } from './InfoHint';
@@ -13,9 +14,12 @@ export function KYCUploadModal({ onClose, onSuccess }: KYCUploadModalProps) {
   const [step, setStep] = useState(1);
   const [idDocument, setIdDocument] = useState<File | null>(null);
   const [faceVideo, setFaceVideo] = useState<File | null>(null);
-  const [cameraError, setCameraError] = useState('');
-  const [isStartingCamera, setIsStartingCamera] = useState(false);
-  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [cameraAttempt, setCameraAttempt] = useState(0);
+  const cameraKey = useMemo(() => ({step, faceVideo, cameraAttempt}), [step, faceVideo, cameraAttempt]);
+  const [cameraState, setCameraState] = useState<{key: typeof cameraKey; active: boolean; error: string} | null>(null);
+  const isStartingCamera = step === 2 && !faceVideo && cameraState?.key !== cameraKey;
+  const isCameraActive = step === 2 && !faceVideo && cameraState?.key === cameraKey && cameraState.active;
+  const cameraError = cameraState?.key === cameraKey ? cameraState.error : '';
   const [capturedPreview, setCapturedPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -28,36 +32,28 @@ export function KYCUploadModal({ onClose, onSuccess }: KYCUploadModalProps) {
   const streamRef = useRef<MediaStream | null>(null);
 
   const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-    setIsCameraActive(false);
+    streamRef.current?.getTracks().forEach(track => track.stop());
+    streamRef.current = null;
   };
-
-  const startCamera = async () => {
-    try {
-      setIsStartingCamera(true);
-      setCameraError('');
-      stopCamera();
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-      setIsCameraActive(true);
-    } catch {
-      setCameraError('No se pudo acceder a la cámara. Verifica permisos del navegador.');
-    } finally {
-      setIsStartingCamera(false);
-    }
-  };
-
+  const startCamera = () => setCameraAttempt(value => value + 1);
   useEffect(() => {
-    if (step === 2 && !faceVideo) startCamera();
-    return () => stopCamera();
-  }, [step]);
+    if(step !== 2 || faceVideo) return;
+    let active = true;
+    let openedStream: MediaStream | null = null;
+    const request = navigator.mediaDevices?.getUserMedia?.({video:{facingMode:'user'},audio:false})
+      ?? Promise.reject(new Error('Camera API unavailable'));
+    request.then(async stream => {
+      openedStream = stream;
+      if(!active) {stream.getTracks().forEach(track => track.stop()); return;}
+      streamRef.current = stream;
+      if(videoRef.current) {videoRef.current.srcObject = stream; await videoRef.current.play();}
+      if(active) setCameraState({key:cameraKey,active:true,error:''});
+    }).catch(() => {
+      openedStream?.getTracks().forEach(track => track.stop());
+      if(active) setCameraState({key:cameraKey,active:false,error:'No se pudo acceder a la cámara. Verifica permisos del navegador.'});
+    });
+    return () => {active=false; openedStream?.getTracks().forEach(track => track.stop()); streamRef.current=null;};
+  }, [step, faceVideo, cameraKey]);
 
   const captureFromCamera = () => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -85,8 +81,8 @@ export function KYCUploadModal({ onClose, onSuccess }: KYCUploadModalProps) {
       setError('');
       const updatedProfile = await submitKycDocuments(idDocument, faceVideo);
       onSuccess(updatedProfile);
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Error al enviar documentos KYC.');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, '') || 'Error al enviar documentos KYC.');
     } finally {
       setIsSubmitting(false);
     }

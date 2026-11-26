@@ -1,17 +1,13 @@
 import type { InvestorProfile } from '../../types/investor.types';
-import { 
-  MapPin, 
-  FileText, 
-  Link2, 
-  Home, 
-  Globe, 
-  Scale, 
-  Pencil, 
+import {
+  MapPin,
+  FileText,
+  Link2,
+  Home,
+  Globe,
+  Pencil,
   ChevronRight,
-  ShieldCheck,
-  ShieldAlert,
   Shield,
-  Target,
   TrendingUp,
 } from 'lucide-react';
 
@@ -30,7 +26,7 @@ const INVESTOR_TYPE_LABELS: Record<string, string> = {
   angel: 'Ángel',
 };
 
-export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile: _onDeleteProfile }: Props) {
+export function ProfileSidebar({profile, openModal, userEmail}: Props) {
   const fields = [
     { label: 'Información básica', value: profile?.firstName && profile?.lastName && profile?.bio, modal: 'profile' },
     { label: 'Datos fiscales', value: profile?.taxId, modal: 'fiscal' },
@@ -68,7 +64,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile:
           {nextStep && (
             <button 
               className="mt-5 w-full text-center py-3 text-[13px] text-[#72B626] font-black bg-[#f0f9e0] border border-gray-100 rounded-xl hover:bg-[#72B626] hover:text-white transition-all flex items-center justify-center gap-2 group/btn relative z-10 cursor-pointer" 
-              onClick={() => openModal(nextStep.modal as any)}
+              onClick={() => openModal(nextStep.modal as ModalType)}
             >
               Siguiente: {nextStep.label}
               <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" strokeWidth={3} />

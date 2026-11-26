@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
+import type { CreateEntrepreneurProfileDto } from '../../types/entrepreneur.types';
+import { useState } from 'react';
 import type { EntrepreneurProfile } from '../../types/entrepreneur.types';
-import { 
-  Lightbulb, 
-  Lock, 
-  Image as ImageIcon, 
-  User, 
-  X, 
-  Check, 
+import {
+  Lightbulb,
+  Lock,
+  Image as ImageIcon,
+  User,
+  X,
+  Check,
   Loader2,
-  ChevronDown
+  ChevronDown,
 } from 'lucide-react';
 
 type ModalType = 'profile' | 'personal' | 'company' | 'address' | 'banking' | 'avatar' | 'new-campaign' | null;
@@ -17,7 +18,7 @@ interface Props {
   type: ModalType;
   profile: EntrepreneurProfile | null;
   onClose: () => void;
-  onSave: (section: string, data: any, file?: File) => Promise<void>;
+  onSave: (section: string, data: Partial<CreateEntrepreneurProfileDto> & Partial<import('../../types/campaign.types').CreateCampaignDto> & {duration?: string}, file?: File) => Promise<void>;
   saving: boolean;
 }
 
@@ -42,22 +43,25 @@ const BOLIVIAN_BANKS = [
 ];
 
 export function EditProfileModal({ type, profile, onClose, onSave, saving }: Props) {
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<Partial<CreateEntrepreneurProfileDto> & Partial<import('../../types/campaign.types').CreateCampaignDto> & {duration?: string}>(() => profile && type ? Object.fromEntries(Object.entries(profile).filter(([, value]) => value !== null)) as Partial<CreateEntrepreneurProfileDto> & Partial<import('../../types/campaign.types').CreateCampaignDto> & {duration?: string} : {});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
-  useEffect(() => {
+  const [source, setSource] = useState({profile, type});
+  if (source.profile !== profile || source.type !== type) {
+    setSource({profile, type});
     setErrors({});
     setCoverFile(null);
     setCoverPreview(null);
     if (profile && type) {
-      setFormData({ ...profile });
+      setFormData(Object.fromEntries(Object.entries(profile).filter(([, value]) => value !== null)) as Partial<CreateEntrepreneurProfileDto> & Partial<import('../../types/campaign.types').CreateCampaignDto> & {duration?: string});
     } else {
       setFormData({});
     }
-  }, [profile, type]);
+
+  }
 
   if (!type) {
     return null;
@@ -150,14 +154,7 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
   };
 
   // Wrapper for Select to include icon
-  const SelectWrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="relative">
-      {children}
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-        <ChevronDown size={18} strokeWidth={2.5} />
-      </div>
-    </div>
-  );
+
 
   let modalTitle = '';
   let modalContent: React.ReactNode = null;
@@ -435,3 +432,12 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
     </div>
   );
 }
+
+const SelectWrapper = ({ children }: { children: React.ReactNode }) => (
+    <div className="relative">
+      {children}
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+        <ChevronDown size={18} strokeWidth={2.5} />
+      </div>
+    </div>
+  );

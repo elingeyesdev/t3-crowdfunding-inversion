@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useAsyncResource } from './useAsyncResource.ts';
+import { getApiErrorMessage, getApiErrorStatus } from '../utils/apiError.ts';
+import { useState, useCallback } from 'react';
 import {
   getMyInvestorProfile,
   createInvestorProfile,
@@ -7,10 +9,7 @@ import {
   uploadInvestorAvatar,
   uploadInvestorCover,
 } from '../api/investor.api';
-import type {
-  InvestorProfile,
-  CreateInvestorProfileDto,
-} from '../types/investor.types';
+import type { InvestorProfile, CreateInvestorProfileDto } from '../types/investor.types';
 
 interface UseInvestorProfileReturn {
   profile: InvestorProfile | null;
@@ -27,32 +26,20 @@ interface UseInvestorProfileReturn {
 }
 
 export function useInvestorProfile(): UseInvestorProfileReturn {
-  const [profile, setProfile] = useState<InvestorProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const resource = useAsyncResource(loadProfile);
+  const {setData} = resource;
+  const profile = resource.data?.profile ?? null;
+  const setProfile = useCallback((profile: InvestorProfile | null) => setData({profile}), [setData]);
+  const loading = resource.loading;
+  const isNewProfile = !loading && !resource.error && !profile;
+  const fetchProfile = resource.refetch;
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [isNewProfile, setIsNewProfile] = useState(false);
 
-  const fetchProfile = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getMyInvestorProfile();
-      setProfile(data);
-      setIsNewProfile(false);
-    } catch (err: any) {
-      // 404 = no tiene perfil aún → modo creación
-      if (err?.response?.status === 404) {
-        setProfile(null);
-        setIsNewProfile(true);
-      } else {
-        setError('Error al cargar el perfil. Verifica que el servidor esté activo.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+
+
 
   const submitProfile = useCallback(
     async (dto: CreateInvestorProfileDto) => {
@@ -71,14 +58,14 @@ export function useInvestorProfile(): UseInvestorProfileReturn {
           setSuccessMessage('¡Perfil actualizado exitosamente!');
         }
         setProfile(saved);
-        setIsNewProfile(false);
-      } catch (err: any) {
-        if (err?.response?.status === 409) {
+
+      } catch (err: unknown) {
+        if (getApiErrorStatus(err) === 409) {
           setError('El nombre público ya está en uso por otro donador. Prueba con uno diferente.');
           return;
         }
         const msg =
-          err?.response?.data?.message ||
+          getApiErrorMessage(err, '') ||
           'Error al guardar el perfil. Intenta de nuevo.';
         setError(Array.isArray(msg) ? msg.join(', ') : msg);
       } finally {
@@ -87,7 +74,7 @@ export function useInvestorProfile(): UseInvestorProfileReturn {
         setTimeout(() => setSuccessMessage(null), 4000);
       }
     },
-    [profile],
+    [profile, setProfile],
   );
 
   const uploadAvatarPhoto = useCallback(async (file: File) => {
@@ -97,13 +84,13 @@ export function useInvestorProfile(): UseInvestorProfileReturn {
       const updated = await uploadInvestorAvatar(file);
       setProfile(updated);
       setSuccessMessage('Foto de perfil actualizada exitosamente.');
-    } catch (err: any) {
+    } catch {
       setError('Error al subir la foto de perfil.');
     } finally {
       setSaving(false);
       setTimeout(() => setSuccessMessage(null), 4000);
     }
-  }, []);
+  }, [setProfile]);
 
   const uploadCoverPhoto = useCallback(async (file: File) => {
     setSaving(true);
@@ -112,13 +99,13 @@ export function useInvestorProfile(): UseInvestorProfileReturn {
       const updated = await uploadInvestorCover(file);
       setProfile(updated);
       setSuccessMessage('Foto de portada actualizada exitosamente.');
-    } catch (err: any) {
+    } catch {
       setError('Error al subir la foto de portada.');
     } finally {
       setSaving(false);
       setTimeout(() => setSuccessMessage(null), 4000);
     }
-  }, []);
+  }, [setProfile]);
 
   const deleteProfile = useCallback(async () => {
     setSaving(true);
@@ -127,30 +114,28 @@ export function useInvestorProfile(): UseInvestorProfileReturn {
     try {
       await deleteInvestorProfile();
       setProfile(null);
-      setIsNewProfile(true);
+
       setSuccessMessage(
         'Perfil de donador eliminado. Tu cuenta sigue activa; puedes registrar un perfil nuevo cuando quieras.',
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg =
-        err?.response?.data?.message ||
+        getApiErrorMessage(err, '') ||
         'No se pudo eliminar el perfil. ¿Tienes donaciones registradas?';
       setError(Array.isArray(msg) ? msg.join(', ') : String(msg));
     } finally {
       setSaving(false);
       setTimeout(() => setSuccessMessage(null), 6000);
     }
-  }, []);
+  }, [setProfile]);
 
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+
 
   return {
     profile,
     loading,
     saving,
-    error,
+    error: error ?? (resource.error ? 'Error al cargar el perfil. Verifica que el servidor esté activo.' : null),
     successMessage,
     isNewProfile,
     fetchProfile,
@@ -159,4 +144,9 @@ export function useInvestorProfile(): UseInvestorProfileReturn {
     uploadCoverPhoto,
     deleteProfile,
   };
+}
+
+async function loadProfile(): Promise<{profile: InvestorProfile | null}> {
+  try { return {profile: await getMyInvestorProfile()}; }
+  catch(error) { if (getApiErrorStatus(error) === 404) return {profile: null}; throw error; }
 }

@@ -1,9 +1,26 @@
+import { useClock } from '../hooks/useClock.ts';
 import { useState } from 'react';
 import type { EntrepreneurCampaign } from '../types/campaign.types';
-import { formatCampaignCurrency, computeFundingPercent, clampPercentForBar } from '../utils/campaignFunding';
 import {
-  Eye, Send, Rocket, Trash2, CheckCircle2, Users, Calendar, TrendingUp,
-  AlertTriangle, X, ChevronRight, MoreHorizontal, Flag, Share2
+  formatCampaignCurrency,
+  computeFundingPercent,
+  clampPercentForBar,
+} from '../utils/campaignFunding';
+import {
+  Eye,
+  Send,
+  Rocket,
+  Trash2,
+  CheckCircle2,
+  Users,
+  Calendar,
+  TrendingUp,
+  AlertTriangle,
+  X,
+  ChevronRight,
+  MoreHorizontal,
+  Flag,
+  Share2,
 } from 'lucide-react';
 import { ShareModal } from './ShareModal';
 import { campaignStatusLabel } from '../utils/campaignStatus';
@@ -45,6 +62,7 @@ export function CampaignCard({
   onPublishUpdate,
   actionCampaignId,
 }: Props) {
+  const now = useClock();
   const busy = actionCampaignId === campaign.id;
   const [showFinalizeConfirm, setShowFinalizeConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -63,7 +81,7 @@ export function CampaignCard({
 
   let daysLeft: number | null = null;
   if (campaign.endDate) {
-    const ms = new Date(campaign.endDate).getTime() - Date.now();
+    const ms = new Date(campaign.endDate).getTime() - now;
     daysLeft = Math.max(0, Math.ceil(ms / 86_400_000));
   }
 

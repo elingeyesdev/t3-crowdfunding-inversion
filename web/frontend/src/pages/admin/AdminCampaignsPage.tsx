@@ -1,20 +1,20 @@
-import { CAMPAIGN_FILTERS, campaignStatusLabel, matchesCampaignGroup } from '../../utils/campaignStatus';
-import { useState, useEffect } from 'react';
+import { useAsyncResource } from '../../hooks/useAsyncResource.ts';
+import { useCallback } from 'react';
+import type { CampaignStatus } from '../../types/campaign.types';
+import {
+  CAMPAIGN_FILTERS,
+  campaignStatusLabel,
+  matchesCampaignGroup,
+} from '../../utils/campaignStatus';
+import { useState } from 'react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { getAllCampaigns, hardDeleteCampaign, getCampaignDetail } from '../../api/admin.api';
-import type { SystemCampaign, PendingCampaignDetail } from '../../types/admin.types';
+import type { PendingCampaignDetail } from '../../types/admin.types';
 import { CampaignPreviewModal } from '../../components/CampaignPreviewModal';
-import { 
-  Rocket, 
-  Search, 
-  Trash2, 
-  Eye, 
-  AlertTriangle
-} from 'lucide-react';
+import { Rocket, Search, Trash2, Eye, AlertTriangle } from 'lucide-react';
 
 export function AdminCampaignsPage() {
-  const [campaigns, setCampaigns] = useState<SystemCampaign[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [actionLoading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedDetail, setSelectedDetail] = useState<PendingCampaignDetail | null>(null);
@@ -28,23 +28,11 @@ export function AdminCampaignsPage() {
     campaignTitle: string;
   } | null>(null);
 
-  useEffect(() => {
-    loadCampaigns();
-  }, []);
-
-  const loadCampaigns = async () => {
-    try {
-      setLoading(true);
-      const data = await getAllCampaigns();
-      // Sort by creation date descending
-      const sorted = [...data].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      setCampaigns(sorted);
-    } catch (error) {
-      console.error('Error loading campaigns:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const load = useCallback(async () => [...await getAllCampaigns()].sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()), []);
+  const resource = useAsyncResource(load);
+  const campaigns = resource.data ?? [];
+  const loading = resource.loading || actionLoading;
+  const loadCampaigns = resource.refetch;
 
   const handlePreviewClick = async (id: string) => {
     try {
@@ -277,12 +265,12 @@ export function AdminCampaignsPage() {
             campaign={{
               id: selectedDetail.id,
               title: selectedDetail.title,
-              slug: selectedDetail.slug || (selectedDetail as any).id,
+              slug: selectedDetail.slug || selectedDetail.id,
               shortDescription: selectedDetail.short_description || '',
               description: selectedDetail.description || '',
               location: selectedDetail.location || 'Global',
               campaignType: selectedDetail.campaign_type,
-              status: selectedDetail.status as any,
+              status: selectedDetail.status as CampaignStatus,
               goalAmount: parseFloat(selectedDetail.goal_amount || '0'),
               currentAmount: selectedDetail.current_amount || 0,
               investorCount: selectedDetail.investor_count || 0,

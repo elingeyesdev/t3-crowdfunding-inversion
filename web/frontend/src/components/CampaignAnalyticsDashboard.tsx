@@ -9,7 +9,7 @@ import {
   Tooltip as RechartsTooltip,
   PieChart,
   Pie,
-  Cell
+  Cell,
 } from 'recharts';
 import {
   TrendingUp,
@@ -18,7 +18,7 @@ import {
   PieChart as PieIcon,
   ShieldCheck,
   Zap,
-  CheckCircle2
+  CheckCircle2,
 } from 'lucide-react';
 import type { CampaignFinancialProgress } from '../types/campaign.types';
 import { formatCampaignCurrency } from '../utils/campaignFunding';
@@ -228,7 +228,7 @@ function CampaignAnalyticsContent({ finance, startDate, createdAt }: Props & { f
                     color: '#fff',
                     fontFamily: "'Plus Jakarta Sans', sans-serif"
                   }}
-                  formatter={(value: any) => [`Bs. ${value.toLocaleString('es-BO')}`, 'Total Acumulado']}
+                  formatter={(value) => [`Bs. ${(value ?? 0).toLocaleString('es-BO')}`, 'Total Acumulado']}
                   labelStyle={{ fontWeight: 900, color: '#10b981', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.1em' }}
                 />
                 <Area
@@ -284,8 +284,8 @@ function CampaignAnalyticsContent({ finance, startDate, createdAt }: Props & { f
                     color: '#fff',
                     fontFamily: "'Plus Jakarta Sans', sans-serif"
                   }}
-                  formatter={(value: any) => [
-                    `Bs. ${value.toLocaleString('es-BO')}`,
+                  formatter={(value) => [
+                    `Bs. ${(value ?? 0).toLocaleString('es-BO')}`,
                     'Valor'
                   ]}
                 />

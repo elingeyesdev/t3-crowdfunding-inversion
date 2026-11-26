@@ -1,45 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useAsyncResource } from '../../hooks/useAsyncResource.ts';
+
+import { getApiErrorMessage, getApiErrorStatus } from '../../utils/apiError.ts';
+import { useState } from 'react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { getAllAdmins, createAdmin, deleteAdmin } from '../../api/admin.api';
-import type { AdminUser } from '../../types/admin.types';
-import { 
-  ShieldCheck, 
-  ShieldAlert, 
-  Mail, 
-  Lock 
-} from 'lucide-react';
+
+import { ShieldCheck, ShieldAlert, Mail, Lock } from 'lucide-react';
 
 export function SuperAdminDashboardPage() {
-  const [admins, setAdmins] = useState<AdminUser[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+
+  const [error, ] = useState<string | null>(null);
   const [creds, setCreds] = useState({ email: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getAllAdmins();
-      setAdmins(data);
-    } catch (e: any) {
-      if (e.response?.status === 401) {
-        setError('Acceso denegado. Se requieren permisos de Super Administrador.');
-      } else {
-        console.error('Error loading admin list:', e);
-        setError('Error al cargar la lista de administradores.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
+  const resource = useAsyncResource(getAllAdmins);
+  const admins = resource.data ?? [];
+  const loading = resource.loading;
+  const loadData = resource.refetch;
+  const visibleError =
+    error ??
+    (resource.error
+      ? getApiErrorStatus(resource.error) === 401
+        ? 'Acceso denegado. Se requieren permisos de superadministrador.'
+        : 'Error al cargar administradores.'
+      : null);
   const handleDelete = async (id: string, email: string) => {
     if (!window.confirm(`ESTAS A PUNTO DE ELIMINAR LOS PERMISOS DE: ${email}\n\n¿Deseas continuar? Pasará a ser un usuario común.`)) return;
     try {
@@ -60,9 +47,9 @@ export function SuperAdminDashboardPage() {
       setCreds({ email: '', password: '' });
       setSubmitSuccess('Administrador creado con éxito.');
       await loadData();
-    } catch(err: any) {
+    } catch(err: unknown) {
       console.error(err);
-      const apiMsg = err.response?.data?.message;
+      const apiMsg = getApiErrorMessage(err, '');
       const formattedMsg = Array.isArray(apiMsg) ? apiMsg.join(', ') : apiMsg;
       setSubmitError(formattedMsg || 'Error al intentar crear el administrador.');
     } finally {
@@ -88,7 +75,7 @@ export function SuperAdminDashboardPage() {
             <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-2">
               <ShieldAlert size={32} />
             </div>
-            <h2 className="text-xl font-bold text-gray-800">{error}</h2>
+            <h2 className="text-xl font-bold text-gray-800">{visibleError}</h2>
             <p className="text-gray-500 font-medium">Esta sección es de acceso restringido.</p>
             <button 
               onClick={() => window.location.href = '/login'}

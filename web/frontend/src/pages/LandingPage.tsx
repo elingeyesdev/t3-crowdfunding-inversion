@@ -1,3 +1,5 @@
+import { useAsyncResource } from '../hooks/useAsyncResource.ts';
+import { useClock } from '../hooks/useClock.ts';
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
@@ -12,11 +14,26 @@ import { Footer } from '../components/Footer';
 import { getImageUrl } from '../utils/image.utils';
 import type { Category } from '../types/category.types';
 import {
-  Rocket, Search, Heart, Gem, TrendingUp, Users, Target, Calendar,
-  Shield, ChevronRight, ArrowRight, LayoutGrid,
-  CheckCircle2, Globe, Lock, Flame,
-  Play, Share2,
-  ChevronUp, ChevronDown,
+  Rocket,
+  Search,
+  Heart,
+  Gem,
+  TrendingUp,
+  Users,
+  Target,
+  Calendar,
+  Shield,
+  ChevronRight,
+  ArrowRight,
+  LayoutGrid,
+  CheckCircle2,
+  Globe,
+  Lock,
+  Flame,
+  Play,
+  Share2,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 
 // ─── Brand ───────────────────────────────────────────────────────────────────
@@ -173,6 +190,7 @@ function HeroSection({ totalCampaigns, campaigns, loading }: { totalCampaigns: n
 
 
 function CampaignCard({ campaign }: { campaign: PublicCampaign }) {
+  const now = useClock();
   const navigate = useNavigate();
   const progress = campaign.goalAmount > 0
     ? Math.min(Math.round((campaign.currentAmount / campaign.goalAmount) * 100), 100)
@@ -182,7 +200,7 @@ function CampaignCard({ campaign }: { campaign: PublicCampaign }) {
   const TypeIcon = typeInfo.icon;
   let daysLeft: number | null = null;
   if (campaign.endDate) {
-    const ms = new Date(campaign.endDate).getTime() - Date.now();
+    const ms = new Date(campaign.endDate).getTime() - now;
     daysLeft = Math.max(0, Math.ceil(ms / 86_400_000));
   }
 
@@ -776,30 +794,15 @@ function CTABanner() {
 
 // ─── Main LandingPage ─────────────────────────────────────────────────────────
 export function LandingPage() {
-  const [featuredCampaigns, setFeaturedCampaigns] = useState<PublicCampaign[]>([]);
-  const [campaignsLoading, setCampaignsLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [totalCampaigns, setTotalCampaigns] = useState<number | null>(null);
-  const [campaignsError, setCampaignsError] = useState(false);
-
-  const loadCampaigns = useCallback(async () => {
-    setCampaignsLoading(true);
-    setCampaignsError(false);
-    setTotalCampaigns(null);
-    setFeaturedCampaigns([]);
-    try {
-      const res = await fetchPublicCampaigns({ limit: 8, sortBy: 'current_amount', sortOrder: 'DESC' });
-      setFeaturedCampaigns(res.data);
-      const total = res.meta.totalItems;
-      setTotalCampaigns(Number.isSafeInteger(total) && total >= 0 ? total : null);
-    } catch {
-      setCampaignsError(true);
-    } finally {
-      setCampaignsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { void loadCampaigns(); }, [loadCampaigns]);
+  const load = useCallback(() => fetchPublicCampaigns({limit:8,sortBy:'current_amount',sortOrder:'DESC'}), []);
+  const resource = useAsyncResource(load);
+  const featuredCampaigns = resource.loading ? [] : resource.data?.data ?? [];
+  const campaignsLoading = resource.loading;
+  const campaignsError = !!resource.error;
+  const total = resource.loading ? undefined : resource.data?.meta.totalItems;
+  const totalCampaigns = total !== undefined && Number.isSafeInteger(total) && total >= 0 ? total : null;
+  const loadCampaigns = resource.retry;
   useEffect(() => { getCategories().then(setCategories).catch(() => { }); }, []);
 
   return (

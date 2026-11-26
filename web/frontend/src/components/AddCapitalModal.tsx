@@ -1,11 +1,12 @@
+import { getApiErrorMessage } from '../utils/apiError.ts';
 import { useState } from 'react';
 import { addCapital } from '../api/investor.api';
-import { 
-  X, 
-  TrendingUp, 
-  DollarSign, 
-  StickyNote, 
-  CheckCircle2, 
+import {
+  X,
+  TrendingUp,
+  DollarSign,
+  StickyNote,
+  CheckCircle2,
   AlertCircle,
   Loader2,
   ArrowUpCircle,
@@ -59,8 +60,8 @@ export function AddCapitalModal({ isOpen, onClose, onSuccess, currentAvailable, 
         onSuccess();
         onClose();
       }, 2200);
-    } catch (err: any) {
-      const msg = err.response?.data?.message || 'Error al procesar la solicitud.';
+    } catch (err: unknown) {
+      const msg = getApiErrorMessage(err, '') || 'Error al procesar la solicitud.';
       setError(Array.isArray(msg) ? msg[0] : msg);
     } finally {
       setLoading(false);

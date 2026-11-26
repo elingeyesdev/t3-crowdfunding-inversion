@@ -1,15 +1,10 @@
-﻿import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { ConversationsSidebar } from '../components/chat/ConversationsSidebar';
 import { ChatWindow } from '../components/chat/ChatWindow';
 import { useChat } from '../hooks/useChat';
-import {
-  getMyConversations,
-  markAsRead,
-  type Conversation,
-  type Message,
-} from '../api/chat.api';
+import { getMyConversations, markAsRead, type Conversation, type Message } from '../api/chat.api';
 import { MessageCircle } from 'lucide-react';
 
 export function ChatPage() {
@@ -17,7 +12,7 @@ export function ChatPage() {
   const { conversationId } = useParams<{ conversationId?: string }>();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loadingConvs, setLoadingConvs] = useState(true);
-  const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
+  const activeConversation = conversations.find(conversation => conversation.id === conversationId) ?? null;
   const [search, setSearch] = useState('');
   const [showSidebar, setShowSidebar] = useState(true);
   const [syncError, setSyncError] = useState<string | null>(null);
@@ -46,7 +41,7 @@ export function ChatPage() {
             new Date(b.lastMessageAt ?? 0).getTime() - new Date(a.lastMessageAt ?? 0).getTime()));
           // Apply current campaign permissions to the open window too, even
           // when its conversation ID has not changed.
-          setActiveConversation(current => current ? convs.find(conv => conv.id === current.id) ?? null : null);
+
           setSyncError(null);
         } while (syncRequested.current && mounted.current);
       } catch {
@@ -65,35 +60,12 @@ export function ChatPage() {
     return () => { mounted.current = false; };
   }, [loadConversations]);
 
-  // Synchronize URL conversationId with activeConversation state
-  useEffect(() => {
-    if (loadingConvs) return;
-
-    if (conversationId) {
-      const found = conversations.find((c) => c.id === conversationId);
-      if (found) {
-        if (activeConversation?.id !== found.id) {
-          setActiveConversation(found);
-          setIncomingMessages([]);
-          setShowSidebar(false);
-          // Mark as read locally in sidebar list
-          setConversations((prev) =>
-            prev.map((c) => (c.id === found.id ? { ...c, unreadCount: 0 } : c))
-          );
-        }
-      } else {
-        // If the ID in URL is invalid or not in the user's conversation list, fallback to /chat
-        setActiveConversation(null);
-      }
-    } else {
-      // No conversationId in URL, clear active conversation and show sidebar
-      if (activeConversation) {
-        setActiveConversation(null);
-        setShowSidebar(true);
-      }
-    }
-  }, [conversationId, conversations, loadingConvs, activeConversation]);
-
+  const [previousConversationId, setPreviousConversationId] = useState<string | undefined>(undefined);
+  if(previousConversationId !== conversationId) {
+    setPreviousConversationId(conversationId);
+    setIncomingMessages([]);
+    setShowSidebar(!conversationId);
+  }
   // ── Callback para nuevo mensaje recibido por WS ───────────
   const handleNewMessage = useCallback((msg: Message) => {
     setIncomingMessages(current => [...current, msg]);
@@ -112,7 +84,7 @@ export function ChatPage() {
   }, [loadConversations]);
 
   // ── WebSocket hook ────────────────────────────────────────
-  const { connected, typingUsers, sendMessage, emitTyping, emitMarkAsRead } = useChat({
+  const {connected, typingUsers, sendMessage, emitTyping} = useChat({
     conversationId: activeConversation?.id ?? null,
     onNewMessage: handleNewMessage,
     onConversationUpdated: handleConversationUpdated,

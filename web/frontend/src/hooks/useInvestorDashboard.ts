@@ -1,45 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useAsyncResource } from './useAsyncResource.ts';
 import { getCapitalOverview, getMyInvestments } from '../api/investor.api';
-import type { CapitalOverview } from '../types/investor.types';
-import type { InvestmentHistoryItem } from '../api/investor.api';
-
+import { getApiErrorStatus } from '../utils/apiError.ts';
+async function loadOverview() {
+ const [capital, investments] = await Promise.all([getCapitalOverview(), getMyInvestments()]);
+ return {capital, investments};
+}
 export function useInvestorDashboard() {
-  const [data, setData] = useState<CapitalOverview | null>(null);
-  const [investments, setInvestments] = useState<InvestmentHistoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchOverview = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const [capitalRes, investmentsRes] = await Promise.all([
-        getCapitalOverview(),
-        getMyInvestments(),
-      ]);
-      setData(capitalRes);
-      setInvestments(investmentsRes);
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        // Significa que no ha creado su perfil aún
-        setError('No tienes perfil de donador.');
-      } else {
-        setError('Error al cargar datos financieros.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchOverview();
-  }, []);
-
-  return {
-    data,
-    investments,
-    loading,
-    error,
-    refetch: fetchOverview,
-  };
+ const resource = useAsyncResource(loadOverview);
+ return {data: resource.data?.capital ?? null, investments: resource.data?.investments ?? [], loading: resource.loading, error: resource.error ? getApiErrorStatus(resource.error) === 404 ? 'No tienes perfil de donador.' : 'Error al cargar datos financieros.' : null, refetch: resource.refetch};
 }

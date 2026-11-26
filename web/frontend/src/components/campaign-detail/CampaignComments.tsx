@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useAsyncResource } from '../../hooks/useAsyncResource.ts';
+import { useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ThumbsUp, MessageCircle, Send, Loader2, LogIn } from 'lucide-react';
 import { getImageUrl } from '../../utils/image.utils';
@@ -45,30 +46,18 @@ export function CampaignComments({ campaignId, readOnly = false }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [comments, setComments] = useState<CampaignComment[]>([]);
-  const [loading, setLoading] = useState(true);
+
+
   const [commentText, setCommentText] = useState('');
   const [posting, setPosting] = useState(false);
   const [likingId, setLikingId] = useState<string | null>(null);
 
   const isLoggedIn = !!localStorage.getItem('accessToken');
 
-  const loadComments = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await getComments(campaignId);
-      setComments(data);
-    } catch {
-      // Silent fail — the section simply shows empty
-    } finally {
-      setLoading(false);
-    }
-  }, [campaignId]);
-
-  useEffect(() => {
-    loadComments();
-  }, [loadComments]);
-
+  const load = useCallback(() => getComments(campaignId), [campaignId]);
+  const {data, loading, setData: updateComments} = useAsyncResource(load);
+  const comments = data ?? [];
+  const setComments = (update: (previous: CampaignComment[]) => CampaignComment[]) => updateComments(previous => update(previous ?? []));
   const handlePost = async () => {
     if (readOnly) return;
     if (!isLoggedIn) {

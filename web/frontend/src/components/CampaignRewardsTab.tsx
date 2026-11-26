@@ -1,17 +1,32 @@
-import { useState, useEffect } from 'react';
-import { getRewardTiers, createRewardTier, updateRewardTier, deleteRewardTier, getRewardClaims, getCampaignFinancialProgress, updateRewardClaim } from '../api/campaign.api';
-import { getAdminRewardClaims, getCampaignFinancialProgress as getAdminFinancialProgress } from '../api/admin.api';
-import type { RewardTier, CreateRewardTierDto, UpdateRewardTierDto, RewardClaim, CampaignFinancialProgress } from '../types/campaign.types';
-import { 
-  Gift, 
-  Plus, 
-  Edit2, 
-  Trash2, 
-  Users, 
-  Save, 
+import { useAsyncResource } from '../hooks/useAsyncResource.ts';
+import { useCallback } from 'react';
+import { getApiErrorMessage } from '../utils/apiError.ts';
+import { useState } from 'react';
+import {
+  getRewardTiers,
+  createRewardTier,
+  updateRewardTier,
+  deleteRewardTier,
+  getRewardClaims,
+  updateRewardClaim,
+} from '../api/campaign.api';
+import { getAdminRewardClaims } from '../api/admin.api';
+import type {
+  RewardTier,
+  CreateRewardTierDto,
+  UpdateRewardTierDto,
+  RewardClaim,
+} from '../types/campaign.types';
+import {
+  Gift,
+  Plus,
+  Edit2,
+  Trash2,
+  Users,
+  Save,
   Loader2,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
 } from 'lucide-react';
 import { formatCampaignCurrency } from '../utils/campaignFunding';
 import { rewardTrackingLabel } from '../utils/rewardTracking';
@@ -25,11 +40,6 @@ interface Props {
 }
 
 export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isAdmin = false, canManageClaims = !readOnly }: Props) {
-  const [tiers, setTiers] = useState<RewardTier[]>([]);
-  const [claims, setClaims] = useState<RewardClaim[]>([]);
-  const [_financialProgress, setFinancialProgress] = useState<CampaignFinancialProgress | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const [isEditing, setIsEditing] = useState<string | null>(null); // 'new' for new tier, or tier.id
   const [formData, setFormData] = useState<Partial<UpdateRewardTierDto>>({});
@@ -38,30 +48,22 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
   const [updatingClaimId, setUpdatingClaimId] = useState<string | null>(null);
   const [claimError, setClaimError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, [campaignId]);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const [tiersData, claimsData, progressData] = await Promise.all([
-        getRewardTiers(campaignId),
-        isAdmin ? getAdminRewardClaims(campaignId) : getRewardClaims(campaignId),
-        isAdmin ? getAdminFinancialProgress(campaignId) : getCampaignFinancialProgress(campaignId)
-      ]);
-      setTiers(tiersData);
-      setClaims(claimsData);
-      setFinancialProgress(progressData);
-    } catch (err: any) {
-      console.error(err);
-      setError('Error al cargar la información de recompensas.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  const load = useCallback(async () => {
+    const [tiers, claims] = await Promise.all([getRewardTiers(campaignId), isAdmin ? getAdminRewardClaims(campaignId) : getRewardClaims(campaignId)]);
+    return {tiers, claims};
+  }, [campaignId,isAdmin]);
+  const resource = useAsyncResource(load);
+  const tiers = resource.data?.tiers ?? [];
+  const claims = resource.data?.claims ?? [];
+  const loading = resource.loading;
+  const error = resource.error ? 'Error al cargar la información de recompensas.' : null;
+  const loadData = resource.retry;
+  const setTiers = (tiers: RewardTier[]) => resource.setData(previous => ({tiers, claims: previous?.claims ?? []}));
+  const setClaims = (value: RewardClaim[] | ((previous: RewardClaim[]) => RewardClaim[])) =>
+    resource.setData((previous) => ({
+      tiers: previous?.tiers ?? [],
+      claims: typeof value === 'function' ? value(previous?.claims ?? []) : value,
+    }));
   const handleAddNew = () => {
     setIsEditing('new');
     setFormData({
@@ -71,7 +73,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
       maxPercentage: 10,
       isActive: true,
       items: []
-    } as any);
+    });
   };
 
   const handleEdit = (tier: RewardTier) => {
@@ -83,7 +85,7 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
       maxPercentage: tier.maxPercentage || 100,
       isActive: tier.isActive,
       items: tier.items || []
-    } as any);
+    });
   };
 
   const handleDelete = async (id: string) => {
@@ -91,8 +93,8 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
     try {
       await deleteRewardTier(campaignId, id);
       setTiers(tiers.filter(t => t.id !== id));
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Error al eliminar. Puede que ya tenga reclamos, en ese caso debes desactivarla.');
+    } catch (err: unknown) {
+      alert(getApiErrorMessage(err, '') || 'Error al eliminar. Puede que ya tenga reclamos, en ese caso debes desactivarla.');
     }
   };
 
@@ -112,10 +114,11 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
     try {
       setSubmitting(true);
       
-      const payload: any = { ...formData };
+      const payload = { ...formData };
       
       if (isEditing === 'new') {
-        const { isActive, ...createPayload } = payload;
+        const createPayload = {...payload};
+        delete createPayload.isActive;
         const newTier = await createRewardTier(campaignId, createPayload as CreateRewardTierDto);
         setTiers([...tiers, newTier]);
       } else {
@@ -124,8 +127,8 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
       }
       setIsEditing(null);
       setFormData({});
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Error al guardar el nivel de recompensa.');
+    } catch (err: unknown) {
+      alert(getApiErrorMessage(err, '') || 'Error al guardar el nivel de recompensa.');
     } finally {
       setSubmitting(false);
     }
@@ -400,9 +403,9 @@ export function CampaignRewardsTab({ campaignId, currency, readOnly = false, isA
                                 try {
                                   const updated = await updateRewardClaim(campaignId, claim.claim_id, { status });
                                   setClaims(current => current.map(c => c.claim_id === claim.claim_id ? { ...c, claim_status: updated.status, allowed_statuses: updated.allowedStatuses } : c));
-                                } catch(err: any) {
-                                  const message = err?.response?.data?.message;
-                                  setClaimError(typeof message === 'string' ? message : Array.isArray(message) ? message.join(' ') : 'No se pudo actualizar el estado. Intenta nuevamente.');
+                                } catch(err: unknown) {
+                                  const message = getApiErrorMessage(err, '');
+                                  setClaimError(message || 'No se pudo actualizar el estado. Intenta nuevamente.');
                                   try { setClaims(await getRewardClaims(campaignId)); } catch { /* Keep the last confirmed state if refreshing fails. */ }
                                 } finally {
                                   setUpdatingClaimId(null);

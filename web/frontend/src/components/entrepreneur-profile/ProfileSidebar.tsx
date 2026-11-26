@@ -1,17 +1,16 @@
 import type { EntrepreneurProfile } from '../../types/entrepreneur.types';
-import { 
-  MapPin, 
-  FileText, 
-  Link2, 
-  Building2, 
-  Home, 
-  Globe, 
-  Scale, 
-  Pencil, 
+import {
+  MapPin,
+  FileText,
+  Link2,
+  Building2,
+  Home,
+  Globe,
+  Scale,
+  Pencil,
   ChevronRight,
   ShieldCheck,
   ShieldAlert,
-  Trash2,
 } from 'lucide-react';
 
 type ModalType = 'profile' | 'personal' | 'company' | 'address' | 'banking' | 'avatar' | 'new-campaign' | 'kyc' | null;
@@ -24,7 +23,7 @@ interface Props {
   onDeleteProfile?: () => void | Promise<void>;
 }
 
-export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile }: Props) {
+export function ProfileSidebar({profile, openModal, userEmail}: Props) {
   // Calculate completion percentage based on key fields
   const fields = [
     { label: 'Información básica', value: profile?.firstName && profile?.lastName && profile?.bio, modal: 'profile' },
@@ -63,7 +62,7 @@ export function ProfileSidebar({ profile, openModal, userEmail, onDeleteProfile 
           {nextStep && (
             <button 
               className="mt-5 w-full text-center py-3 text-[13px] text-[#72B626] font-black bg-[#f0f9e0] border border-gray-100 rounded-xl hover:bg-[#72B626] hover:text-white transition-all flex items-center justify-center gap-2 group/btn relative z-10" 
-              onClick={() => openModal(nextStep.modal as any)}
+              onClick={() => openModal(nextStep.modal as ModalType)}
             >
               Siguiente: {nextStep.label}
               <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" strokeWidth={3} />

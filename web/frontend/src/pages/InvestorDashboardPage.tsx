@@ -16,11 +16,8 @@ import {
   TrendingUp,
   ArrowRight,
   LayoutDashboard,
-  Clock,
   FileText,
   Sparkles,
-  Receipt,
-  FolderOpen,
 } from 'lucide-react';
 import { getMyInvestments, type InvestmentHistoryItem } from '../api/investor.api';
 import { hasInvestmentReward } from '../utils/rewardTracking';
@@ -36,25 +33,20 @@ export function InvestorDashboardPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
 
-  const [activeTab, setActiveTab] = useState<InvestorDashboardTab>(() => {
+  const activeTab = (() => {
     if (urlTab === 'rewards' || urlTab === 'updates' || urlTab === 'receipts' || urlTab === 'analytics') {
       return urlTab;
     }
     if (urlTab === 'activity') return 'contributions';
     if (urlTab === 'more') return 'analytics';
     return 'contributions';
-  });
+  })();
 
   // Sync tab with URL
-  useEffect(() => {
-    const tabParam = searchParams.get('tab');
-    if (tabParam && ['contributions', 'rewards', 'updates', 'receipts', 'analytics'].includes(tabParam)) {
-      setActiveTab(tabParam as InvestorDashboardTab);
-    }
-  }, [searchParams]);
+
 
   const handleTabChange = (tab: InvestorDashboardTab) => {
-    setActiveTab(tab);
+
     setSearchParams({ tab });
   };
 

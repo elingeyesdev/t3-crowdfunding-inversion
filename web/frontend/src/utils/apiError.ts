@@ -1,8 +1,12 @@
-﻿import axios from 'axios';
+import axios from 'axios';
 
 /**
  * Mensaje legible para fallos de Axios (incl. 502 del proxy de Vite cuando no hay backend).
  */
+export function getApiErrorStatus(error: unknown): number | undefined {
+  return axios.isAxiosError(error) ? error.response?.status : undefined;
+}
+
 export function getApiErrorMessage(err: unknown, fallback: string): string {
   if (!axios.isAxiosError(err)) {
     return err instanceof Error ? err.message : fallback;

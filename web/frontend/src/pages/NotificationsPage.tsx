@@ -37,7 +37,6 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
-  ShieldCheck,
   X,
   Check,
 } from 'lucide-react';
@@ -155,20 +154,17 @@ export function NotificationsPage() {
   const prefsRequest = useRef(0);
   const prefsCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchNotifications = useCallback(async () => {
+  const requestNotifications = useCallback(() => {
     const requestId = ++latestRequest.current;
-    setLoadError(null);
-    try {
-      setLoading(true);
+
       const isUnread = filterStatus === 'unread' ? true : filterStatus === 'read' ? false : undefined;
-      const res = await getMyNotifications({
+    return getMyNotifications({
         page,
         limit: 12,
         unread: isUnread,
         category: categoryFilter === 'all' ? undefined : categoryFilter,
         q: searchTerm || undefined,
-      });
-
+      }).then(res => {
       if (requestId !== latestRequest.current) return;
       const pages = res.totalPages || Math.max(1, Math.ceil((res.total ?? res.notifications.length) / (res.perPage || 12)));
       if (page > pages) {
@@ -182,22 +178,26 @@ export function NotificationsPage() {
       setTotalPages(pages);
       setTotalCount(res.total ?? res.notifications.length);
       setLoadedQuery(JSON.stringify([page, filterStatus, searchTerm, categoryFilter]));
-    } catch (err) {
+    }).catch((err: unknown) => {
       if (requestId === latestRequest.current) setLoadError(err);
-    } finally {
+    }).finally(() => {
       if (requestId === latestRequest.current) {
         setLoading(false);
         setRefreshing(false);
       }
-    }
+    });
   }, [page, filterStatus, searchTerm, categoryFilter]);
 
+  const fetchNotifications = useCallback(() => {setLoadError(null); setLoading(true); return requestNotifications();}, [requestNotifications]);
+  const invalidateRequests = useCallback(() => {latestRequest.current++;}, []);
+  const [requestedQuery, setRequestedQuery] = useState(queryKey);
+  if(requestedQuery !== queryKey) {setRequestedQuery(queryKey); setLoading(true); setLoadError(null);}
   useEffect(() => {
     reloadNotifications.current = fetchNotifications;
-    fetchNotifications();
+    void requestNotifications();
     // Ignore responses from an older filter selection or an unmounted view.
-    return () => { reloadNotifications.current = null; latestRequest.current++; };
-  }, [fetchNotifications]);
+    return () => { reloadNotifications.current = null; invalidateRequests(); };
+  }, [fetchNotifications, requestNotifications, invalidateRequests]);
 
   useEffect(() => subscribeToNotificationsChanged(() => { void reloadNotifications.current?.(); }), []);
 

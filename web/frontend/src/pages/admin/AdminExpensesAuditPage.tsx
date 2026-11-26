@@ -1,4 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useAsyncResource } from '../../hooks/useAsyncResource.ts';
+import { useCallback } from 'react';
+import type { CampaignFinancialAudit } from '../../types/admin.types';
+import { getApiErrorMessage } from '../../utils/apiError.ts';
+import { useState } from 'react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { FinancialMovementHistory } from '../../components/admin/FinancialMovementHistory';
 import {
@@ -8,10 +12,7 @@ import {
   getAdminFinancialAuditSummary,
   getAdminCampaignFinancialAudit,
 } from '../../api/admin.api';
-import type {
-  FinancialMovementAuditItem,
-  FinancialAuditSummary,
-} from '../../types/admin.types';
+import type { FinancialMovementAuditItem } from '../../types/admin.types';
 import {
   Receipt,
   Search,
@@ -20,10 +21,7 @@ import {
   AlertTriangle,
   XCircle,
   Clock,
-  Eye,
-  FileText,
   DollarSign,
-  TrendingUp,
   RefreshCw,
   ExternalLink,
   ShieldCheck,
@@ -32,9 +30,6 @@ import {
 } from 'lucide-react';
 
 export function AdminExpensesAuditPage() {
-  const [movements, setMovements] = useState<FinancialMovementAuditItem[]>([]);
-  const [summary, setSummary] = useState<FinancialAuditSummary | null>(null);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   // Filters state
@@ -43,8 +38,6 @@ export function AdminExpensesAuditPage() {
   const [typeFilter, setTypeFilter] = useState('expense'); // Default focus on expenses
   const [receiptFilter, setReceiptFilter] = useState('');
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
 
   // Review Modal State
   const [selectedMovement, setSelectedMovement] = useState<FinancialMovementAuditItem | null>(null);
@@ -54,55 +47,26 @@ export function AdminExpensesAuditPage() {
   const [reviewError, setReviewError] = useState<string | null>(null);
 
   // Campaign Audit Modal State
-  const [campaignAuditData, setCampaignAuditData] = useState<any | null>(null);
-  const [loadingCampaignAudit, setLoadingCampaignAudit] = useState(false);
+  const [campaignAuditData, setCampaignAuditData] = useState<CampaignFinancialAudit | null>(null);
+  const [, setLoadingCampaignAudit] = useState(false);
 
-  useEffect(() => {
-    loadSummary();
-  }, []);
-
-  useEffect(() => {
-    loadMovements();
-  }, [page, statusFilter, typeFilter, receiptFilter]);
-
-  const loadSummary = async () => {
-    try {
-      const data = await getAdminFinancialAuditSummary();
-      setSummary(data);
-    } catch (err) {
-      console.error('Error al cargar métricas de auditoría financiera:', err);
-    }
-  };
-
-  const loadMovements = async () => {
-    try {
-      setLoading(true);
-      const res = await getAdminFinancialMovements({
-        page,
-        limit: 10,
-        type: typeFilter || undefined,
-        status: statusFilter || undefined,
-        hasReceipt: receiptFilter === 'yes' ? true : receiptFilter === 'no' ? false : undefined,
-        q: searchTerm || undefined,
-      });
-
-      setMovements(res.data || []);
-      setTotalPages(Math.max(1, Math.ceil((res.total || 0) / (res.perPage || 10))));
-      setTotalItems(res.total || 0);
-    } catch (err) {
-      console.error('Error al listar movimientos:', err);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const [submittedSearch, setSubmittedSearch] = useState('');
+  const load = useCallback(() => getAdminFinancialMovements({page, limit:10, type:typeFilter || undefined, status:statusFilter || undefined, hasReceipt:receiptFilter === 'yes' ? true : receiptFilter === 'no' ? false : undefined, q:submittedSearch || undefined}), [page,typeFilter,statusFilter,receiptFilter,submittedSearch]);
+  const resource = useAsyncResource(load);
+  const summaryResource = useAsyncResource(getAdminFinancialAuditSummary);
+  const summary = summaryResource.data;
+  const movements = resource.data?.data ?? [];
+  const loading = resource.loading;
+  const totalPages = Math.max(1, Math.ceil((resource.data?.total ?? 0) / (resource.data?.perPage || 10)));
+  const totalItems = resource.data?.total ?? 0;
+  const loadSummary = summaryResource.refetch;
+  const loadMovements = async () => { await resource.refetch(); setRefreshing(false); };
+  const handleSearchSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    setSubmittedSearch(searchTerm);
     setPage(1);
-    loadMovements();
+    if (page === 1) resource.retry();
   };
-
   const handleOpenReview = async (movement: FinancialMovementAuditItem) => {
     try {
       // Fetch full details with consistency flags
@@ -111,7 +75,7 @@ export function AdminExpensesAuditPage() {
       setReviewAction('approve');
       setReviewNotes(fullDetail.reviewNotes || '');
       setReviewError(null);
-    } catch (err) {
+    } catch {
       setSelectedMovement({ ...movement, canReview: false });
       setReviewError('No se pudo cargar el detalle actual. Vuelve a cargarlo antes de revisar.');
     }
@@ -130,8 +94,8 @@ export function AdminExpensesAuditPage() {
       await reviewAdminFinancialMovement(selectedMovement.id, reviewAction, selectedMovement.version, reviewNotes);
       setSelectedMovement(null);
       await Promise.all([loadMovements(), loadSummary()]);
-    } catch (err: any) {
-      setReviewError(err?.response?.data?.message || 'Error al procesar la revisión.');
+    } catch (err: unknown) {
+      setReviewError(getApiErrorMessage(err, '') || 'Error al procesar la revisión.');
     } finally {
       setSubmittingReview(false);
     }
@@ -142,7 +106,7 @@ export function AdminExpensesAuditPage() {
       setLoadingCampaignAudit(true);
       const audit = await getAdminCampaignFinancialAudit(campaignId);
       setCampaignAuditData(audit);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error al cargar auditoría de campaña:', err);
     } finally {
       setLoadingCampaignAudit(false);
@@ -740,7 +704,7 @@ export function AdminExpensesAuditPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {campaignAuditData.fundingPlanComparison?.map((plan: any) => (
+                      {campaignAuditData.fundingPlanComparison?.map((plan) => (
                         <tr key={plan.id} className="hover:bg-gray-50">
                           <td className="py-2.5 px-3 font-semibold text-gray-900">{plan.category}</td>
                           <td className="py-2.5 px-3 text-right font-medium">BOB {plan.budgetedAmount.toLocaleString('es-BO')}</td>
@@ -783,7 +747,7 @@ export function AdminExpensesAuditPage() {
                     Gastos en categorías no planificadas ({campaignAuditData.unbudgetedExpenses.length}):
                   </div>
                   <ul className="text-xs text-amber-900 list-disc list-inside">
-                    {campaignAuditData.unbudgetedExpenses.map((u: any) => (
+                    {campaignAuditData.unbudgetedExpenses.map((u) => (
                       <li key={u.id}>
                         {u.concept} - {u.category} (BOB {u.amount})
                       </li>

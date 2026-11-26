@@ -1,3 +1,4 @@
+import type { CreateInvestorProfileDto } from '../types/investor.types';
 import { useState, useEffect } from 'react';
 import { useInvestorProfile } from '../hooks/useInvestorProfile';
 import { useInvestorDashboard } from '../hooks/useInvestorDashboard';
@@ -70,17 +71,19 @@ export function InvestorProfilePage() {
     }
   }, [profileLoading, profile, onboardingTriggered]);
 
-  const handleSave = async (_type: string, data: any) => {
+  const handleSave = async (_type: string, data: Partial<CreateInvestorProfileDto>) => {
     const baseData = { ...profile, ...data };
     if (!profile) {
       if (!baseData.firstName) baseData.firstName = 'Usuario';
       if (!baseData.lastName) baseData.lastName = 'Sin Registrar';
     }
-    const {
-      id, userId, avatarUrl, coverUrl, identityVerified, identityVerifiedAt,
-      verificationDocuments, totalInvestments, totalInvested, accredited,
-      metadata, createdAt, updatedAt, ...sanitizedData
-    } = baseData;
+    const sanitizedData: CreateInvestorProfileDto = {
+      firstName: baseData.firstName || 'Usuario', lastName: baseData.lastName || 'Sin Registrar',
+      displayName: baseData.displayName ?? undefined, bio: baseData.bio ?? undefined, investorType: baseData.investorType,
+      taxId: baseData.taxId ?? undefined, addressLine1: baseData.addressLine1 ?? undefined, addressLine2: baseData.addressLine2 ?? undefined,
+      city: baseData.city ?? undefined, state: baseData.state ?? undefined, country: baseData.country ?? undefined, postalCode: baseData.postalCode ?? undefined,
+      minInvestment: baseData.minInvestment ?? undefined, maxInvestment: baseData.maxInvestment ?? undefined,
+    };
     await submitProfile(sanitizedData);
     setModalType(null);
   };
@@ -103,7 +106,7 @@ export function InvestorProfilePage() {
             <div className="bg-white shadow-sm">
               <ProfileHeader
                 profile={profile}
-                onEdit={(type: any) => setModalType(type as ModalType)}
+                onEdit={(type) => setModalType(type as ModalType)}
                 uploadAvatar={uploadAvatarPhoto}
                 uploadCover={uploadCoverPhoto}
               />

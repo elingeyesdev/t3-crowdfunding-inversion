@@ -16,7 +16,7 @@ export interface AppNotification {
   actionUrl: string | null;
   referenceType: string | null;
   referenceId: string | null;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   createdAt: string;
   updatedAt?: string;
 }

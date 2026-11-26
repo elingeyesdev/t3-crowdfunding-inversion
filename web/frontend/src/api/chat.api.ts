@@ -1,4 +1,4 @@
-﻿import axios from 'axios';
+import axios from 'axios';
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -82,7 +82,7 @@ export async function getMessages(
   limit = 50,
   beforeId?: string,
 ): Promise<Message[]> {
-  const params: Record<string, any> = { limit };
+  const params: Record<string, unknown> = { limit };
   if (beforeId) params.beforeId = beforeId;
   const { data } = await api.get(`/chat/conversations/${conversationId}/messages`, { params });
   return data.data;

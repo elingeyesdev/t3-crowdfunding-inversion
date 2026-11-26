@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   regression:
-    name: React, build and PHP
+    name: Lint, React, build and PHP
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -41,6 +41,8 @@ jobs:
         run: composer validate --strict
       - name: Install JavaScript dependencies
         run: npm ci
+      - name: ESLint quality check
+        run: npm run lint
       - name: React regression tests
         run: npm test
       # Build before PHP tests: several web route tests render the Vite entrypoint.

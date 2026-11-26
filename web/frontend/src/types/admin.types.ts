@@ -56,6 +56,7 @@ export interface PendingCampaign {
   title: string;
   campaign_type: string;
   entrepreneur_name: string;
+  video_url?: string;
   category_name: string;
   goal_amount: string;
   created_at: string;
@@ -89,7 +90,7 @@ export interface PendingCampaignDetail {
   entrepreneur_avatar?: string;
   entrepreneur_linkedin?: string;
   entrepreneur_website?: string;
-  media?: any[];
+  media?: {url: string; type: string}[];
   min_investment?: number;
   max_investment?: number;
   subtitle?: string;
@@ -160,6 +161,41 @@ export interface FinancialMovementHistoryEntry {
   before: Record<string, unknown> | null;
   after: Record<string, unknown>;
   createdAt: string;
+}
+
+export interface CampaignFinancialAudit {
+  campaign: {
+    id: string;
+    title: string;
+    status: string;
+    goalAmount: number;
+    currentAmount: number;
+    currency: string;
+  };
+  ledger: import('./campaign.types').FinancialLedgerResponse;
+  fundingPlanComparison: {
+    id: string;
+    category: string;
+    description: string | null;
+    budgetedAmount: number;
+    budgetedPercentage: number;
+    spentAmount: number;
+    variance: number;
+    isOverbudget: boolean;
+    expensesCount: number;
+    missingReceiptCount: number;
+    flaggedCount: number;
+  }[];
+  unbudgetedExpenses: FinancialMovementAuditItem[];
+  inconsistencies: {
+    missingReceiptsCount: number;
+    missingReceipts: FinancialMovementAuditItem[];
+    flaggedCount: number;
+    flaggedMovements: FinancialMovementAuditItem[];
+    overbudgetCount: number;
+    unbudgetedExpensesCount: number;
+  };
+  milestonesAudit: { totalMilestones: number; completedMilestones: number; totalEvidences: number };
 }
 
 export interface FinancialAuditSummary {

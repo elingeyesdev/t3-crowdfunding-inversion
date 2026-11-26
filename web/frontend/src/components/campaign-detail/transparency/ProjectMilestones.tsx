@@ -1,13 +1,5 @@
-import {
-  CheckCircle2,
-  Clock,
-  Rocket,
-  ShieldCheck,
-  AlertCircle,
-  Flag,
-  Calendar,
-  Layers,
-} from 'lucide-react';
+import type { FundingMilestone } from '../../../types/campaign-content.types';
+import { CheckCircle2, Rocket, ShieldCheck, Flag } from 'lucide-react';
 import { formatCampaignCurrency } from '../../../utils/campaignFunding';
 
 interface MilestoneItem {
@@ -25,7 +17,7 @@ interface Props {
   goalAmount: number;
   currentAmount: number;
   currency?: string;
-  customMilestones?: any[];
+  customMilestones?: FundingMilestone[];
 }
 
 export function ProjectMilestones({

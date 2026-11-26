@@ -1,14 +1,7 @@
-import { useState, useEffect } from 'react';
+import type { CreateInvestorProfileDto } from '../../types/investor.types';
+import { useState } from 'react';
 import type { InvestorProfile } from '../../types/investor.types';
-import { 
-  Lightbulb, 
-  User, 
-  X, 
-  Check, 
-  Loader2,
-  ChevronDown,
-  Shield,
-} from 'lucide-react';
+import { Lightbulb, User, X, Check, Loader2, ChevronDown, Shield } from 'lucide-react';
 
 type ModalType = 'profile' | 'fiscal' | 'address' | 'investment' | 'avatar' | null;
 
@@ -16,7 +9,7 @@ interface Props {
   type: ModalType;
   profile: InvestorProfile | null;
   onClose: () => void;
-  onSave: (section: string, data: any) => Promise<void>;
+  onSave: (section: string, data: Partial<CreateInvestorProfileDto>) => Promise<void>;
   saving: boolean;
 }
 
@@ -37,17 +30,20 @@ const BOLIVIAN_CITIES_BY_DEPARTMENT: Record<string, string[]> = {
 };
 
 export function EditProfileModal({ type, profile, onClose, onSave, saving }: Props) {
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<Partial<CreateInvestorProfileDto>>(() => profile && type ? Object.fromEntries(Object.entries(profile).filter(([, value]) => value !== null)) as Partial<CreateInvestorProfileDto> : {});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
+  const [source, setSource] = useState({profile, type});
+  if (source.profile !== profile || source.type !== type) {
+    setSource({profile, type});
     setErrors({});
     if (profile && type) {
-      setFormData({ ...profile });
+      setFormData(Object.fromEntries(Object.entries(profile).filter(([, value]) => value !== null)) as Partial<CreateInvestorProfileDto>);
     } else {
       setFormData({});
     }
-  }, [profile, type]);
+
+  }
 
   if (!type) return null;
 
@@ -80,12 +76,7 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
   const btnSec = "flex-1 bg-gray-50 hover:bg-red-50 text-slate-500 hover:text-[#c62828] border-none rounded-xl py-3 text-[15px] font-bold cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-2";
   const btnPri = "flex-1 bg-[#72B626] hover:bg-[#1c2b1e] text-white border-none rounded-xl py-3 text-[15px] font-bold cursor-pointer transition-all active:scale-95 disabled:opacity-50 shadow-lg shadow-[#72B626]/20/20 px-6 flex items-center justify-center gap-2";
 
-  const SelectWrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="relative">
-      {children}
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"><ChevronDown size={18} strokeWidth={2.5} /></div>
-    </div>
-  );
+
 
   let modalTitle = '';
   let modalContent: React.ReactNode = null;
@@ -247,3 +238,12 @@ export function EditProfileModal({ type, profile, onClose, onSave, saving }: Pro
     </div>
   );
 }
+
+const SelectWrapper = ({ children }: { children: React.ReactNode }) => (
+  <div className="relative">
+    {children}
+    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+      <ChevronDown size={18} strokeWidth={2.5} />
+    </div>
+  </div>
+);

@@ -1,63 +1,38 @@
-import { useState, useEffect } from 'react';
+import { useAsyncResource } from '../../hooks/useAsyncResource.ts';
+import { useCallback } from 'react';
+
+
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../../components/admin/AdminLayout';
-import { 
-  getDashboardStats, 
+import {
+  getDashboardStats,
   getPendingCampaigns,
   getPendingKyc,
-  getAdminFinancialAuditSummary
+  getAdminFinancialAuditSummary,
 } from '../../api/admin.api';
-import type { DashboardStats } from '../../types/admin.types';
-import { 
-  Users, 
-  Rocket, 
-  BarChart3, 
-  Clock, 
+
+import {
+  Users,
+  Rocket,
+  BarChart3,
+  Clock,
   ChevronRight,
   UserCheck,
   AlertCircle,
   FileCheck,
   Receipt,
-  Shield
 } from 'lucide-react';
 
 export function AdminDashboardPage() {
   const navigate = useNavigate();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [pendingCampaignsCount, setPendingCampaignsCount] = useState(0);
-  const [pendingKycCount, setPendingKycCount] = useState(0);
-  const [pendingExpensesCount, setPendingExpensesCount] = useState(0);
-  const [recentPending, setRecentPending] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const adminAccessLevel = localStorage.getItem('adminAccessLevel');
-
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
-    try {
-      setLoading(true);
-      const [statsData, campaignsData, kycData, auditSummary] = await Promise.all([
-        getDashboardStats(),
-        getPendingCampaigns({ page: 1, limit: 3, status: 'pending_review' }),
-        getPendingKyc(),
-        getAdminFinancialAuditSummary().catch(() => null)
-      ]);
-      setStats(statsData);
-      setPendingCampaignsCount(campaignsData.total);
-      setRecentPending(campaignsData.campaigns);
-      setPendingKycCount(kycData.length);
-      if (auditSummary) {
-        setPendingExpensesCount((auditSummary.pendingCount || 0) + (auditSummary.flaggedCount || 0));
-      }
-    } catch (error) {
-      console.error('Error loading dashboard stats:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  const load = useCallback(() => Promise.all([getDashboardStats(), getPendingCampaigns({page:1, limit:3, status:'pending_review'}), getPendingKyc(), getAdminFinancialAuditSummary().catch(() => null)]), []);
+  const resource = useAsyncResource(load);
+  const [stats, pendingCampaigns, pendingKyc, auditSummary] = resource.data ?? [];
+  const pendingCampaignsCount = pendingCampaigns?.total ?? 0;
+  const recentPending = pendingCampaigns?.campaigns ?? [];
+  const pendingKycCount = pendingKyc?.length ?? 0;
+  const pendingExpensesCount = (auditSummary?.pendingCount ?? 0) + (auditSummary?.flaggedCount ?? 0);
+  const loading = resource.loading;
   if (loading) {
     return (
       <AdminLayout>

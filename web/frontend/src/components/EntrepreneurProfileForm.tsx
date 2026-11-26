@@ -1,5 +1,8 @@
-﻿import React, { useState, useEffect } from 'react';
-import type { EntrepreneurProfile, CreateEntrepreneurProfileDto } from '../types/entrepreneur.types';
+import React, { useState } from 'react';
+import type {
+  EntrepreneurProfile,
+  CreateEntrepreneurProfileDto,
+} from '../types/entrepreneur.types';
 import { KYCUploadModal } from './KYCUploadModal';
 
 interface Props {
@@ -23,7 +26,9 @@ export function EntrepreneurProfileForm({ profile, saving, isNew, onSubmit, acti
   const [editSection, setEditSection] = useState<string | null>(isNew ? 'basic' : null);
   const [showKycModal, setShowKycModal] = useState(false);
   
-  useEffect(() => {
+  const [sourceProfile, setSourceProfile] = useState<EntrepreneurProfile | null>(null);
+  if (sourceProfile !== profile) {
+    setSourceProfile(profile);
     if (profile) {
       setFormData({
         firstName: profile.firstName ?? '',
@@ -42,7 +47,8 @@ export function EntrepreneurProfileForm({ profile, saving, isNew, onSubmit, acti
         bankName: profile.bankName ?? '',
       });
     }
-  }, [profile]);
+
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

@@ -1,3 +1,4 @@
+import type { CampaignAttachment } from '../types/campaign-content.types';
 import axios from 'axios';
 import type { PaginatedResponse } from '../types/campaign.types';
 import type {
@@ -108,8 +109,8 @@ export interface CreateInvestmentDto {
   rewardTierId?: string;
 }
 
-export async function createInvestment(dto: CreateInvestmentDto): Promise<any> {
-  const { data } = await api.post<ApiSuccessResponse<any>>(
+export async function createInvestment(dto: CreateInvestmentDto): Promise<{ticket: {id: string}; id?: string}> {
+  const { data } = await api.post<ApiSuccessResponse<{ticket: {id: string}; id?: string}>>(
     '/investments',
     dto,
   );
@@ -147,7 +148,7 @@ export interface BackedCampaignUpdate {
   campaignId: string;
   title: string;
   content: string;
-  attachments: any[];
+  attachments: CampaignAttachment[];
   createdAt: string;
   updatedAt: string;
   campaignTitle: string;

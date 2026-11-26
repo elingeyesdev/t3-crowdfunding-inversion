@@ -1,8 +1,20 @@
-import { useState, useEffect } from 'react';
+import { getApiErrorMessage } from '../utils/apiError.ts';
+import { useState } from 'react';
 import { useNavigate, useLocation, Link, useSearchParams } from 'react-router-dom';
 import { login } from '../api/investor.api';
 import { persistUserRoleFromServer } from '../utils/authRole';
-import { AlertCircle, ArrowRight, CheckCircle2, Mail, Lock, Rocket, Shield, TrendingUp, Eye, EyeOff } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowRight,
+  CheckCircle2,
+  Mail,
+  Lock,
+  Rocket,
+  Shield,
+  TrendingUp,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 
 const GOOGLE_OAUTH_URL = '/api/v1/auth/google?role=investor';
 
@@ -26,24 +38,21 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const redirectTo = (location.state as any)?.from || null;
-  const [email, setEmail] = useState('');
+  const redirectTo = (location.state as {from?: string} | null)?.from || null;
+  const [email, setEmail] = useState(() => localStorage.getItem('rememberedEmail') ?? '');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem('rememberedEmail'));
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const savedEmail = localStorage.getItem('rememberedEmail');
-    if (savedEmail) {
-      setEmail(savedEmail);
-      setRememberMe(true);
-    }
-    if (searchParams.get('error') === 'oauth') {
-      setError('No se pudo autenticar con Google. Intenta de nuevo.');
-    }
-  }, [searchParams]);
+  const oauthError = searchParams.get('error');
+  const [previousOauthError, setPreviousOauthError] = useState<string | null>(null);
+  if (previousOauthError !== oauthError) {
+    setPreviousOauthError(oauthError);
+    if (oauthError === 'oauth') setError('No se pudo autenticar con Google. Intenta de nuevo.');
+  }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,8 +95,8 @@ export function LoginPage() {
       } else {
         navigate('/dashboard');
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message ?? 'Credenciales incorrectas.';
+    } catch (err: unknown) {
+      const msg = getApiErrorMessage(err, '') ?? 'Credenciales incorrectas.';
       setError(Array.isArray(msg) ? msg.join(', ') : msg);
     } finally {
       setLoading(false);
