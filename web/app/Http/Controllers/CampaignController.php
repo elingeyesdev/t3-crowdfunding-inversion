@@ -11,8 +11,8 @@ use App\Services\CampaignPublication;
 use App\Services\FinancialMovementAudit;
 use App\Services\InvestmentEngine;
 use App\Services\Notifier;
-use App\Services\ProfileReadiness;
 use App\Services\PrivateFileLinks;
+use App\Services\ProfileReadiness;
 use App\Support\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -200,7 +200,7 @@ class CampaignController extends Controller
     {
         self::authorizeOwner($r, $campaign, true);
 
-        return Api::ok(CampaignStatusHistory::with('actor.admin')->where('campaign_id', $campaign->id)->latest()->get()->map(fn ($h) => [...$h->attributesToArray(), 'feedback' => $h->reason, 'changed_by_email' => $h->actor?->email, 'changed_by_name' => $h->actor?->admin?->first_name ?? $h->actor?->email]), 200, false);
+        return Api::ok(CampaignStatusHistory::with('actor.admin')->where('campaign_id', $campaign->id)->latest()->get()->map(fn ($h) => [...$h->attributesToArray(), 'feedback' => $h->reason, 'changed_by_email' => $h->actor?->email, 'changed_by_name' => $h->isAutomaticClosure() ? 'Sistema (cierre automático)' : ($h->actor?->admin?->first_name ?? $h->actor?->email)]), 200, false);
     }
 
     public function destroy(Request $r, Campaign $campaign)

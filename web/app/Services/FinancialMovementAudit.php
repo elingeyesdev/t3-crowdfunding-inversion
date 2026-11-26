@@ -41,7 +41,7 @@ class FinancialMovementAudit
         }
     }
 
-    public function createSystem(Investment $investment, string $source, string $actor): CampaignFinancialMovement
+    public function createSystem(Investment $investment, string $source, ?string $actor): CampaignFinancialMovement
     {
         abort_unless(in_array($source, ['investment', 'refund'], true), 422);
 
@@ -149,7 +149,9 @@ class FinancialMovementAudit
             $profile = $entry->actor?->admin ?? $entry->actor?->entrepreneur;
             $name = trim(($profile?->first_name ?? '').' '.($profile?->last_name ?? ''));
 
-            return ['id' => $entry->id, 'actorId' => $entry->actor_id, 'actorName' => $name ?: ($entry->actor?->email ?? 'Sin autor registrado'), 'action' => $entry->action, 'version' => $entry->version, 'before' => $entry->before, 'after' => $entry->after, 'createdAt' => $entry->created_at->toIso8601String()];
+            $automaticRefund = $entry->actor_id === null && $entry->action === 'created' && ($entry->after['source'] ?? null) === 'refund';
+
+            return ['id' => $entry->id, 'actorId' => $entry->actor_id, 'actorName' => $name ?: ($entry->actor?->email ?? ($automaticRefund ? 'Sistema (cierre automático)' : 'Sin autor registrado')), 'action' => $entry->action, 'version' => $entry->version, 'before' => $entry->before, 'after' => $entry->after, 'createdAt' => $entry->created_at->toIso8601String()];
         })->all();
     }
 

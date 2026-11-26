@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Campaign;
 use App\Models\CampaignStatusHistory;
+use App\Models\EntrepreneurProfile;
 use App\Models\Investment;
 use App\Models\InvestorProfile;
 use App\Models\RewardClaim;
@@ -78,9 +79,24 @@ class InvestmentEngine
 
     public function finalize(Campaign $campaign, string $actor): Campaign
     {
-        return DB::transaction(function () use ($campaign, $actor) {
+        return $this->close($campaign, $actor, false);
+    }
+
+    public function finalizeExpired(Campaign $campaign): ?Campaign
+    {
+        return $this->close($campaign, null, true);
+    }
+
+    private function close(Campaign $campaign, ?string $actor, bool $onlyIfExpired): ?Campaign
+    {
+        return DB::transaction(function () use ($campaign, $actor, $onlyIfExpired) {
             $c = Campaign::whereKey($campaign->id)->lockForUpdate()->firstOrFail();
-            abort_unless(in_array($c->status, ['published', 'partially_funded', 'funded']), 422, 'Solo se pueden finalizar campañas activas o financiadas.');
+            // Recheck after locking: another closer, an administrator or an edit
+            // may have changed the selected campaign while the task was waiting.
+            if ($onlyIfExpired && (! in_array($c->status, Campaign::CLOSABLE_STATUSES, true) || ! $c->end_date || $c->end_date->isFuture())) {
+                return null;
+            }
+            abort_unless(in_array($c->status, Campaign::CLOSABLE_STATUSES, true), 422, 'Solo se pueden finalizar campañas activas o financiadas.');
             $old = $c->status;
             if (bccomp($this->money($c->current_amount), $this->money($c->goal_amount), 2) < 0) {
                 $investments = $c->investments()->where('status', 'completed')->orderBy('investor_id')->lockForUpdate()->get();
@@ -99,12 +115,15 @@ class InvestmentEngine
                     RewardClaim::where('investment_id', $i->id)->update(['status' => 'cancelled']);
                     $this->notifier->send($i->investor_id, 'investment_refunded', 'Aporte reembolsado', $amount.' '.$c->currency.' de '.$c->title.' fueron devueltos a tu saldo.', $c->id);
                 }
-                $c->creator->entrepreneur()->decrement('total_raised', (float) $refunded);
+                if (bccomp($refunded, '0.00', 2) > 0) {
+                    $ownerProfile = EntrepreneurProfile::where('user_id', $c->creator_id)->lockForUpdate()->firstOrFail();
+                    $ownerProfile->update(['total_raised' => bcsub($this->money($ownerProfile->total_raised), $refunded, 2)]);
+                }
                 $c->update(['status' => 'failed', 'current_amount' => 0, 'investor_count' => 0]);
             } else {
                 $c->update(['status' => 'completed']);
             }
-            CampaignStatusHistory::create(['campaign_id' => $c->id, 'from_status' => $old, 'to_status' => $c->status, 'changed_by' => $actor, 'reason' => 'Finalización de campaña']);
+            CampaignStatusHistory::create(['campaign_id' => $c->id, 'from_status' => $old, 'to_status' => $c->status, 'changed_by' => $actor, 'reason' => $onlyIfExpired ? CampaignStatusHistory::AUTOMATIC_CLOSURE_REASON : 'Finalización de campaña']);
             $this->notifier->send($c->creator_id, 'campaign_'.$c->status, 'Campaña finalizada', $c->title.': '.$c->status, $c->id);
 
             return $c->fresh();

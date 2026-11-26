@@ -133,6 +133,37 @@ El último comando reintenta únicamente fallos de conexión seguros. **SMTP no 
 
 Para probar sin entrega externa: `php artisan test --filter=ActivityMail`. La integración levanta un capturador SMTP efímero en `127.0.0.1`, verifica el correo recibido y comprueba que reprocesar el trabajo no lo duplique.
 
+## Cierre automático de campañas vencidas
+
+El programador revisa cada minuto las campañas `published`, `partially_funded` y `funded` con `end_date` definido y menor o igual al instante actual. Las fechas almacenadas se interpretan en `America/La_Paz`, igual que el resto de la aplicación; el límite es inclusivo y conserva el instante de entradas con UTC u otros offsets. Alcanzar la meta antes del vencimiento no adelanta el cierre automático.
+
+Una campaña que alcanzó la meta pasa a `completed`, conservando sus aportes y recompensas. Si no la alcanzó, pasa a `failed`: se devuelve el saldo simulado de cada aporte completado, se registran transacciones y movimientos de reembolso, se cancelan las reclamaciones de recompensas, se liberan sus cupos y se actualizan los totales de campaña y emprendedor. Los aportes a otras campañas conservan su saldo comprometido. El contador histórico de aportes del donador mantiene el comportamiento del cierre manual.
+
+Quedan fuera los borradores, estados de revisión, aprobadas sin publicar, suspendidas, canceladas, completadas, fallidas, campañas futuras y campañas sin fecha. El cierre manual continúa disponible con sus reglas actuales, incluso antes de vencer. Ambos caminos usan la misma transacción financiera. El automático registra `changed_by=null` con el motivo «Cierre automático por fecha de vencimiento»; las consultas de historial identifican al autor como «Sistema (cierre automático)». No se crea una cuenta ficticia ni se atribuye la acción al emprendedor.
+
+Desde `web/`, puedes revisar candidatos sin escribir datos y ejecutar el proceso explícitamente:
+
+```powershell
+php artisan campaigns:close-expired --dry-run
+php artisan campaigns:close-expired
+```
+
+`--chunk=100` controla cuántos candidatos se leen por lote (entre 1 y 1000); todos los lotes se procesan en la misma ejecución. La simulación muestra candidatos, pero no valida que todos sus datos financieros estén completos. Antes de habilitar el programador en una instalación existente, revisa la simulación: también serán elegibles campañas históricas que sigan activas y vencidas. Este issue no requiere migraciones nuevas.
+
+La ejecución programada está habilitada por defecto con `CAMPAIGN_AUTO_CLOSE_ENABLED=true`. Puedes pausarla con `false`; el comando explícito sigue disponible. Tras cambiar configuración con caché, reconstruye la caché habitual. En desarrollo mantén `php artisan schedule:work` activo. En producción ejecuta `php artisan schedule:run` cada minuto desde el programador del sistema. El cierre financiero no usa una cola adicional; sus correos, si están habilitados, utilizan la cola `activity-mail` documentada arriba.
+
+El programador utiliza un bloqueo de caché con vencimiento de cinco minutos para evitar ejecuciones solapadas. En varios servidores usa una caché compartida si quieres coordinar ese bloqueo. La integridad financiera no depende de él: cada cierre bloquea y vuelve a leer la campaña dentro de la transacción, antes de modificar saldos. Si otro proceso ya cerró la campaña o cambió la fecha/estado, el automático la omite; el manual conserva su respuesta `422` al intentar cerrar una campaña ya finalizada. Los movimientos de reembolso conservan además su unicidad por aporte y origen.
+
+Si una campaña falla, se revierte su transacción completa, incluidos historial, avisos y correos pendientes; las demás campañas siguen procesándose. Los bloqueos/deadlocks reconocidos se reintentan hasta tres veces dentro de la operación. Una campaña que continúa fallando permanece elegible para la siguiente ejecución del minuto, sin duplicar devoluciones ya confirmadas. El comando devuelve código `1` cuando hay fallos, `2` ante parámetros inválidos y `0` cuando termina sin fallos. Su resumen muestra seleccionadas, cerradas, omitidas y fallidas. Supervisa la salida del programador y los mensajes `Automatic campaign closure failed`/`summary` del log, que incluyen el ID de campaña. Corrige datos incompletos u otros errores persistentes antes de reintentar. Tras una terminación abrupta, el bloqueo de programación puede demorar el siguiente intento hasta cinco minutos; no elimines bloqueos de otros procesos activos.
+
+Validación automatizada:
+
+```powershell
+php artisan test --filter="CampaignAutomaticClosureTest|CampaignClosureConcurrencyTest|CampaignClosingTimeTest"
+```
+
+La prueba de concurrencia utiliza una base SQLite temporal aislada y dos procesos PHP independientes, tanto para automático/automático como para automático/manual. Comprueba un solo cierre, reembolso, movimiento, liberación de cupo y aviso por destinatario. No utiliza la base local de la aplicación. **SQLite no reproduce los bloqueos por fila de MySQL/PostgreSQL.** Antes de desplegar en otro motor, repite en una base de pruebas aislada de ese motor: prepara una campaña vencida con aportes y recompensas, lanza dos comandos simultáneos y luego combina un comando con una petición de cierre manual. Verifica un único historial final, una transacción y un movimiento de reembolso por aporte, saldos correctos, reclamaciones canceladas y avisos no duplicados. Repite la ejecución después de provocar un fallo y confirmar la reversión completa.
+
 ## Datos originales y migración a otra base
 
 La migración local conserva **13 usuarios, 10 campañas, 36 inversiones y 36 transacciones**, además de perfiles, comentarios, recompensas, actualizaciones y notificaciones. Los UUID y hashes de contraseña se conservan. `legacy_records` guarda una copia íntegra de cada fila del origen, incluyendo los campos y tablas históricos que no utiliza la aplicación activa. El respaldo original está en `storage/app/private/legacy-export.json`, excluido de Git y del servidor público.
