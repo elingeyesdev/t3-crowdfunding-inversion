@@ -28,11 +28,11 @@ class RewardSelectionTest extends TestCase
         $this->assertSame(':memory:', DB::connection()->getDatabaseName());
         $this->seed();
         $this->travelTo(now()->startOfSecond());
-        $owner = User::create(['email' => Str::uuid().'@example.test']);
+        $owner = User::create(['email_verified' => true, 'email' => Str::uuid().'@example.test']);
         $owner->assignRole('entrepreneur');
         EntrepreneurProfile::create(['user_id' => $owner->id]);
         $this->campaign = Campaign::create(['creator_id' => $owner->id, 'category_id' => Category::first()->id, 'title' => 'Selected reward', 'slug' => (string) Str::uuid(), 'goal_amount' => 1000, 'status' => 'published']);
-        $this->donor = User::create(['email' => Str::uuid().'@example.test']);
+        $this->donor = User::create(['email_verified' => true, 'email' => Str::uuid().'@example.test']);
         $this->donor->assignRole('investor');
         InvestorProfile::create(['user_id' => $this->donor->id, 'max_investment' => 5000]);
         Auth::forgetGuards();

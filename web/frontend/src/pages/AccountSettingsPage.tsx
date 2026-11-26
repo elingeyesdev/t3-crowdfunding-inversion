@@ -17,6 +17,7 @@ import { Navbar } from '../components/Navbar';
 import { useAuth } from '../hooks/useAuth';
 import { changePassword, logout } from '../api/auth.api';
 import { getApiErrorMessage } from '../utils/apiError';
+import { EmailVerificationControls } from '../components/EmailVerificationControls';
 
 /** Formatea fecha en español con hora */
 function formatDate(iso: string | null): string {
@@ -79,7 +80,7 @@ function Skeleton() {
 
 export function AccountSettingsPage() {
   const navigate = useNavigate();
-  const { user, loading, error: authError } = useAuth();
+  const { user, loading, error: authError, refreshUser } = useAuth();
 
   // Formulario cambio de contraseña
   const [currentPassword, setCurrentPassword] = useState('');
@@ -219,6 +220,7 @@ export function AccountSettingsPage() {
               </div>
 
               {/* Proveedor OAuth */}
+              {!user.emailVerified && <EmailVerificationControls onRefresh={refreshUser} />}
               {isGoogleUser && (
                 <div className="space-y-1">
                   <label className="text-[12px] font-medium text-gray-500 uppercase tracking-wide">

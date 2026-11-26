@@ -7,12 +7,14 @@ use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\CampaignReadController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CommunityController;
+use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\InvestmentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PasswordRecoveryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RewardController;
+use App\Http\Middleware\RequireVerifiedEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +43,8 @@ Route::get('private-files/{path}', [FileController::class, 'show'])->where('path
 
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('auth/me', [AuthController::class, 'me']);
+    Route::post('auth/email/verification', [EmailVerificationController::class, 'send'])->middleware('throttle:email-verification');
+    Route::post('auth/email/verify/{id}/{hash}', [EmailVerificationController::class, 'confirm'])->name('email.confirm')->middleware('throttle:10,1');
     Route::post('auth/logout', [AuthController::class, 'logout']);
     Route::get('users/me', [AuthController::class, 'me']);
     Route::patch('users/me/password', [AuthController::class, 'changePassword'])->middleware('throttle:5,1');
@@ -68,8 +72,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('campaigns/{campaign}', [CampaignController::class, 'show']);
         Route::patch('campaigns/{campaign}', [CampaignController::class, 'save']);
         Route::delete('campaigns/{campaign}', [CampaignController::class, 'destroy']);
-        Route::post('campaigns/{campaign}/submit-for-review', [CampaignController::class, 'transition']);
-        Route::post('campaigns/{campaign}/publish', [CampaignController::class, 'transition']);
+        Route::post('campaigns/{campaign}/submit-for-review', [CampaignController::class, 'transition'])->middleware(RequireVerifiedEmail::class);
+        Route::post('campaigns/{campaign}/publish', [CampaignController::class, 'transition'])->middleware(RequireVerifiedEmail::class);
         Route::post('campaigns/{campaign}/finalize', [CampaignController::class, 'finalize']);
         Route::post('campaigns/{campaign}/cover', [CampaignController::class, 'cover']);
         Route::get('campaigns/{campaign}/history', [CampaignController::class, 'history']);
@@ -101,7 +105,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::prefix('investments')->middleware('roles:investor')->group(function () {
         Route::get('backed-campaigns/updates', [InvestmentController::class, 'backedUpdates']);
         Route::get('me', [InvestmentController::class, 'index']);
-        Route::post('/', [InvestmentController::class, 'store']);
+        Route::post('/', [InvestmentController::class, 'store'])->middleware(RequireVerifiedEmail::class);
         Route::get('{investment}/receipt', [InvestmentController::class, 'receipt']);
     });
     Route::post('campaigns/{campaign}/comments', [CommunityController::class, 'postComment'])->middleware('roles:investor,entrepreneur');

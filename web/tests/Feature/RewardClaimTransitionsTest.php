@@ -48,7 +48,7 @@ class RewardClaimTransitionsTest extends TestCase
 
     private function user(string $role): User
     {
-        $user = User::create(['email' => Str::uuid().'@example.test']);
+        $user = User::create(['email_verified' => true, 'email' => Str::uuid().'@example.test']);
         $user->assignRole($role);
         if ($role === 'entrepreneur') {
             EntrepreneurProfile::create(['user_id' => $user->id]);
