@@ -8,6 +8,7 @@
     "build": "tsc -b frontend/tsconfig.json && vite build",
     "postbuild": "node -e \"require('node:fs').rmSync('public/hot', { force: true })\"",
     "lint": "npm --prefix frontend run lint",
+    "test": "node --test \"frontend/tests/*.test.mjs\"",
     "legacy:export": "node scripts/export-legacy.cjs",
     "test:e2e": "node e2e/run.mjs"
   },
