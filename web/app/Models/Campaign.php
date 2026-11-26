@@ -20,6 +20,16 @@ class Campaign extends Record
 
     public const HISTORICAL_STATUSES = ['completed', 'failed'];
 
+    public const CLOSABLE_STATUSES = ['published', 'partially_funded', 'funded'];
+
+    public function scopeAwaitingClosure(Builder $query): Builder
+    {
+        // end_date is stored in the application zone, without an offset.
+        return $query->whereIn('status', self::CLOSABLE_STATUSES)
+            ->whereNotNull('end_date')
+            ->where('end_date', '<=', now()->setTimezone(config('app.timezone'))->toDateTimeString());
+    }
+
     public const FILTER_GROUPS = [
         'drafts' => ['draft', 'rejected'],
         'review' => ['pending_review', 'in_review'],
