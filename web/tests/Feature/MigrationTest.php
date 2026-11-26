@@ -32,7 +32,7 @@ class MigrationTest extends TestCase
 
     private function account(string $role = 'investor'): User
     {
-        $u = User::create(['email' => uniqid().'@example.test', 'password_hash' => Hash::make('Password123')]);
+        $u = User::create(['email_verified' => true, 'email' => uniqid().'@example.test', 'password_hash' => Hash::make('Password123')]);
         $u->assignRole($role);
         if ($role === 'investor') {
             InvestorProfile::create(['user_id' => $u->id, 'first_name' => 'Ana', 'last_name' => 'Perez', 'max_investment' => 1000]);

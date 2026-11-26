@@ -239,6 +239,7 @@ export function MyCampaignsPage() {
           <div className="bg-red-50 border border-red-200 rounded-xl p-10 text-center mb-8">
             <AlertCircle className="text-red-400 mx-auto mb-4" size={36} />
             <p className="text-red-700 font-bold mb-4 text-[15px]">{error}</p>
+            {error.includes('Verifica tu correo') && <a href="/account-settings" className="block mb-4 text-[#4a7f1a] underline">Ir a Configuración de Cuenta para verificar mi correo</a>}
             <button
               onClick={() => window.location.reload()}
               className="text-[#c62828] font-bold text-[12px] tracking-wide hover:underline cursor-pointer border-none bg-transparent"

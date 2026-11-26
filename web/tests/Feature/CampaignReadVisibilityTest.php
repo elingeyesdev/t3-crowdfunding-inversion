@@ -30,7 +30,7 @@ class CampaignReadVisibilityTest extends TestCase
 
     private function account(string $role = 'entrepreneur'): User
     {
-        $user = User::create(['email' => Str::uuid().'@example.test', 'phone' => 'PRIVATE PHONE', 'last_login_ip' => '192.0.2.10']);
+        $user = User::create(['email_verified' => true, 'email' => Str::uuid().'@example.test', 'phone' => 'PRIVATE PHONE', 'last_login_ip' => '192.0.2.10']);
         $user->assignRole($role);
         if ($role === 'entrepreneur') {
             EntrepreneurProfile::create(['user_id' => $user->id, 'first_name' => 'Public', 'last_name' => 'Author', 'display_name' => 'author-'.Str::uuid(), 'avatar_url' => '/storage/profiles/avatar.jpg']);

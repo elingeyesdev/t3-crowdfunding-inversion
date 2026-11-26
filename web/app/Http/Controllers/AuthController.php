@@ -150,6 +150,8 @@ class AuthController extends Controller
                 $user->assignRole($r->session()->pull('signup_role', 'investor'));
             } elseif (! $user->oauth_provider) {
                 $user->update(['oauth_provider' => 'google', 'oauth_provider_id' => $google->getId(), 'email_verified' => true]);
+            } elseif ($user->oauth_provider === 'google' && $user->oauth_provider_id === $google->getId()) {
+                $user->update(['email_verified' => true]);
             }
             abort_unless($user->is_active, 401, 'Usuario inactivo.');
 

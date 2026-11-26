@@ -28,7 +28,7 @@ class CampaignClosingTimeTest extends TestCase
 
     private function owner(): User
     {
-        $user = User::create(['email' => Str::uuid().'@example.test']);
+        $user = User::create(['email_verified' => true, 'email' => Str::uuid().'@example.test']);
         $user->assignRole('entrepreneur');
         EntrepreneurProfile::create(['user_id' => $user->id, 'bio' => str_repeat('Biografía completa. ', 4), 'company_name' => 'Proyecto', 'website' => 'https://example.com', 'linkedin_url' => 'https://linkedin.com/in/example', 'country' => 'Bolivia', 'identity_verified' => true, 'kyc_status' => 'approved']);
 
@@ -80,7 +80,7 @@ class CampaignClosingTimeTest extends TestCase
     public function test_investments_stop_at_the_exact_closing_instant_without_financial_side_effects(): void
     {
         $owner = $this->owner();
-        $investor = User::create(['email' => Str::uuid().'@example.test']);
+        $investor = User::create(['email_verified' => true, 'email' => Str::uuid().'@example.test']);
         $investor->assignRole('investor');
         InvestorProfile::create(['user_id' => $investor->id, 'max_investment' => 5000]);
         foreach (['2026-11-20T21:59:59Z' => 201, '2026-11-20T22:00:00Z' => 422, '2026-11-20T22:00:01Z' => 422] as $now => $status) {

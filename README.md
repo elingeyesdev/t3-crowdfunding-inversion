@@ -79,6 +79,22 @@ La API pública ofrece `POST /api/v1/auth/forgot-password` (`email`) y `POST /ap
 
 La prueba `php artisan test --filter=PasswordRecovery` usa una base SQLite en memoria y un capturador SMTP efímero en `127.0.0.1`, sin envío externo; comprueba el correo recibido y utiliza su enlace para restablecer la contraseña.
 
+## Verificación de correo web
+
+Las cuentas locales pueden enviar y reenviar su enlace desde **Configuración de Cuenta**. No se envía automáticamente al registrarse: la solicitud se hace desde la sesión de la cuenta. El enlace abre `/verify-email`, exige iniciar sesión con esa misma cuenta y confirmar mediante un botón. Abrir el enlace por GET no modifica la cuenta. La firma protege la cuenta, la dirección y el vencimiento de 60 minutos; los enlaces dejan de servir si cambia el correo. Reenviar no invalida enlaces anteriores todavía vigentes. Confirmar varias veces no repite el evento de verificación.
+
+**Política:** todas las cuentas, incluidas las existentes, necesitan correo verificado para realizar aportes y para enviar campañas a revisión o publicarlas. Se conserva el estado anterior de cada usuario, sin verificar automáticamente cuentas pendientes. Se mantienen disponibles el login, exploración, configuración, recuperación de contraseña, edición de perfiles y borradores, e historial de aportes. La verificación de correo y la revisión de identidad KYC son requisitos independientes. Los correos verificados por Google conservan su verificación; una nueva autenticación de Google con correo verificado también confirma una cuenta vinculada coincidente.
+
+El envío usa el mismo servicio SMTP que la recuperación, con una cola separada. Desde `web/`, inicia:
+
+```powershell
+php artisan queue:work database --queue=email-verification --sleep=1 --tries=3
+```
+
+`EMAIL_VERIFICATION_QUEUE_CONNECTION` selecciona la conexión (por defecto `database`, nunca `sync`); usa esa conexión en el comando. También puedes atender ambas colas con `--queue=email-verification,password-recovery`. El trabajador debe mantenerse activo y reiniciarse tras desplegar. Se reintenta hasta tres veces; los fallos persistentes aparecen en `queue:failed`. Con `MAIL_MAILER=log` el correo solo se escribe en el log; configura SMTP para entregarlo. `APP_URL` determina el origen público de los enlaces y debe usar HTTPS en producción. Un trabajo pendiente se descarta si la cuenta fue verificada, desactivada, eliminada o cambió de correo.
+
+La API autenticada permite `POST /api/v1/auth/email/verification` (sin email en el cuerpo; siempre usa el de la sesión), limitado a una solicitud por minuto por cuenta y cinco por IP. `POST /api/v1/auth/email/verify/{id}/{hash}` confirma la URL firmada recibida por correo, con límite de diez intentos por minuto por IP. Las operaciones restringidas responden `403` con código `EMAIL_VERIFICATION_REQUIRED` y las interfaces muestran cómo ir a verificar. No hay cambios de esquema ni migración de los usuarios existentes para este flujo.
+
 ## Datos originales y migración a otra base
 
 La migración local conserva **13 usuarios, 10 campañas, 36 inversiones y 36 transacciones**, además de perfiles, comentarios, recompensas, actualizaciones y notificaciones. Los UUID y hashes de contraseña se conservan. `legacy_records` guarda una copia íntegra de cada fila del origen, incluyendo los campos y tablas históricos que no utiliza la aplicación activa. El respaldo original está en `storage/app/private/legacy-export.json`, excluido de Git y del servidor público.

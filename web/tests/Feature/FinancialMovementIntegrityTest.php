@@ -32,7 +32,7 @@ class FinancialMovementIntegrityTest extends TestCase
 
     private function account(string $role = 'entrepreneur'): User
     {
-        $user = User::create(['email' => Str::uuid().'@example.test']);
+        $user = User::create(['email_verified' => true, 'email' => Str::uuid().'@example.test']);
         $user->assignRole($role);
         if ($role === 'entrepreneur') {
             EntrepreneurProfile::create(['user_id' => $user->id, 'first_name' => 'Ana', 'last_name' => 'Perez']);

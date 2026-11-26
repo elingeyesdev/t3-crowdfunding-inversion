@@ -30,7 +30,7 @@ class BackedCampaignUpdatesTest extends TestCase
 
     private function user(string $role = 'investor'): User
     {
-        $user = User::create(['email' => Str::uuid().'@example.test', 'phone' => 'PRIVATE PHONE']);
+        $user = User::create(['email_verified' => true, 'email' => Str::uuid().'@example.test', 'phone' => 'PRIVATE PHONE']);
         $user->assignRole($role);
         if ($role === 'entrepreneur') {
             EntrepreneurProfile::create(['user_id' => $user->id, 'first_name' => 'Public', 'last_name' => 'Author', 'display_name' => 'project-owner', 'avatar_url' => '/storage/profiles/avatar.jpg']);

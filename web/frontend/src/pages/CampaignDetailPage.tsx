@@ -888,6 +888,7 @@ export function CampaignDetailPage() {
                   <div className="bg-red-50 text-[#c62828] p-3 rounded-xl text-[12px] font-bold border border-red-100 mb-4 flex items-start gap-2">
                     <AlertCircle size={14} strokeWidth={2.5} className="shrink-0 mt-0.5" />
                     {investmentError}
+                    {investmentError.includes('Verifica tu correo') && <a href="/account-settings" className="underline">Revisar la verificación de mi correo</a>}
                   </div>
                 )}
 

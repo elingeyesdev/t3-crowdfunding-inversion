@@ -58,3 +58,27 @@ export async function resetPassword(input: { email: string; token: string; passw
     password_confirmation: input.passwordConfirmation,
   }, { timeout: 15000 });
 }
+
+export async function requestEmailVerification(): Promise<string> {
+  const { data } = await axios.post('/api/v1/auth/email/verification', {}, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }, timeout: 15000,
+  });
+  return data.data.message;
+}
+
+export function isVerificationPath(path: string): boolean {
+  if (!path.startsWith('/api/v1/auth/email/verify/')) return false;
+  const url = new URL(path, 'https://verification.invalid');
+  return url.origin === 'https://verification.invalid'
+    && /^\/api\/v1\/auth\/email\/verify\/[a-f\d-]{36}\/[a-f\d]{40}$/.test(url.pathname)
+    && /^\d+$/.test(url.searchParams.get('expires') ?? '')
+    && /^[a-f\d]{64}$/.test(url.searchParams.get('signature') ?? '')
+    && [...url.searchParams.keys()].length === 2 && !url.hash;
+}
+
+export async function confirmEmailVerification(path: string): Promise<void> {
+  if (!isVerificationPath(path)) throw new Error('El enlace está incompleto o no es válido. Solicita uno nuevo.');
+  await axios.post(path, {}, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }, timeout: 15000,
+  });
+}
