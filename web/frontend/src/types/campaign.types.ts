@@ -1,3 +1,4 @@
+import type { CampaignUpdate } from './campaign-content.types';
 export type CampaignStatus =
   | 'draft'
   | 'pending_review'
@@ -24,7 +25,7 @@ export interface EntrepreneurCampaign {
   location: string | null;
   categoryId?: string;
   categoryIds?: string[];
-  categories?: any[];
+  categories?: import('./category.types').Category[];
   status: CampaignStatus;
   goalAmount: number;
   currentAmount: number;
@@ -71,7 +72,7 @@ export interface CampaignMilestone {
   progressPercentage: number;
   sortOrder: number;
   evidenceUrls?: MilestoneEvidence[];
-  updates?: any[];
+  updates?: CampaignUpdate[];
   createdAt: string;
   updatedAt: string;
 }
@@ -298,7 +299,7 @@ export interface RewardTier {
   shippingDetails: string | null;
   imageUrl: string | null;
   expiresAt: string | null;
-  items: any[];
+  items: unknown[];
   sortOrder: number;
   isActive: boolean;
   createdAt: string;
@@ -318,7 +319,7 @@ export interface CreateRewardTierDto {
   shippingDetails?: string;
   imageUrl?: string;
   expiresAt?: string;
-  items?: any[];
+  items?: unknown[];
   sortOrder?: number;
 }
 
@@ -353,6 +354,7 @@ export interface CampaignDocument {
   file_size_bytes: number;
   justification: string;
   status: 'pending' | 'approved' | 'rejected';
+  is_public?: boolean;
   reviewer_notes?: string;
   reviewed_by?: string;
   reviewed_at?: string;

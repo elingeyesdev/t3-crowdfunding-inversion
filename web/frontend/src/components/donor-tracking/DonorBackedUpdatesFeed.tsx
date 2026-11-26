@@ -3,10 +3,6 @@ import {
   Sparkles,
   Calendar,
   ExternalLink,
-  Target,
-  Image as ImageIcon,
-  Video,
-  Clock,
   ArrowRight,
   Filter,
   AlertTriangle,
@@ -206,7 +202,7 @@ export function DonorBackedUpdatesFeedView({ updates, campaigns, meta, loading, 
                 {/* Attachments if any */}
                 {update.attachments && update.attachments.length > 0 && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100">
-                    {update.attachments.map((att: any, aIdx: number) => {
+                    {update.attachments.map((att, aIdx: number) => {
                       if (att.type === 'image' && att.url) {
                         return (
                           <div

@@ -237,6 +237,7 @@ En producción configura `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL`, las
 Desde `web/`, con las dependencias instaladas y la configuración de instalación preparada:
 
 ```powershell
+npm run lint
 npm test
 npm run build
 composer test
@@ -252,6 +253,7 @@ Copy-Item .env.example .env
 composer install --no-interaction --prefer-dist
 php artisan key:generate
 npm ci
+npm run lint
 npm test
 npm run build
 composer test
@@ -260,7 +262,7 @@ composer validate --strict
 
 La copia de `.env` es solo para una instalación nueva; conserva tu configuración si ya existe. No se necesita `migrate --seed`, crear usuarios ni levantar Laravel, Reverb o trabajadores para estas verificaciones. `phpunit.xml` selecciona SQLite en memoria, correo simulado y servicios de prueba. Los casos SMTP levantan capturadores locales efímeros y el caso de concurrencia crea su propia base SQLite temporal. Las regresiones verifican autenticación, contratos de API, roles, propiedad de recursos, aportes, precisión decimal, reembolsos, recompensas, PDF/CSV, KYC privado, comentarios, chat e importación reversible.
 
-El workflow [Web checks](.github/workflows/web-checks.yml) ejecuta instalación desde los lockfiles, regresiones React, compilación, regresiones PHP y validación de Composer en cada push y pull request; también admite ejecución manual. Usa Node 24 y PHP 8.4 en un entorno nuevo, sin secretos del proyecto. Un resultado correcto solo acredita las comprobaciones ejecutadas.
+El workflow [Web checks](.github/workflows/web-checks.yml) ejecuta instalación desde los lockfiles, ESLint, regresiones React, compilación, regresiones PHP y validación de Composer en cada push y pull request; también admite ejecución manual. Usa Node 24 y PHP 8.4 en un entorno nuevo, sin secretos del proyecto. Un resultado correcto solo acredita las comprobaciones ejecutadas.
 
 Se distinguen tres clases de evidencia:
 
@@ -270,6 +272,8 @@ Se distinguen tres clases de evidencia:
 
 Verificación de arranque del **12 de noviembre de 2026**: **36 pruebas y 326 aserciones correctas**, compilación TypeScript/Vite completa y requisitos PHP satisfechos. Se comprobó `composer dev` desde `web/`, la portada y el catálogo en el navegador sin errores de consola, HTTP 200 en las rutas públicas y HTTP 401 en las rutas protegidas sin sesión. Las migraciones locales están aplicadas. Vite avisa que el bundle principal supera 500 kB; no impide compilar ni ejecutar la aplicación. Esta comprobación no valida Google OAuth ni llamadas reales al proveedor de IA.
 
-ESLint todavía reporta deuda previa de tipado y reglas de React; `npm run lint` no pasa. Se corrigió el orden condicional de hooks del panel de estadísticas y se añadieron regresiones para correos duplicados con mayúsculas y solicitudes a la API sin sesión ni cabecera Accept. La comparación con la exportación histórica detecta un cambio en `users.last_login_ip`; una base que ya recibe sesiones puede diferir de esa instantánea.
+`npm run lint` comprueba TypeScript y TSX con las reglas recomendadas de ESLint, TypeScript, React Hooks y React Refresh. Se exigen cero errores y cero advertencias (`--max-warnings 0`), también en CI. Se mantienen las comprobaciones de dependencias, inmutabilidad, pureza, referencias y componentes estables. Los contratos conocidos usan tipos concretos; los datos aún no interpretados y los errores usan `unknown`, con comprobación antes de acceder a ellos. Solo los parámetros de compatibilidad intencionalmente ignorados pueden llevar prefijo `_`; las variables e importaciones sin uso se eliminan. No se desactivan reglas globalmente ni se difieren actualizaciones con temporizadores para eludirlas. Consulta también [la guía de interfaz](web/frontend/README.md).
+
+La comparación con la exportación histórica detecta un cambio en `users.last_login_ip`; una base que ya recibe sesiones puede diferir de esa instantánea.
 
 La conexión WebSocket, la suscripción privada y la publicación de un evento se comprobaron contra Reverb local en el puerto 9091 (8000, 8080 y 9000 no responden en este equipo). El script `node scripts/verify-reverb.cjs` repite esa comprobación sin crear registros; utiliza `ws` del backend anterior como dependencia de verificación.

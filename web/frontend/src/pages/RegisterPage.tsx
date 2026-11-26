@@ -1,9 +1,18 @@
+import { getApiErrorMessage } from '../utils/apiError.ts';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { login } from '../api/investor.api';
 import { persistUserRoleFromServer } from '../utils/authRole';
-import { AlertCircle, ArrowRight, CheckCircle2, Mail, Lock, TrendingUp, DollarSign } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowRight,
+  CheckCircle2,
+  Mail,
+  Lock,
+  TrendingUp,
+  DollarSign,
+} from 'lucide-react';
 
 function GoogleIcon() {
   return (
@@ -47,8 +56,8 @@ export function RegisterPage() {
       persistUserRoleFromServer(response.user?.roles, role);
       if (role === 'entrepreneur') navigate('/entrepreneur-profile');
       else navigate('/dashboard');
-    } catch (err: any) {
-      const msg = err?.response?.data?.message ?? 'Error al registrar el usuario.';
+    } catch (err: unknown) {
+      const msg = getApiErrorMessage(err, '') ?? 'Error al registrar el usuario.';
       setError(Array.isArray(msg) ? msg.join(', ') : msg);
     } finally {
       setLoading(false);

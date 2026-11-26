@@ -6,13 +6,9 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip as RechartsTooltip
+  Tooltip as RechartsTooltip,
 } from 'recharts';
-import {
-  TrendingUp,
-  RefreshCw,
-  HeartHandshake
-} from 'lucide-react';
+import { TrendingUp, RefreshCw, HeartHandshake } from 'lucide-react';
 import type { CapitalOverview } from '../types/investor.types';
 import type { InvestmentHistoryItem } from '../api/investor.api';
 
@@ -21,7 +17,7 @@ interface Props {
   investments: InvestmentHistoryItem[];
 }
 
-export function InvestorDashboardAnalytics({ data: _data, investments }: Props) {
+export function InvestorDashboardAnalytics({investments}: Props) {
   // Formateador de moneda
   const formatCurrency = (val: number) => {
     const formatted = new Intl.NumberFormat('es-BO', {
@@ -56,15 +52,17 @@ export function InvestorDashboardAnalytics({ data: _data, investments }: Props) 
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     
     let cumulativeSum = 0;
-    return completed.map(inv => {
+    const timeline = [];
+    for (const inv of completed) {
       cumulativeSum += inv.amount;
-      return {
+      timeline.push({
         date: new Date(inv.createdAt).toLocaleDateString('es', { month: 'short', day: 'numeric' }),
         monto: inv.amount,
         acumulado: cumulativeSum,
         campaign: inv.campaignTitle
-      };
-    });
+      });
+    }
+    return timeline;
   }, [investments]);
 
   const cardClass = "relative overflow-hidden bg-white/80 backdrop-blur-xl border border-white rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 flex flex-col group";
@@ -160,8 +158,8 @@ export function InvestorDashboardAnalytics({ data: _data, investments }: Props) 
                     color: '#fff',
                     fontFamily: "'Plus Jakarta Sans', sans-serif"
                   }}
-                  formatter={(value: any, _name: any, props: any) => [
-                    `Bs. ${value.toLocaleString('es-BO')}`, 
+                  formatter={(value, _name, props) => [
+                    `Bs. ${(value ?? 0).toLocaleString('es-BO')}`,
                     `Acumulado (${props.payload.campaign})`
                   ]}
                   labelStyle={{ fontWeight: 900, color: '#72B626', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.1em' }}

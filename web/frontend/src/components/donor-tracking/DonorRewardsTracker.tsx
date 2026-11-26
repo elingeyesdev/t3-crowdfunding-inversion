@@ -9,16 +9,19 @@ import {
   ExternalLink,
   Package,
   Calendar,
-  Sparkles,
   ArrowRight,
-  ShieldCheck,
   Search,
   XCircle,
   type LucideIcon,
 } from 'lucide-react';
 import type { InvestmentHistoryItem } from '../../api/investor.api';
 import { getImageUrl } from '../../utils/image.utils';
-import { hasInvestmentReward, rewardTrackingStatus, rewardTrackingDate, rewardTrackingUrl } from '../../utils/rewardTracking';
+import {
+  hasInvestmentReward,
+  rewardTrackingStatus,
+  rewardTrackingDate,
+  rewardTrackingUrl,
+} from '../../utils/rewardTracking';
 
 interface Props {
   investments: InvestmentHistoryItem[];

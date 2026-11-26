@@ -1,14 +1,5 @@
 import { useMemo } from 'react';
-import {
-  PieChart as PieIcon,
-  ShieldCheck,
-  CheckCircle2,
-  Clock,
-  Layers,
-  Info,
-  DollarSign,
-  TrendingUp,
-} from 'lucide-react';
+import { ShieldCheck, Info, DollarSign } from 'lucide-react';
 import { formatCampaignCurrency } from '../../../utils/campaignFunding';
 
 interface Props {
@@ -98,7 +89,8 @@ export function FundAllocationPlan({
     // Distribute executed amount progressively across categories
     let remainingCollected = currentAmount;
 
-    return baseList.map((item) => {
+    const items: BudgetItem[] = [];
+    for (const item of baseList) {
       const plannedAmount = Math.round((goalAmount * item.percentage) / 100);
       let executedAmount = 0;
 
@@ -117,13 +109,14 @@ export function FundAllocationPlan({
         status = 'en_progreso';
       }
 
-      return {
+      items.push({
         ...item,
         plannedAmount,
         executedAmount,
         status,
-      };
-    });
+      });
+    }
+    return items;
   }, [goalAmount, currentAmount, customPlan]);
 
   const totalPlanned = budgetItems.reduce((acc, curr) => acc + curr.plannedAmount, 0);

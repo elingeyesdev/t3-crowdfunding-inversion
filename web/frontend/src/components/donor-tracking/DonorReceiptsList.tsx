@@ -4,13 +4,9 @@ import {
   FileText,
   Download,
   CheckCircle2,
-  Calendar,
-  ExternalLink,
-  ShieldCheck,
   Search,
   Receipt,
   Loader2,
-  DollarSign,
   AlertCircle,
 } from 'lucide-react';
 import type { InvestmentHistoryItem } from '../../api/investor.api';

@@ -1,15 +1,27 @@
+import { useAsyncResource } from '../hooks/useAsyncResource.ts';
+import { useCallback } from 'react';
+
 import { campaignStatusLabel } from '../utils/campaignStatus';
 import { campaignTypeLabel, isSupportedCampaignType } from '../utils/campaignType.ts';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { EntrepreneurCampaign, CampaignFinancialProgress } from '../types/campaign.types';
+import type { EntrepreneurCampaign } from '../types/campaign.types';
 import { CircularFundingRing } from './CircularFundingRing';
 import { CampaignInvestorsTab } from './CampaignInvestorsTab';
 import { CampaignRewardsTab } from './CampaignRewardsTab';
 import { CampaignAnalyticsDashboard } from './CampaignAnalyticsDashboard';
-import { getCampaignFinancialProgress, getCampaignHistory as getEntrepreneurHistory, getCampaignDocuments as getEntrepreneurDocuments } from '../api/campaign.api';
-import { getCampaignFinancialProgress as getAdminFinancialProgress, getCampaignHistory as getAdminHistory, getAdminCampaignDocuments, reviewAdminCampaignDocument } from '../api/admin.api';
-import type { CampaignHistoryItem } from '../types/admin.types';
+import {
+  getCampaignFinancialProgress,
+  getCampaignHistory as getEntrepreneurHistory,
+  getCampaignDocuments as getEntrepreneurDocuments,
+} from '../api/campaign.api';
+import {
+  getCampaignFinancialProgress as getAdminFinancialProgress,
+  getCampaignHistory as getAdminHistory,
+  getAdminCampaignDocuments,
+  reviewAdminCampaignDocument,
+} from '../api/admin.api';
+
 import { formatCampaignCurrency } from '../utils/campaignFunding';
 import { getImageUrl } from '../utils/image.utils';
 import { getApiErrorMessage } from '../utils/apiError';
@@ -36,7 +48,7 @@ import {
   Play,
   Share2,
   ShieldCheck,
-  ExternalLink
+  ExternalLink,
 } from 'lucide-react';
 
 
@@ -98,7 +110,11 @@ interface Props {
   auditScore?: number;
 }
 
-export function CampaignPreviewModal({
+export function CampaignPreviewModal(props: Props) {
+  return props.open && props.campaign ? <CampaignPreviewContent key={props.campaign.id} {...props} /> : null;
+}
+
+function CampaignPreviewContent({
   campaign,
   open,
   onClose,
@@ -121,15 +137,10 @@ export function CampaignPreviewModal({
   socialLinks,
   auditScore,
 }: Props) {
-  const [finance, setFinance] = useState<CampaignFinancialProgress | null>(null);
-  const [history, setHistory] = useState<CampaignHistoryItem[]>([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [adminFeedback, setAdminFeedback] = useState('');
   const [activeTab, setActiveTab] = useState<'details' | 'investors' | 'rewards' | 'documents' | 'analytics'>('details');
 
-  const [documents, setDocuments] = useState<any[]>([]);
-  const [documentsLoading, setDocumentsLoading] = useState(false);
   const [updatingDocumentId, setUpdatingDocumentId] = useState<string | null>(null);
 
   // Custom modal dialog states
@@ -190,69 +201,24 @@ export function CampaignPreviewModal({
   const canPublish = supportedType && campaign?.status === 'approved';
   const isPendingReview = campaign?.status === 'pending_review' || campaign?.status === 'in_review';
 
-  useEffect(() => {
-    if (open && campaign) {
-      loadHistory();
-      if (campaign.status === 'published' || campaign.status === 'funded' || isAdmin) {
-        loadFinance();
-      }
-    } else {
-      setFinance(null);
-      setHistory([]);
-      setAdminFeedback('');
-      setActiveTab('details');
-    }
-  }, [open, campaign]);
-
-  const loadFinance = async () => {
-    if (!campaign) return;
-    try {
-      const data = isAdmin
-        ? await getAdminFinancialProgress(campaign.id)
-        : await getCampaignFinancialProgress(campaign.id);
-      setFinance(data);
-    } catch (err) {
-      console.error('Error loading finance:', err);
-    } finally {
-    }
-  };
-
-  const loadHistory = async () => {
-    if (!campaign) return;
-    try {
-      setHistoryLoading(true);
-      const data = isAdmin
-        ? await getAdminHistory(campaign.id)
-        : await getEntrepreneurHistory(campaign.id);
-      setHistory(data);
-    } catch (err) {
-      console.error('Error loading history:', err);
-    } finally {
-      setHistoryLoading(false);
-    }
-  };
-
-  const loadDocuments = async () => {
-    if (!campaign) return;
-    try {
-      setDocumentsLoading(true);
-      const data = isAdmin
-        ? await getAdminCampaignDocuments(campaign.id)
-        : await getEntrepreneurDocuments(campaign.id);
-      setDocuments(data);
-    } catch (err) {
-      console.error('Error loading documents:', err);
-    } finally {
-      setDocumentsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (activeTab === 'documents' && campaign) {
-      loadDocuments();
-    }
-  }, [activeTab, campaign]);
-
+  const campaignId = campaign?.id ?? '';
+  const fetchHistory = useCallback(() => isAdmin ? getAdminHistory(campaignId) : getEntrepreneurHistory(campaignId), [campaignId,isAdmin]);
+  const historyResource = useAsyncResource(fetchHistory, open && !!campaignId);
+  const history = historyResource.data ?? [];
+  const historyLoading = historyResource.loading;
+  const fetchFinance = useCallback(() => isAdmin ? getAdminFinancialProgress(campaignId) : getCampaignFinancialProgress(campaignId), [campaignId,isAdmin]);
+  const financeResource = useAsyncResource(
+    fetchFinance,
+    open &&
+      !!campaignId &&
+      (campaign?.status === 'published' || campaign?.status === 'funded' || !!isAdmin)
+  );
+  const finance = financeResource.data;
+  const fetchDocuments = useCallback(() => isAdmin ? getAdminCampaignDocuments(campaignId) : getEntrepreneurDocuments(campaignId), [campaignId,isAdmin]);
+  const documentsResource = useAsyncResource(fetchDocuments, open && !!campaignId && activeTab === 'documents');
+  const documents = documentsResource.data ?? [];
+  const documentsLoading = documentsResource.loading;
+  const loadDocuments = documentsResource.refetch;
   const handleDocumentVisibility = async (docId: string, isPublic: boolean) => {
     if (!campaign || !isAdmin || updatingDocumentId) return;
     setUpdatingDocumentId(docId);
@@ -837,7 +803,7 @@ export function CampaignPreviewModal({
                   <p className="text-slate-400 text-center py-10">No hay documentos subidos para esta campaña.</p>
                 ) : (
                   <div className="space-y-4">
-                    {documents.map((doc: any) => (
+                    {documents.map((doc) => (
                       <div key={doc.id} className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 border border-slate-100 rounded-2xl gap-4">
                         <div className="flex-1">
                           <p className="font-bold text-[14px] mb-1">{doc.original_name}</p>

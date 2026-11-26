@@ -1,18 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useAsyncResource } from '../hooks/useAsyncResource.ts';
+import { useCallback } from 'react';
+import { useState } from 'react';
 import { getCampaignInvestors } from '../api/campaign.api';
 import { getAdminCampaignInvestors } from '../api/admin.api';
-import type { CampaignInvestor, PaginatedResponse } from '../types/campaign.types';
-import { 
-  Users, 
-  Mail, 
-  MapPin, 
-  Calendar, 
-  MessageSquare, 
+import type { CampaignInvestor } from '../types/campaign.types';
+import {
+  Users,
+  Mail,
+  MapPin,
+  Calendar,
+  MessageSquare,
   Heart,
   Loader2,
   ChevronRight,
   ExternalLink,
-  X
+  X,
 } from 'lucide-react';
 import { getImageUrl } from '../utils/image.utils';
 import { formatCampaignCurrency } from '../utils/campaignFunding';
@@ -24,31 +26,15 @@ interface Props {
 }
 
 export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: Props) {
-  const [data, setData] = useState<PaginatedResponse<CampaignInvestor> | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [selectedInvestor, setSelectedInvestor] = useState<CampaignInvestor | null>(null);
 
-  useEffect(() => {
-    loadInvestors();
-  }, [campaignId, page]);
-
-  const loadInvestors = async () => {
-    try {
-      setLoading(true);
-      const result = isAdmin 
-        ? await getAdminCampaignInvestors(campaignId, page)
-        : await getCampaignInvestors(campaignId, page);
-      setData(result);
-    } catch (err) {
-      console.error(err);
-      setError('No se pudieron cargar los donadores.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  const load = useCallback(() => isAdmin ? getAdminCampaignInvestors(campaignId, page) : getCampaignInvestors(campaignId, page), [campaignId,page,isAdmin]);
+  const resource = useAsyncResource(load);
+  const data = resource.data;
+  const loading = resource.loading;
+  const error = resource.error ? 'No se pudieron cargar los donadores.' : null;
+  const loadInvestors = resource.retry;
   if (loading && !data) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">

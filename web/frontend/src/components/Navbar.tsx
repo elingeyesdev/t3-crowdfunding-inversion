@@ -1,3 +1,5 @@
+import { useCallback } from 'react';
+import { getApiErrorStatus } from '../utils/apiError.ts';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, LogOut, User, MessageCircle, Settings, Bell } from 'lucide-react';
@@ -6,7 +8,7 @@ import { getMyConversations } from '../api/chat.api';
 import { logout } from '../api/auth.api';
 
 interface NavbarProps {
-  socket?: any;
+  socket?: {on: (event: string, listener: () => void) => void; off: (event: string, listener: () => void) => void};
 }
 
 
@@ -21,6 +23,11 @@ export function Navbar({ socket }: NavbarProps) {
   const adminAccessLevel = localStorage.getItem('adminAccessLevel');
   const isAdmin = userRole === 'admin' || userRole === 'super_admin' || Boolean(adminAccessLevel);
 
+  const handleLogout = useCallback(async () => {
+    try { await logout(); } catch { /* La sesión local se limpia aunque el servidor no responda. */ }
+    navigate('/login');
+  }, [navigate]);
+
   useEffect(() => {
     if (!userEmail) return;
 
@@ -29,9 +36,9 @@ export function Navbar({ socket }: NavbarProps) {
         const conversations = await getMyConversations();
         const count = conversations.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0);
         setUnreadCount(count);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching unread count', err);
-        if (err?.response?.status === 401) {
+        if (getApiErrorStatus(err) === 401) {
           handleLogout();
         }
       }
@@ -39,7 +46,7 @@ export function Navbar({ socket }: NavbarProps) {
     fetchUnread();
     const interval = setInterval(fetchUnread, 10000);
     return () => clearInterval(interval);
-  }, [userEmail]);
+  }, [userEmail, handleLogout]);
 
   useEffect(() => {
     if (!socket) return;
@@ -54,10 +61,7 @@ export function Navbar({ socket }: NavbarProps) {
     };
   }, [socket]);
 
-  const handleLogout = async () => {
-    try { await logout(); } catch { /* La sesión local se limpia aunque el servidor no responda. */ }
-    navigate('/login');
-  };
+
 
   const isActive = (path: string) => location.pathname === path;
 

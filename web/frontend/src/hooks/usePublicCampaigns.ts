@@ -1,11 +1,8 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useAsyncResource } from './useAsyncResource.ts';
+import { getApiErrorMessage } from '../utils/apiError.ts';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import {
-  fetchPublicCampaigns,
-  type PublicCampaign,
-  type PaginatedPublicCampaigns,
-  type PublicCampaignFilters,
-} from '../api/public-campaigns.api';
+import { fetchPublicCampaigns, type PublicCampaignFilters } from '../api/public-campaigns.api';
 
 /**
  * Reads initial filter values from URL search params so that
@@ -42,11 +39,6 @@ function filtersToSearchParams(f: PublicCampaignFilters): URLSearchParams {
 export function usePublicCampaigns(initialFilters: PublicCampaignFilters = {}) {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [campaigns, setCampaigns] = useState<PublicCampaign[]>([]);
-  const [meta, setMeta] = useState<PaginatedPublicCampaigns['meta'] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   // Initialize filters from URL on first render
   const [filters, setFilters] = useState<PublicCampaignFilters>(() => ({
     ...filtersFromSearchParams(searchParams),
@@ -58,25 +50,12 @@ export function usePublicCampaigns(initialFilters: PublicCampaignFilters = {}) {
     setSearchParams(filtersToSearchParams(filters), { replace: true });
   }, [filters, setSearchParams]);
 
-  const loadCampaigns = useCallback(async (f: PublicCampaignFilters) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await fetchPublicCampaigns(f);
-      setCampaigns(result.data);
-      setMeta(result.meta);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Error al cargar campañas');
-      setCampaigns([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadCampaigns(filters);
-  }, [filters, loadCampaigns]);
-
+  const load = useCallback(() => fetchPublicCampaigns(filters), [filters]);
+  const resource = useAsyncResource(load);
+  const campaigns = resource.data?.data ?? [];
+  const meta = resource.data?.meta ?? null;
+  const loading = resource.loading;
+  const error = resource.error ? getApiErrorMessage(resource.error, 'Error al cargar campañas') : null;
   const updateFilters = useCallback((partial: Partial<PublicCampaignFilters>) => {
     setFilters(prev => ({
       ...prev,
@@ -89,9 +68,7 @@ export function usePublicCampaigns(initialFilters: PublicCampaignFilters = {}) {
     setFilters(prev => ({ ...prev, page }));
   }, []);
 
-  const refresh = useCallback(() => {
-    loadCampaigns(filters);
-  }, [filters, loadCampaigns]);
+  const refresh = resource.retry;
 
   return {
     campaigns,

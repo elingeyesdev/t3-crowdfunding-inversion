@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Volume2, VolumeX, Play } from 'lucide-react';
 
 /* ─────────────────────────────────────────────
@@ -98,7 +98,6 @@ export function PitchVideoPlayer({ videoUrl, isActive }: PitchVideoPlayerProps) 
       }, 400);
       return () => clearTimeout(t);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive, embedUrl]);
 
   // Send mute/unmute command via postMessage whenever muted state changes

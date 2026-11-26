@@ -1,27 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  TrendingUp,
-  Clock,
-  Gift,
-  FileText,
-  ArrowRight,
-  Search,
-  Filter,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  FolderOpen,
-  Loader2,
-  Heart,
-  Calendar,
-  Layers,
-} from 'lucide-react';
+import { Gift, FileText, ArrowRight, Search, Loader2, Heart, Calendar } from 'lucide-react';
 import type { InvestmentHistoryItem } from '../../api/investor.api';
 import { hasInvestmentReward, rewardTrackingLabel } from '../../utils/rewardTracking';
 import { downloadInvestmentReceipt } from '../../api/investor.api';
 import { getImageUrl } from '../../utils/image.utils';
-import { ProgressBar } from '../ProgressBar';
+
 import { campaignTypeLabel } from '../../utils/campaignType.ts';
 
 interface Props {
@@ -30,7 +14,7 @@ interface Props {
   onSelectTab?: (tab: string) => void;
 }
 
-export function DonorContributionsFeed({ investments, loading, onSelectTab }: Props) {
+export function DonorContributionsFeed({investments, loading}: Props) {
   const [sortType, setSortType] = useState<string>('newest');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');

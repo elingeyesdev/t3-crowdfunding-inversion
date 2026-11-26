@@ -1,3 +1,11 @@
+import type {
+  CampaignFinancialProgress,
+  PaginatedResponse,
+  CampaignInvestor,
+  RewardClaim,
+  CampaignDocument,
+} from '../types/campaign.types';
+import type { CampaignFinancialAudit } from '../types/admin.types';
 import axios from 'axios';
 import type { KycReviewData } from '../types/kyc.types';
 import type {
@@ -50,8 +58,8 @@ export async function getAllCampaigns(): Promise<SystemCampaign[]> {
   return data.data;
 }
 
-export async function updateCampaignStatus(id: string, status: string, feedback?: string): Promise<any> {
-  const { data } = await api.patch<ApiSuccessResponse<any>>(`/admin/campaigns/${id}/status`, { 
+export async function updateCampaignStatus(id: string, status: string, feedback?: string): Promise<SystemCampaign> {
+  const { data } = await api.patch<ApiSuccessResponse<SystemCampaign>>(`/admin/campaigns/${id}/status`, {
     status,
     feedback 
   });
@@ -59,8 +67,8 @@ export async function updateCampaignStatus(id: string, status: string, feedback?
 }
 
 // SuperAdmin endpoints
-export async function createAdmin(dto: any): Promise<any> {
-  const { data } = await api.post<ApiSuccessResponse<any>>('/superadmin/admins', dto);
+export async function createAdmin(dto: {email: string; password: string; firstName?: string; lastName?: string; accessLevel?: string}): Promise<AdminUser> {
+  const { data } = await api.post<ApiSuccessResponse<AdminUser>>('/superadmin/admins', dto);
   return data.data;
 }
 
@@ -84,13 +92,13 @@ export async function getUserStatusHistory(id: string, page = 1): Promise<UserSt
   return data.data;
 }
 
-export async function hardDeleteCampaign(id: string): Promise<any> {
-  const { data } = await api.delete<ApiSuccessResponse<any>>(`/admin/campaigns/${id}`);
+export async function hardDeleteCampaign(id: string): Promise<unknown> {
+  const { data } = await api.delete<ApiSuccessResponse<unknown>>(`/admin/campaigns/${id}`);
   return data.data;
 }
 
-export async function deleteAdmin(id: string): Promise<any> {
-  const { data } = await api.delete<ApiSuccessResponse<any>>(`/superadmin/admins/${id}`);
+export async function deleteAdmin(id: string): Promise<unknown> {
+  const { data } = await api.delete<ApiSuccessResponse<unknown>>(`/superadmin/admins/${id}`);
   return data.data;
 }
 
@@ -100,8 +108,8 @@ export async function getPendingCampaigns(params: {
   search?: string;
   type?: string;
   status?: string;
-}): Promise<{ campaigns: PendingCampaign[]; total: number }> {
-  const { data } = await api.get<ApiSuccessResponse<any>>('/admin/campaigns/pending', {
+}): Promise<{campaigns: PendingCampaign[]; total: number}> {
+  const { data } = await api.get<ApiSuccessResponse<{data: AdminCampaignWire[]; meta: {totalItems: number}}>>('/admin/campaigns/pending', {
     params: {
       page: params.page,
       limit: params.limit,
@@ -111,14 +119,14 @@ export async function getPendingCampaigns(params: {
   });
 
   return {
-    campaigns: data.data.data.map((c: any) => ({
+    campaigns: data.data.data.map((c) => ({
       id: c.id,
-      title: c.title,
+      title: c.title ?? 'Campaña sin título',
       campaign_type: c.campaign_type ?? c.campaignType ?? '',
-      entrepreneur_name: c.entrepreneur_name,
+      entrepreneur_name: c.entrepreneur_name ?? '',
       category_name: c.category_name || 'Sin categoría',
       goal_amount: c.goal_amount.toString(),
-      created_at: c.created_at,
+      created_at: c.created_at ?? '',
       audit_score: c.audit_score,
     })),
     total: data.data.meta.totalItems,
@@ -127,7 +135,7 @@ export async function getPendingCampaigns(params: {
 
 export async function getCampaignDetail(id: string): Promise<PendingCampaignDetail> {
   try {
-    const { data } = await api.get<ApiSuccessResponse<any>>(`/admin/campaigns/${id}`);
+    const { data } = await api.get<ApiSuccessResponse<AdminCampaignWire>>(`/admin/campaigns/${id}`);
     const c = data.data;
 
     if (!c) {
@@ -155,16 +163,16 @@ export async function getCampaignDetail(id: string): Promise<PendingCampaignDeta
       main_image_url: mainImageUrl,
       short_description: c.short_description || c.shortDescription || '',
       description: c.description || '',
-      reward_tiers: (c.reward_tiers || c.rewardTiers || []).map((t: any) => ({
+      reward_tiers: (c.reward_tiers || c.rewardTiers || []).map((t) => ({
         title: t.title || 'Recompensa',
-        min_percentage: parseFloat(t.min_percentage || t.minPercentage || 0),
-        max_percentage: parseFloat(t.max_percentage || t.maxPercentage || 100),
+        min_percentage: Number(t.min_percentage || t.minPercentage || 0),
+        max_percentage: Number(t.max_percentage || t.maxPercentage || 100),
         description: t.description || '',
         delivery_date: t.delivery_date || t.deliveryDate || new Date().toISOString(),
       })),
       goal_amount: (c.goal_amount || c.goalAmount || 0).toString(),
-      current_amount: parseFloat(c.current_amount || c.currentAmount || 0),
-      investor_count: parseInt(c.investor_count || c.investorsCount || 0, 10),
+      current_amount: Number(c.current_amount || c.currentAmount || 0),
+      investor_count: Number(c.investor_count || c.investorsCount || 0),
       start_date: c.start_date || c.startDate || new Date().toISOString(),
       end_date: c.end_date || c.endDate || new Date().toISOString(),
       location: c.location || 'Global',
@@ -177,8 +185,8 @@ export async function getCampaignDetail(id: string): Promise<PendingCampaignDeta
       entrepreneur_linkedin: c.entrepreneur_linkedin || c.metadata?.social_links?.linkedin,
       entrepreneur_website: c.entrepreneur_website || c.metadata?.social_links?.website,
       media: c.media || [],
-      min_investment: parseFloat(c.min_investment || 0),
-      max_investment: c.max_investment ? parseFloat(c.max_investment) : undefined,
+      min_investment: Number(c.min_investment || 0),
+      max_investment: c.max_investment ? Number(c.max_investment) : undefined,
       subtitle: c.subtitle || '',
       risks_and_challenges: c.risks_and_challenges || '',
       video_url: c.video_url || '',
@@ -195,25 +203,25 @@ export async function getCampaignHistory(id: string): Promise<CampaignHistoryIte
   return data.data;
 }
 
-export async function getCampaignFinancialProgress(id: string): Promise<any> {
-  const { data } = await api.get<ApiSuccessResponse<any>>(`/admin/campaigns/${id}/financial-progress`);
+export async function getCampaignFinancialProgress(id: string): Promise<CampaignFinancialProgress> {
+  const { data } = await api.get<ApiSuccessResponse<CampaignFinancialProgress>>(`/admin/campaigns/${id}/financial-progress`);
   return data.data;
 }
 
-export async function getAdminCampaignInvestors(id: string, page: number = 1, limit: number = 20): Promise<any> {
-  const { data } = await api.get<ApiSuccessResponse<any>>(`/admin/campaigns/${id}/investors`, {
+export async function getAdminCampaignInvestors(id: string, page: number = 1, limit: number = 20): Promise<PaginatedResponse<CampaignInvestor>> {
+  const { data } = await api.get<ApiSuccessResponse<PaginatedResponse<CampaignInvestor>>>(`/admin/campaigns/${id}/investors`, {
     params: { page, limit }
   });
   return data.data;
 }
 
-export async function getAdminRewardClaims(id: string): Promise<any[]> {
-  const { data } = await api.get<ApiSuccessResponse<any[]>>(`/admin/campaigns/${id}/rewards/claims`);
+export async function getAdminRewardClaims(id: string): Promise<RewardClaim[]> {
+  const { data } = await api.get<ApiSuccessResponse<RewardClaim[]>>(`/admin/campaigns/${id}/rewards/claims`);
   return data.data;
 }
 
-export async function getAdminCampaignDocuments(id: string): Promise<any[]> {
-  const { data } = await api.get<ApiSuccessResponse<any[]>>(`/admin/campaigns/${id}/documents`);
+export async function getAdminCampaignDocuments(id: string): Promise<CampaignDocument[]> {
+  const { data } = await api.get<ApiSuccessResponse<CampaignDocument[]>>(`/admin/campaigns/${id}/documents`);
   return data.data;
 }
 
@@ -223,8 +231,8 @@ export async function reviewAdminCampaignDocument(
   status: 'approved' | 'rejected',
   reviewerNotes?: string,
   isPublic?: boolean
-): Promise<any> {
-  const { data } = await api.patch<ApiSuccessResponse<any>>(
+): Promise<CampaignDocument> {
+  const { data } = await api.patch<ApiSuccessResponse<CampaignDocument>>(
     `/admin/campaigns/${campaignId}/documents/${docId}/review`,
     { status, ...(reviewerNotes !== undefined ? { reviewerNotes } : {}), ...(isPublic !== undefined ? { isPublic } : {}) }
   );
@@ -232,7 +240,7 @@ export async function reviewAdminCampaignDocument(
 }
 
 export async function getPendingKyc(): Promise<KycReviewData[]> {
-  const { data } = await api.get<ApiSuccessResponse<any[]>>('/admin/kyc/pending');
+  const { data } = await api.get<ApiSuccessResponse<KycReviewData[]>>('/admin/kyc/pending');
   return data.data;
 }
 
@@ -241,8 +249,8 @@ export async function getKycProfile(id: string): Promise<KycReviewData> {
   return data.data;
 }
 
-export async function reviewKyc(entrepreneurId: string, action: 'approve' | 'reject', reason?: string): Promise<any> {
-  const { data } = await api.post<ApiSuccessResponse<any>>(`/admin/kyc/${entrepreneurId}/review`, { action, reason });
+export async function reviewKyc(entrepreneurId: string, action: 'approve' | 'reject', reason?: string): Promise<unknown> {
+  const { data } = await api.post<ApiSuccessResponse<unknown>>(`/admin/kyc/${entrepreneurId}/review`, { action, reason });
   return data.data;
 }
 
@@ -260,8 +268,8 @@ export async function getAdminFinancialMovements(params: {
   sortOrder?: string;
   dateFrom?: string;
   dateTo?: string;
-}): Promise<{ data: FinancialMovementAuditItem[]; total: number; page: number; perPage: number }> {
-  const { data } = await api.get<ApiSuccessResponse<any>>('/admin/financial-movements', {
+}): Promise<{data: FinancialMovementAuditItem[]; total: number; page: number; perPage: number}> {
+  const { data } = await api.get<ApiSuccessResponse<{data: FinancialMovementAuditItem[]; total: number; page: number; perPage: number}>>('/admin/financial-movements', {
     params,
   });
   return data.data;
@@ -290,8 +298,44 @@ export async function getAdminFinancialAuditSummary(): Promise<FinancialAuditSum
   return data.data;
 }
 
-export async function getAdminCampaignFinancialAudit(campaignId: string): Promise<any> {
-  const { data } = await api.get<ApiSuccessResponse<any>>(`/admin/campaigns/${campaignId}/financial-audit`);
+export async function getAdminCampaignFinancialAudit(campaignId: string): Promise<CampaignFinancialAudit> {
+  const { data } = await api.get<ApiSuccessResponse<CampaignFinancialAudit>>(`/admin/campaigns/${campaignId}/financial-audit`);
   return data.data;
 }
 
+
+interface AdminRewardWire {
+  title?: string;
+  description?: string;
+  min_percentage?: number | string;
+  minPercentage?: number;
+  max_percentage?: number | string;
+  maxPercentage?: number;
+  delivery_date?: string;
+  deliveryDate?: string;
+}
+interface AdminCampaignWire extends Omit<
+  Partial<PendingCampaignDetail>,
+  'goal_amount' | 'current_amount' | 'investor_count' | 'reward_tiers'
+> {
+  id: string;
+  created_at?: string;
+  goal_amount: number | string;
+  current_amount?: number | string;
+  investor_count?: number | string;
+  campaignType?: string;
+  coverImageUrl?: string;
+  shortDescription?: string;
+  reward_tiers?: AdminRewardWire[];
+  rewardTiers?: AdminRewardWire[];
+  goalAmount?: number;
+  currentAmount?: number;
+  investorsCount?: number;
+  startDate?: string;
+  endDate?: string;
+  categoryName?: string;
+  creator_email?: string;
+  avatar_url?: string;
+  entrepreneur_name?: string;
+  metadata?: { social_links?: { linkedin?: string; website?: string } };
+}

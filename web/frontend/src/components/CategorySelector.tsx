@@ -1,29 +1,30 @@
-﻿import { useEffect, useState } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { getCategories } from '../api/categories.api';
 import type { Category } from '../types/category.types';
-import { 
-  Cpu, 
-  Stethoscope, 
-  GraduationCap, 
-  Leaf, 
-  Palette, 
-  Handshake, 
-  Utensils, 
-  Shirt, 
-  Gamepad2, 
-  Building2, 
-  Coins, 
-  Sprout, 
-  Car, 
-  Radio, 
-  Users, 
+import {
+  Cpu,
+  Stethoscope,
+  GraduationCap,
+  Leaf,
+  Palette,
+  Handshake,
+  Utensils,
+  Shirt,
+  Gamepad2,
+  Building2,
+  Coins,
+  Sprout,
+  Car,
+  Radio,
+  Users,
   Pin,
   Check,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 
 // Mapa de íconos por nombre de categoría
-const CATEGORY_ICONS: Record<string, any> = {
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
   technology:   Cpu,
   health:       Stethoscope,
   education:    GraduationCap,

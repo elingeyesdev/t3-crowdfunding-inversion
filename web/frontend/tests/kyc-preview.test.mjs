@@ -13,7 +13,7 @@ for (const name of ['window', 'document', 'navigator', 'HTMLElement', 'Node', 'M
 }
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 globalThis.localStorage = { getItem: () => 'admin-token' };
-Object.defineProperty(navigator, 'mediaDevices', { value: { getUserMedia: async () => { throw new Error('No camera in test'); } } });
+Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: { getUserMedia: async () => { throw new Error('No camera in test'); } } });
 URL.createObjectURL = () => 'blob:test-kyc-preview';
 URL.revokeObjectURL = () => {};
 const { createRoot } = await import('react-dom/client');
@@ -202,6 +202,67 @@ test('the upload form accepts videos and previews them with a video element', as
   await act(async () => faceInput.dispatchEvent(new Event('change', { bubbles: true })));
   assert.ok(container.querySelector('video[controls]'));
   assert.equal(container.querySelector('img'), null);
+});
+
+test('an unavailable camera API shows an inline error and keeps file upload available', async () => {
+  const original = navigator.mediaDevices;
+  Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: undefined });
+  try {
+    await render(createElement(KYCUploadModal, { onClose() {}, onSuccess() {} }));
+    const input = container.querySelector('input[type="file"]');
+    Object.defineProperty(input, 'files', { value: [new dom.window.File(['pdf'], 'id.pdf', { type: 'application/pdf' })] });
+    await act(async () => input.dispatchEvent(new Event('change', { bubbles: true })));
+    await click('Siguiente');
+    assert.match(container.textContent, /No se pudo acceder a la cámara/);
+    assert.ok(container.querySelector('input[type="file"]'));
+    assert.equal([...container.querySelectorAll('button')].find(node => node.textContent.includes('Activar cámara')).disabled, false);
+  } finally {
+    Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: original });
+  }
+});
+
+test('returning to the camera step starts a fresh request without showing the previous error', async () => {
+  const original = navigator.mediaDevices;
+  let attempts = 0;
+  Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: { getUserMedia: () => ++attempts === 1 ? Promise.reject(new Error('Permission denied')) : new Promise(() => {}) } });
+  try {
+    await render(createElement(KYCUploadModal, { onClose() {}, onSuccess() {} }));
+    const input = container.querySelector('input[type="file"]');
+    Object.defineProperty(input, 'files', { value: [new dom.window.File(['pdf'], 'id.pdf', { type: 'application/pdf' })] });
+    await act(async () => input.dispatchEvent(new Event('change', { bubbles: true })));
+    await click('Siguiente');
+    assert.match(container.textContent, /No se pudo acceder a la cámara/);
+    await click('Atrás');
+    await click('Siguiente');
+    assert.equal(attempts, 2);
+    assert.doesNotMatch(container.textContent, /No se pudo acceder a la cámara/);
+    assert.match(container.textContent, /Iniciando/);
+  } finally {
+    Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: original });
+  }
+});
+
+test('a camera response arriving after selecting a file stops its stream instead of activating it', async () => {
+  const original = navigator.mediaDevices;
+  let resolveCamera;
+  let stopped = 0;
+  Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: { getUserMedia: () => new Promise(resolve => { resolveCamera = resolve; }) } });
+  try {
+    await render(createElement(KYCUploadModal, { onClose() {}, onSuccess() {} }));
+    const input = container.querySelector('input[type="file"]');
+    Object.defineProperty(input, 'files', { value: [new dom.window.File(['pdf'], 'id.pdf', { type: 'application/pdf' })] });
+    await act(async () => input.dispatchEvent(new Event('change', { bubbles: true })));
+    await click('Siguiente');
+    const face = container.querySelector('input[type="file"]');
+    Object.defineProperty(face, 'files', { value: [new dom.window.File(['photo'], 'face.jpg', { type: 'image/jpeg' })] });
+    await act(async () => face.dispatchEvent(new Event('change', { bubbles: true })));
+    await act(async () => resolveCamera({ getTracks: () => [{ stop() { stopped++; } }] }));
+    assert.equal(stopped, 1);
+    assert.match(container.textContent, /Cambiar foto o video/);
+    assert.equal(container.querySelector('video'), null);
+  } finally {
+    Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: original });
+  }
 });
 
 test('the refresh API uses the authenticated administrative route', async () => {

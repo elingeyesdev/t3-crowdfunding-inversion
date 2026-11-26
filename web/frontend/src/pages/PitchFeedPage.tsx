@@ -6,8 +6,14 @@ import { PitchVideoPlayer } from '../components/campaigns/PitchVideoPlayer';
 import { getImageUrl } from '../utils/image.utils';
 import axios from 'axios';
 import {
-  Rocket, TrendingUp, Users, ArrowRight,
-  Loader2, AlertCircle, RefreshCw, Play,
+  Rocket,
+  TrendingUp,
+  Users,
+  ArrowRight,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+  Play,
 } from 'lucide-react';
 
 const GREEN = '#72B626';
@@ -186,7 +192,6 @@ export function PitchFeedPage() {
 
   // ── Fetch campaigns with videoUrl only ──
   useEffect(() => {
-    setLoading(true);
     fetchPublicCampaigns({ limit: 50 })
       .then(result => {
         const withVideo = result.data.filter(c => c.videoUrl && c.videoUrl.trim() !== '');

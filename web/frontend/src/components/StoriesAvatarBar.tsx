@@ -1,6 +1,11 @@
-﻿import { useEffect, useRef, useState, useCallback } from 'react';
+import { useAsyncResource } from '../hooks/useAsyncResource.ts';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getRecentStories, type CampaignStoryGroup, type StoryItem } from '../api/public-campaigns.api';
+import {
+  getRecentStories,
+  type CampaignStoryGroup,
+  type StoryItem,
+} from '../api/public-campaigns.api';
 import { getImageUrl } from '../utils/image.utils';
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
@@ -162,8 +167,9 @@ function StoryViewer({ group, onClose, onPrevGroup, onNextGroup }: ViewerProps) 
     }
   };
 
+  const [previousStory, setPreviousStory] = useState(currentIdx);
+  if (previousStory !== currentIdx) { setPreviousStory(currentIdx); setProgress(0); }
   useEffect(() => {
-    setProgress(0);
     intervalRef.current = setInterval(() => {
       setProgress(p => {
         if (p >= 100) {
@@ -310,34 +316,22 @@ function StoryViewer({ group, onClose, onPrevGroup, onNextGroup }: ViewerProps) 
 // ─── Main StoriesAvatarBar ────────────────────────────────────────────────────
 
 export function StoriesAvatarBar({ style }: { style?: React.CSSProperties }) {
-  const [groups, setGroups] = useState<CampaignStoryGroup[]>([]);
-  const [loading, setLoading] = useState(true);
+
+
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
-  const [unseenMap, setUnseenMap] = useState<Record<string, boolean>>({});
+  const [seenOverrides, setUnseenMap] = useState<Record<string, boolean>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await getRecentStories();
-      const limited = data.slice(0, 8);
-      setGroups(limited);
-
-      const map: Record<string, boolean> = {};
-      for (const g of limited) {
-        const latest = g.stories[g.stories.length - 1].createdAt;
-        map[g.campaignId] = isUnseen(g.campaignId, latest);
-      }
-      setUnseenMap(map);
-    } catch {
-      // Stories are optional — fail silently
-    } finally {
-      setLoading(false);
-    }
+    const groups = (await getRecentStories()).slice(0,8);
+    const unseen: Record<string,boolean> = {};
+    for(const group of groups) { const latest = group.stories[group.stories.length-1]?.createdAt; if(latest) unseen[group.campaignId] = isUnseen(group.campaignId,latest); }
+    return {groups,unseen};
   }, []);
-
-  useEffect(() => { load(); }, [load]);
-
+  const resource = useAsyncResource(load);
+  const groups = resource.data?.groups ?? [];
+  const loading = resource.loading;
+  const unseenMap = {...resource.data?.unseen, ...seenOverrides};
   const openStory = (idx: number) => {
     setActiveIdx(idx);
     const g = groups[idx];

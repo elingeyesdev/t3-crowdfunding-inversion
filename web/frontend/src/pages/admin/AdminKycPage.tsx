@@ -1,42 +1,23 @@
+import { useAsyncResource } from '../../hooks/useAsyncResource.ts';
+import { useCallback } from 'react';
 import type { KycReviewData } from '../../types/kyc.types';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { getPendingKyc, getKycProfile, reviewKyc } from '../../api/admin.api';
 import { KYCReviewModal } from '../../components/admin/KYCReviewModal';
-import { 
-  UserCheck, 
-  Search, 
-  Eye, 
-  Mail, 
-  Calendar,
-  Building,
-  CheckCircle2
-} from 'lucide-react';
+import { UserCheck, Search, Eye, Mail, Calendar, Building, CheckCircle2 } from 'lucide-react';
 
 export function AdminKycPage() {
-  const [pendingKyc, setPendingKyc] = useState<KycReviewData[]>([]);
-  const [loading, setLoading] = useState(true);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedKyc, setSelectedKyc] = useState<KycReviewData | null>(null);
   const [isKycModalOpen, setIsKycModalOpen] = useState(false);
 
-  useEffect(() => {
-    loadKyc();
-  }, []);
-
-  const loadKyc = async () => {
-    try {
-      setLoading(true);
-      const data = await getPendingKyc();
-      // Sort by updated_at descending
-      const sorted = [...data].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
-      setPendingKyc(sorted);
-    } catch (error) {
-      console.error('Error loading pending KYC:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const load = useCallback(async () => [...await getPendingKyc()].sort((a,b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()), []);
+  const resource = useAsyncResource(load);
+  const pendingKyc = resource.data ?? [];
+  const loading = resource.loading;
+  const loadKyc = resource.refetch;
 
   const handleApproveKyc = async (id: string) => {
     try {

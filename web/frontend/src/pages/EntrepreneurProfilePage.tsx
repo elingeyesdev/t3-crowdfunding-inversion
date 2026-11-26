@@ -1,3 +1,7 @@
+import { useAsyncResource } from '../hooks/useAsyncResource.ts';
+import { useCallback } from 'react';
+import type { EntrepreneurCampaign, CreateCampaignDto } from '../types/campaign.types';
+import type { CreateEntrepreneurProfileDto } from '../types/entrepreneur.types';
 import { useState, useEffect } from 'react';
 import { useEntrepreneurProfile } from '../hooks/useEntrepreneurProfile';
 import { useCampaigns } from '../hooks/useCampaigns';
@@ -19,14 +23,13 @@ import {
   AlertCircle,
   Loader2,
   User,
-  Building2,
   MapPin,
   CreditCard,
   Globe,
   ExternalLink,
   Rocket,
   Wallet,
-  Building
+  Building,
 } from 'lucide-react';
 
 type ModalType = 'profile' | 'personal' | 'company' | 'address' | 'banking' | 'avatar' | 'new-campaign' | 'edit-campaign' | 'kyc' | null;
@@ -50,7 +53,7 @@ export function EntrepreneurProfilePage() {
     await performDeleteProfile();
   };
 
-  const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
+  const [selectedCampaign, setSelectedCampaign] = useState<EntrepreneurCampaign | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const {
     campaigns,
@@ -69,34 +72,11 @@ export function EntrepreneurProfilePage() {
   const [onboardingTriggered, setOnboardingTriggered] = useState(false);
 
   const [selectedFinanceCampaignId, setSelectedFinanceCampaignId] = useState<string>('');
-  const [campaignFinance, setCampaignFinance] = useState<any>(null);
-  const [financeLoading, setFinanceLoading] = useState(false);
-
-  useEffect(() => {
-    if (campaigns && campaigns.length > 0 && !selectedFinanceCampaignId) {
-      setSelectedFinanceCampaignId(campaigns[0].id);
-    }
-  }, [campaigns, selectedFinanceCampaignId]);
-
-  useEffect(() => {
-    if (selectedFinanceCampaignId) {
-      const loadFinanceData = async () => {
-        setFinanceLoading(true);
-        try {
-          const data = await getCampaignFinancialProgress(selectedFinanceCampaignId);
-          setCampaignFinance(data);
-        } catch (err) {
-          console.error('Error loading campaign finance details:', err);
-        } finally {
-          setFinanceLoading(false);
-        }
-      };
-      loadFinanceData();
-    } else {
-      setCampaignFinance(null);
-    }
-  }, [selectedFinanceCampaignId]);
-
+  const financeCampaignId = selectedFinanceCampaignId || campaigns[0]?.id || '';
+  const loadFinance = useCallback(() => getCampaignFinancialProgress(financeCampaignId), [financeCampaignId]);
+  const financeResource = useAsyncResource(loadFinance, !!financeCampaignId);
+  const campaignFinance = financeResource.data;
+  const financeLoading = financeResource.loading;
   const userEmail = localStorage.getItem('userEmail') ?? '';
 
   // Auto-onboarding: Abrir modal si el perfil está vacío por primera vez
@@ -110,9 +90,9 @@ export function EntrepreneurProfilePage() {
     }
   }, [profileLoading, profile, onboardingTriggered]);
 
-  const handleSave = async (type: string, data: any, file?: File, documents?: { file: File; justification: string }[]) => {
+  const handleSave = async (type: string, data: Partial<CreateEntrepreneurProfileDto> & Partial<CreateCampaignDto>, file?: File, documents?: { file: File; justification: string }[]) => {
     if (type === 'new-campaign') {
-      const id = await addCampaign(data, file, documents);
+      const id = await addCampaign({ ...data, title: data.title ?? '', description: data.description ?? '', goalAmount: data.goalAmount ?? 0 }, file, documents);
       return id !== null;
     } else if (type === 'edit-campaign' && selectedCampaign) {
       await updateCampaign(selectedCampaign.id, data, file, documents);
@@ -126,23 +106,13 @@ export function EntrepreneurProfilePage() {
         if (!baseData.lastName) baseData.lastName = 'Sin Registrar';
       }
 
-      const {
-        id,
-        userId,
-        avatarUrl,
-        coverUrl,
-        identityVerified,
-        identityVerifiedAt,
-        kycStatus,
-        kycRejectionReason,
-        verificationDocuments,
-        totalCampaigns,
-        totalRaised,
-        rating,
-        createdAt,
-        updatedAt,
-        ...sanitizedData
-      } = baseData;
+      const sanitizedData: CreateEntrepreneurProfileDto = {
+        firstName: baseData.firstName || 'Usuario', lastName: baseData.lastName || 'Sin Registrar',
+        displayName: baseData.displayName ?? undefined, bio: baseData.bio ?? undefined, companyName: baseData.companyName ?? undefined,
+        website: baseData.website ?? undefined, linkedinUrl: baseData.linkedinUrl ?? undefined, addressLine: baseData.addressLine ?? undefined,
+        city: baseData.city ?? undefined, state: baseData.state ?? undefined, country: baseData.country ?? undefined, postalCode: baseData.postalCode ?? undefined,
+        bankAccountNumber: baseData.bankAccountNumber ?? undefined, bankName: baseData.bankName ?? undefined,
+      };
 
       await submitProfile(sanitizedData);
 
@@ -180,7 +150,7 @@ export function EntrepreneurProfilePage() {
             <div className="bg-white shadow-sm">
               <ProfileHeader
                 profile={profile}
-                onEdit={(type: any) => setModalType(type as ModalType)}
+                onEdit={(type) => setModalType(type as ModalType)}
                 uploadAvatar={uploadAvatarPhoto}
                 uploadCover={uploadCoverPhoto}
               />
@@ -369,7 +339,7 @@ export function EntrepreneurProfilePage() {
                       {campaigns.length > 0 ? (
                         <div className="relative min-w-[240px]">
                           <select
-                            value={selectedFinanceCampaignId}
+                            value={financeCampaignId}
                             onChange={(e) => setSelectedFinanceCampaignId(e.target.value)}
                             className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-[13px] font-bold outline-none focus:border-[#72B626] transition-colors appearance-none cursor-pointer"
                           >

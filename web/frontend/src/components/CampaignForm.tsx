@@ -1,16 +1,24 @@
 import { useState, useEffect, useRef } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, useWatch, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, Save, X, Plus, Trash2, Gift, Edit2, Send } from 'lucide-react';
-import type { CreateRewardTierDto, EntrepreneurCampaign, CreateCampaignDto } from '../types/campaign.types';
+import type {
+  CreateRewardTierDto,
+  EntrepreneurCampaign,
+  CreateCampaignDto,
+} from '../types/campaign.types';
 import type { Category } from '../types/category.types';
 import { getCategories } from '../api/categories.api';
 import { getImageUrl } from '../utils/image.utils';
 import { formatNumberSpanish } from '../utils/numberFormat';
 import { isFutureLocalDateTime, localDateTimeToUtc, toLocalDateTime } from '../utils/campaignDate';
 import { InfoHint } from './InfoHint';
-import { campaignTypeLabel, isSupportedCampaignType, SUPPORTED_CAMPAIGN_TYPES } from '../utils/campaignType.ts';
+import {
+  campaignTypeLabel,
+  isSupportedCampaignType,
+  SUPPORTED_CAMPAIGN_TYPES,
+} from '../utils/campaignType.ts';
 
 
 
@@ -44,12 +52,15 @@ interface Props {
   saveError: string | null;
 }
 
-export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCancel, saving, saveError }: Props) {
+export function CampaignForm(props: Props) {
+  return <CampaignFormContent key={props.initialData?.id ?? 'new'} {...props} />;
+}
+
+function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCancel, saving, saveError }: Props) {
   const {
     register,
     handleSubmit,
     reset,
-    watch,
     control,
     formState: { errors },
   } = useForm<FormValues>({
@@ -67,9 +78,9 @@ export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCanc
   });
 
 
-  const titleVal = watch('title') || '';
-  const sloganVal = watch('shortDescription') || '';
-  const descVal = watch('description') || '';
+  const titleVal = useWatch({control, name: 'title'}) || '';
+  const sloganVal = useWatch({control, name: 'shortDescription'}) || '';
+  const descVal = useWatch({control, name: 'description'}) || '';
 
   const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -78,7 +89,7 @@ export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCanc
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(getImageUrl(initialData?.coverImageUrl) || null);
   
-  const [rewards, setRewards] = useState<CreateRewardTierDto[]>([]);
+  const [rewards, setRewards] = useState<CreateRewardTierDto[]>(() => initialData?.rewardTiers?.map(tier => ({title:tier.title,description:tier.description,minPercentage:tier.minPercentage ?? 0,maxPercentage:tier.maxPercentage ?? 100})) ?? []);
   const [showRewardForm, setShowRewardForm] = useState(false);
   const [editingRewardIndex, setEditingRewardIndex] = useState<number | null>(null);
   const [documents, setDocuments] = useState<{ file: File; justification: string }[]>([]);
@@ -86,7 +97,8 @@ export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCanc
   const [docJustification, setDocJustification] = useState('');
   const [docError, setDocError] = useState<string | null>(null);
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
-  const [pendingFormData, setPendingFormData] = useState<any>(null);
+  const selectedCategoryIds = useWatch({control, name: 'categoryIds'});
+  const [pendingFormData, setPendingFormData] = useState<FormValues | null>(null);
 
   const [rewardData, setRewardData] = useState<CreateRewardTierDto>({
     title: '',
@@ -94,20 +106,6 @@ export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCanc
     minPercentage: 0,
     maxPercentage: 10
   });
-
-  // Sync rewards when editing
-  useEffect(() => {
-    if (initialData?.rewardTiers) {
-      setRewards(initialData.rewardTiers.map(rt => ({
-        title: rt.title,
-        description: rt.description,
-        minPercentage: rt.minPercentage || 0,
-        maxPercentage: rt.maxPercentage || 100
-      })));
-    } else {
-      setRewards([]);
-    }
-  }, [initialData]);
 
   useEffect(() => {
     let mounted = true;
@@ -342,8 +340,8 @@ export function CampaignForm({ initialData, onSuccess, onSubmitForReview, onCanc
                       className="hidden"
                       {...register('categoryIds')}
                     />
-                    <span className={`text-[13px] font-bold ${watch('categoryIds')?.includes(c.id) ? 'text-emerald-700' : 'text-slate-600'}`}>
-                      {watch('categoryIds')?.includes(c.id) ? '✓ ' : ''}{c.displayName}
+                    <span className={`text-[13px] font-bold ${selectedCategoryIds?.includes(c.id) ? 'text-emerald-700' : 'text-slate-600'}`}>
+                      {selectedCategoryIds?.includes(c.id) ? '✓ ' : ''}{c.displayName}
                     </span>
                   </label>
                 ))

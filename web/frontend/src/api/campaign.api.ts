@@ -1,3 +1,16 @@
+import type {
+  CampaignDocument,
+  FundingPlanItem,
+  CreateFundingPlanItemDto,
+  FinancialLedgerResponse,
+  CampaignFinancialMovement,
+  CreateFinancialMovementDto,
+  CampaignMilestone,
+  CreateCampaignMilestoneDto,
+  UpdateCampaignMilestoneDto,
+  MilestoneEvidence,
+} from '../types/campaign.types';
+import type { CampaignUpdate, CampaignAttachment } from '../types/campaign-content.types';
 import axios from 'axios';
 import type {
   EntrepreneurCampaign,
@@ -235,11 +248,11 @@ export async function uploadCampaignDocument(
   campaignId: string,
   file: File,
   justification: string,
-): Promise<any> {
+): Promise<CampaignDocument> {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('justification', justification);
-  const { data } = await api.post<ApiSuccessResponse<any>>(
+  const { data } = await api.post<ApiSuccessResponse<CampaignDocument>>(
     `/entrepreneurs/me/campaigns/${campaignId}/documents`,
     formData,
     { headers: { 'Content-Type': 'multipart/form-data' } },
@@ -249,8 +262,8 @@ export async function uploadCampaignDocument(
 
 export async function getCampaignDocuments(
   campaignId: string,
-): Promise<any[]> {
-  const { data } = await api.get<ApiSuccessResponse<any[]>>(
+): Promise<CampaignDocument[]> {
+  const { data } = await api.get<ApiSuccessResponse<CampaignDocument[]>>(
     `/entrepreneurs/me/campaigns/${campaignId}/documents`,
   );
   return data.data;
@@ -265,14 +278,9 @@ export async function deleteCampaignDocument(
 
 export async function createCampaignUpdate(
   campaignId: string,
-  dto: {
-    title: string;
-    content: string;
-    isPublic?: boolean;
-    attachments?: any[];
-  },
+  dto: {title: string; content: string; isPublic?: boolean; attachments?: CampaignAttachment[]},
   file?: File,
-): Promise<any> {
+): Promise<CampaignUpdate> {
   if (file) {
     const formData = new FormData();
     formData.append('title', dto.title);
@@ -281,14 +289,14 @@ export async function createCampaignUpdate(
       formData.append('isPublic', String(dto.isPublic));
     }
     formData.append('file', file);
-    const { data } = await api.post<ApiSuccessResponse<any>>(
+    const { data } = await api.post<ApiSuccessResponse<CampaignUpdate>>(
       `/entrepreneurs/me/campaigns/${campaignId}/updates`,
       formData,
       { headers: { 'Content-Type': 'multipart/form-data' } },
     );
     return data.data;
   } else {
-    const { data } = await api.post<ApiSuccessResponse<any>>(
+    const { data } = await api.post<ApiSuccessResponse<CampaignUpdate>>(
       `/entrepreneurs/me/campaigns/${campaignId}/updates`,
       dto,
     );
@@ -296,8 +304,8 @@ export async function createCampaignUpdate(
   }
 }
 
-export async function getCampaignFundingPlan(campaignId: string): Promise<any[]> {
-  const { data } = await api.get<ApiSuccessResponse<any[]>>(
+export async function getCampaignFundingPlan(campaignId: string): Promise<FundingPlanItem[]> {
+  const { data } = await api.get<ApiSuccessResponse<FundingPlanItem[]>>(
     `/campaigns/${campaignId}/funding-plan`
   );
   return data.data;
@@ -305,9 +313,9 @@ export async function getCampaignFundingPlan(campaignId: string): Promise<any[]>
 
 export async function updateCampaignFundingPlan(
   campaignId: string,
-  fundingPlan: any[]
-): Promise<any[]> {
-  const { data } = await api.put<ApiSuccessResponse<any[]>>(
+  fundingPlan: CreateFundingPlanItemDto[]
+): Promise<FundingPlanItem[]> {
+  const { data } = await api.put<ApiSuccessResponse<FundingPlanItem[]>>(
     `/entrepreneurs/me/campaigns/${campaignId}/funding-plan`,
     { fundingPlan }
   );
@@ -316,9 +324,9 @@ export async function updateCampaignFundingPlan(
 
 export async function addCampaignFundingPlanItem(
   campaignId: string,
-  item: any
-): Promise<any> {
-  const { data } = await api.post<ApiSuccessResponse<any>>(
+  item: CreateFundingPlanItemDto
+): Promise<FundingPlanItem> {
+  const { data } = await api.post<ApiSuccessResponse<FundingPlanItem>>(
     `/entrepreneurs/me/campaigns/${campaignId}/funding-plan`,
     item
   );
@@ -332,8 +340,8 @@ export async function deleteCampaignFundingPlanItem(
   await api.delete(`/entrepreneurs/me/campaigns/${campaignId}/funding-plan/${itemId}`);
 }
 
-export async function getCampaignFinancialLedger(campaignId: string): Promise<any> {
-  const { data } = await api.get<ApiSuccessResponse<any>>(
+export async function getCampaignFinancialLedger(campaignId: string): Promise<FinancialLedgerResponse> {
+  const { data } = await api.get<ApiSuccessResponse<FinancialLedgerResponse>>(
     `/campaigns/${campaignId}/financial-ledger`
   );
   return data.data;
@@ -341,9 +349,9 @@ export async function getCampaignFinancialLedger(campaignId: string): Promise<an
 
 export async function getCampaignFinancialMovements(
   campaignId: string,
-  params?: Record<string, any>
-): Promise<any> {
-  const { data } = await api.get<ApiSuccessResponse<any>>(
+  params?: Record<string, string | number | boolean | undefined>
+): Promise<PaginatedResponse<CampaignFinancialMovement>> {
+  const { data } = await api.get<ApiSuccessResponse<PaginatedResponse<CampaignFinancialMovement>>>(
     `/entrepreneurs/me/campaigns/${campaignId}/financial-movements`,
     { params }
   );
@@ -352,16 +360,16 @@ export async function getCampaignFinancialMovements(
 
 export async function addCampaignFinancialMovement(
   campaignId: string,
-  dto: Record<string, any>,
+  dto: CreateFinancialMovementDto,
   receiptFile?: File
-): Promise<any> {
+): Promise<CampaignFinancialMovement> {
   if (receiptFile) {
     const formData = new FormData();
     Object.entries(dto).forEach(([k, v]) => {
       if (v !== undefined && v !== null) formData.append(k, String(v));
     });
     formData.append('receipt', receiptFile);
-    const { data } = await api.post<ApiSuccessResponse<any>>(
+    const { data } = await api.post<ApiSuccessResponse<CampaignFinancialMovement>>(
       `/entrepreneurs/me/campaigns/${campaignId}/financial-movements`,
       formData,
       { headers: { 'Content-Type': 'multipart/form-data' } }
@@ -369,7 +377,7 @@ export async function addCampaignFinancialMovement(
     return data.data;
   }
 
-  const { data } = await api.post<ApiSuccessResponse<any>>(
+  const { data } = await api.post<ApiSuccessResponse<CampaignFinancialMovement>>(
     `/entrepreneurs/me/campaigns/${campaignId}/financial-movements`,
     dto
   );
@@ -379,9 +387,9 @@ export async function addCampaignFinancialMovement(
 export async function updateCampaignFinancialMovement(
   campaignId: string,
   movementId: string,
-  dto: Record<string, any>
-): Promise<any> {
-  const { data } = await api.patch<ApiSuccessResponse<any>>(
+  dto: Partial<CreateFinancialMovementDto>
+): Promise<CampaignFinancialMovement> {
+  const { data } = await api.patch<ApiSuccessResponse<CampaignFinancialMovement>>(
     `/entrepreneurs/me/campaigns/${campaignId}/financial-movements/${movementId}`,
     dto
   );
@@ -401,10 +409,10 @@ export async function uploadMovementReceipt(
   campaignId: string,
   movementId: string,
   receiptFile: File
-): Promise<any> {
+): Promise<CampaignFinancialMovement> {
   const formData = new FormData();
   formData.append('receipt', receiptFile);
-  const { data } = await api.post<ApiSuccessResponse<any>>(
+  const { data } = await api.post<ApiSuccessResponse<CampaignFinancialMovement>>(
     `/entrepreneurs/me/campaigns/${campaignId}/financial-movements/${movementId}/receipt`,
     formData,
     { headers: { 'Content-Type': 'multipart/form-data' } }
@@ -412,8 +420,8 @@ export async function uploadMovementReceipt(
   return data.data;
 }
 
-export async function getCampaignMilestones(campaignId: string): Promise<any[]> {
-  const { data } = await api.get<ApiSuccessResponse<any[]>>(
+export async function getCampaignMilestones(campaignId: string): Promise<CampaignMilestone[]> {
+  const { data } = await api.get<ApiSuccessResponse<CampaignMilestone[]>>(
     `/campaigns/${campaignId}/milestones`
   );
   return data.data;
@@ -422,8 +430,8 @@ export async function getCampaignMilestones(campaignId: string): Promise<any[]> 
 export async function getCampaignMilestoneById(
   campaignId: string,
   milestoneId: string
-): Promise<any> {
-  const { data } = await api.get<ApiSuccessResponse<any>>(
+): Promise<CampaignMilestone> {
+  const { data } = await api.get<ApiSuccessResponse<CampaignMilestone>>(
     `/campaigns/${campaignId}/milestones/${milestoneId}`
   );
   return data.data;
@@ -431,9 +439,9 @@ export async function getCampaignMilestoneById(
 
 export async function addCampaignMilestone(
   campaignId: string,
-  dto: Record<string, any>
-): Promise<any> {
-  const { data } = await api.post<ApiSuccessResponse<any>>(
+  dto: CreateCampaignMilestoneDto
+): Promise<CampaignMilestone> {
+  const { data } = await api.post<ApiSuccessResponse<CampaignMilestone>>(
     `/entrepreneurs/me/campaigns/${campaignId}/milestones`,
     dto
   );
@@ -443,9 +451,9 @@ export async function addCampaignMilestone(
 export async function updateCampaignMilestone(
   campaignId: string,
   milestoneId: string,
-  dto: Record<string, any>
-): Promise<any> {
-  const { data } = await api.patch<ApiSuccessResponse<any>>(
+  dto: UpdateCampaignMilestoneDto
+): Promise<CampaignMilestone> {
+  const { data } = await api.patch<ApiSuccessResponse<CampaignMilestone>>(
     `/entrepreneurs/me/campaigns/${campaignId}/milestones/${milestoneId}`,
     dto
   );
@@ -467,13 +475,13 @@ export async function uploadMilestoneEvidence(
   file: File,
   title: string,
   description?: string
-): Promise<any> {
+): Promise<MilestoneEvidence> {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('title', title);
   if (description) formData.append('description', description);
 
-  const { data } = await api.post<ApiSuccessResponse<any>>(
+  const { data } = await api.post<ApiSuccessResponse<MilestoneEvidence>>(
     `/entrepreneurs/me/campaigns/${campaignId}/milestones/${milestoneId}/evidence`,
     formData,
     { headers: { 'Content-Type': 'multipart/form-data' } }
@@ -481,8 +489,8 @@ export async function uploadMilestoneEvidence(
   return data.data;
 }
 
-export async function getCampaignUpdates(campaignId: string): Promise<any[]> {
-  const { data } = await api.get<ApiSuccessResponse<any[]>>(
+export async function getCampaignUpdates(campaignId: string): Promise<CampaignUpdate[]> {
+  const { data } = await api.get<ApiSuccessResponse<CampaignUpdate[]>>(
     `/campaigns/${campaignId}/updates`
   );
   return data.data;

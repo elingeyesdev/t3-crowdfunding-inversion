@@ -1,8 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  Bell, BellRing, Check, CheckCheck, ExternalLink, Loader2,
-  TrendingUp, MessageCircle, CheckCircle2, XCircle, Rocket, Star, Info,
-  Trash2, FileText, ChevronRight
+  Bell,
+  BellRing,
+  Check,
+  CheckCheck,
+  ExternalLink,
+  Loader2,
+  TrendingUp,
+  MessageCircle,
+  CheckCircle2,
+  XCircle,
+  Rocket,
+  Star,
+  Info,
+  Trash2,
+  FileText,
+  ChevronRight,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -78,29 +91,22 @@ export function NotificationBell() {
   const deletionPending = useRef(false);
   const [deleting, setDeleting] = useState(false);
 
-  const fetchNotifications = useCallback(async () => {
+  const fetchNotifications = useCallback(() => {
     const requestId = ++latestRequest.current;
-    try {
-      const res = await getMyNotifications();
-      if (requestId !== latestRequest.current) return;
+    return getMyNotifications().then(res => {
+      if (requestId !== latestRequest.current || !mounted.current) return;
       setNotifications(res.notifications);
-      if (res.unreadCount > prevUnreadRef.current) {
-        setShake(true);
-        setTimeout(() => setShake(false), 800);
-      }
+      if(res.unreadCount > prevUnreadRef.current) {setShake(true); setTimeout(() => setShake(false), 800);}
       prevUnreadRef.current = res.unreadCount;
       setUnreadCount(res.unreadCount);
-    } catch {
-      // silently fail — user may not be logged in yet
-    }
+    }).catch(() => { /* Polling is optional when no authenticated session exists. */ });
   }, []);
-
   // Initial fetch + polling
   useEffect(() => {
     mounted.current = true;
     fetchNotifications();
     const interval = setInterval(fetchNotifications, POLL_INTERVAL_MS);
-    return () => { mounted.current = false; latestRequest.current++; clearInterval(interval); };
+    return () => { mounted.current = false; clearInterval(interval); };
   }, [fetchNotifications]);
 
   useEffect(() => subscribeToNotificationsChanged(() => { void fetchNotifications(); }), [fetchNotifications]);

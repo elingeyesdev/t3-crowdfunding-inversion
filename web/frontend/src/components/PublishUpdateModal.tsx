@@ -1,3 +1,5 @@
+import type { CampaignAttachment } from '../types/campaign-content.types';
+import { getApiErrorMessage } from '../utils/apiError.ts';
 import { useState } from 'react';
 import { X, Send, Image, Video, FileText, Loader2 } from 'lucide-react';
 import { createCampaignUpdate } from '../api/campaign.api';
@@ -68,7 +70,7 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
     setError(null);
     setSuccessMsg(null);
 
-    const attachments: any[] = [];
+    const attachments: CampaignAttachment[] = [];
     if (attachmentType === 'text' && attachmentValue.trim()) {
       attachments.push({ type: 'text', text: attachmentValue.trim() });
     }
@@ -96,9 +98,9 @@ export function PublishUpdateModal({ campaignId, campaignTitle, open, onClose, o
         if (onSuccess) onSuccess();
         onClose();
       }, 1500);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(
-        err.response?.data?.message || 
+        getApiErrorMessage(err, '') ||
         'Ocurrió un error al intentar publicar la novedad.'
       );
     } finally {

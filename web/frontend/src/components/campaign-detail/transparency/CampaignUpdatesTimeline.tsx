@@ -1,14 +1,4 @@
-import {
-  MessageSquare,
-  Calendar,
-  User,
-  Sparkles,
-  Image as ImageIcon,
-  ExternalLink,
-  Clock,
-  AlertTriangle,
-  RefreshCw,
-} from 'lucide-react';
+import { Calendar, Sparkles, Clock, AlertTriangle, RefreshCw } from 'lucide-react';
 import type { PublicCampaignUpdate } from '../../../api/public-campaigns.api';
 import { getImageUrl } from '../../../utils/image.utils';
 
@@ -141,7 +131,7 @@ export function CampaignUpdatesTimeline({
               {/* Attachments (if any) */}
               {update.attachments && update.attachments.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100">
-                  {update.attachments.map((att: any, aIdx: number) => {
+                  {update.attachments.map((att, aIdx: number) => {
                     if (att.type === 'image' && att.url) {
                       return (
                         <div

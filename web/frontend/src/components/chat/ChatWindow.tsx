@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Send, ArrowLeft, Rocket, Loader2 } from 'lucide-react';
 import type { Conversation, Message } from '../../api/chat.api';
 import { getMessages } from '../../api/chat.api';
@@ -74,9 +74,9 @@ export function ChatWindow({
   const [historyError, setHistoryError] = useState(false);
   const [retryVersion, setRetryVersion] = useState(0);
   const messagesRef = useRef(messages);
-  messagesRef.current = messages;
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
   const currentConversationId = useRef(conversation.id);
-  currentConversationId.current = conversation.id;
+  useEffect(() => { currentConversationId.current = conversation.id; }, [conversation.id]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isTypingIndicatorVisible = typingUsers.size > 0;
@@ -84,15 +84,24 @@ export function ChatWindow({
   const otherUser = conversation.otherUser;
   const avatarUrl = getImageUrl(otherUser.avatar);
 
+  const requestKey = JSON.stringify([conversation.id, connectionVersion, retryVersion, onMarkAsRead]);
+  const [previousRequest, setPreviousRequest] = useState(requestKey);
+  if(previousRequest !== requestKey) {
+    setPreviousRequest(requestKey);
+    setMessages(previous => previous.filter(message => message.conversationId === conversation.id));
+    setLoading(true); setHistoryError(false); setHasMore(true);
+  }
+  const [processedBatch, setProcessedBatch] = useState<Message[]>([]);
+  if(processedBatch !== incomingMessages) {
+    setProcessedBatch(incomingMessages);
+    if(incomingMessages.length) setMessages(previous => mergeChatMessages(previous, incomingMessages.filter(message => message.conversationId === conversation.id)));
+  }
   // ── Carga inicial de mensajes ──────────────────────────────
   useEffect(() => {
     let cancelled = false;
     const existing = messagesRef.current.filter(message => message.conversationId === conversation.id);
     const knownIds = new Set(existing.map(message => message.id));
-    setMessages(existing);
-    setLoading(true);
-    setHistoryError(false);
-    setHasMore(true);
+
 
     const recoverMessages = async () => {
       let batch = await getMessages(conversation.id, 50);
@@ -117,18 +126,13 @@ export function ChatWindow({
       .catch(() => { if (!cancelled) { setLoading(false); setHistoryError(true); } });
 
     return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversation.id, connectionVersion, retryVersion]);
+  }, [conversation.id, connectionVersion, retryVersion, onMarkAsRead]);
 
   // ── Nuevo mensaje por WebSocket ────────────────────────────
   useEffect(() => {
     if (!incomingMessages.length) return;
     const matching = incomingMessages.filter(message => message.conversationId === conversation.id);
 
-    setMessages((prev) => {
-      // Evitar duplicados
-      return mergeChatMessages(prev, matching);
-    });
     onIncomingProcessed(incomingMessages.map(message => message.id));
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
 
@@ -136,7 +140,6 @@ export function ChatWindow({
     if (matching.some(message => message.senderId !== currentUserId)) {
       onMarkAsRead(conversation.id);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [incomingMessages, conversation.id, currentUserId, onIncomingProcessed, onMarkAsRead]);
 
   // ── Scroll automático al escribir ─────────────────────────

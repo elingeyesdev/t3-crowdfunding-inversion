@@ -1,3 +1,5 @@
+import type { CampaignMetadata } from '../types/campaign-content.types';
+import type { CampaignAttachment } from '../types/campaign-content.types';
 import axios from 'axios';
 import type { CampaignFinancialProgress } from '../types/campaign.types';
 import type { CampaignType } from '../utils/campaignType';
@@ -43,6 +45,7 @@ export interface RewardTier {
 }
 
 export interface PublicCampaignDetail extends PublicCampaign {
+  metadata?: CampaignMetadata;
   categoryId: string;
   description: string;
   subtitle: string | null;
@@ -102,7 +105,7 @@ export interface StoryItem {
   id: string;
   title: string;
   content: string;
-  attachments: any[];
+  attachments: CampaignAttachment[];
   createdAt: string;
 }
 
@@ -120,7 +123,7 @@ export async function getRecentStories(): Promise<CampaignStoryGroup[]> {
   return res.data.data;
 }
 
-export async function seedTestStories(): Promise<any> {
+export async function seedTestStories(): Promise<unknown> {
   const res = await API.post('/campaigns/public/updates/seed-test');
   return res.data;
 }
@@ -142,7 +145,7 @@ export interface PublicCampaignUpdate {
   campaignId: string;
   title: string;
   content: string;
-  attachments?: any[];
+  attachments?: CampaignAttachment[];
   authorName?: string;
   authorDisplayName?: string | null;
   authorAvatar?: string | null;

@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { InvestorProfile } from '../types/investor.types';
 import { CategorySelector } from './CategorySelector';
 import { User, Scale, Home, CircleDollarSign, Target, Sparkles, Save } from 'lucide-react';
@@ -20,8 +20,8 @@ const schema = z.object({
   state:        z.string().max(100).optional().or(z.literal('')),
   country:      z.string().max(100).optional().or(z.literal('')),
   postalCode:   z.string().max(20).optional().or(z.literal('')),
-  minInvestment: z.coerce.number().positive().optional().or(z.literal('' as any)),
-  maxInvestment: z.coerce.number().positive().optional().or(z.literal('' as any)),
+  minInvestment: z.coerce.number().positive().optional().or(z.literal('')),
+  maxInvestment: z.coerce.number().positive().optional().or(z.literal('')),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -40,7 +40,7 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<FormValues>({
+  } = useForm<z.input<typeof schema>, unknown, FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       firstName:    '',
@@ -55,13 +55,15 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
       state:        '',
       country:      '',
       postalCode:   '',
-      minInvestment: '' as any,
-      maxInvestment: '' as any,
+      minInvestment: '',
+      maxInvestment: '',
     },
   });
 
   // Pre-llenar formulario si ya existe perfil
-  useEffect(() => {
+  const [sourceProfile, setSourceProfile] = useState<InvestorProfile | null>(null);
+  if (sourceProfile !== profile) {
+    setSourceProfile(profile);
     if (profile) {
       reset({
         firstName:    profile.firstName,
@@ -76,13 +78,14 @@ export function InvestorProfileForm({ profile, saving, isNew, onSubmit }: Props)
         state:        profile.state ?? '',
         country:      profile.country ?? '',
         postalCode:   profile.postalCode ?? '',
-        minInvestment: profile.minInvestment ?? ('' as any),
-        maxInvestment: profile.maxInvestment ?? ('' as any),
+        minInvestment: profile.minInvestment ?? (''),
+        maxInvestment: profile.maxInvestment ?? (''),
       });
       // Cargar categorías seleccionadas previamente
       setSelectedCategories(profile.preferredCategories ?? []);
     }
-  }, [profile, reset]);
+
+  }
 
   const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[15px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#72B626] focus:ring-4 focus:ring-[#72B626]/10 placeholder:text-gray-400 font-medium";
   const labelClass = "text-[12px] font-black text-slate-500 mb-2 block uppercase tracking-wider ml-1";

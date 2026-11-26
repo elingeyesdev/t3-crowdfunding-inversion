@@ -1,15 +1,6 @@
+import type { BudgetCategory, FundingMilestone } from '../../types/campaign-content.types';
 import { useState } from 'react';
-import {
-  ShieldCheck,
-  TrendingUp,
-  FileText,
-  Rocket,
-  Sparkles,
-  PieChart as PieIcon,
-  Layers,
-  Receipt,
-  CheckCircle2,
-} from 'lucide-react';
+import { FileText, Rocket, Sparkles, PieChart as PieIcon, Receipt } from 'lucide-react';
 import { FundAllocationPlan } from './transparency/FundAllocationPlan';
 import { PublicFinancialAuditing } from './transparency/PublicFinancialAuditing';
 import { ProjectMilestones } from './transparency/ProjectMilestones';
@@ -30,8 +21,8 @@ interface Props {
   createdAt?: string | Date | null;
   entrepreneurName?: string;
   entrepreneurAvatar?: string | null;
-  customBudgetPlan?: any;
-  customMilestones?: any;
+  customBudgetPlan?: BudgetCategory[];
+  customMilestones?: FundingMilestone[];
 }
 
 export function CampaignTransparencySection({

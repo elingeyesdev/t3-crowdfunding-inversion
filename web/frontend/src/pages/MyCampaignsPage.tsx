@@ -12,8 +12,14 @@ import type { EntrepreneurCampaign } from '../types/campaign.types';
 import { getMyCampaignById } from '../api/campaign.api';
 import { CAMPAIGN_FILTERS, matchesCampaignGroup } from '../utils/campaignStatus';
 import {
-  Rocket, Plus, Search, AlertCircle, Loader2,
-  LayoutGrid, List, ShieldAlert,
+  Rocket,
+  Plus,
+  Search,
+  AlertCircle,
+  Loader2,
+  LayoutGrid,
+  List,
+  ShieldAlert,
 } from 'lucide-react';
 
 /* ─── Small Summary Card ─── */
@@ -38,6 +44,7 @@ export function MyCampaignsPage() {
 
   const [previewCampaign, setPreviewCampaign] = useState<EntrepreneurCampaign | null>(null);
   const [editingCampaign, setEditingCampaign] = useState<EntrepreneurCampaign | null>(null);
+  const [creatingCampaign, setCreatingCampaign] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -49,7 +56,7 @@ export function MyCampaignsPage() {
       setShowKycModal(true);
       return;
     }
-    setEditingCampaign({} as any);
+    setCreatingCampaign(true);
   };
 
   const handleModalPreview = useCallback((c: EntrepreneurCampaign) => setPreviewCampaign(c), []);
@@ -263,7 +270,7 @@ export function MyCampaignsPage() {
             </p>
             {!searchTerm && statusFilter === 'all' && (
               <button
-                onClick={() => setEditingCampaign({} as any)}
+                onClick={() => setCreatingCampaign(true)}
                 className="flex items-center gap-2 mx-auto px-5 py-3 rounded-xl font-semibold text-[13px] text-white border-none cursor-pointer transition-all hover:bg-[#4a7f1a]"
                 style={{ background: '#72B626', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
               >
@@ -297,19 +304,19 @@ export function MyCampaignsPage() {
       </div>
 
       {/* ── Modals ── */}
-      {editingCampaign && (
+      {(editingCampaign || creatingCampaign) && (
         <div className="fixed inset-0 bg-[#1c2b1e]/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div className="w-full max-w-5xl max-h-[90vh] overflow-y-auto">
             <CampaignForm
-              initialData={editingCampaign.id ? editingCampaign : null}
+              initialData={editingCampaign}
               onSuccess={async (dto, file, documents) => {
-                const success = editingCampaign.id
+                const success = editingCampaign?.id
                   ? await updateCampaign(editingCampaign.id, dto, file, documents)
                   : await addCampaign(dto, file, documents);
-                if (success) setEditingCampaign(null);
+                if (success) {setEditingCampaign(null); setCreatingCampaign(false);}
                 return Boolean(success);
               }}
-              onCancel={() => setEditingCampaign(null)}
+              onCancel={() => {setEditingCampaign(null); setCreatingCampaign(false);}}
               saving={loading}
               saveError={null}
             />

@@ -1,3 +1,4 @@
+import { useClock } from '../hooks/useClock.ts';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { campaignTypeLabel, SUPPORTED_CAMPAIGN_TYPES } from '../utils/campaignType.ts';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -33,6 +34,7 @@ import { ShareModal } from '../components/ShareModal';
 
 
 function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick?: () => void }) {
+  const now = useClock();
   const [showShare, setShowShare] = useState(false);
   const progress = campaign.goalAmount > 0
     ? Math.min(Math.round((campaign.currentAmount / campaign.goalAmount) * 100), 100)
@@ -44,7 +46,7 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
 
   let daysRemaining: number | null = null;
   if (campaign.endDate) {
-    const ms = new Date(campaign.endDate).getTime() - Date.now();
+    const ms = new Date(campaign.endDate).getTime() - now;
     daysRemaining = Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
   }
 
@@ -225,15 +227,17 @@ export function ExploreCampaignsPage() {
       .finally(() => setCategoriesLoading(false));
   }, []);
 
+  const [previousSearchInput, setPreviousSearchInput] = useState(searchInput);
+  if (previousSearchInput !== searchInput) {
+    setPreviousSearchInput(searchInput);
+    setSuggestions([]);
+    setShowSuggestions(false);
+    setSelectedIndex(-1);
+  }
   // ── Debounced search suggestions ──
   useEffect(() => {
     const trimmed = searchInput.trim();
-    if (trimmed.length < 2) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      setSelectedIndex(-1);
-      return;
-    }
+    if (trimmed.length < 2) return;
 
     const timer = setTimeout(async () => {
       setSuggestionsLoading(true);
@@ -310,17 +314,10 @@ export function ExploreCampaignsPage() {
     }
   };
 
-  const sortOptions = [
-    { value: 'created_at:DESC', label: 'Más recientes' },
-    { value: 'created_at:ASC', label: 'Más antiguas' },
-    { value: 'current_amount:DESC', label: 'Mayor recaudación' },
-    { value: 'goal_amount:ASC', label: 'Menor meta' },
-    { value: 'goal_amount:DESC', label: 'Mayor meta' },
-  ];
 
 
 
-  const currentSort = `${filters.sortBy || 'created_at'}:${filters.sortOrder || 'DESC'}`;
+
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>

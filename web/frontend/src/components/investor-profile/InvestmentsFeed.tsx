@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { CapitalOverview } from '../../types/investor.types';
@@ -5,10 +6,10 @@ import { getMyInvestments, downloadInvestmentReceipt } from '../../api/investor.
 import { getImageUrl } from '../../utils/image.utils';
 import type { InvestmentHistoryItem } from '../../api/investor.api';
 import { campaignTypeLabel } from '../../utils/campaignType.ts';
-import { 
-  TrendingUp, 
-  Wallet, 
-  BarChart3, 
+import {
+  TrendingUp,
+  Wallet,
+  BarChart3,
   Clock,
   FolderOpen,
   Heart,
@@ -25,7 +26,7 @@ interface Props {
   capitalLoading: boolean;
 }
 
-const STATUS_CONFIG: Record<string, { icon: any; color: string; bg: string; label: string }> = {
+const STATUS_CONFIG: Record<string, { icon: LucideIcon; color: string; bg: string; label: string }> = {
   completed: { icon: CheckCircle2, color: '#72B626', bg: '#e8f5e9', label: 'Completada' },
   pending: { icon: Clock, color: '#f9a825', bg: '#fff8e1', label: 'Pendiente' },
   processing: { icon: Clock, color: '#1976d2', bg: '#e3f2fd', label: 'Procesando' },
