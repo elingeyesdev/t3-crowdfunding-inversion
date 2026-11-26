@@ -144,6 +144,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('dashboard-stats', [AdminController::class, 'stats']);
         Route::get('users', [AdminController::class, 'users']);
         Route::delete('users/{user}', [AdminController::class, 'deleteUser']);
+        Route::patch('users/{user}/status', [AdminController::class, 'userStatus']);
+        Route::get('users/{user}/status-history', [AdminController::class, 'userStatusHistory']);
         Route::get('campaigns', [AdminController::class, 'campaigns']);
         Route::get('campaigns/pending', [AdminController::class, 'pending']);
         Route::get('campaigns/{campaign}', [AdminController::class, 'campaign']);

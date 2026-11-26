@@ -3,6 +3,7 @@ import type { KycReviewData } from '../types/kyc.types';
 import type {
   DashboardStats,
   SystemUser,
+  UserStatusHistoryPage,
   SystemCampaign,
   AdminUser,
   PendingCampaign,
@@ -68,8 +69,18 @@ export async function getAllAdmins(): Promise<AdminUser[]> {
   return data.data;
 }
 
-export async function softDeleteUser(id: string): Promise<any> {
-  const { data } = await api.delete<ApiSuccessResponse<any>>(`/admin/users/${id}`);
+export async function softDeleteUser(id: string, reason: string, expectedVersion?: number): Promise<SystemUser> {
+  const { data } = await api.delete<ApiSuccessResponse<SystemUser>>(`/admin/users/${id}`, { data: { reason, expectedVersion }, timeout: 15000 });
+  return data.data;
+}
+
+export async function updateUserStatus(id: string, isActive: boolean, reason: string, expectedVersion: number): Promise<SystemUser> {
+  const { data } = await api.patch<ApiSuccessResponse<SystemUser>>(`/admin/users/${id}/status`, { isActive, reason, expectedVersion }, { timeout: 15000 });
+  return data.data;
+}
+
+export async function getUserStatusHistory(id: string, page = 1): Promise<UserStatusHistoryPage> {
+  const { data } = await api.get<ApiSuccessResponse<UserStatusHistoryPage>>(`/admin/users/${id}/status-history`, { params: { page }, timeout: 15000 });
   return data.data;
 }
 

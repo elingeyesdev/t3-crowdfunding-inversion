@@ -53,7 +53,14 @@ class AuthController extends Controller
 
     public function sessionData(User $user): array
     {
-        return ['accessToken' => $user->createToken('web', ['*'], now()->addDay())->plainTextToken, 'tokenType' => 'Bearer', 'expiresIn' => '24h', 'user' => $user->apiData()];
+        return DB::transaction(function () use ($user) {
+            $current = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            abort_unless($current->is_active, 401, 'Usuario inactivo.');
+            abort_unless((int) $current->status_version === (int) $user->status_version && $current->password_hash === $user->password_hash,
+                401, 'La cuenta cambió durante el inicio de sesión. Intenta nuevamente.');
+
+            return ['accessToken' => $current->createToken('web', ['*'], now()->addDay())->plainTextToken, 'tokenType' => 'Bearer', 'expiresIn' => '24h', 'user' => $current->apiData()];
+        }, 3);
     }
 
     public function me(Request $r)
@@ -144,7 +151,7 @@ class AuthController extends Controller
         $google = Socialite::driver('google')->user();
         abort_unless($google->user['email_verified'] ?? false, 403, 'Google no verificó el correo.');
         $user = DB::transaction(function () use ($google, $r) {
-            $user = User::where('email', $google->getEmail())->first();
+            $user = User::where('email', $google->getEmail())->lockForUpdate()->first();
             if (! $user) {
                 $user = User::create(['email' => $google->getEmail(), 'email_verified' => true, 'avatar_url' => $google->getAvatar(), 'oauth_provider' => 'google', 'oauth_provider_id' => $google->getId()]);
                 $user->assignRole($r->session()->pull('signup_role', 'investor'));
