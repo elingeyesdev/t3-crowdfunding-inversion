@@ -107,14 +107,15 @@ class NotificationPreferencesTest extends TestCase
         $notifier = app(Notifier::class);
         $this->login($user)->putJson(self::PATH, ['inAppEnabled' => false, 'emailEnabled' => true, 'investmentAlerts' => true])->assertOk();
         $this->assertNull($notifier->send($user->id, 'investment_received', 'In app', 'Body'));
-        $this->assertNotNull($notifier->send($user->id, 'investment_received', 'Email record', 'Body', channel: 'email'));
+        // Email-only events no longer create records in the web notification feed.
+        $this->assertNull($notifier->send($user->id, 'investment_received', 'Email record', 'Body', channel: 'email'));
         $this->putJson(self::PATH, ['inAppEnabled' => true, 'emailEnabled' => false])->assertOk();
         $this->assertNotNull($notifier->send($user->id, 'investment_received', 'In app', 'Body'));
         $this->assertNull($notifier->send($user->id, 'investment_received', 'Email record', 'Body', channel: 'email'));
         $this->putJson(self::PATH, ['emailEnabled' => true, 'investmentAlerts' => false, 'categories' => ['investment_received' => true]])->assertOk();
         $this->assertNull($notifier->send($user->id, 'investment_received', 'In app', 'Body'));
         $this->assertNull($notifier->send($user->id, 'investment_received', 'Email record', 'Body', channel: 'email'));
-        $this->assertDatabaseCount('notifications', 2);
+        $this->assertDatabaseCount('notifications', 1);
     }
 
     public function test_partial_updates_preserve_other_switches_and_legacy_per_event_settings(): void

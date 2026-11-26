@@ -7,6 +7,7 @@ use App\Models\Campaign;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
+use App\Services\Notifier;
 use App\Support\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -113,6 +114,8 @@ class ChatController extends Controller
             $c = Conversation::whereKey($conversation->id)->lockForUpdate()->firstOrFail();
             $m = $c->messages()->create(['sender_id' => $r->user()->id, 'content' => $data['content']]);
             $c->update(['last_message_at' => now()]);
+            $recipientId = $c->user_one_id === $r->user()->id ? $c->user_two_id : $c->user_one_id;
+            app(Notifier::class)->send($recipientId, 'new_message', 'Nuevo mensaje', 'Tienes un nuevo mensaje privado. Inicia sesión para leerlo.', null, 'conversation', '/chat/'.$c->id, ['messageId' => $m->id]);
 
             return $m;
         });

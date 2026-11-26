@@ -38,6 +38,7 @@ export interface NotificationPreferences {
   commentAlerts: boolean;
   milestoneUpdates: boolean;
   categories?: Record<string, boolean>;
+  emailChannel?: { available: boolean; reason: 'available' | 'unverified' | 'inactive' | 'disabled' | 'not_configured' };
 }
 
 const api = axios.create({
@@ -145,6 +146,8 @@ export async function getNotificationPreferences(): Promise<NotificationPreferen
 export async function updateNotificationPreferences(
   preferences: Partial<NotificationPreferences>
 ): Promise<NotificationPreferences> {
-  const { data } = await api.put<{ data: NotificationPreferences }>('/notifications/preferences', preferences);
+  const settings = { ...preferences };
+  delete settings.emailChannel;
+  const { data } = await api.put<{ data: NotificationPreferences }>('/notifications/preferences', settings);
   return data.data;
 }

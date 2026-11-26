@@ -646,7 +646,7 @@ export function NotificationsPage() {
                 <label className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100 cursor-pointer">
                   <div>
                     <span className="text-xs font-bold text-gray-900 block">Notificaciones por correo</span>
-                    <span className="text-[11px] text-gray-500">Recibir resúmenes y alertas críticas por email</span>
+                    <span className="text-[11px] text-gray-500">Recibir avisos de aportes, campañas, avances, mensajes, identidad y recompensas según tus preferencias</span>
                   </div>
                   <input
                     type="checkbox"
@@ -656,6 +656,12 @@ export function NotificationsPage() {
                   />
                 </label>
 
+                {preferences.emailChannel?.available === false && <div role="status" className="rounded-xl bg-amber-50 p-3 text-xs text-amber-900">
+                  {preferences.emailChannel.reason === 'unverified'
+                    ? <>Verifica tu correo en <a href="/account-settings" className="underline font-semibold">Configuración de Cuenta</a> para recibir estos avisos.</>
+                    : 'El canal de correo no está disponible para esta cuenta. Tu preferencia se conserva, pero los avisos no se enviarán hasta que el servicio esté habilitado y configurado.'}
+                </div>}
+                <p className="text-[11px] text-gray-500">El correo y los avisos dentro de la app son independientes. La recuperación de contraseña y la verificación de correo siguen disponibles aunque desactives estos avisos.</p>
                 <label className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100 cursor-pointer">
                   <div>
                     <span className="text-xs font-bold text-gray-900 block">Estados de Campañas</span>

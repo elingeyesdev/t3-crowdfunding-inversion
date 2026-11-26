@@ -95,6 +95,44 @@ php artisan queue:work database --queue=email-verification --sleep=1 --tries=3
 
 La API autenticada permite `POST /api/v1/auth/email/verification` (sin email en el cuerpo; siempre usa el de la sesión), limitado a una solicitud por minuto por cuenta y cinco por IP. `POST /api/v1/auth/email/verify/{id}/{hash}` confirma la URL firmada recibida por correo, con límite de diez intentos por minuto por IP. Las operaciones restringidas responden `403` con código `EMAIL_VERIFICATION_REQUIRED` y las interfaces muestran cómo ir a verificar. No hay cambios de esquema ni migración de los usuarios existentes para este flujo.
 
+## Notificaciones de actividad por correo
+
+La preferencia **Notificaciones por correo** controla avisos individuales de eventos nuevos; no genera resúmenes periódicos ni envía notificaciones históricas. Se conservan las preferencias existentes y sus valores predeterminados. La campana web y el correo son canales independientes: desactivar la campana no desactiva el email. Cada categoría desactivada y cada exclusión por evento se respeta en ambos canales. Los correos de recuperación y verificación de cuenta no dependen de estas preferencias.
+
+| Eventos | Preferencia adicional al canal de correo |
+| --- | --- |
+| Aporte confirmado, recibido o reembolsado | `investmentAlerts` |
+| Estados de campaña: borrador, envío/revisión, aprobación/rechazo, publicación, financiación, cierre, cancelación o suspensión | `campaignStatusUpdates` |
+| Comentarios y mensajes privados nuevos | `commentAlerts` |
+| Avance publicado e hito completado | `milestoneUpdates` |
+| Revisión KYC, recompensa enviada/entregada, documento aprobado/rechazado, auditoría de movimiento verificado/rechazado/con observaciones/pendiente | Preferencia general y exclusión por evento en `categories` |
+
+Solo se envía a cuentas activas con correo verificado. Se vuelven a consultar estos requisitos, la dirección original y las preferencias al procesar cada trabajo. Si cambiaron, el envío queda `skipped`; no se recupera automáticamente al reactivar preferencias. Los mensajes de chat solo avisan de un mensaje nuevo, sin copiar el contenido privado. Los enlaces del correo apuntan al origen configurado en `APP_URL` y requieren la autenticación y permisos habituales para acceder a información privada.
+
+Para habilitar el canal usa **SMTP** (`MAIL_MAILER=smtp`), remitente y credenciales del proveedor, `APP_URL` correcto y `ACTIVITY_MAIL_ENABLED=true`. En producción configura TLS según el proveedor. `log` y `array` no se consideran entrega disponible para estos avisos. `ACTIVITY_MAIL_QUEUE_CONNECTION` admite conexiones `database`, `redis`, `sqs` o `beanstalkd`; por defecto usa `database`. La API de preferencias informa `emailChannel.available` y `reason` sin exponer credenciales. Ese estado indica configuración y elegibilidad, no comprueba la conexión SMTP ni que el trabajador esté activo.
+
+Este cambio **requiere una migración** para crear `activity_email_deliveries`. Desde `web/`:
+
+```powershell
+php artisan migrate
+php artisan queue:work database --queue=activity-mail --sleep=1 --tries=3
+php artisan schedule:work
+```
+
+Puedes usar un trabajador para `--queue=email-verification,password-recovery,activity-mail`. Si cambias la conexión, usa la misma en el comando. En producción mantén los trabajadores mediante un supervisor y ejecuta `schedule:run` cada minuto desde el programador del sistema. Después de desplegar, actualiza la caché de configuración y ejecuta `queue:restart`. El programador recupera cada minuto los envíos pendientes que no pudieron entrar a la cola; espera diez minutos antes de reencolar un trabajo ya despachado. El aviso y su registro de envío se guardan dentro de la transacción del evento y solo se encolan después del commit, sin esperar al SMTP en la petición web.
+
+Cada envío conserva estado, intentos, resultado y un `Message-ID` estable, independientemente de que el usuario elimine el aviso de la campana. Un trabajo repetido no vuelve a enviar una fila `sent`. Los fallos al conectar/autenticar SMTP antes de enviar el mensaje se reintentan hasta tres veces, con esperas de 30 y 120 segundos. Los estados son `pending`, `sending`, `sent` (aceptado por SMTP, no confirmación de llegada al buzón), `skipped`, `failed` y `uncertain`.
+
+```powershell
+php artisan notifications:mail-status --status=failed
+php artisan notifications:mail-status --status=uncertain
+php artisan notifications:dispatch-mail --retry-failed
+```
+
+El último comando reintenta únicamente fallos de conexión seguros. **SMTP no garantiza una entrega exactamente una vez** si se pierde la respuesta tras aceptar un mensaje. Por eso, los errores posteriores a la conexión y los intentos interrumpidos que permanecen en `sending` más de dos minutos se marcan `uncertain` y no se reenvían automáticamente, ni mediante `queue:retry`. Revisa los registros del proveedor usando el `Message-ID` antes de decidir cualquier reenvío manual. El comando de estado omite destinatarios y contenido; la tabla contiene una copia privada del correo y su mensaje, que debe protegerse como el resto de los datos de cuenta.
+
+Para probar sin entrega externa: `php artisan test --filter=ActivityMail`. La integración levanta un capturador SMTP efímero en `127.0.0.1`, verifica el correo recibido y comprueba que reprocesar el trabajo no lo duplique.
+
 ## Datos originales y migración a otra base
 
 La migración local conserva **13 usuarios, 10 campañas, 36 inversiones y 36 transacciones**, además de perfiles, comentarios, recompensas, actualizaciones y notificaciones. Los UUID y hashes de contraseña se conservan. `legacy_records` guarda una copia íntegra de cada fila del origen, incluyendo los campos y tablas históricos que no utiliza la aplicación activa. El respaldo original está en `storage/app/private/legacy-export.json`, excluido de Git y del servidor público.
