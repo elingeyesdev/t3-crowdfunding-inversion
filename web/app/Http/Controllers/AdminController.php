@@ -12,11 +12,13 @@ use App\Models\CampaignStatusHistory;
 use App\Models\EntrepreneurProfile;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\UserStatusHistory;
 use App\Services\CampaignFinance;
 use App\Services\CampaignPublication;
 use App\Services\FinancialMovementAudit;
 use App\Services\Notifier;
 use App\Services\PrivateFileLinks;
+use App\Services\UserStatusManager;
 use App\Support\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -31,9 +33,9 @@ class AdminController extends Controller
         return Api::ok(['totalUsers' => User::count(), 'totalCampaigns' => Campaign::count(), 'totalFunded' => (float) Campaign::sum('current_amount')]);
     }
 
-    public function users()
+    public function users(Request $r, UserStatusManager $manager)
     {
-        return Api::ok(User::select(['id', 'email', 'created_at', 'is_active'])->latest()->get(), 200, false);
+        return Api::ok(User::with(['roles', 'admin'])->select(['id', 'email', 'created_at', 'is_active', 'status_version'])->latest()->get()->map(fn ($user) => $manager->data($r->user(), $user)), 200, false);
     }
 
     private function campaignData(Campaign $c): array
@@ -105,14 +107,44 @@ class AdminController extends Controller
         });
     }
 
-    public function deleteUser(Request $r, User $user)
+    public function deleteUser(Request $r, User $user, UserStatusManager $manager)
     {
-        abort_if($user->id === $r->user()->id, 422, 'No puedes desactivar tu propia cuenta.');
-        abort_if($user->roles()->where('name', 'super_admin')->exists(), 403, 'No puedes desactivar un superadministrador.');
-        $user->update(['is_active' => false]);
-        $user->tokens()->delete();
+        $data = $this->statusInput($r, false);
 
-        return Api::ok();
+        return Api::ok($manager->change($r, $user, false, $data['reason'], $data['expectedVersion'] ?? null), camel: false);
+    }
+
+    public function userStatus(Request $r, User $user, UserStatusManager $manager)
+    {
+        $data = $this->statusInput($r, true);
+
+        return Api::ok($manager->change($r, $user, (bool) $data['isActive'], $data['reason'], $data['expectedVersion']), camel: false);
+    }
+
+    private function statusInput(Request $r, bool $versionRequired): array
+    {
+        if (is_string($r->input('reason'))) {
+            $r->merge(['reason' => trim($r->input('reason'))]);
+        }
+
+        return $r->validate(['reason' => 'required|string|min:3|max:2000',
+            'isActive' => $versionRequired ? 'required|boolean' : 'sometimes|boolean',
+            'expectedVersion' => ($versionRequired ? 'required' : 'sometimes').'|integer|min:0'], [
+                'reason.required' => 'Ingresa el motivo del cambio de estado.', 'reason.min' => 'El motivo debe tener al menos 3 caracteres.',
+                'reason.max' => 'El motivo no puede superar los 2000 caracteres.',
+            ]);
+    }
+
+    public function userStatusHistory(Request $r, User $user, UserStatusManager $manager)
+    {
+        abort_unless($manager->canManage($r->user(), $user), 403, 'No tienes permisos para consultar este historial.');
+        $history = UserStatusHistory::with('actor:id,email')->where('user_id', $user->id)->orderByDesc('version')->paginate(20);
+
+        return Api::ok(['entries' => $history->getCollection()->map(fn ($entry) => [
+            'id' => $entry->id, 'actorId' => $entry->actor_id, 'actorEmail' => $entry->actor?->email,
+            'fromActive' => $entry->from_active, 'toActive' => $entry->to_active,
+            'version' => $entry->version, 'reason' => $entry->reason, 'createdAt' => $entry->created_at->toIso8601String(),
+        ])->all(), 'page' => $history->currentPage(), 'totalPages' => $history->lastPage()]);
     }
 
     public function admins()

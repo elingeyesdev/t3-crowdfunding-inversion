@@ -46,7 +46,7 @@ axios.defaults.adapter = async config => {
   assert.equal(config.headers.Authorization, 'Bearer test-token');
   calls.push({ url: config.url, method: config.method, params: { ...config.params } });
   let data;
-  if (config.method === 'delete' && config.url.startsWith('/admin/users/')) {
+  if (config.method === 'patch' && config.url.startsWith('/admin/users/')) {
     if (suspendFailure !== null) fail(config, suspendFailure);
     data = null;
   } else if (config.url.endsWith('/preferences')) {
@@ -63,7 +63,7 @@ axios.defaults.adapter = async config => {
   } else {
     if (failure !== null) fail(config, failure);
     data = config.url === '/admin/users'
-      ? (empty ? [] : [{ id: 'user', email: 'kept@example.test', is_active: true, created_at: '2026-11-22T12:00:00Z' }])
+      ? (empty ? [] : [{ id: 'user', email: 'kept@example.test', is_active: true, created_at: '2026-11-22T12:00:00Z', status_version: 0, can_suspend: true, can_reactivate: false, can_view_history: true }])
       : { notifications: empty ? [] : [notice], unreadCount: empty ? 0 : 1, total: empty ? 0 : 1, totalPages: 1, perPage: 12 };
   }
   return { data: { data: structuredClone(data) }, config, headers: {}, status: 200, statusText: 'OK' };
@@ -184,6 +184,11 @@ test('an old preference request cannot overwrite a reopened dialog', async () =>
 test('failed user suspension shows an inline error and preserves the confirmed account state', async () => {
   await mount(AdminUsersPage); suspendFailure = 503;
   await click(container.querySelector('button[title="Suspender Cuenta"]'));
+  await act(async () => {
+    const input = container.querySelector('#status-reason');
+    Object.getOwnPropertyDescriptor(dom.window.HTMLTextAreaElement.prototype, 'value').set.call(input, 'Motivo de suspensión');
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
   await click(button('Confirmar'));
   assert.match(container.querySelector('[role="alert"]').textContent, /servicio no está disponible/);
   assert.match(container.textContent, /kept@example.test/);

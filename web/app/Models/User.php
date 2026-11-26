@@ -21,6 +21,7 @@ class User extends Authenticatable
     {
         return [
             'is_active' => 'boolean',
+            'status_version' => 'integer',
             'email_verified' => 'boolean',
             'phone_verified' => 'boolean',
             'last_login_at' => 'datetime',

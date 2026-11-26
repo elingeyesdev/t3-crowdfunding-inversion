@@ -9,6 +9,16 @@ export interface SystemUser {
   email: string;
   created_at: string;
   is_active: boolean;
+  status_version: number;
+  can_suspend: boolean;
+  can_reactivate: boolean;
+  can_view_history: boolean;
+}
+
+export interface UserStatusHistoryPage {
+  entries: { id: string; actorId: string; actorEmail: string | null; fromActive: boolean; toActive: boolean; version: number; reason: string; createdAt: string }[];
+  page: number;
+  totalPages: number;
 }
 
 export interface SystemCampaign {
