@@ -9,6 +9,8 @@
     "postbuild": "node -e \"require('node:fs').rmSync('public/hot', { force: true })\"",
     "lint": "npm --prefix frontend run lint",
     "test": "node --test \"frontend/tests/*.test.mjs\"",
+    "bundle:report": "node scripts/bundle-report.mjs",
+    "bundle:check": "node scripts/bundle-report.mjs --check",
     "legacy:export": "node scripts/export-legacy.cjs",
     "test:e2e": "node e2e/run.mjs"
   },

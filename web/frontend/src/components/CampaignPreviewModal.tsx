@@ -1,15 +1,14 @@
+import { lazy, useCallback, useState } from 'react';
+import { AsyncContent } from './AsyncContent.tsx';
 import { useAsyncResource } from '../hooks/useAsyncResource.ts';
-import { useCallback } from 'react';
 
 import { campaignStatusLabel } from '../utils/campaignStatus';
 import { campaignTypeLabel, isSupportedCampaignType } from '../utils/campaignType.ts';
-import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { EntrepreneurCampaign } from '../types/campaign.types';
 import { CircularFundingRing } from './CircularFundingRing';
 import { CampaignInvestorsTab } from './CampaignInvestorsTab';
 import { CampaignRewardsTab } from './CampaignRewardsTab';
-import { CampaignAnalyticsDashboard } from './CampaignAnalyticsDashboard';
 import {
   getCampaignFinancialProgress,
   getCampaignHistory as getEntrepreneurHistory,
@@ -50,6 +49,12 @@ import {
   ShieldCheck,
   ExternalLink,
 } from 'lucide-react';
+
+const CampaignAnalyticsDashboard = lazy(() =>
+  import('./CampaignAnalyticsDashboard').then((module) => ({
+    default: module.CampaignAnalyticsDashboard,
+  })),
+);
 
 
 
@@ -782,12 +787,14 @@ function CampaignPreviewContent({
             </div>
           ) : activeTab === 'analytics' ? (
             <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">
-              <CampaignAnalyticsDashboard
-                finance={finance}
-                campaignType={campaign.campaignType}
-                startDate={campaign.startDate}
-                createdAt={campaign.createdAt}
-              />
+              <AsyncContent label="Cargando estadísticas...">
+                <CampaignAnalyticsDashboard
+                  finance={finance}
+                  campaignType={campaign.campaignType}
+                  startDate={campaign.startDate}
+                  createdAt={campaign.createdAt}
+                />
+              </AsyncContent>
             </div>
           ) : activeTab === 'documents' ? (
             <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">

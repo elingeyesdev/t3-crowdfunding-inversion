@@ -240,6 +240,7 @@ Desde `web/`, con las dependencias instaladas y la configuración de instalació
 npm run lint
 npm test
 npm run build
+npm run bundle:check
 composer test
 composer validate --strict
 ```
@@ -256,19 +257,20 @@ npm ci
 npm run lint
 npm test
 npm run build
+npm run bundle:check
 composer test
 composer validate --strict
 ```
 
 La copia de `.env` es solo para una instalación nueva; conserva tu configuración si ya existe. No se necesita `migrate --seed`, crear usuarios ni levantar Laravel, Reverb o trabajadores para estas verificaciones. `phpunit.xml` selecciona SQLite en memoria, correo simulado y servicios de prueba. Los casos SMTP levantan capturadores locales efímeros y el caso de concurrencia crea su propia base SQLite temporal. Las regresiones verifican autenticación, contratos de API, roles, propiedad de recursos, aportes, precisión decimal, reembolsos, recompensas, PDF/CSV, KYC privado, comentarios, chat e importación reversible.
 
-El workflow [Web checks](.github/workflows/web-checks.yml) ejecuta instalación desde los lockfiles, ESLint, regresiones React, compilación, regresiones PHP y validación de Composer en cada push y pull request; también admite ejecución manual. Usa Node 24 y PHP 8.4 en un entorno nuevo, sin secretos del proyecto. Un resultado correcto solo acredita las comprobaciones ejecutadas.
+El workflow [Web checks](.github/workflows/web-checks.yml) ejecuta instalación desde los lockfiles, ESLint, regresiones React, compilación, presupuesto de JavaScript, regresiones PHP, validación de Composer y navegación Chromium del build de producción en cada push y pull request; también admite ejecución manual. Usa Node 24 y PHP 8.4 en un entorno nuevo, sin secretos del proyecto. Un resultado correcto solo acredita las comprobaciones ejecutadas. Consulta [la medición del bundle y sus límites](docs/FRONTEND_BUNDLE.md).
 
 Se distinguen tres clases de evidencia:
 
 - **Regresiones automatizadas:** `web/tests/Unit`, `web/tests/Feature` y `web/frontend/tests`. Exigen el comportamiento esperado; reproducir un defecto debe hacerlas fallar. Los scripts de `web/tests/Support` son auxiliares de estas pruebas, no diagnósticos de aceptación independientes.
 - **Diagnósticos históricos:** [la auditoría de octubre](docs/AUDITORIA_ACTUAL.md) y [la auditoría de noviembre](docs/AUDITORIA_FUNCIONAL_2026-11-14.md) conservan hallazgos y resultados de su fecha. Sus diagnósticos no forman parte de la suite actual ni se requieren en un checkout limpio. Los casos corregidos están cubiertos por regresiones; por ejemplo, `CampaignPublicationTest`, `RewardSelectionTest`, `CampaignReadVisibilityTest`, `AdminEmailNormalizationTest` y `frontend/tests/kyc-preview.test.mjs`. Si se crea un diagnóstico exploratorio, debe quedar fuera de las carpetas descubiertas por las suites y documentar que reproducir un fallo no es aceptación.
-- **Validaciones adicionales:** los recorridos en navegador y las integraciones reales con Google, IA o WebSocket requieren evidencia propia. La suite [Playwright](web/e2e/README.md) se ejecuta aparte mediante `npm run test:e2e` y no está incluida en este workflow. La concurrencia con bloqueo de filas debe comprobarse también en el motor de producción: SQLite serializa escrituras y no reproduce el comportamiento de MySQL/PostgreSQL.
+- **Validaciones adicionales:** las integraciones reales con Google, IA o WebSocket requieren evidencia propia. La suite [Playwright](web/e2e/README.md) completa se ejecuta aparte mediante `npm run test:e2e`; el workflow incluye los casos de carga y navegación de `bundle-loading.spec.ts`. La concurrencia con bloqueo de filas debe comprobarse también en el motor de producción: SQLite serializa escrituras y no reproduce el comportamiento de MySQL/PostgreSQL.
 
 Verificación de arranque del **12 de noviembre de 2026**: **36 pruebas y 326 aserciones correctas**, compilación TypeScript/Vite completa y requisitos PHP satisfechos. Se comprobó `composer dev` desde `web/`, la portada y el catálogo en el navegador sin errores de consola, HTTP 200 en las rutas públicas y HTTP 401 en las rutas protegidas sin sesión. Las migraciones locales están aplicadas. Vite avisa que el bundle principal supera 500 kB; no impide compilar ni ejecutar la aplicación. Esta comprobación no valida Google OAuth ni llamadas reales al proveedor de IA.
 

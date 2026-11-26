@@ -1,8 +1,8 @@
+import { lazy, useCallback, useState, useEffect } from 'react';
+import { AsyncContent } from '../components/AsyncContent.tsx';
 import { useAsyncResource } from '../hooks/useAsyncResource.ts';
-import { useCallback } from 'react';
 import type { EntrepreneurCampaign, CreateCampaignDto } from '../types/campaign.types';
 import type { CreateEntrepreneurProfileDto } from '../types/entrepreneur.types';
-import { useState, useEffect } from 'react';
 import { useEntrepreneurProfile } from '../hooks/useEntrepreneurProfile';
 import { useCampaigns } from '../hooks/useCampaigns';
 import { getCampaignFinancialProgress, getMyCampaignById } from '../api/campaign.api';
@@ -17,7 +17,6 @@ import { NewCampaignFAB } from '../components/entrepreneur-profile/NewCampaignFA
 import { CampaignPreviewModal } from '../components/CampaignPreviewModal';
 import { CampaignForm } from '../components/CampaignForm';
 import { KYCUploadModal } from '../components/KYCUploadModal';
-import { CampaignAnalyticsDashboard } from '../components/CampaignAnalyticsDashboard';
 import {
   FolderOpen,
   AlertCircle,
@@ -31,6 +30,12 @@ import {
   Wallet,
   Building,
 } from 'lucide-react';
+
+const CampaignAnalyticsDashboard = lazy(() =>
+  import('../components/CampaignAnalyticsDashboard').then((module) => ({
+    default: module.CampaignAnalyticsDashboard,
+  })),
+);
 
 type ModalType = 'profile' | 'personal' | 'company' | 'address' | 'banking' | 'avatar' | 'new-campaign' | 'edit-campaign' | 'kyc' | null;
 
@@ -364,14 +369,16 @@ export function EntrepreneurProfilePage() {
                         <p className="text-slate-400 text-xs font-black uppercase tracking-widest">Cargando métricas financieras...</p>
                       </div>
                     ) : campaignFinance ? (
-                      <CampaignAnalyticsDashboard
-                        finance={campaignFinance}
-                        campaignType={
-                          campaigns.find((c) => c.id === selectedFinanceCampaignId)?.campaignType
-                        }
-                        startDate={campaigns.find((c) => c.id === selectedFinanceCampaignId)?.startDate}
-                        createdAt={campaigns.find((c) => c.id === selectedFinanceCampaignId)?.createdAt}
-                      />
+                      <AsyncContent label="Cargando estadísticas...">
+                        <CampaignAnalyticsDashboard
+                          finance={campaignFinance}
+                          campaignType={
+                            campaigns.find((c) => c.id === selectedFinanceCampaignId)?.campaignType
+                          }
+                          startDate={campaigns.find((c) => c.id === selectedFinanceCampaignId)?.startDate}
+                          createdAt={campaigns.find((c) => c.id === selectedFinanceCampaignId)?.createdAt}
+                        />
+                      </AsyncContent>
                     ) : (
                       <div className="bg-white rounded-[32px] border border-green-50 p-12 text-center text-slate-400 py-32">
                         <Wallet size={80} strokeWidth={1} className="text-green-100 mb-6 mx-auto" />

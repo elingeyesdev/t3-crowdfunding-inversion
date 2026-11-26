@@ -1,0 +1,44 @@
+{
+  "entry": "frontend/src/main.tsx",
+  "home": "frontend/src/pages/LandingPage.tsx",
+  "limits": {
+    "entryJs": { "bytes": 330000, "gzipBytes": 110000 },
+    "homeJs": { "bytes": 500000, "gzipBytes": 160000, "fileCount": 20 }
+  },
+  "maxChunkBytes": 500000,
+  "forbiddenHomePrefixes": [
+    "frontend/src/pages/",
+    "frontend/src/components/CampaignAnalyticsDashboard",
+    "frontend/src/components/InvestorDashboardAnalytics",
+    "frontend/src/components/campaign-detail/transparency/PublicFinancialAuditing",
+    "node_modules/recharts/"
+  ],
+  "deferredEntries": [
+    "frontend/src/pages/LoginPage.tsx",
+    "frontend/src/pages/RegisterPage.tsx",
+    "frontend/src/pages/InvestorProfilePage.tsx",
+    "frontend/src/pages/InvestorDashboardPage.tsx",
+    "frontend/src/pages/EntrepreneurProfilePage.tsx",
+    "frontend/src/pages/MyCampaignsPage.tsx",
+    "frontend/src/pages/ExploreCampaignsPage.tsx",
+    "frontend/src/pages/CampaignDetailPage.tsx",
+    "frontend/src/pages/ChatPage.tsx",
+    "frontend/src/pages/admin/AdminDashboardPage.tsx",
+    "frontend/src/pages/admin/SuperAdminDashboardPage.tsx",
+    "frontend/src/pages/admin/CampaignReviewPage.tsx",
+    "frontend/src/pages/admin/AdminUsersPage.tsx",
+    "frontend/src/pages/admin/AdminCampaignsPage.tsx",
+    "frontend/src/pages/admin/AdminKycPage.tsx",
+    "frontend/src/pages/admin/AdminExpensesAuditPage.tsx",
+    "frontend/src/pages/PitchFeedPage.tsx",
+    "frontend/src/pages/LandingPage.tsx",
+    "frontend/src/pages/OAuthCallbackPage.tsx",
+    "frontend/src/pages/AccountSettingsPage.tsx",
+    "frontend/src/pages/NotificationsPage.tsx",
+    "frontend/src/pages/PasswordRecoveryPage.tsx",
+    "frontend/src/pages/EmailVerificationPage.tsx",
+    "frontend/src/components/CampaignAnalyticsDashboard.tsx",
+    "frontend/src/components/InvestorDashboardAnalytics.tsx",
+    "frontend/src/components/campaign-detail/transparency/PublicFinancialAuditing.tsx"
+  ]
+}

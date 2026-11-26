@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { lazy, useState, useEffect } from 'react';
+import { AsyncContent } from '../components/AsyncContent.tsx';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { InvestorDashboardOverview } from '../components/InvestorDashboardOverview';
-import { InvestorDashboardAnalytics } from '../components/InvestorDashboardAnalytics';
 import { AddCapitalModal } from '../components/AddCapitalModal';
 import { DonorContributionsFeed } from '../components/donor-tracking/DonorContributionsFeed';
 import { DonorRewardsTracker } from '../components/donor-tracking/DonorRewardsTracker';
@@ -21,6 +21,12 @@ import {
 } from 'lucide-react';
 import { getMyInvestments, type InvestmentHistoryItem } from '../api/investor.api';
 import { hasInvestmentReward } from '../utils/rewardTracking';
+
+const InvestorDashboardAnalytics = lazy(() =>
+  import('../components/InvestorDashboardAnalytics').then((module) => ({
+    default: module.InvestorDashboardAnalytics,
+  })),
+);
 
 export type InvestorDashboardTab = 'contributions' | 'rewards' | 'updates' | 'receipts' | 'analytics';
 
@@ -262,10 +268,12 @@ export function InvestorDashboardPage() {
             )}
 
             {activeTab === 'analytics' && (
-              <InvestorDashboardAnalytics
-                data={data}
-                investments={investments}
-              />
+              <AsyncContent label="Cargando estadísticas...">
+                <InvestorDashboardAnalytics
+                  data={data}
+                  investments={investments}
+                />
+              </AsyncContent>
             )}
           </div>
         )}

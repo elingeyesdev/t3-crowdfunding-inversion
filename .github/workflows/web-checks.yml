@@ -48,5 +48,11 @@ jobs:
       # Build before PHP tests: several web route tests render the Vite entrypoint.
       - name: Compile TypeScript and production assets
         run: npm run build
+      - name: Initial JavaScript budget and deferred modules
+        run: npm run bundle:check
       - name: PHP regression tests
         run: composer test
+      - name: Install Chromium for production navigation checks
+        run: npx playwright install --with-deps chromium
+      - name: Production route and lazy loading checks
+        run: npm run test:e2e -- bundle-loading.spec.ts
