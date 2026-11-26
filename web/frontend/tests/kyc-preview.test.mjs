@@ -47,7 +47,9 @@ axios.defaults.adapter = originalAdapter;
 const signed = (name, expires = Math.floor(Date.now() / 1000) + 600) => `http://localhost/api/v1/private-files/kyc/${name}?expires=${expires}&signature=test-signature`;
 let root, container, calls, respond, errors;
 const originalError = console.error;
-beforeEach(() => {
+beforeEach(context => {
+  // Keep signed URLs and the viewer's expiry timers independent of real elapsed time.
+  context.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: new Date('2026-11-26T12:00:00Z') });
   calls = [];
   errors = [];
   console.error = (...args) => errors.push(args.map(String).join(' '));
@@ -57,12 +59,15 @@ beforeEach(() => {
   document.body.append(container);
   root = createRoot(container);
 });
-afterEach(async () => {
+afterEach(async context => {
   try {
     await act(async () => root.unmount());
     container.remove();
     assert.deepEqual(errors, [], 'React rendering must not emit errors');
-  } finally { console.error = originalError; }
+  } finally {
+    console.error = originalError;
+    context.mock.timers.reset();
+  }
 });
 after(() => dom.window.close());
 const render = async node => act(async () => root.render(node));
@@ -139,11 +144,14 @@ test('expired links and HTTP failures have explicit messages without attempting 
   assert.match(container.textContent, /problema de conexión/);
 });
 
-test('an open viewer reports expiration once its signed URL expires', async () => {
+test('an open viewer reports expiration once its signed URL expires', async context => {
   const expires = Math.floor(Date.now() / 1000) + 1;
   await renderFile({ type: 'idDocument', url: signed('timed.pdf', expires) });
   assert.ok(container.querySelector('iframe'));
-  await act(async () => new Promise(resolve => setTimeout(resolve, Math.max(0, expires * 1000 - Date.now()) + 25)));
+  await act(async () => context.mock.timers.tick(999));
+  assert.ok(container.querySelector('iframe'), 'The document remains visible just before expiration');
+  assert.doesNotMatch(container.textContent, /ha caducado/);
+  await act(async () => context.mock.timers.tick(1));
   assert.match(container.textContent, /ha caducado/);
   assert.equal(container.querySelector('iframe'), null);
 });
