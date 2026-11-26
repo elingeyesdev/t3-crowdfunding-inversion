@@ -1,4 +1,5 @@
 import { campaignStatusLabel } from '../utils/campaignStatus';
+import { campaignTypeLabel, isSupportedCampaignType } from '../utils/campaignType.ts';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { EntrepreneurCampaign, CampaignFinancialProgress } from '../types/campaign.types';
@@ -183,9 +184,10 @@ export function CampaignPreviewModal({
   };
 
   const effectiveRewards = rewardTiers || campaign?.rewardTiers || [];
-  const canEdit = campaign?.status === 'draft' || campaign?.status === 'rejected';
-  const canSubmit = campaign?.status === 'draft' || campaign?.status === 'rejected';
-  const canPublish = campaign?.status === 'approved';
+  const supportedType = isSupportedCampaignType(campaign?.campaignType);
+  const canEdit = supportedType && (campaign?.status === 'draft' || campaign?.status === 'rejected');
+  const canSubmit = supportedType && (campaign?.status === 'draft' || campaign?.status === 'rejected');
+  const canPublish = supportedType && campaign?.status === 'approved';
   const isPendingReview = campaign?.status === 'pending_review' || campaign?.status === 'in_review';
 
   useEffect(() => {
@@ -347,6 +349,7 @@ export function CampaignPreviewModal({
               <h2 id="preview-title" className="text-xl md:text-2xl font-black text-[#1c2b1e] tracking-tight leading-none mb-2 max-w-xl truncate pr-12 sm:pr-0">
                 {campaign.title}
               </h2>
+              <p className="text-sm text-gray-600">{campaignTypeLabel(campaign.campaignType)}</p>
               {campaign.shortDescription && (
                 <p className="text-[13px] md:text-[14px] font-medium text-slate-500 line-clamp-1 max-w-2xl italic pr-8 sm:pr-0">
                   {campaign.shortDescription}
@@ -894,8 +897,8 @@ export function CampaignPreviewModal({
                     <XCircle size={18} /> Rechazar
                   </button>
                   <button
-                    onClick={() => onApprove?.()}
-                    disabled={actionLoading}
+                    onClick={() => { if (supportedType) onApprove?.(); }}
+                    disabled={actionLoading || !supportedType}
                     className="flex-1 md:px-10 h-14 bg-[#1c2b1e] hover:bg-[#72B626] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-[#1c2b1e]/20/10 border-none cursor-pointer flex items-center justify-center gap-2 min-w-[160px]"
                   >
                     {actionLoading ? <Loader2 className="animate-spin" size={18} /> : <><CheckCircle size={18} /> Aprobar</>}

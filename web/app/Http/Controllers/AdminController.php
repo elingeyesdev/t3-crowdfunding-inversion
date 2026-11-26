@@ -20,6 +20,7 @@ use App\Services\Notifier;
 use App\Services\PrivateFileLinks;
 use App\Services\UserStatusManager;
 use App\Support\Api;
+use App\Support\CampaignTypes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -75,6 +76,9 @@ class AdminController extends Controller
             $c = Campaign::whereKey($campaign->id)->lockForUpdate()->firstOrFail();
             $old = $c->status;
             $next = $data['status'];
+            if (in_array($next, ['in_review', 'approved', 'published'], true)) {
+                CampaignTypes::requireSupported($c->campaign_type);
+            }
             $transitions = [
                 'draft' => ['cancelled'],
                 'pending_review' => ['in_review', 'approved', 'rejected', 'cancelled'],

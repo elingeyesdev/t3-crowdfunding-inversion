@@ -1,4 +1,5 @@
 import { campaignStatusLabel } from '../utils/campaignStatus';
+import { campaignTypeLabel, isSupportedCampaignType } from '../utils/campaignType.ts';
 import { rewardAmountRange, rewardSelectionError } from '../utils/rewardSelection';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { PitchVideoPlayer } from '../components/campaigns/PitchVideoPlayer';
@@ -261,7 +262,8 @@ export function CampaignDetailPage() {
     campaign.status === 'funded' ||
     campaign.status === 'completed' ||
     (campaign.goalAmount > 0 && campaign.currentAmount >= campaign.goalAmount);
-  const acceptsDonations = (campaign.status === 'published' || campaign.status === 'partially_funded') && !isExpired && !isFundedOrCompleted;
+  const supportsContributions = isSupportedCampaignType(campaign.campaignType);
+  const acceptsDonations = supportsContributions && (campaign.status === 'published' || campaign.status === 'partially_funded') && !isExpired && !isFundedOrCompleted;
   const token = localStorage.getItem('accessToken');
   const parsedAmount = parseFloat(customAmount);
   const hasValidAmount = !isNaN(parsedAmount) && parsedAmount > 0;
@@ -270,7 +272,8 @@ export function CampaignDetailPage() {
   const selectedTier = selectedTierId ? campaign.rewardTiers?.find(t => t.id === selectedTierId) : null;
   const rewardError = selectedTierId ? rewardSelectionError(selectedTier, parsedAmount, campaign.goalAmount, campaign.currency) : null;
   const canInvest = acceptsDonations && !investmentLoading && !investmentSuccess && hasValidAmount && !amountTooLow && !amountTooHigh && !rewardError;
-  const closedDonationLabel = campaign.status === 'completed' ? 'Campaña finalizada con éxito'
+  const closedDonationLabel = !supportsContributions ? 'Modalidad no disponible'
+    : campaign.status === 'completed' ? 'Campaña finalizada con éxito'
     : campaign.status === 'failed' ? 'Campaña cerrada sin alcanzar la meta'
     : isFundedOrCompleted ? 'Meta de financiación alcanzada'
     : isExpired ? 'Campaña finalizada' : 'No disponible';
@@ -429,6 +432,8 @@ export function CampaignDetailPage() {
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#1c2b1e] tracking-tight leading-tight mb-3">
               {campaign.title}
             </h1>
+            <p className="text-sm font-semibold text-gray-600">{campaignTypeLabel(campaign.campaignType)}</p>
+            {!supportsContributions && <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">Esta modalidad se conserva para consulta y no admite nuevos aportes.</p>}
             {campaign.subtitle && (
               <p className="text-[15px] sm:text-[17px] text-slate-500 font-medium leading-relaxed mb-6">
                 {campaign.subtitle}

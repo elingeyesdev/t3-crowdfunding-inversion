@@ -397,7 +397,7 @@ export function EntrepreneurProfilePage() {
                       <CampaignAnalyticsDashboard
                         finance={campaignFinance}
                         campaignType={
-                          campaigns.find((c) => c.id === selectedFinanceCampaignId)?.campaignType || 'donation'
+                          campaigns.find((c) => c.id === selectedFinanceCampaignId)?.campaignType
                         }
                         startDate={campaigns.find((c) => c.id === selectedFinanceCampaignId)?.startDate}
                         createdAt={campaigns.find((c) => c.id === selectedFinanceCampaignId)?.createdAt}

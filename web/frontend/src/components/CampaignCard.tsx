@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { ShareModal } from './ShareModal';
 import { campaignStatusLabel } from '../utils/campaignStatus';
+import { campaignTypeLabel, isSupportedCampaignType } from '../utils/campaignType.ts';
 
 interface Props {
   campaign: EntrepreneurCampaign;
@@ -55,8 +56,8 @@ export function CampaignCard({
   const barWidth = clampPercentForBar(rawPercent);
   const pct = Math.round(rawPercent);
 
-  const canSubmit  = campaign.status === 'draft';
-  const canPublish = campaign.status === 'approved';
+  const canSubmit  = isSupportedCampaignType(campaign.campaignType) && campaign.status === 'draft';
+  const canPublish = isSupportedCampaignType(campaign.campaignType) && campaign.status === 'approved';
   const canDelete  = campaign.status === 'draft' || campaign.status === 'rejected';
   const canFinalize= campaign.status === 'published';
 
@@ -163,7 +164,7 @@ export function CampaignCard({
             {campaign.title}
           </h3>
           <p className="text-[13px] text-gray-400 leading-relaxed line-clamp-2">
-            {campaign.shortDescription || 'Sin descripción breve disponible para esta campaña.'}
+              {campaignTypeLabel(campaign.campaignType)} · {campaign.shortDescription || 'Sin descripción breve disponible para esta campaña.'}
           </p>
         </div>
 

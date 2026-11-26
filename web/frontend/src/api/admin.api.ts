@@ -114,7 +114,7 @@ export async function getPendingCampaigns(params: {
     campaigns: data.data.data.map((c: any) => ({
       id: c.id,
       title: c.title,
-      type: 'donation',
+      campaign_type: c.campaign_type ?? c.campaignType ?? '',
       entrepreneur_name: c.entrepreneur_name,
       category_name: c.category_name || 'Sin categoría',
       goal_amount: c.goal_amount.toString(),
@@ -149,7 +149,7 @@ export async function getCampaignDetail(id: string): Promise<PendingCampaignDeta
       title: c.title || 'Campaña sin título',
       slug: c.slug || c.id,
       status: c.status || 'pending_review',
-      type: 'donation' as const,
+      campaign_type: c.campaign_type ?? c.campaignType ?? '',
       currency: c.currency || 'BOB',
       audit_score: c.audit_score,
       main_image_url: mainImageUrl,

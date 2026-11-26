@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { campaignTypeLabel, SUPPORTED_CAMPAIGN_TYPES } from '../utils/campaignType.ts';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePublicCampaigns } from '../hooks/usePublicCampaigns';
 import { Navbar } from '../components/Navbar';
@@ -134,6 +135,7 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
         </div>
 
         {/* Title */}
+        <p className="text-xs font-semibold text-gray-500">{campaignTypeLabel(campaign.campaignType)}</p>
         <h3 className="text-[15px] font-bold text-gray-900 leading-tight line-clamp-2 group-hover:text-[#72B626] transition-colors">
           {campaign.title}
         </h3>
@@ -419,6 +421,14 @@ export function ExploreCampaignsPage() {
           </div>
 
           {/* Right section: Search Bar with Autocomplete */}
+          <label className="text-xs font-semibold text-gray-600">Modalidad
+            <select aria-label="Filtrar por modalidad" value={filters.campaignType ?? ''} onChange={event => updateFilters({ campaignType: event.target.value || undefined })} className="ml-2 rounded-xl border bg-white px-3 py-2">
+              <option value="">Todas</option>
+              {SUPPORTED_CAMPAIGN_TYPES.map(type => <option key={type} value={type}>{campaignTypeLabel(type)}</option>)}
+              <option value="equity">Equity · históricos, no disponible</option>
+              {filters.campaignType && ![...SUPPORTED_CAMPAIGN_TYPES, 'equity'].includes(filters.campaignType) && <option value={filters.campaignType}>{campaignTypeLabel(filters.campaignType)}</option>}
+            </select>
+          </label>
           <div ref={searchContainerRef} className="relative z-40 w-full sm:w-[280px]">
             <form onSubmit={handleSearch} className="relative">
               <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 z-10" strokeWidth={2.5} />

@@ -22,6 +22,7 @@ export interface UserStatusHistoryPage {
 }
 
 export interface SystemCampaign {
+  campaign_type: string;
   id: string;
   title: string;
   status: string;
@@ -53,7 +54,7 @@ export interface RewardTier {
 export interface PendingCampaign {
   id: string;
   title: string;
-  type: 'reward' | 'donation';
+  campaign_type: string;
   entrepreneur_name: string;
   category_name: string;
   goal_amount: string;
@@ -66,7 +67,7 @@ export interface PendingCampaignDetail {
   title: string;
   slug: string;
   status: string;
-  type: 'reward' | 'donation';
+  campaign_type: string;
   cover_image_url?: string;
   main_image_url?: string;
   short_description: string;

@@ -61,6 +61,14 @@ La API conserva `/api/v1` y los contratos usados por React, incluyendo paginaci�
 
 Los endpoints temporales de creación de superadministrador y publicación de historias de prueba se sustituyeron por operaciones locales y autenticadas. KYC y documentos nuevos se guardan fuera de `public/` y se sirven con enlaces firmados de 15 minutos.
 
+## Tipos de campaña web
+
+Las modalidades disponibles son `donation` (Donación) y `reward` (Con recompensas). El formulario permite elegirlas y envía `campaignType`; la API conserva ese valor al editar, revisar, publicar y consultar campañas. Crear sin ese campo mantiene el valor predeterminado `donation`. Los aportes usan saldo simulado y la selección de una recompensa es opcional en ambas modalidades; no se implementan pagos reales ni participación accionaria.
+
+Las campañas históricas `equity` y de tipos desconocidos conservan su valor original y su historial. La web identifica expresamente la modalidad no disponible, sin convertirla en donación. No se permite crear, editar, enviar a revisión, aprobar, publicar ni recibir nuevos aportes en esas modalidades. La consulta y las operaciones existentes de cierre, cancelación y reembolso mantienen sus reglas habituales. El catálogo permite filtrar por modalidad, incluido `equity` histórico; la API también admite filtrar por otros valores históricos exactos.
+
+Este cambio no requiere migraciones ni conversiones de datos. Las respuestas públicas usan `campaignType` y las administrativas `campaign_type`; ambos exponen el tipo original. Los campos alternativos `type` y `campaign_type` no se aceptan para crear o editar desde la API web.
+
 ## Recuperación de contraseña web
 
 Desde «Olvidé mi contraseña» en el login se solicita un enlace en `/forgot-password`. El correo abre `/reset-password`; el enlace caduca a los 60 minutos y solo se puede usar una vez. Cambiar la contraseña revoca todos los tokens de acceso y las sesiones de base de datos de esa cuenta. Las cuentas que utilizan exclusivamente Google deben continuar con Google; las cuentas vinculadas a Google que también tienen contraseña local sí pueden recuperarla.

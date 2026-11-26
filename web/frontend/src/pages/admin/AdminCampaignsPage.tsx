@@ -281,7 +281,7 @@ export function AdminCampaignsPage() {
               shortDescription: selectedDetail.short_description || '',
               description: selectedDetail.description || '',
               location: selectedDetail.location || 'Global',
-              campaignType: selectedDetail.type as any,
+              campaignType: selectedDetail.campaign_type,
               status: selectedDetail.status as any,
               goalAmount: parseFloat(selectedDetail.goal_amount || '0'),
               currentAmount: selectedDetail.current_amount || 0,

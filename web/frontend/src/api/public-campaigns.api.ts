@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { CampaignFinancialProgress } from '../types/campaign.types';
+import type { CampaignType } from '../utils/campaignType';
 
 const API = axios.create({ baseURL: '/api/v1' });
 
@@ -8,7 +9,7 @@ export interface PublicCampaign {
   title: string;
   slug: string;
   shortDescription: string | null;
-  campaignType: 'donation' | 'reward' | 'equity';
+  campaignType: CampaignType;
   status: string;
   goalAmount: number;
   currentAmount: number;
