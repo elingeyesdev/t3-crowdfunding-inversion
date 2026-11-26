@@ -63,7 +63,10 @@ test('production home excludes other pages and chart modules, and navigates to t
     .getByRole('link', { name: /explorar/i })
     .first()
     .click();
-  await expect(page.getByText('QA published', { exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/explore$/);
+  // The landing page also renders this campaign while the lazy route is loading.
+  await expect(page.getByRole('heading', { name: 'Descubre campañas con impacto real', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'QA published', exact: true, level: 3 })).toBeVisible();
 });
 
 test('public deep entry and refresh preserve the campaign URL', async ({ page }) => {

@@ -8,7 +8,8 @@ test('HU-V01-CA01 portada permite entrar al catálogo', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('link', { name: /explorar/i }).first().click();
   await expect(page).toHaveURL(/\/explore$/);
-  await expect(page.getByText('QA published', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Descubre campañas con impacto real', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'QA published', exact: true, level: 3 })).toBeVisible();
 });
 test('HU-V01-CA02 catálogo permite consulta sin registrarse', async ({ page }) => {
   await page.goto('/explore');
