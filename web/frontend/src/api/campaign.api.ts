@@ -141,13 +141,14 @@ export async function getPublicCampaignFinancialProgress(
 export async function uploadCampaignImage(
   campaignId: string,
   file: File,
+  signal?: AbortSignal,
 ): Promise<EntrepreneurCampaign> {
   const formData = new FormData();
   formData.append('file', file);
   const { data } = await api.post<ApiSuccessResponse<EntrepreneurCampaign>>(
     `/entrepreneurs/me/campaigns/${campaignId}/cover`,
     formData,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
+    { headers: { 'Content-Type': 'multipart/form-data' }, signal },
   );
   return data.data;
 }
@@ -248,14 +249,17 @@ export async function uploadCampaignDocument(
   campaignId: string,
   file: File,
   justification: string,
+  uploadId?: string,
+  signal?: AbortSignal,
 ): Promise<CampaignDocument> {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('justification', justification);
+  if (uploadId) formData.append('uploadId', uploadId);
   const { data } = await api.post<ApiSuccessResponse<CampaignDocument>>(
     `/entrepreneurs/me/campaigns/${campaignId}/documents`,
     formData,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
+    { headers: { 'Content-Type': 'multipart/form-data' }, signal },
   );
   return data.data;
 }

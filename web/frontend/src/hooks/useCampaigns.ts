@@ -1,6 +1,5 @@
 import { useAsyncResource } from './useAsyncResource.ts';
 import { useState, useCallback, useEffect, useRef } from 'react';
-import axios from 'axios';
 import {
   getAllMyCampaigns,
   createCampaign,
@@ -18,6 +17,8 @@ import type {
   QueryCampaignsDto,
 } from '../types/campaign.types';
 import { getApiErrorMessage } from '../utils/apiError';
+import { CampaignUploadSession } from '../utils/campaignUploads.ts';
+import type { CampaignDocumentUpload, CampaignUploadProgress } from '../utils/campaignUploads.ts';
 
 const DEFAULT_QUERY: QueryCampaignsDto = {
     page: 1,
@@ -33,7 +34,22 @@ export function useCampaigns() {
     const [adding, setAdding] = useState(false);
     const [addError, setAddError] = useState<string | null>(null);
     const saveInFlight = useRef(false);
-    const clearSaveError = useCallback(() => setAddError(null), []);
+    const uploadSession = useRef<{ key: string; session: CampaignUploadSession } | null>(null);
+    const saveMounted = useRef(false);
+    const [saveProgress, setSaveProgress] = useState<CampaignUploadProgress | null>(null);
+    const resetSaveState = useCallback(() => {
+        if (saveInFlight.current) return;
+        uploadSession.current = null;
+        setSaveProgress(null);
+        setAddError(null);
+    }, []);
+    useEffect(() => {
+        saveMounted.current = true;
+        return () => {
+            saveMounted.current = false;
+            uploadSession.current?.session.cancel();
+        };
+    }, []);
     const [actionCampaignId, setActionCampaignId] = useState<string | null>(null);
 
     // Token que fuerza un re-fetch incluso cuando el query no cambia
@@ -79,93 +95,62 @@ export function useCampaigns() {
 
     const fetchCampaigns = resource.retry;
 
-    const addCampaign = async (
-        dto: CreateCampaignDto,
+    const saveCampaign = async (
+        campaignId: string | null,
+        dto: Partial<CreateCampaignDto>,
         coverFile?: File,
-        documents?: { file: File; justification: string }[],
+        documents?: CampaignDocumentUpload[],
     ): Promise<string | null> => {
         if (saveInFlight.current) return null;
         saveInFlight.current = true;
+        setAdding(true);
+        setAddError(null);
         try {
-            setAdding(true);
-            setAddError(null);
-            const campaign = await createCampaign(dto);
-
-            if (coverFile) {
-                try {
-                    await uploadCampaignImageApi(campaign.id, coverFile);
-                } catch (uploadErr) {
-                    console.error('Error uploading campaign cover after creation:', uploadErr);
-                }
+            const key = campaignId ? 'edit:' + campaignId : 'create';
+            let current = uploadSession.current;
+            if (current && current.key !== key) {
+                throw new Error('Cierra el editor anterior antes de guardar otra campaña.');
             }
-
-            if (documents && documents.length > 0) {
-                for (const doc of documents) {
-                    try {
-                        await uploadCampaignDocumentApi(campaign.id, doc.file, doc.justification);
-                    } catch (docErr) {
-                        console.error('Error uploading campaign document:', docErr);
-                    }
-                }
+            if (!current) {
+                const saved = campaignId
+                    ? await updateCampaignApi(campaignId, dto)
+                    : await createCampaign(dto as CreateCampaignDto);
+                if (!saveMounted.current) return null;
+                current = { key, session: new CampaignUploadSession(saved.id, coverFile, documents) };
+                uploadSession.current = current;
+                setSaveProgress(current.session.progress);
             }
-
-            setQuery({ ...DEFAULT_QUERY });
-            resource.retry();
-            return campaign.id;
-        } catch (err: unknown) {
-            if (axios.isAxiosError(err)) {
-                console.error('Error creating campaign response:', err.response?.data);
+            await current.session.upload(
+                { cover: uploadCampaignImageApi, document: uploadCampaignDocumentApi },
+                progress => {
+                    if (saveMounted.current) setSaveProgress(progress);
+                },
+            );
+            if (!saveMounted.current) return null;
+            // A list refresh is not another write and must not turn a saved record into a failure.
+            if (!campaignId) {
+                setQuery({ ...DEFAULT_QUERY });
+                resource.retry();
             } else {
-                console.error('Error creating campaign:', err);
+                await resource.refetch();
             }
-            setAddError(getApiErrorMessage(err, 'Error al crear la campaña'));
+            return current.session.progress.complete ? current.session.campaignId : null;
+        } catch (failure) {
+            if (saveMounted.current) {
+                setAddError(getApiErrorMessage(failure, 'No se pudo guardar la campaña. Intenta nuevamente.'));
+            }
             return null;
         } finally {
             saveInFlight.current = false;
-            setAdding(false);
+            if (saveMounted.current) setAdding(false);
         }
     };
 
-    const updateCampaign = async (
-        campaignId: string,
-        dto: Partial<CreateCampaignDto>,
-        coverFile?: File,
-        documents?: { file: File; justification: string }[],
-    ): Promise<boolean> => {
-        if (saveInFlight.current) return false;
-        saveInFlight.current = true;
-        try {
-            setAdding(true);
-            setAddError(null);
-            await updateCampaignApi(campaignId, dto);
+    const addCampaign = (dto: CreateCampaignDto, coverFile?: File, documents?: CampaignDocumentUpload[]) =>
+        saveCampaign(null, dto, coverFile, documents);
 
-            if (coverFile) {
-                await uploadCampaignImageApi(campaignId, coverFile);
-            }
-
-            if (documents && documents.length > 0) {
-                for (const doc of documents) {
-                    try {
-                        await uploadCampaignDocumentApi(campaignId, doc.file, doc.justification);
-                    } catch (docErr) {
-                        console.error('Error uploading campaign document:', docErr);
-                    }
-                }
-            }
-
-            // Actualizar lista local
-            const paginated = await getAllMyCampaigns(queryRef.current);
-            setCampaigns(paginated.data);
-            return true;
-        } catch (err: unknown) {
-            console.error('Error updating campaign:', err);
-            setAddError(getApiErrorMessage(err, 'Error al actualizar la campaña'));
-            return false;
-        } finally {
-            saveInFlight.current = false;
-            setAdding(false);
-        }
-    };
+    const updateCampaign = async (campaignId: string, dto: Partial<CreateCampaignDto>, coverFile?: File, documents?: CampaignDocumentUpload[]) =>
+        (await saveCampaign(campaignId, dto, coverFile, documents)) !== null;
 
     const submitForReview = async (campaignId: string): Promise<boolean> => {
         try {
@@ -269,7 +254,8 @@ export function useCampaigns() {
         setError,
         adding,
         addError,
-        clearSaveError,
+        resetSaveState,
+        saveProgress,
         fetchCampaigns,
         addCampaign,
         updateCampaign,

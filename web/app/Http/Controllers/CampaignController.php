@@ -238,9 +238,23 @@ class CampaignController extends Controller
     {
         self::authorizeOwner($r, $campaign);
         $r->validate(['file' => 'required|file|mimes:jpg,jpeg,png,webp,avif|max:10240']);
-        $campaign->update(['cover_image_url' => '/storage/'.$r->file('file')->store('campaigns', 'public')]);
 
-        return Api::ok($campaign->fresh()->apiData());
+        return DB::transaction(function () use ($r, $campaign) {
+            $current = Campaign::whereKey($campaign->id)->lockForUpdate()->firstOrFail();
+            self::authorizeOwner($r, $current);
+            $path = str_starts_with($current->cover_image_url ?? '', '/storage/campaigns/')
+                ? substr($current->cover_image_url, strlen('/storage/')) : null;
+            $disk = Storage::disk('public');
+            // A lost response must not create another copy of the current image.
+            if (! $path || ! $disk->exists($path)
+                || ! hash_equals(hash('sha256', $disk->get($path)), hash_file('sha256', $r->file('file')->getRealPath()))) {
+                $stored = $r->file('file')->store('campaigns', 'public');
+                abort_unless($stored, 500, 'No se pudo guardar la portada.');
+                $current->update(['cover_image_url' => '/storage/'.$stored]);
+            }
+
+            return Api::ok($current->fresh()->apiData());
+        });
     }
 
     public function progress(Request $r, Campaign $campaign, CampaignFinance $finance)
@@ -299,11 +313,39 @@ class CampaignController extends Controller
     public function uploadDocument(Request $r, Campaign $campaign)
     {
         self::authorizeOwner($r, $campaign);
-        $r->validate(['file' => 'required|file|mimes:pdf,jpg,jpeg,png,webp,doc,docx|max:20480', 'justification' => 'nullable|string|max:5000']);
+        $data = $r->validate(['file' => 'required|file|mimes:pdf,jpg,jpeg,png,webp,doc,docx|max:20480', 'justification' => 'nullable|string|max:5000', 'uploadId' => 'nullable|uuid']);
         $f = $r->file('file');
-        $path = $f->store('documents', 'local');
+        $fingerprint = hash('sha256', hash_file('sha256', $f->getRealPath())."\0".$f->getClientOriginalName()."\0".($data['justification'] ?? ''));
+        $path = null;
+        try {
+            $document = DB::transaction(function () use ($r, $campaign, $data, $f, $fingerprint, &$path) {
+                $current = Campaign::whereKey($campaign->id)->lockForUpdate()->firstOrFail();
+                self::authorizeOwner($r, $current);
+                if (! empty($data['uploadId'])) {
+                    $existing = $current->documents()->where('upload_key', $data['uploadId'])->first();
+                    if ($existing) {
+                        abort_unless(hash_equals($existing->upload_fingerprint ?? '', $fingerprint), 409, 'Este identificador de subida ya corresponde a otro archivo.');
 
-        $document = $campaign->documents()->create(['file_url' => '/api/v1/private-files/'.$path, 'original_name' => $f->getClientOriginalName(), 'mime_type' => $f->getMimeType(), 'file_size_bytes' => $f->getSize(), 'justification' => $r->input('justification')])->fresh();
+                        return $existing;
+                    }
+                }
+                $path = $f->store('documents', 'local');
+                abort_unless($path, 500, 'No se pudo guardar el documento.');
+
+                return $current->documents()->create([
+                    'file_url' => '/api/v1/private-files/'.$path, 'original_name' => $f->getClientOriginalName(),
+                    'mime_type' => $f->getMimeType(), 'file_size_bytes' => $f->getSize(),
+                    'justification' => $data['justification'] ?? null, 'upload_key' => $data['uploadId'] ?? null,
+                    'upload_fingerprint' => ! empty($data['uploadId']) ? $fingerprint : null,
+                ])->fresh();
+            });
+        } catch (\Throwable $failure) {
+            if ($path) {
+                Storage::disk('local')->delete($path);
+            }
+
+            throw $failure;
+        }
 
         return Api::ok(PrivateFileLinks::documentData($document), 201, false);
     }

@@ -104,6 +104,7 @@ registerHooks({
 const { MyCampaignsPage } = await import('../src/pages/MyCampaignsPage.tsx');
 const { CampaignForm } = await import('../src/components/CampaignForm.tsx');
 const { useCampaigns } = await import('../src/hooks/useCampaigns.ts');
+const { CampaignUploadSession } = await import('../src/utils/campaignUploads.ts');
 const deferred = () => {
   let resolve, reject;
   const promise = new Promise((yes, no) => {
@@ -383,4 +384,134 @@ test('late category options preserve an edited field and the original category s
   await act(async () => categories.resolve([{ id: 'category', displayName: 'Tecnología' }]));
   assert.equal(container.querySelector('#title').value, 'Cambios antes de cargar las categorías');
   assert.equal(container.querySelector('input[type="checkbox"]').checked, true);
+});
+
+for (const mode of ['create', 'edit']) {
+  test(`${mode}: partial uploads retry only pending files on the saved campaign`, async () => {
+    const files = await prepare(mode);
+    const extra = new File(['other'], 'other.pdf', { type: 'application/pdf' });
+    await choose('input[type="file"]:not(#cover-upload)', extra);
+    await fill('input[placeholder="Ej. Cotización oficial del proveedor"]', 'Otro respaldo');
+    await click(button('Añadir Documento'));
+    let covers = 0, pending = 0;
+    globalThis.__savingApi.uploadCampaignImage = async (...args) => {
+      uploads.push({ kind: 'cover', args });
+      if (++covers === 1) throw failure(500);
+    };
+    globalThis.__savingApi.uploadCampaignDocument = async (...args) => {
+      uploads.push({ kind: 'document', args });
+      if (args[1] === extra && ++pending < 3) throw failure(500);
+    };
+    await submit();
+    await confirmTwice();
+    await act(async () => gate.resolve());
+    assert.match(container.textContent, /Datos de campaña guardados/);
+    assert.match(container.querySelector('[role="alert"]').textContent, /archivos pendientes/);
+    assert.equal(container.querySelector('#title').matches(':disabled'), true);
+    assert.equal(container.querySelector('#cover-upload').files[0], files.cover);
+    assert.equal(uploads.length, 3);
+    assert.equal(mutations.length, 1);
+    await click(button('Reintentar subidas pendientes'));
+    assert.equal(uploads.length, 5);
+    assert.ok(button('Reintentar subidas pendientes'));
+    await click(button('Reintentar subidas pendientes'));
+    assert.equal(container.querySelector('form'), null);
+    assert.equal(mutations.length, 1);
+    assert.equal(uploads.length, 6);
+    assert.equal(uploads.filter(upload => upload.args[1] === files.document).length, 1);
+    const attempts = uploads.filter(upload => upload.args[1] === extra);
+    assert.equal(new Set(attempts.map(upload => upload.args[3])).size, 1);
+    assert.match(attempts[0].args[3], /^[a-f0-9-]{36}$/);
+    assert.ok(uploads.every(upload => upload.args[0] === (mode === 'create' ? 'created' : 'existing')));
+  });
+}
+
+test('closing partial progress requires confirmation and a new editor starts a new save', async () => {
+  await prepare('create');
+  globalThis.__savingApi.uploadCampaignImage = async () => { throw failure(500); };
+  await submit();
+  await confirmTwice();
+  await act(async () => gate.resolve());
+  await click(button('Cerrar y conservar campaña'));
+  assert.match(container.textContent, /¿Cerrar el editor\?/);
+  assert.ok(container.querySelector('form'));
+  await click(button('Sí, cerrar'));
+  assert.equal(container.querySelector('form'), null);
+  await click(button('Lanzar Campaña'));
+  assert.equal(container.querySelector('[aria-label="Estado de las subidas"]'), null);
+  assert.equal(container.querySelector('#title').value, '');
+  assert.equal(container.querySelector('#title').matches(':disabled'), false);
+  assert.equal(mutations.length, 1);
+});
+
+test('review retries reuse completed uploads and the same saved campaign', async () => {
+  let reviews = 0, closes = 0;
+  function Editor() {
+    const state = useCampaigns();
+    return createElement(CampaignForm, {
+      initialData: campaign, saving: state.adding, saveError: state.addError,
+      saveProgress: state.saveProgress, onCancel() { closes++; },
+      onSuccess: (dto, cover, docs) => state.updateCampaign(campaign.id, dto, cover, docs),
+      async onSubmitForReview(dto, cover, docs) {
+        if (!await state.updateCampaign(campaign.id, dto, cover, docs)) return false;
+        return ++reviews > 1;
+      },
+    });
+  }
+  await mount(Editor);
+  await choose('input[type="file"]:not(#cover-upload)', new File(['fixture'], 'support.pdf'));
+  await fill('input[placeholder="Ej. Cotización oficial del proveedor"]', 'Documento de prueba');
+  await click(button('Añadir Documento'));
+  await click(button('Enviar a Revisión'));
+  await click(button('Sí, enviar'));
+  await act(async () => gate.resolve());
+  assert.equal(reviews, 1);
+  assert.equal(closes, 0);
+  await click(button('Reintentar envío a revisión'));
+  assert.equal(reviews, 2);
+  assert.equal(closes, 1);
+  assert.equal(mutations.length, 1);
+  assert.equal(uploads.length, 1);
+});
+
+test('same-named documents retain separate identities and progress snapshots', async () => {
+  const file = new File(['fixture'], 'same.pdf');
+  const session = new CampaignUploadSession('saved', undefined, [
+    { file, justification: 'Primero' }, { file, justification: 'Segundo' },
+  ]);
+  const initial = session.progress;
+  const calls = [];
+  let fail = true;
+  const api = {
+    async cover() {},
+    async document(...args) {
+      calls.push(args);
+      if (fail && args[2] === 'Segundo') throw failure(500);
+    },
+  };
+  await session.upload(api, () => {});
+  assert.equal(session.progress.complete, false);
+  assert.equal(initial.files[0].status, 'pending');
+  assert.notEqual(calls[0][3], calls[1][3]);
+  fail = false;
+  await session.upload(api, () => {});
+  assert.equal(session.progress.complete, true);
+  assert.equal(calls.length, 3);
+  assert.equal(calls[1][3], calls[2][3]);
+});
+
+test('unmount cancellation aborts the active upload and prevents queued files', async () => {
+  const file = new File(['fixture'], 'support.pdf');
+  const session = new CampaignUploadSession('saved', file, [{file, justification:'Respaldo'}]);
+  let documentCalls = 0, updates = 0;
+  await session.upload({
+    async cover(_id, _file, signal) {
+      session.cancel();
+      assert.equal(signal.aborted, true);
+      throw new Error('Aborted');
+    },
+    async document() { documentCalls++; },
+  }, () => updates++);
+  assert.equal(documentCalls, 0);
+  assert.equal(updates, 1);
 });

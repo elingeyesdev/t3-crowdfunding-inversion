@@ -33,7 +33,8 @@ export function MyCampaignsPage() {
     error,
     adding,
     addError,
-    clearSaveError,
+    resetSaveState,
+    saveProgress,
     addCampaign,
     updateCampaign,
     submitForReview,
@@ -56,7 +57,7 @@ export function MyCampaignsPage() {
 
   const handleLaunchClick = () => {
     if (adding) return;
-    clearSaveError();
+    resetSaveState();
     if (profile && !profile.identityVerified) {
       setShowKycModal(true);
       return;
@@ -67,7 +68,7 @@ export function MyCampaignsPage() {
   const handleModalPreview = useCallback((c: EntrepreneurCampaign) => setPreviewCampaign(c), []);
 
   const handleModalEdit = useCallback(async (c: EntrepreneurCampaign) => {
-    clearSaveError();
+    resetSaveState();
     setPreviewCampaign(null);
     try {
       const fullCampaign = await getMyCampaignById(c.id);
@@ -75,7 +76,7 @@ export function MyCampaignsPage() {
     } catch {
       setEditingCampaign(c);
     }
-  }, [clearSaveError]);
+  }, [resetSaveState]);
 
   const filteredCampaigns = campaigns.filter(c => {
     const matchesSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -321,9 +322,10 @@ export function MyCampaignsPage() {
                   : await addCampaign(dto, file, documents);
                 return Boolean(success);
               }}
-              onCancel={() => {setEditingCampaign(null); setCreatingCampaign(false);}}
+              onCancel={() => {resetSaveState(); setEditingCampaign(null); setCreatingCampaign(false);}}
               saving={adding}
               saveError={addError}
+              saveProgress={saveProgress}
             />
           </div>
         </div>

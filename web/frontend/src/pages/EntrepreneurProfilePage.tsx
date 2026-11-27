@@ -70,7 +70,8 @@ export function EntrepreneurProfilePage() {
     uploadCampaignImage,
     adding,
     addError,
-    clearSaveError,
+    resetSaveState,
+    saveProgress,
     actionCampaignId,
   } = useCampaigns();
 
@@ -131,7 +132,7 @@ export function EntrepreneurProfilePage() {
   };
 
   const handleOpenModal = (type: ModalType) => {
-    if (type === 'new-campaign' || type === 'edit-campaign') clearSaveError();
+    if (type === 'new-campaign' || type === 'edit-campaign') resetSaveState();
     if (type === 'new-campaign') {
       if (!profile || !profile.identityVerified) {
         setModalType('kyc');
@@ -433,7 +434,7 @@ export function EntrepreneurProfilePage() {
 
       {(modalType === 'new-campaign' || modalType === 'edit-campaign') && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-[#1c2b1e]/80 backdrop-blur-sm" onClick={() => { if (!adding && !actionCampaignId) setModalType(null); }} />
+          <div className="absolute inset-0 bg-[#1c2b1e]/80 backdrop-blur-sm" onClick={() => { if (!adding && !actionCampaignId && !saveProgress) {resetSaveState(); setModalType(null);} }} />
           <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <CampaignForm
               initialData={modalType === 'edit-campaign' ? selectedCampaign : null}
@@ -449,9 +450,10 @@ export function EntrepreneurProfilePage() {
                 if (!campaignId) return false;
                 return await submitForReview(campaignId);
               }}
-              onCancel={() => setModalType(null)}
+              onCancel={() => {resetSaveState(); setModalType(null);}}
               saving={adding}
               saveError={addError}
+              saveProgress={saveProgress}
             />
           </div>
         </div>
@@ -485,7 +487,7 @@ export function EntrepreneurProfilePage() {
           }
         }}
         onEdit={async (campaign) => {
-          clearSaveError();
+          resetSaveState();
           setPreviewOpen(false);
           try {
             const fullCampaign = await getMyCampaignById(campaign.id);
