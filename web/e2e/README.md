@@ -33,6 +33,10 @@ documento nuevo, la reapertura del editor y el envío a revisión desde el perfi
 Incluye fallos de consulta con reintento y conservación de campos y archivos en
 ambas pantallas. Las descargas y la conservación de referencias se comprueban
 contra Laravel real; estos casos también forman parte de CI.
+`npm run test:e2e -- donor-query-states.spec.ts` verifica errores de red, HTTP 500
+y sesión vencida en el dashboard y el historial del perfil. Incluye reintentos
+con respuestas reales de Laravel, errores del perfil que no disparan la creación
+y la ausencia confirmada de perfil. Estos casos también se ejecutan en CI.
 No ejecuta PHPUnit como sustituto de Playwright. Los casos funcionales conservan la HU y,
 cuando corresponde, el criterio verificable; la matriz del plan distingue una
 prueba de servicio de la aceptación completa de interfaz.

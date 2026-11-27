@@ -1,4 +1,5 @@
-import { lazy, useState, useEffect } from 'react';
+import { lazy, useState } from 'react';
+import { RequestErrorNotice } from '../components/RequestErrorNotice';
 import { AsyncContent } from '../components/AsyncContent.tsx';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
@@ -19,7 +20,6 @@ import {
   FileText,
   Sparkles,
 } from 'lucide-react';
-import { getMyInvestments, type InvestmentHistoryItem } from '../api/investor.api';
 import { hasInvestmentReward } from '../utils/rewardTracking';
 
 const InvestorDashboardAnalytics = lazy(() =>
@@ -31,9 +31,8 @@ const InvestorDashboardAnalytics = lazy(() =>
 export type InvestorDashboardTab = 'contributions' | 'rewards' | 'updates' | 'receipts' | 'analytics';
 
 export function InvestorDashboardPage() {
-  const { data, loading, error, refetch } = useInvestorDashboard();
-  const [investments, setInvestments] = useState<InvestmentHistoryItem[]>([]);
-  const [loadingInvestments, setLoadingInvestments] = useState(true);
+  const { data, loading, error, isNewProfile, retry, refetch, investments,
+    investmentsLoading: loadingInvestments, investmentsError, retryInvestments } = useInvestorDashboard();
   const [showAddCapital, setShowAddCapital] = useState(false);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -55,15 +54,6 @@ export function InvestorDashboardPage() {
 
     setSearchParams({ tab });
   };
-
-  useEffect(() => {
-    if (data) {
-      getMyInvestments()
-        .then(setInvestments)
-        .catch(console.error)
-        .finally(() => setLoadingInvestments(false));
-    }
-  }, [data]);
 
   const rewardCount = investments.filter(hasInvestmentReward).length;
 
@@ -95,13 +85,14 @@ export function InvestorDashboardPage() {
 
       <main className="max-w-[1100px] mx-auto px-6 -mt-20 relative z-20">
         {loading && (
-          <div className="py-20 flex flex-col items-center justify-center gap-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
+          <div role="status" className="py-20 flex flex-col items-center justify-center gap-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
             <div className="w-10 h-10 border-3 border-gray-200 border-t-[#72B626] rounded-full animate-spin" />
             <span className="text-[13px] text-gray-400">Cargando tu panel de seguimiento...</span>
           </div>
         )}
 
-        {error && (
+        {Boolean(error) && !isNewProfile && <RequestErrorNotice error={error} fallback="No se pudo cargar el resumen del donador." onRetry={retry} />}
+        {isNewProfile && (
           <div className="bg-white/90 backdrop-blur-xl rounded-[32px] p-12 text-center shadow-[0_20px_40px_rgb(0,0,0,0.08)] border border-white animate-in fade-in zoom-in-95 duration-500 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
             <div className="text-[#72B626] mb-6 flex justify-center relative z-10">
@@ -241,7 +232,8 @@ export function InvestorDashboardPage() {
             </div>
 
             {/* ── Active Tab Contents ── */}
-            {activeTab === 'contributions' && (
+            {Boolean(investmentsError) && <RequestErrorNotice error={investmentsError} fallback="No se pudo cargar tu historial de donaciones." onRetry={retryInvestments} />}
+            {!investmentsError && activeTab === 'contributions' && (
               <DonorContributionsFeed
                 investments={investments}
                 loading={loadingInvestments}
@@ -249,7 +241,7 @@ export function InvestorDashboardPage() {
               />
             )}
 
-            {activeTab === 'rewards' && (
+            {!investmentsError && activeTab === 'rewards' && (
               <DonorRewardsTracker
                 investments={investments}
                 loading={loadingInvestments}
@@ -260,14 +252,15 @@ export function InvestorDashboardPage() {
               <DonorBackedUpdatesFeed />
             )}
 
-            {activeTab === 'receipts' && (
+            {!investmentsError && activeTab === 'receipts' && (
               <DonorReceiptsList
                 investments={investments}
                 loading={loadingInvestments}
               />
             )}
 
-            {activeTab === 'analytics' && (
+            {loadingInvestments && activeTab === 'analytics' && <p role="status">Cargando historial para las estadísticas...</p>}
+            {!investmentsError && !loadingInvestments && activeTab === 'analytics' && (
               <AsyncContent label="Cargando estadísticas...">
                 <InvestorDashboardAnalytics
                   data={data}

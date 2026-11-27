@@ -16,6 +16,8 @@ interface UseInvestorProfileReturn {
   loading: boolean;
   saving: boolean;
   error: string | null;
+  loadError: unknown;
+  retryProfile: () => void;
   successMessage: string | null;
   isNewProfile: boolean;
   fetchProfile: () => Promise<void>;
@@ -136,6 +138,8 @@ export function useInvestorProfile(): UseInvestorProfileReturn {
     loading,
     saving,
     error: error ?? (resource.error ? 'Error al cargar el perfil. Verifica que el servidor esté activo.' : null),
+    loadError: resource.error,
+    retryProfile: resource.retry,
     successMessage,
     isNewProfile,
     fetchProfile,
