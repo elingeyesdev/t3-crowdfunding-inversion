@@ -27,6 +27,12 @@ desde ambas pantallas con subidas parciales, reintentos repetidos y respuestas
 perdidas después de guardar archivos en Laravel. Verifica una sola campaña,
 el mismo documento recibido, la portada conservada y descargas autorizadas.
 También forma parte de CI y usa únicamente la base y el almacenamiento aislados.
+`npm run test:e2e -- campaign-existing-documents.spec.ts` verifica la edición con
+documentos pendientes y aprobados sin volver a subirlos, la incorporación de un
+documento nuevo, la reapertura del editor y el envío a revisión desde el perfil.
+Incluye fallos de consulta con reintento y conservación de campos y archivos en
+ambas pantallas. Las descargas y la conservación de referencias se comprueban
+contra Laravel real; estos casos también forman parte de CI.
 No ejecuta PHPUnit como sustituto de Playwright. Los casos funcionales conservan la HU y,
 cuando corresponde, el criterio verificable; la matriz del plan distingue una
 prueba de servicio de la aceptación completa de interfaz.

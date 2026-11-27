@@ -48,6 +48,7 @@ const originalAdapter = axios.defaults.adapter;
 axios.defaults.adapter = async config => {
   let data;
   if (config.url === '/categories') data = [{ id: 'category', name: 'Category', displayName: 'Category' }];
+  else if (/^\/entrepreneurs\/me\/campaigns\/[^/]+\/documents$/.test(config.url)) data = [];
   else if (config.url === '/investments/me') data = structuredClone(history);
   else if (config.url === '/admin/campaigns/pending') data = { data: [{ id: 'campaign', campaign_type: rawType, goal_amount: 100, title: 'Original type' }], meta: { totalItems: 1 } };
   else if (config.url.startsWith('/admin/campaigns/')) data = { id: 'campaign', campaign_type: rawType, title: 'Original type' };
