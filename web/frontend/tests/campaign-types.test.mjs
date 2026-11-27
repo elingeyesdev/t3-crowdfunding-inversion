@@ -22,7 +22,6 @@ registerHooks({
   resolve(specifier, context, nextResolve) {
     const shell = shells.find(name => specifier.endsWith('/'+name));
     if (shell) return { url: virtual(shell), shortCircuit: true };
-    if (specifier.endsWith('/useInvestorDashboard')) return { url: virtual('dashboard'), shortCircuit: true };
     if (specifier.startsWith('.') && context.parentURL?.includes('/frontend/src/')) {
       for (const ext of ['.ts', '.tsx']) {
         const url = new URL(specifier+ext, context.parentURL);
@@ -34,7 +33,6 @@ registerHooks({
   load(url, context, nextLoad) {
     const shell = shells.find(name => url === virtual(name));
     if (shell) return { format: 'module', shortCircuit: true, source: `export function ${shell}() { return null; }` };
-    if (url === virtual('dashboard')) return { format: 'module', shortCircuit: true, source: 'const data = {}; export function useInvestorDashboard() { return { data, loading: false, error: null, refetch() {} }; }' };
     if (!url.endsWith('.tsx') || !url.includes('/frontend/src/')) return nextLoad(url, context);
     return { format: 'module', shortCircuit: true, source: ts.transpileModule(readFileSync(new URL(url), 'utf8'), {
       compilerOptions: { module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2023 },
@@ -48,6 +46,7 @@ const originalAdapter = axios.defaults.adapter;
 axios.defaults.adapter = async config => {
   let data;
   if (config.url === '/categories') data = [{ id: 'category', name: 'Category', displayName: 'Category' }];
+  else if (config.url === '/investors/me/capital') data = {};
   else if (/^\/entrepreneurs\/me\/campaigns\/[^/]+\/documents$/.test(config.url)) data = [];
   else if (config.url === '/investments/me') data = structuredClone(history);
   else if (config.url === '/admin/campaigns/pending') data = { data: [{ id: 'campaign', campaign_type: rawType, goal_amount: 100, title: 'Original type' }], meta: { totalItems: 1 } };

@@ -1,7 +1,8 @@
 import type { CreateInvestorProfileDto } from '../types/investor.types';
 import { useState, useEffect } from 'react';
 import { useInvestorProfile } from '../hooks/useInvestorProfile';
-import { useInvestorDashboard } from '../hooks/useInvestorDashboard';
+import { useInvestorCapital } from '../hooks/useInvestorDashboard';
+import { RequestErrorNotice } from '../components/RequestErrorNotice';
 import { Navbar } from '../components/Navbar';
 
 import { ProfileHeader } from '../components/investor-profile/ProfileHeader';
@@ -35,6 +36,9 @@ export function InvestorProfilePage() {
     loading: profileLoading,
     saving,
     error: profileError,
+    loadError: profileLoadError,
+    retryProfile,
+    isNewProfile,
     successMessage,
     submitProfile,
     uploadAvatarPhoto,
@@ -45,7 +49,10 @@ export function InvestorProfilePage() {
   const {
     data: capitalData,
     loading: capitalLoading,
-  } = useInvestorDashboard();
+    error: capitalError,
+    isNewProfile: capitalProfileMissing,
+    retry: retryCapital,
+  } = useInvestorCapital();
 
   const handleDeleteInvestorProfile = async () => {
     const ok = window.confirm(
@@ -62,14 +69,14 @@ export function InvestorProfilePage() {
   const userEmail = localStorage.getItem('userEmail') ?? '';
 
   useEffect(() => {
-    if (!profileLoading && !profile && !onboardingTriggered) {
+    if (isNewProfile && !onboardingTriggered) {
       const timer = setTimeout(() => {
         setModalType('profile');
         setOnboardingTriggered(true);
       }, 800);
       return () => clearTimeout(timer);
     }
-  }, [profileLoading, profile, onboardingTriggered]);
+  }, [isNewProfile, onboardingTriggered]);
 
   const handleSave = async (_type: string, data: Partial<CreateInvestorProfileDto>) => {
     const baseData = { ...profile, ...data };
@@ -101,6 +108,8 @@ export function InvestorProfilePage() {
             <Loader2 className="w-14 h-14 text-[#72B626] animate-spin" strokeWidth={2.5} />
             <p className="text-slate-400 font-black uppercase tracking-widest text-[11px]">Sincronizando Perfil Corporativo...</p>
           </div>
+        ) : profileLoadError ? (
+          <div className="max-w-[1100px] mx-auto p-6"><RequestErrorNotice error={profileLoadError} fallback="No se pudo cargar tu perfil de donador." onRetry={retryProfile} /></div>
         ) : (
           <>
             <div className="bg-white shadow-sm">
@@ -127,7 +136,7 @@ export function InvestorProfilePage() {
               <div className="flex-1 min-w-0 flex flex-col w-full">
                 {((!profileLoading && !profile) || error || successMessage) && (
                   <div className="w-full mb-8 flex flex-col gap-4">
-                    {!profileLoading && !profile && (
+                    {isNewProfile && (
                       <div className="bg-gradient-to-r from-[#72B626] to-[#1c2b1e] text-white p-5 sm:p-6 rounded-[24px] sm:rounded-[32px] shadow-xl shadow-gray-900/10 flex flex-col sm:flex-row items-center sm:justify-between gap-5 sm:gap-4 text-center sm:text-left animate-in slide-in-from-top-4 duration-700">
                         <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
                           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-md rounded-xl sm:rounded-2xl flex items-center justify-center text-white ring-1 ring-white/30 shrink-0">
@@ -161,7 +170,10 @@ export function InvestorProfilePage() {
                 )}
 
                 {activeTab === 'donations' ? (
-                  <InvestmentsFeed capitalData={capitalData} capitalLoading={capitalLoading} />
+                  <>
+                    {Boolean(capitalError) && !capitalProfileMissing && <RequestErrorNotice error={capitalError} fallback="No se pudo cargar el resumen del donador." onRetry={retryCapital} />}
+                    <InvestmentsFeed capitalData={capitalData} capitalLoading={capitalLoading} />
+                  </>
                 ) : activeTab === 'info' ? (
                   <div className="flex flex-col gap-6 sm:gap-8">
                     <section className="bg-white rounded-[24px] sm:rounded-[32px] border border-green-50 p-6 sm:p-8 shadow-sm">

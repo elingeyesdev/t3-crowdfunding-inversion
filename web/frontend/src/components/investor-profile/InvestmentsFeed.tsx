@@ -1,10 +1,11 @@
 import type { LucideIcon } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useAsyncResource } from '../../hooks/useAsyncResource.ts';
+import { RequestErrorNotice } from '../RequestErrorNotice';
 import { useNavigate } from 'react-router-dom';
 import type { CapitalOverview } from '../../types/investor.types';
 import { getMyInvestments, downloadInvestmentReceipt } from '../../api/investor.api';
 import { getImageUrl } from '../../utils/image.utils';
-import type { InvestmentHistoryItem } from '../../api/investor.api';
 import { campaignTypeLabel } from '../../utils/campaignType.ts';
 import {
   TrendingUp,
@@ -37,24 +38,10 @@ const STATUS_CONFIG: Record<string, { icon: LucideIcon; color: string; bg: strin
 
 export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
   const navigate = useNavigate();
-  const [investments, setInvestments] = useState<InvestmentHistoryItem[]>([]);
-  const [investmentsLoading, setInvestmentsLoading] = useState(true);
+  const history = useAsyncResource(getMyInvestments);
+  const investmentsLoading = history.loading;
+  const investments = !history.loading && !history.error ? history.data ?? [] : [];
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchInvestments = async () => {
-      try {
-        setInvestmentsLoading(true);
-        const data = await getMyInvestments();
-        setInvestments(data);
-      } catch {
-        // silently fail — will show empty state
-      } finally {
-        setInvestmentsLoading(false);
-      }
-    };
-    fetchInvestments();
-  }, []);
 
   return (
     <div className="flex-1 min-w-[280px] flex flex-col gap-8 font-['Plus Jakarta Sans',sans-serif]">
@@ -137,10 +124,12 @@ export function InvestmentsFeed({ capitalData, capitalLoading }: Props) {
         </div>
 
         {investmentsLoading ? (
-          <div className="py-16 flex flex-col items-center justify-center gap-4">
+          <div role="status" className="py-16 flex flex-col items-center justify-center gap-4">
             <Loader2 size={32} strokeWidth={2} className="text-[#72B626] animate-spin" />
             <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Cargando historial...</span>
           </div>
+        ) : history.error ? (
+          <RequestErrorNotice error={history.error} fallback="No se pudo cargar tu historial de donaciones." onRetry={history.retry} />
         ) : investments.length > 0 ? (
           <div className="flex flex-col gap-3">
             {investments.map((inv) => {
