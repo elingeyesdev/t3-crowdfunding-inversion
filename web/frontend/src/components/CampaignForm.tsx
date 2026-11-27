@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { getApiErrorMessage } from '../utils/apiError.ts';
+import type { CampaignUploadProgress } from '../utils/campaignUploads.ts';
 import { useForm, useWatch, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -43,6 +44,12 @@ const schema = (originalEndDate?: string | null) => z.object({
 type FormValues = z.infer<ReturnType<typeof schema>>;
 
 type ConfirmAction = 'discard' | 'draft' | 'review' | null;
+type SaveRequest = {
+  action: 'draft' | 'review';
+  dto: CreateCampaignDto;
+  cover?: File;
+  documents: { file: File; justification: string }[];
+};
 
 interface Props {
   initialData?: EntrepreneurCampaign | null;
@@ -51,13 +58,14 @@ interface Props {
   onCancel: () => void;
   saving: boolean;
   saveError: string | null;
+  saveProgress?: CampaignUploadProgress | null;
 }
 
 export function CampaignForm(props: Props) {
   return <CampaignFormContent key={props.initialData?.id ?? 'new'} {...props} />;
 }
 
-function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCancel, saving, saveError }: Props) {
+function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCancel, saving, saveError, saveProgress = null }: Props) {
   const {
     register,
     handleSubmit,
@@ -102,9 +110,12 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
   const submissionPending = useRef(false);
   const [submitting, setSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [retryRequest, setRetryRequest] = useState<SaveRequest | null>(null);
   const errorRef = useRef<HTMLDivElement | null>(null);
   const busy = saving || submitting;
-  const displayedError = busy ? null : saveError || submissionError;
+  const displayedError = busy ? null : saveProgress && !saveProgress.complete
+    ? 'Los datos de la campaña ya están guardados. Hay archivos pendientes de subir.'
+    : saveError || submissionError;
 
   useEffect(() => {
     if (displayedError) errorRef.current?.focus();
@@ -217,7 +228,7 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
   };
 
   const requestAction = (action: 'draft' | 'review', data: FormValues) => {
-    if (busy || submissionPending.current) return;
+    if (busy || submissionPending.current || saveProgress) return;
     if (documents.length === 0) {
       setDocError('Debes adjuntar al menos un documento de respaldo para continuar.');
       return;
@@ -229,28 +240,22 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
 
   const onSubmit = (data: FormValues) => requestAction('draft', data);
 
-  const handleConfirm = async () => {
-    if (busy || submissionPending.current || !confirmAction) return;
-    if (confirmAction === 'discard') {
-      setConfirmAction(null);
-      onCancel();
-      return;
-    }
-    if (!pendingFormData) return;
-    const dto = buildDto(pendingFormData);
+  const submitRequest = async (request: SaveRequest) => {
+    if (busy || submissionPending.current) return;
     submissionPending.current = true;
     setSubmitting(true);
     setSubmissionError(null);
-    setConfirmAction(null);
-    setPendingFormData(null);
+    setRetryRequest(request);
     let success = false;
     try {
-      if (confirmAction === 'review' && onSubmitForReview) {
-        success = await onSubmitForReview(dto, coverFile || undefined, documents);
+      if (request.action === 'review' && onSubmitForReview) {
+        success = await onSubmitForReview(request.dto, request.cover, request.documents);
       } else {
-        success = await onSuccess(dto, coverFile || undefined, documents);
+        success = await onSuccess(request.dto, request.cover, request.documents);
       }
-      if (!success) setSubmissionError('No se pudo completar el guardado. Revisa los datos e intenta nuevamente.');
+      if (!success) setSubmissionError(request.action === 'review'
+        ? 'No se pudo completar el envío a revisión. Si los datos ya se guardaron, el reintento continuará sobre la misma campaña.'
+        : 'No se pudo completar el guardado. Revisa los datos e intenta nuevamente.');
     } catch (failure) {
       setSubmissionError(getApiErrorMessage(failure, 'No se pudo completar el guardado. Intenta nuevamente.'));
     } finally {
@@ -258,6 +263,25 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
       setSubmitting(false);
     }
     if (success) onCancel();
+  };
+
+  const handleConfirm = async () => {
+    if (busy || submissionPending.current || !confirmAction) return;
+    if (confirmAction === 'discard') {
+      setConfirmAction(null);
+      onCancel();
+      return;
+    }
+    if (!pendingFormData || saveProgress) return;
+    const request: SaveRequest = {
+      action: confirmAction,
+      dto: buildDto(pendingFormData),
+      cover: coverFile || undefined,
+      documents,
+    };
+    setConfirmAction(null);
+    setPendingFormData(null);
+    await submitRequest(request);
   };
 
   const inputClass = "w-full border-gray-200 border-[1.5px] rounded-xl px-4 py-3 text-[15px] outline-none transition-all bg-gray-50/50 focus:bg-white focus:border-[#72B626] focus:ring-4 focus:ring-green-500/10 placeholder:text-gray-400 font-medium";
@@ -289,8 +313,25 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
         </div>
       )}
 
+      {saveProgress && <section aria-label="Estado de las subidas" className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-6 space-y-4">
+        <h3 className="font-bold text-gray-900">Datos de campaña guardados</h3>
+        <p className="text-sm text-gray-700">La campaña ya existe. Los reintentos continúan sobre este mismo registro y conservan los archivos recibidos.</p>
+        <ul className="space-y-3">
+          {saveProgress.files.map(file => <li key={file.id} className="text-sm">
+            <span className="font-semibold">{file.kind === 'cover' ? 'Portada: ' : 'Documento: '}{file.name}</span>
+            <span className="ml-2">{file.status === 'uploaded' ? 'Recibido' : file.status === 'uploading' ? 'Subiendo...' : file.status === 'failed' ? 'No se pudo subir' : 'Pendiente'}</span>
+            {file.error && <p className="mt-1 text-red-700">{file.error}</p>}
+          </li>)}
+        </ul>
+        {retryRequest && <button type="button" disabled={busy} className="rounded-xl bg-[#72B626] px-5 py-3 font-bold text-white disabled:opacity-50" onClick={() => { void submitRequest(retryRequest); }}>
+          {busy ? 'Completando guardado...' : !saveProgress.complete ? 'Reintentar subidas pendientes' : 'Reintentar envío a revisión'}
+        </button>}
+        <button type="button" disabled={busy} onClick={() => setConfirmAction('discard')} className="block text-gray-700 underline disabled:opacity-50">Cerrar y conservar campaña</button>
+        <p className="text-xs text-gray-600">Los archivos pendientes se conservan mientras este editor permanezca abierto. Si lo cierras o recargas, tendrás que seleccionarlos nuevamente.</p>
+      </section>}
+
       <form className="flex flex-col gap-8" onSubmit={event => { void handleSubmit(onSubmit)(event); }} aria-busy={busy} noValidate>
-        <fieldset disabled={busy} className="contents">
+        <fieldset disabled={busy || Boolean(saveProgress)} className="contents">
         <div><label htmlFor="campaign-type" className={labelClass}>Modalidad de campaña</label><select id="campaign-type" {...register('campaignType')} disabled={busy} className={inputClass}>{SUPPORTED_CAMPAIGN_TYPES.map(type => <option key={type} value={type}>{campaignTypeLabel(type)}</option>)}</select><p className="mt-2 text-sm text-gray-500">Los aportes utilizan saldo simulado. Puedes configurar recompensas opcionales; ninguna modalidad ofrece participación accionaria.</p></div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Fila 1: Título (2/3) y Meta de Recaudación (1/3) */}
@@ -688,7 +729,7 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-end items-center gap-4 mt-8 pt-8 border-t border-green-50">
+        {!saveProgress && <div className="flex flex-col md:flex-row justify-end items-center gap-4 mt-8 pt-8 border-t border-green-50">
           <button
             type="button"
             className="w-full md:w-auto bg-slate-50 hover:bg-red-50 text-slate-500 hover:text-[#c62828] font-bold px-8 py-3.5 rounded-xl transition-all border-none active:scale-95 cursor-pointer text-[14px] flex items-center justify-center gap-2"
@@ -735,7 +776,7 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
               )}
             </button>
           )}
-        </div>
+        </div>}
         </fieldset>
       </form>
 
@@ -749,8 +790,8 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
                 <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
                   <X size={24} className="text-[#c62828]" />
                 </div>
-                <h3 className="text-lg font-black text-[#1c2b1e] mb-2">¿Descartar cambios?</h3>
-                <p className="text-[14px] text-slate-500 mb-6">Se perderán todos los datos ingresados. Esta acción no se puede deshacer.</p>
+                <h3 className="text-lg font-black text-[#1c2b1e] mb-2">{saveProgress ? '¿Cerrar el editor?' : '¿Descartar cambios?'}</h3>
+                <p className="text-[14px] text-slate-500 mb-6">{saveProgress ? 'La campaña y los archivos recibidos se conservarán. Las subidas pendientes no se completarán al cerrar; tendrás que seleccionar esos archivos nuevamente.' : 'Se perderán todos los datos ingresados. Esta acción no se puede deshacer.'}</p>
               </>
             )}
             {confirmAction === 'draft' && (
@@ -788,7 +829,7 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
                 }`}
                 onClick={handleConfirm}
               >
-                {confirmAction === 'discard' ? 'Sí, descartar' : confirmAction === 'review' ? 'Sí, enviar' : 'Sí, guardar'}
+                {confirmAction === 'discard' ? saveProgress ? 'Sí, cerrar' : 'Sí, descartar' : confirmAction === 'review' ? 'Sí, enviar' : 'Sí, guardar'}
               </button>
             </div>
           </div>

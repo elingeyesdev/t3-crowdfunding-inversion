@@ -4,6 +4,8 @@ namespace App\Models;
 
 class CampaignDocument extends Record
 {
+    protected $hidden = ['upload_key', 'upload_fingerprint'];
+
     protected function casts(): array
     {
         return ['is_public' => 'boolean'];

@@ -44,6 +44,7 @@ jobs:
       - name: ESLint quality check
         run: npm run lint
       - name: React regression tests
+        timeout-minutes: 5
         run: npm test
       # Build before PHP tests: several web route tests render the Vite entrypoint.
       - name: Compile TypeScript and production assets
@@ -55,4 +56,4 @@ jobs:
       - name: Install Chromium for production navigation checks
         run: npx playwright install --with-deps chromium
       - name: Production routes, sessions and campaign saving
-        run: npm run test:e2e -- bundle-loading.spec.ts oauth-session.spec.ts campaign-saving.spec.ts
+        run: npm run test:e2e -- bundle-loading.spec.ts oauth-session.spec.ts campaign-saving.spec.ts campaign-upload-recovery.spec.ts

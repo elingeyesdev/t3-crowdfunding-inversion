@@ -22,6 +22,11 @@ en CI. No contacta a Google ni acredita la integración externa con el proveedor
 Mis Campañas y el perfil del emprendedor: bloqueo de solicitudes pendientes,
 errores visibles, conservación de campos y archivos, reintento y guardado real.
 Los casos usan archivos sintéticos y también se ejecutan en CI.
+`npm run test:e2e -- campaign-upload-recovery.spec.ts` comprueba creación y edición
+desde ambas pantallas con subidas parciales, reintentos repetidos y respuestas
+perdidas después de guardar archivos en Laravel. Verifica una sola campaña,
+el mismo documento recibido, la portada conservada y descargas autorizadas.
+También forma parte de CI y usa únicamente la base y el almacenamiento aislados.
 No ejecuta PHPUnit como sustituto de Playwright. Los casos funcionales conservan la HU y,
 cuando corresponde, el criterio verificable; la matriz del plan distingue una
 prueba de servicio de la aceptación completa de interfaz.
