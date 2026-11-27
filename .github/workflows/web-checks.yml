@@ -44,6 +44,7 @@ jobs:
       - name: ESLint quality check
         run: npm run lint
       - name: React regression tests
+        timeout-minutes: 5
         run: npm test
       # Build before PHP tests: several web route tests render the Vite entrypoint.
       - name: Compile TypeScript and production assets

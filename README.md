@@ -253,7 +253,7 @@ composer test
 composer validate --strict
 ```
 
-`npm test` descubre todos los archivos `frontend/tests/*.test.mjs`, incluidas las nuevas regresiones que se añadan con ese nombre. Usa Node Test Runner y JSDOM, sin servidor ni credenciales externas. También funciona desde `web/frontend/`. La compilación verifica TypeScript y genera assets; se ejecuta antes de PHP porque algunas pruebas de rutas web renderizan la entrada de Vite. `composer test` limpia la caché de configuración y ejecuta `php artisan test`. Cualquier prueba fallida devuelve un código de salida distinto de cero.
+`npm test` descubre todos los archivos `frontend/tests/*.test.mjs`, incluidas las nuevas regresiones que se añadan con ese nombre. Usa Node Test Runner y JSDOM, sin servidor ni credenciales externas. Ejecuta los archivos de forma secuencial para evitar los bloqueos observados en paralelo, con un límite de 60 segundos por prueba y un límite de cinco minutos para el paso de React en CI. También funciona desde `web/frontend/`. La compilación verifica TypeScript y genera assets; se ejecuta antes de PHP porque algunas pruebas de rutas web renderizan la entrada de Vite. `composer test` limpia la caché de configuración y ejecuta `php artisan test`. Cualquier prueba fallida devuelve un código de salida distinto de cero.
 
 Para verificar un checkout limpio sin importar datos reales, instala PHP y Node según los requisitos y ejecuta desde `web/`:
 
