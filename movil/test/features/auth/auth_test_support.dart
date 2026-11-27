@@ -77,6 +77,7 @@ AppDependencies testDependencies({
   MemorySessionStore? store,
   bool configured = true,
   bool includeCatalog = false,
+  bool includeTracking = false,
   DateTime Function()? clock,
   Future<http.Response> Function(http.Request)? handler,
 }) {
@@ -92,6 +93,23 @@ AppDependencies testDependencies({
           'totalItems': 0,
           'itemCount': 0,
           'itemsPerPage': 20,
+          'totalPages': 1,
+          'currentPage': 1,
+        },
+      });
+    }
+    if (!includeTracking && request.url.path == '/api/v1/investments/me') {
+      return testResponse([]);
+    }
+    if (!includeTracking &&
+        request.url.path == '/api/v1/investments/backed-campaigns/updates') {
+      return testResponse({
+        'data': [],
+        'campaigns': [],
+        'meta': {
+          'totalItems': 0,
+          'itemCount': 0,
+          'itemsPerPage': 10,
           'totalPages': 1,
           'currentPage': 1,
         },

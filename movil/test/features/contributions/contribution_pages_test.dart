@@ -54,9 +54,10 @@ void main() {
     );
     await pumpAuthApp(tester, deps, location: path);
     await tester.pumpAndSettle();
+    expect(find.byKey(const Key('contribution.amount')), findsNothing);
     expect(
       find.text('Esta función requiere una sesión de donante.'),
-      findsOneWidget,
+      findsNothing,
     );
     expect(api.requests.where((r) => r.url.path.endsWith('/capital')), isEmpty);
   });

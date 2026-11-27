@@ -16,6 +16,7 @@ import '../../features/contributions/presentation/investor_gate.dart';
 import '../../features/contributions/presentation/receipt_page.dart';
 import '../../features/notifications/presentation/notifications_page.dart';
 import '../../features/tracking/presentation/tracking_page.dart';
+import '../../features/tracking/presentation/tracking_campaign_page.dart';
 import '../../shared/widgets/feature_pending_view.dart';
 import '../shell/main_shell.dart';
 import 'app_routes.dart';
@@ -44,12 +45,18 @@ abstract final class AppRouter {
           scheduleMicrotask(session.checkExpiration);
         }
         if (authenticated) {
+          final donor = session.state.user?.roles.contains('investor') ?? false;
           if ([
             AppRoutes.access,
             AppRoutes.register,
             AppRoutes.session,
           ].contains(path)) {
-            return destination;
+            return !donor && AppRoutes.requiresDonor(destination)
+                ? AppRoutes.explore
+                : destination;
+          }
+          if (!donor && AppRoutes.requiresDonor(path)) {
+            return AppRoutes.explore;
           }
           return null;
         }
@@ -132,7 +139,7 @@ abstract final class AppRouter {
         StatefulShellRoute.indexedStack(
           pageBuilder: (context, state, shell) => NoTransitionPage(
             key: state.pageKey,
-            child: MainShell(navigationShell: shell),
+            child: MainShell(navigationShell: shell, session: session),
           ),
           branches: [
             StatefulShellBranch(
@@ -175,10 +182,25 @@ abstract final class AppRouter {
                 GoRoute(
                   path: AppRoutes.tracking,
                   name: AppRoutes.trackingName,
-                  builder: (_, _) => _PrivateView(
+                  builder: (_, _) => InvestorGate(
                     dependencies: dependencies,
-                    child: const TrackingPage(),
+                    builder: () => TrackingPage(dependencies: dependencies),
                   ),
+                  routes: [
+                    GoRoute(
+                      parentNavigatorKey: rootNavigatorKey,
+                      path: 'campanas/:id',
+                      name: AppRoutes.trackingCampaignName,
+                      builder: (_, state) => InvestorGate(
+                        dependencies: dependencies,
+                        builder: () => TrackingCampaignPage(
+                          key: ValueKey(state.pathParameters['id']),
+                          dependencies: dependencies,
+                          campaignId: state.pathParameters['id']!,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
