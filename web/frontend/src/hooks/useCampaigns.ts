@@ -32,6 +32,8 @@ export function useCampaigns() {
     const [error, setError] = useState<string | null>(null);
     const [adding, setAdding] = useState(false);
     const [addError, setAddError] = useState<string | null>(null);
+    const saveInFlight = useRef(false);
+    const clearSaveError = useCallback(() => setAddError(null), []);
     const [actionCampaignId, setActionCampaignId] = useState<string | null>(null);
 
     // Token que fuerza un re-fetch incluso cuando el query no cambia
@@ -82,6 +84,8 @@ export function useCampaigns() {
         coverFile?: File,
         documents?: { file: File; justification: string }[],
     ): Promise<string | null> => {
+        if (saveInFlight.current) return null;
+        saveInFlight.current = true;
         try {
             setAdding(true);
             setAddError(null);
@@ -117,6 +121,7 @@ export function useCampaigns() {
             setAddError(getApiErrorMessage(err, 'Error al crear la campaña'));
             return null;
         } finally {
+            saveInFlight.current = false;
             setAdding(false);
         }
     };
@@ -127,6 +132,8 @@ export function useCampaigns() {
         coverFile?: File,
         documents?: { file: File; justification: string }[],
     ): Promise<boolean> => {
+        if (saveInFlight.current) return false;
+        saveInFlight.current = true;
         try {
             setAdding(true);
             setAddError(null);
@@ -155,6 +162,7 @@ export function useCampaigns() {
             setAddError(getApiErrorMessage(err, 'Error al actualizar la campaña'));
             return false;
         } finally {
+            saveInFlight.current = false;
             setAdding(false);
         }
     };
@@ -261,6 +269,7 @@ export function useCampaigns() {
         setError,
         adding,
         addError,
+        clearSaveError,
         fetchCampaigns,
         addCampaign,
         updateCampaign,

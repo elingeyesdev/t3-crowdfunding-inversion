@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { getApiErrorMessage } from '../utils/apiError.ts';
 import { useForm, useWatch, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -60,7 +61,6 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
   const {
     register,
     handleSubmit,
-    reset,
     control,
     formState: { errors },
   } = useForm<FormValues>({
@@ -99,6 +99,16 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
   const selectedCategoryIds = useWatch({control, name: 'categoryIds'});
   const [pendingFormData, setPendingFormData] = useState<FormValues | null>(null);
+  const submissionPending = useRef(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const errorRef = useRef<HTMLDivElement | null>(null);
+  const busy = saving || submitting;
+  const displayedError = busy ? null : saveError || submissionError;
+
+  useEffect(() => {
+    if (displayedError) errorRef.current?.focus();
+  }, [displayedError]);
 
   const [rewardData, setRewardData] = useState<CreateRewardTierDto>({
     title: '',
@@ -128,21 +138,7 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
     }
   }, [descVal]);
 
-  // Sincronizar valores cuando se cargan las categorías o cambia initialData
-  useEffect(() => {
-    if (!loadingCats && initialData) {
-      reset({
-        campaignType: initialData.campaignType ?? '',
-        title: initialData.title || '',
-        description: initialData.description || '',
-        shortDescription: initialData.shortDescription || '',
-        goalAmount: initialData.goalAmount || 1000,
-        categoryIds: initialData.categoryIds || (initialData.categoryId ? [initialData.categoryId] : []),
-        endDate: toLocalDateTime(initialData.endDate),
-        videoUrl: initialData.videoUrl || '',
-      });
-    }
-  }, [loadingCats, initialData, reset]);
+  // CampaignForm keys the editor by record. Loading category options must not reset edits.
 
   const addReward = () => {
     if (!rewardData.title || !rewardData.description) {
@@ -221,6 +217,7 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
   };
 
   const requestAction = (action: 'draft' | 'review', data: FormValues) => {
+    if (busy || submissionPending.current) return;
     if (documents.length === 0) {
       setDocError('Debes adjuntar al menos un documento de respaldo para continuar.');
       return;
@@ -233,20 +230,32 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
   const onSubmit = (data: FormValues) => requestAction('draft', data);
 
   const handleConfirm = async () => {
-    if (!confirmAction || !pendingFormData) return;
+    if (busy || submissionPending.current || !confirmAction) return;
     if (confirmAction === 'discard') {
       setConfirmAction(null);
       onCancel();
       return;
     }
+    if (!pendingFormData) return;
     const dto = buildDto(pendingFormData);
+    submissionPending.current = true;
+    setSubmitting(true);
+    setSubmissionError(null);
     setConfirmAction(null);
     setPendingFormData(null);
     let success = false;
-    if (confirmAction === 'review' && onSubmitForReview) {
-      success = await onSubmitForReview(dto, coverFile || undefined, documents);
-    } else {
-      success = await onSuccess(dto, coverFile || undefined, documents);
+    try {
+      if (confirmAction === 'review' && onSubmitForReview) {
+        success = await onSubmitForReview(dto, coverFile || undefined, documents);
+      } else {
+        success = await onSuccess(dto, coverFile || undefined, documents);
+      }
+      if (!success) setSubmissionError('No se pudo completar el guardado. Revisa los datos e intenta nuevamente.');
+    } catch (failure) {
+      setSubmissionError(getApiErrorMessage(failure, 'No se pudo completar el guardado. Intenta nuevamente.'));
+    } finally {
+      submissionPending.current = false;
+      setSubmitting(false);
     }
     if (success) onCancel();
   };
@@ -272,15 +281,17 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
         </p>
       </div>
 
-      {saveError && (
-        <div className="bg-red-50 border border-red-100 text-[#c62828] p-5 rounded-2xl text-[14px] font-bold mb-8 flex items-center gap-3 animate-in slide-in-from-top-2 duration-300">
+      {busy && <p role="status" aria-live="polite" className="sr-only">Guardando campaña...</p>}
+      {displayedError && (
+        <div ref={errorRef} role="alert" tabIndex={-1} className="bg-red-50 border border-red-100 text-[#c62828] p-5 rounded-2xl text-[14px] font-bold mb-8 flex items-center gap-3 animate-in slide-in-from-top-2 duration-300">
            <AlertCircle size={20} strokeWidth={2.5} />
-           {saveError}
+           {displayedError}
         </div>
       )}
 
-      <form className="flex flex-col gap-8" onSubmit={handleSubmit(onSubmit)} noValidate>
-        <div><label htmlFor="campaign-type" className={labelClass}>Modalidad de campaña</label><select id="campaign-type" {...register('campaignType')} disabled={saving} className={inputClass}>{SUPPORTED_CAMPAIGN_TYPES.map(type => <option key={type} value={type}>{campaignTypeLabel(type)}</option>)}</select><p className="mt-2 text-sm text-gray-500">Los aportes utilizan saldo simulado. Puedes configurar recompensas opcionales; ninguna modalidad ofrece participación accionaria.</p></div>
+      <form className="flex flex-col gap-8" onSubmit={event => { void handleSubmit(onSubmit)(event); }} aria-busy={busy} noValidate>
+        <fieldset disabled={busy} className="contents">
+        <div><label htmlFor="campaign-type" className={labelClass}>Modalidad de campaña</label><select id="campaign-type" {...register('campaignType')} disabled={busy} className={inputClass}>{SUPPORTED_CAMPAIGN_TYPES.map(type => <option key={type} value={type}>{campaignTypeLabel(type)}</option>)}</select><p className="mt-2 text-sm text-gray-500">Los aportes utilizan saldo simulado. Puedes configurar recompensas opcionales; ninguna modalidad ofrece participación accionaria.</p></div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Fila 1: Título (2/3) y Meta de Recaudación (1/3) */}
           <div className="flex flex-col md:col-span-2">
@@ -682,17 +693,17 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
             type="button"
             className="w-full md:w-auto bg-slate-50 hover:bg-red-50 text-slate-500 hover:text-[#c62828] font-bold px-8 py-3.5 rounded-xl transition-all border-none active:scale-95 cursor-pointer text-[14px] flex items-center justify-center gap-2"
             onClick={() => setConfirmAction('discard')}
-            disabled={saving}
+            disabled={busy}
           >
             <X size={18} strokeWidth={2.5} />
             Descartar
           </button>
           <button
             type="submit"
-            disabled={saving}
+            disabled={busy}
             className="w-full md:w-auto bg-white hover:bg-slate-100 text-[#1c2b1e] font-black px-8 py-3.5 rounded-xl transition-all active:scale-95 border border-slate-200 cursor-pointer text-[14px] flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            {saving ? (
+            {busy ? (
               <>
                 <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
                 Guardando...
@@ -707,11 +718,11 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
           {onSubmitForReview && (
             <button
               type="button"
-              disabled={saving}
+              disabled={busy}
               className="w-full md:w-auto bg-[#72B626] hover:bg-[#1c2b1e] text-white font-black px-8 py-3.5 rounded-xl transition-all active:scale-95 shadow-lg shadow-green-500/20 border-none cursor-pointer text-[14px] flex items-center justify-center gap-2 disabled:opacity-50"
-              onClick={handleSubmit((data) => requestAction('review', data))}
+              onClick={event => { void handleSubmit(data => requestAction('review', data))(event); }}
             >
-              {saving ? (
+              {busy ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   Enviando...
@@ -725,6 +736,7 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
             </button>
           )}
         </div>
+        </fieldset>
       </form>
 
       {/* Confirmation Dialog */}

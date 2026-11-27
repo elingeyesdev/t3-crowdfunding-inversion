@@ -31,6 +31,9 @@ export function MyCampaignsPage() {
     campaigns,
     loading,
     error,
+    adding,
+    addError,
+    clearSaveError,
     addCampaign,
     updateCampaign,
     submitForReview,
@@ -52,6 +55,8 @@ export function MyCampaignsPage() {
   const [showKycModal, setShowKycModal] = useState(false);
 
   const handleLaunchClick = () => {
+    if (adding) return;
+    clearSaveError();
     if (profile && !profile.identityVerified) {
       setShowKycModal(true);
       return;
@@ -62,6 +67,7 @@ export function MyCampaignsPage() {
   const handleModalPreview = useCallback((c: EntrepreneurCampaign) => setPreviewCampaign(c), []);
 
   const handleModalEdit = useCallback(async (c: EntrepreneurCampaign) => {
+    clearSaveError();
     setPreviewCampaign(null);
     try {
       const fullCampaign = await getMyCampaignById(c.id);
@@ -69,7 +75,7 @@ export function MyCampaignsPage() {
     } catch {
       setEditingCampaign(c);
     }
-  }, []);
+  }, [clearSaveError]);
 
   const filteredCampaigns = campaigns.filter(c => {
     const matchesSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -270,7 +276,7 @@ export function MyCampaignsPage() {
             </p>
             {!searchTerm && statusFilter === 'all' && (
               <button
-                onClick={() => setCreatingCampaign(true)}
+                onClick={handleLaunchClick}
                 className="flex items-center gap-2 mx-auto px-5 py-3 rounded-xl font-semibold text-[13px] text-white border-none cursor-pointer transition-all hover:bg-[#4a7f1a]"
                 style={{ background: '#72B626', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
               >
@@ -313,12 +319,11 @@ export function MyCampaignsPage() {
                 const success = editingCampaign?.id
                   ? await updateCampaign(editingCampaign.id, dto, file, documents)
                   : await addCampaign(dto, file, documents);
-                if (success) {setEditingCampaign(null); setCreatingCampaign(false);}
                 return Boolean(success);
               }}
               onCancel={() => {setEditingCampaign(null); setCreatingCampaign(false);}}
-              saving={loading}
-              saveError={null}
+              saving={adding}
+              saveError={addError}
             />
           </div>
         </div>

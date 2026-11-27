@@ -18,6 +18,10 @@ diferida de gráficos y recuperación de errores; se incluyen en GitHub Actions.
 opacos reales del Laravel local: identidad del servidor, roles, datos anteriores,
 controles de sesión, recarga, cierre y recuperación de errores. También se incluye
 en CI. No contacta a Google ni acredita la integración externa con el proveedor.
+`npm run test:e2e -- campaign-saving.spec.ts` comprueba creación y edición desde
+Mis Campañas y el perfil del emprendedor: bloqueo de solicitudes pendientes,
+errores visibles, conservación de campos y archivos, reintento y guardado real.
+Los casos usan archivos sintéticos y también se ejecutan en CI.
 No ejecuta PHPUnit como sustituto de Playwright. Los casos funcionales conservan la HU y,
 cuando corresponde, el criterio verificable; la matriz del plan distingue una
 prueba de servicio de la aceptación completa de interfaz.

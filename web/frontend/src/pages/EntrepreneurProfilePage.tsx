@@ -70,6 +70,8 @@ export function EntrepreneurProfilePage() {
     uploadCampaignImage,
     adding,
     addError,
+    clearSaveError,
+    actionCampaignId,
   } = useCampaigns();
 
   const [modalType, setModalType] = useState<ModalType>(null);
@@ -100,7 +102,7 @@ export function EntrepreneurProfilePage() {
       const id = await addCampaign({ ...data, title: data.title ?? '', description: data.description ?? '', goalAmount: data.goalAmount ?? 0 }, file, documents);
       return id !== null;
     } else if (type === 'edit-campaign' && selectedCampaign) {
-      await updateCampaign(selectedCampaign.id, data, file, documents);
+      return updateCampaign(selectedCampaign.id, data, file, documents);
     } else {
       // Filtrar el payload para enviar solo campos permitidos por el DTO
       const baseData = { ...profile, ...data };
@@ -129,6 +131,7 @@ export function EntrepreneurProfilePage() {
   };
 
   const handleOpenModal = (type: ModalType) => {
+    if (type === 'new-campaign' || type === 'edit-campaign') clearSaveError();
     if (type === 'new-campaign') {
       if (!profile || !profile.identityVerified) {
         setModalType('kyc');
@@ -430,11 +433,11 @@ export function EntrepreneurProfilePage() {
 
       {(modalType === 'new-campaign' || modalType === 'edit-campaign') && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-[#1c2b1e]/80 backdrop-blur-sm" onClick={() => setModalType(null)} />
+          <div className="absolute inset-0 bg-[#1c2b1e]/80 backdrop-blur-sm" onClick={() => { if (!adding && !actionCampaignId) setModalType(null); }} />
           <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <CampaignForm
               initialData={modalType === 'edit-campaign' ? selectedCampaign : null}
-              onSuccess={(dto, file, documents) => handleSave(modalType, dto, file, documents).then(() => true)}
+              onSuccess={(dto, file, documents) => handleSave(modalType, dto, file, documents).then(result => result === true)}
               onSubmitForReview={async (dto, file, documents) => {
                 let campaignId: string | null = null;
                 if (modalType === 'new-campaign') {
@@ -482,6 +485,7 @@ export function EntrepreneurProfilePage() {
           }
         }}
         onEdit={async (campaign) => {
+          clearSaveError();
           setPreviewOpen(false);
           try {
             const fullCampaign = await getMyCampaignById(campaign.id);
