@@ -54,5 +54,5 @@ jobs:
         run: composer test
       - name: Install Chromium for production navigation checks
         run: npx playwright install --with-deps chromium
-      - name: Production route and lazy loading checks
-        run: npm run test:e2e -- bundle-loading.spec.ts
+      - name: Production routes, lazy loading and OAuth sessions
+        run: npm run test:e2e -- bundle-loading.spec.ts oauth-session.spec.ts
