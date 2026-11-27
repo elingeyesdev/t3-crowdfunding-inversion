@@ -40,6 +40,7 @@ const shells = [
 const apiNames = [
   'getAllMyCampaigns',
   'getMyCampaignById',
+  'getCampaignDocuments',
   'createCampaign',
   'updateCampaign',
   'submitCampaignForReview',
@@ -148,6 +149,7 @@ beforeEach(() => {
       meta: { totalItems: 1, totalPages: 1, currentPage: 1, itemsPerPage: 100, itemCount: 1 },
     }),
     getMyCampaignById: async () => campaign,
+    getCampaignDocuments: async () => [],
     createCampaign: (dto) => save('create', dto),
     updateCampaign: (_id, dto) => save('edit', dto),
     uploadCampaignImage: async (...args) => uploads.push({ kind: 'cover', args }),
@@ -514,4 +516,141 @@ test('unmount cancellation aborts the active upload and prevents queued files', 
   }, () => updates++);
   assert.equal(documentCalls, 0);
   assert.equal(updates, 1);
+});
+
+const savedDocument = (status = 'approved') => ({
+  id: 'saved-document', campaign_id: 'existing', original_name: 'saved.pdf',
+  file_url: '/api/v1/private-files/documents/saved.pdf?expires=123&signature=receipt',
+  justification: 'Respaldo que ya estaba guardado', status,
+  reviewer_notes: 'Observación de revisión',
+});
+async function openExisting() {
+  await mount(MyCampaignsPage);
+  await click(button('Vista previa de prueba'));
+  await click(button('Editar desde vista previa'));
+}
+
+for (const status of ['pending', 'approved']) {
+  test(`an existing ${status} document permits editing without uploading it again`, async () => {
+    const saved = savedDocument(status);
+    globalThis.__savingApi.getCampaignDocuments = async id => {
+      assert.equal(id, 'existing');
+      return [saved];
+    };
+    await openExisting();
+    const region = container.querySelector('[aria-label="Documentos guardados"]');
+    assert.match(region.textContent, /saved.pdf/);
+    assert.match(region.textContent, /Respaldo que ya estaba guardado/);
+    assert.match(region.textContent, status === 'pending' ? /Pendiente de revisión/ : /Aprobado/);
+    assert.match(region.textContent, /Observación de revisión/);
+    assert.equal(region.querySelector('a').getAttribute('href'), saved.file_url);
+    assert.equal(region.querySelectorAll('button[aria-label^="Quitar"]').length, 0);
+    await fill('#title', 'Título corregido sin subir archivos');
+    await submit();
+    await confirmTwice();
+    await act(async () => gate.resolve());
+    assert.equal(container.querySelector('form'), null);
+    assert.equal(mutations.length, 1);
+    assert.equal(mutations[0].dto.title, 'Título corregido sin subir archivos');
+    assert.deepEqual(uploads, []);
+  });
+}
+
+test('existing and new documents remain separate and only new files are uploaded', async () => {
+  const saved = savedDocument();
+  globalThis.__savingApi.getCampaignDocuments = async () => [saved];
+  const files = await prepare('edit');
+  assert.match(container.querySelector('[aria-label="Documentos guardados"]').textContent, /saved.pdf/);
+  assert.match(container.querySelector('[aria-label="Documentos nuevos"]').textContent, /support.pdf/);
+  await submit();
+  await confirmTwice();
+  await act(async () => gate.resolve());
+  assert.equal(uploads.length, 2);
+  assert.equal(uploads[1].args[1], files.document);
+  assert.equal(saved.id, 'saved-document');
+});
+
+test('loading and failure are distinct from empty documents, and retry preserves edits and new files', async () => {
+  const pending = deferred();
+  globalThis.__savingApi.getCampaignDocuments = () => pending.promise;
+  const files = await prepare('edit');
+  const saved = () => container.querySelector('[aria-label="Documentos guardados"]');
+  assert.match(saved().textContent, /Cargando documentos guardados/);
+  assert.doesNotMatch(saved().textContent, /no tiene documentos/);
+  assert.equal(button('Guardar Borrador').disabled, true);
+  await fill('#title', 'Título conservado durante la consulta');
+  await submit();
+  assert.equal(button('Sí, guardar'), undefined);
+  await act(async () => pending.reject(failure(500)));
+  assert.match(saved().textContent, /No se pudieron cargar/);
+  assert.doesNotMatch(saved().textContent, /no tiene documentos/);
+  assert.equal(button('Guardar Borrador').disabled, true);
+  globalThis.__savingApi.getCampaignDocuments = async () => [savedDocument()];
+  await click(button('Reintentar carga de documentos'));
+  assert.equal(container.querySelector('#title').value, 'Título conservado durante la consulta');
+  assert.equal(container.querySelector('#cover-upload').files[0], files.cover);
+  assert.match(container.querySelector('[aria-label="Documentos nuevos"]').textContent, /support.pdf/);
+  assert.equal(button('Guardar Borrador').disabled, false);
+  await submit();
+  await confirmTwice();
+  await act(async () => gate.resolve());
+  assert.equal(uploads.length, 2);
+});
+
+for (const status of ['rejected', 'unknown', 'empty']) {
+  test(`${status} documents do not satisfy the supporting-document requirement`, async () => {
+    globalThis.__savingApi.getCampaignDocuments = async () => status === 'empty' ? [] : [savedDocument(status)];
+    await openExisting();
+    const region = container.querySelector('[aria-label="Documentos guardados"]');
+    assert.match(region.textContent, status === 'rejected' ? /Rechazado/ : status === 'unknown' ? /Estado no reconocido/ : /no tiene documentos guardados/);
+    await submit();
+    assert.equal(button('Sí, guardar'), undefined);
+    assert.match(container.textContent, /Debes adjuntar al menos un documento/);
+    assert.deepEqual(mutations, []);
+    assert.deepEqual(uploads, []);
+  });
+}
+
+test('refresh renews saved links without resetting edits or queued files', async () => {
+  let calls = 0;
+  globalThis.__savingApi.getCampaignDocuments = async () => [{...savedDocument(), file_url: '/receipt-'+(++calls)}];
+  const files = await prepare('edit');
+  await fill('#description', 'Descripción corregida que debe conservarse al actualizar los documentos de respaldo.');
+  await click(button('Actualizar documentos guardados'));
+  assert.equal(container.querySelector('[aria-label="Documentos guardados"] a').getAttribute('href'), '/receipt-2');
+  assert.match(container.querySelector('#description').value, /Descripción corregida/);
+  assert.equal(container.querySelector('#cover-upload').files[0], files.cover);
+  assert.match(container.querySelector('[aria-label="Documentos nuevos"]').textContent, /support.pdf/);
+});
+
+test('a late document response from a closed editor cannot replace another campaign', async () => {
+  const old = deferred();
+  globalThis.__savingApi.getCampaignDocuments = id => id === 'existing' ? old.promise : Promise.resolve([{...savedDocument(), original_name:'current.pdf', campaign_id:id}]);
+  await openExisting();
+  await click(button('Descartar'));
+  await click(button('Sí, descartar'));
+  campaign = {...campaign, id:'another'};
+  await click(button('Vista previa de prueba'));
+  await click(button('Editar desde vista previa'));
+  await act(async () => old.resolve([savedDocument()]));
+  const region = container.querySelector('[aria-label="Documentos guardados"]');
+  assert.match(region.textContent, /current.pdf/);
+  assert.doesNotMatch(region.textContent, /saved.pdf/);
+});
+
+test('a new campaign never queries saved documents and still requires a new file', async () => {
+  let queries = 0;
+  globalThis.__savingApi.getCampaignDocuments = async () => { queries++; return []; };
+  await mount(MyCampaignsPage);
+  await click(button('Lanzar Campaña'));
+  await fill('#title', campaign.title);
+  await fill('#description', campaign.description);
+  await fill('#shortDescription', campaign.shortDescription);
+  await click(container.querySelector('input[type="checkbox"]'));
+  assert.equal(container.querySelector('[aria-label="Documentos guardados"]'), null);
+  await submit();
+  assert.equal(button('Sí, guardar'), undefined);
+  assert.match(container.textContent, /Debes adjuntar al menos un documento/);
+  assert.equal(queries, 0);
+  assert.deepEqual(mutations, []);
 });

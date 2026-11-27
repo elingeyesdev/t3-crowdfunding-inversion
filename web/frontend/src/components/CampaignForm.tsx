@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { getCampaignDocuments } from '../api/campaign.api';
+import { useAsyncResource } from '../hooks/useAsyncResource.ts';
 import { getApiErrorMessage } from '../utils/apiError.ts';
 import type { CampaignUploadProgress } from '../utils/campaignUploads.ts';
 import { useForm, useWatch, Controller } from 'react-hook-form';
@@ -101,6 +103,15 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
   const [showRewardForm, setShowRewardForm] = useState(false);
   const [editingRewardIndex, setEditingRewardIndex] = useState<number | null>(null);
   const [documents, setDocuments] = useState<{ file: File; justification: string }[]>([]);
+  const campaignId = initialData?.id;
+  const loadSavedDocuments = useCallback(
+    () => campaignId ? getCampaignDocuments(campaignId) : Promise.resolve([]),
+    [campaignId],
+  );
+  const savedDocuments = useAsyncResource(loadSavedDocuments, Boolean(campaignId) && isSupportedCampaignType(initialData?.campaignType));
+  const existingDocuments = savedDocuments.data ?? [];
+  const documentsUnavailable = savedDocuments.loading || Boolean(savedDocuments.error);
+  const hasSupportingDocument = existingDocuments.some(doc => doc.status === 'pending' || doc.status === 'approved');
   const [docFile, setDocFile] = useState<File | null>(null);
   const [docJustification, setDocJustification] = useState('');
   const [docError, setDocError] = useState<string | null>(null);
@@ -229,8 +240,12 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
 
   const requestAction = (action: 'draft' | 'review', data: FormValues) => {
     if (busy || submissionPending.current || saveProgress) return;
-    if (documents.length === 0) {
-      setDocError('Debes adjuntar al menos un documento de respaldo para continuar.');
+    if (documentsUnavailable) {
+      setDocError('Espera a que se carguen los documentos guardados o reintenta su consulta antes de continuar.');
+      return;
+    }
+    if (documents.length === 0 && !hasSupportingDocument) {
+      setDocError('Debes adjuntar al menos un documento de respaldo nuevo o conservar uno pendiente de revisión o aprobado para continuar.');
       return;
     }
     setDocError(null);
@@ -680,9 +695,36 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
             )}
           </div>
 
-          <div className="space-y-4 mb-6">
+          {campaignId && <section aria-label="Documentos guardados" className="space-y-4 mb-6">
+            <h4 className="font-bold text-sm text-[#1c2b1e]">Documentos guardados</h4>
+            {savedDocuments.loading ? (
+              <p role="status" className="text-sm text-slate-500">Cargando documentos guardados...</p>
+            ) : savedDocuments.error ? (
+              <div role="alert" className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-700">
+                <p>No se pudieron cargar los documentos guardados. Reintenta la consulta para continuar.</p>
+                <button type="button" disabled={busy || Boolean(saveProgress)} onClick={savedDocuments.retry} className="mt-2 font-bold underline">Reintentar carga de documentos</button>
+              </div>
+            ) : <>
+              {existingDocuments.length === 0 ? <p className="text-sm text-slate-500">Esta campaña no tiene documentos guardados.</p> : (
+                <ul className="space-y-3">
+                  {existingDocuments.map(doc => <li key={doc.id} className="bg-white p-4 rounded-xl border border-slate-200 text-sm space-y-2">
+                    <p className="font-bold break-words">{doc.original_name}</p>
+                    {doc.justification && <p className="text-slate-600 whitespace-pre-wrap break-words">{doc.justification}</p>}
+                    <p className="font-semibold">{doc.status === 'approved' ? 'Aprobado' : doc.status === 'pending' ? 'Pendiente de revisión' : doc.status === 'rejected' ? 'Rechazado' : 'Estado no reconocido'}</p>
+                    {doc.reviewer_notes && <p className="text-slate-600 whitespace-pre-wrap break-words">Observaciones: {doc.reviewer_notes}</p>}
+                    <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="inline-block font-bold text-[#4a7f1a] underline">Abrir documento</a>
+                  </li>)}
+                </ul>
+              )}
+              <button type="button" disabled={busy || Boolean(saveProgress)} onClick={savedDocuments.retry} className="text-sm font-bold text-[#4a7f1a] underline">Actualizar documentos guardados</button>
+              <p className="text-xs text-slate-500">Los documentos pendientes de revisión y aprobados cuentan como respaldo. Los rechazados se conservan para consulta y no cuentan como respaldo. Puedes actualizar esta lista para renovar los enlaces de descarga.</p>
+            </>}
+          </section>}
+
+          <div className="space-y-4 mb-6" role="region" aria-label="Documentos nuevos">
+            <h4 className="font-bold text-sm text-[#1c2b1e]">Documentos nuevos</h4>
             {documents.length === 0 ? (
-              <p className="text-[13px] text-slate-400">No hay documentos adjuntos aún.</p>
+              <p className="text-[13px] text-slate-400">No hay documentos nuevos seleccionados.</p>
             ) : (
               documents.map((doc, idx) => (
                 <div key={idx} className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200">
@@ -690,7 +732,7 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
                     <p className="font-bold text-[14px]">{doc.file.name}</p>
                     <p className="text-[12px] text-slate-500">{doc.justification}</p>
                   </div>
-                  <button type="button" onClick={() => removeDocument(idx)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg">
+                  <button type="button" aria-label={`Quitar documento nuevo ${doc.file.name}`} onClick={() => removeDocument(idx)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg">
                     <Trash2 size={16} />
                   </button>
                 </div>
@@ -741,7 +783,7 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
           </button>
           <button
             type="submit"
-            disabled={busy}
+            disabled={busy || documentsUnavailable}
             className="w-full md:w-auto bg-white hover:bg-slate-100 text-[#1c2b1e] font-black px-8 py-3.5 rounded-xl transition-all active:scale-95 border border-slate-200 cursor-pointer text-[14px] flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {busy ? (
@@ -759,7 +801,7 @@ function CampaignFormContent({ initialData, onSuccess, onSubmitForReview, onCanc
           {onSubmitForReview && (
             <button
               type="button"
-              disabled={busy}
+              disabled={busy || documentsUnavailable}
               className="w-full md:w-auto bg-[#72B626] hover:bg-[#1c2b1e] text-white font-black px-8 py-3.5 rounded-xl transition-all active:scale-95 shadow-lg shadow-green-500/20 border-none cursor-pointer text-[14px] flex items-center justify-center gap-2 disabled:opacity-50"
               onClick={event => { void handleSubmit(data => requestAction('review', data))(event); }}
             >
