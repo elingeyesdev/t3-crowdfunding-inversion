@@ -14,6 +14,10 @@ Para comprobar únicamente la carga del frontend compilado, ejecuta
 `npm run test:e2e -- bundle-loading.spec.ts` después de `npm run build`.
 Estos casos verifican aislamiento de módulos, rutas directas, recargas, descarga
 diferida de gráficos y recuperación de errores; se incluyen en GitHub Actions.
+`npm run test:e2e -- oauth-session.spec.ts` verifica el callback de acceso con tokens
+opacos reales del Laravel local: identidad del servidor, roles, datos anteriores,
+controles de sesión, recarga, cierre y recuperación de errores. También se incluye
+en CI. No contacta a Google ni acredita la integración externa con el proveedor.
 No ejecuta PHPUnit como sustituto de Playwright. Los casos funcionales conservan la HU y,
 cuando corresponde, el criterio verificable; la matriz del plan distingue una
 prueba de servicio de la aceptación completa de interfaz.

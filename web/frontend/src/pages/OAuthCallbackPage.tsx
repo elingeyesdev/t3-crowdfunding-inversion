@@ -1,87 +1,107 @@
-import { useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { persistUserRoleFromServer } from '../utils/authRole';
-
-const GREEN = '#72B626';
-
-function parseJwtPayload(token: string): { sub?: string; email?: string } {
-  try {
-    return JSON.parse(atob(token.split('.')[1]));
-  } catch {
-    return {};
-  }
-}
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { getMe } from '../api/auth.api.ts';
+import { clearStoredSession, establishSession } from '../utils/authSession.ts';
+import { getApiErrorMessage, getApiErrorStatus } from '../utils/apiError.ts';
 
 export function OAuthCallbackPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const processed = useRef(false);
+  // Retain the credential only in this mounted page while its URL is cleaned.
+  const [callback] = useState(() => ({
+    token: searchParams.get('token')?.trim() ?? '',
+    rejected: Boolean(searchParams.get('error')),
+  }));
+  const [attempt, setAttempt] = useState(0);
+  const [failure, setFailure] = useState<{
+    attempt: number;
+    message: string;
+    retryable: boolean;
+  } | null>(null);
+  const invalid = callback.rejected || !callback.token;
+  const currentFailure = invalid
+    ? {
+        message: 'El enlace de acceso está incompleto o fue rechazado. Vuelve a iniciar sesión.',
+        retryable: false,
+      }
+    : failure?.attempt === attempt
+      ? failure
+      : null;
 
   useEffect(() => {
-    if (processed.current) return;
-    processed.current = true;
+    clearStoredSession();
+    window.history.replaceState(window.history.state, '', '/auth/callback');
+    if (invalid) return;
 
-    const token = searchParams.get('token');
-    const userId = searchParams.get('userId');
-    const role = searchParams.get('role') as 'investor' | 'entrepreneur' | null;
-    const oauthError = searchParams.get('error');
-
-    if (oauthError || !token) {
-      navigate('/login?error=oauth', { replace: true });
-      return;
+    const controller = new AbortController();
+    let active = true;
+    async function complete() {
+      try {
+        const user = await getMe(callback.token, controller.signal);
+        if (!active) return;
+        const destination = establishSession(callback.token, user);
+        navigate(destination, { replace: true });
+      } catch (error) {
+        if (!active) return;
+        clearStoredSession();
+        const status = getApiErrorStatus(error);
+        setFailure({
+          attempt,
+          retryable: status === undefined || status === 429 || status >= 500,
+          message:
+            status === 401 || status === 403
+              ? 'El acceso de Google ya no es válido o no está autorizado. Vuelve a iniciar sesión.'
+              : getApiErrorMessage(
+                  error,
+                  'No pudimos completar el acceso con Google. Intenta nuevamente.',
+                ),
+        });
+      }
     }
-
-    // Guardar token y datos del usuario
-    localStorage.setItem('accessToken', token);
-    if (userId) localStorage.setItem('userId', userId);
-
-    // Decodificar email del JWT sin verificación (ya verificado por el backend)
-    const payload = parseJwtPayload(token);
-    if (payload.email) localStorage.setItem('userEmail', payload.email);
-
-    const appRole = persistUserRoleFromServer([role ?? 'investor'], role ?? 'investor');
-
-    if (appRole === 'entrepreneur') {
-      navigate('/entrepreneur-profile', { replace: true });
-    } else {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [searchParams, navigate]);
+    void complete();
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [callback, invalid, attempt, navigate]);
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#fff',
-        fontFamily: "'Plus Jakarta Sans', sans-serif",
-      }}
-    >
-      <div style={{ textAlign: 'center' }}>
+    <main className="min-h-screen flex items-center justify-center bg-white px-5 py-12 font-['Plus_Jakarta_Sans',sans-serif]">
+      {currentFailure ? (
+        <section
+          role="alert"
+          className="w-full max-w-md rounded-2xl border border-gray-200 p-8 text-center space-y-5"
+        >
+          <h1 className="text-2xl font-bold text-gray-900">
+            No pudimos completar el acceso con Google
+          </h1>
+          <p className="text-gray-600">{currentFailure.message}</p>
+          {currentFailure.retryable && (
+            <button
+              type="button"
+              onClick={() => setAttempt((previous) => previous + 1)}
+              className="rounded-xl bg-[#72B626] px-5 py-3 font-bold text-white"
+            >
+              Reintentar
+            </button>
+          )}
+          <Link to="/login" replace className="block text-[#4a7f1a] underline">
+            Volver a iniciar sesión
+          </Link>
+        </section>
+      ) : (
         <div
-          style={{
-            width: 44,
-            height: 44,
-            border: `3px solid ${GREEN}30`,
-            borderTopColor: GREEN,
-            borderRadius: '50%',
-            animation: 'spin 0.8s linear infinite',
-            margin: '0 auto 20px',
-          }}
-        />
-        <p style={{ color: '#6B7280', fontSize: 15, margin: 0 }}>
-          Iniciando sesión con Google...
-        </p>
-      </div>
-
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
-    </div>
+          role="status"
+          aria-live="polite"
+          className="flex flex-col items-center gap-5 text-gray-600"
+        >
+          <span
+            aria-hidden="true"
+            className="h-11 w-11 animate-spin rounded-full border-3 border-green-100 border-t-[#72B626]"
+          />
+          <p>Iniciando sesión con Google...</p>
+        </div>
+      )}
+    </main>
   );
 }
