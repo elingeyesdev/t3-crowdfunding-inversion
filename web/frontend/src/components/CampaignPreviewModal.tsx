@@ -97,6 +97,8 @@ interface Props {
   onUploadImage?: (campaignId: string, file: File) => Promise<boolean>;
   // Admin actions
   isAdmin?: boolean;
+  // Administrative data access without enabling document/campaign review actions.
+  adminView?: boolean;
   onApprove?: () => void;
   onReject?: (feedback: string) => void;
   // Shared
@@ -131,6 +133,7 @@ function CampaignPreviewContent({
   rewardTiers,
   entrepreneur,
   isAdmin,
+  adminView,
   onApprove,
   onReject,
   minInvestment,
@@ -207,11 +210,12 @@ function CampaignPreviewContent({
   const isPendingReview = campaign?.status === 'pending_review' || campaign?.status === 'in_review';
 
   const campaignId = campaign?.id ?? '';
-  const fetchHistory = useCallback(() => isAdmin ? getAdminHistory(campaignId) : getEntrepreneurHistory(campaignId), [campaignId,isAdmin]);
+  const adminAccess = Boolean(isAdmin || adminView);
+  const fetchHistory = useCallback(() => adminAccess ? getAdminHistory(campaignId) : getEntrepreneurHistory(campaignId), [campaignId,adminAccess]);
   const historyResource = useAsyncResource(fetchHistory, open && !!campaignId);
   const history = historyResource.data ?? [];
   const historyLoading = historyResource.loading;
-  const fetchFinance = useCallback(() => isAdmin ? getAdminFinancialProgress(campaignId) : getCampaignFinancialProgress(campaignId), [campaignId,isAdmin]);
+  const fetchFinance = useCallback(() => adminAccess ? getAdminFinancialProgress(campaignId) : getCampaignFinancialProgress(campaignId), [campaignId,adminAccess]);
   const financeResource = useAsyncResource(
     fetchFinance,
     open &&
@@ -219,7 +223,7 @@ function CampaignPreviewContent({
       (campaign?.status === 'published' || campaign?.status === 'funded' || !!isAdmin)
   );
   const finance = financeResource.data;
-  const fetchDocuments = useCallback(() => isAdmin ? getAdminCampaignDocuments(campaignId) : getEntrepreneurDocuments(campaignId), [campaignId,isAdmin]);
+  const fetchDocuments = useCallback(() => adminAccess ? getAdminCampaignDocuments(campaignId) : getEntrepreneurDocuments(campaignId), [campaignId,adminAccess]);
   const documentsResource = useAsyncResource(fetchDocuments, open && !!campaignId && activeTab === 'documents');
   const documents = documentsResource.data ?? [];
   const documentsLoading = documentsResource.loading;
@@ -779,11 +783,11 @@ function CampaignPreviewContent({
             </>
           ) : activeTab === 'investors' ? (
             <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">
-              <CampaignInvestorsTab campaignId={campaign.id} currency={currency} isAdmin={isAdmin} />
+              <CampaignInvestorsTab campaignId={campaign.id} currency={currency} isAdmin={adminAccess} />
             </div>
           ) : activeTab === 'rewards' ? (
             <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">
-              <CampaignRewardsTab campaignId={campaign.id} currency={currency} readOnly={true} isAdmin={isAdmin} canManageClaims={!isAdmin} />
+              <CampaignRewardsTab campaignId={campaign.id} currency={currency} readOnly={true} isAdmin={adminAccess} canManageClaims={!adminAccess} />
             </div>
           ) : activeTab === 'analytics' ? (
             <div className="flex-1 p-10 lg:p-12 overflow-y-auto bg-slate-50/30">

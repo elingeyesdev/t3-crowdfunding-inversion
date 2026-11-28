@@ -1,6 +1,9 @@
 import { useAsyncResource } from '../hooks/useAsyncResource.ts';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getOrCreateConversation } from '../api/chat.api';
+import { RequestErrorNotice } from './RequestErrorNotice';
 import { getCampaignInvestors } from '../api/campaign.api';
 import { getAdminCampaignInvestors } from '../api/admin.api';
 import type { CampaignInvestor } from '../types/campaign.types';
@@ -13,7 +16,6 @@ import {
   Heart,
   Loader2,
   ChevronRight,
-  ExternalLink,
   X,
 } from 'lucide-react';
 import { getImageUrl } from '../utils/image.utils';
@@ -25,9 +27,49 @@ interface Props {
   isAdmin?: boolean;
 }
 
-export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: Props) {
+export function CampaignInvestorsTab(props: Props) {
+  return <CampaignInvestorsContent key={`${props.campaignId}:${Boolean(props.isAdmin)}`} {...props} />;
+}
+
+function CampaignInvestorsContent({ campaignId, currency, isAdmin = false }: Props) {
   const [page, setPage] = useState(1);
   const [selectedInvestor, setSelectedInvestor] = useState<CampaignInvestor | null>(null);
+  const [openingChat, setOpeningChat] = useState(false);
+  const [chatError, setChatError] = useState<unknown>(null);
+  const pending = useRef(false);
+  const operation = useRef(0);
+  const mounted = useRef(false);
+  const navigate = useNavigate();
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+  const selectInvestor = (investor: CampaignInvestor | null) => {
+    operation.current++;
+    pending.current = false;
+    setOpeningChat(false);
+    setChatError(null);
+    setSelectedInvestor(investor);
+  };
+  const isSelf = selectedInvestor?.userId === localStorage.getItem('userId');
+  const openChat = async () => {
+    if (!selectedInvestor || isSelf || pending.current) return;
+    const attempt = ++operation.current;
+    pending.current = true;
+    setOpeningChat(true);
+    setChatError(null);
+    try {
+      const conversation = await getOrCreateConversation(selectedInvestor.userId, campaignId);
+      if (mounted.current && operation.current === attempt) navigate(`/chat/${conversation.id}`);
+    } catch (failure) {
+      if (mounted.current && operation.current === attempt) setChatError(failure);
+    } finally {
+      if (mounted.current && operation.current === attempt) {
+        pending.current = false;
+        setOpeningChat(false);
+      }
+    }
+  };
 
   const load = useCallback(() => isAdmin ? getAdminCampaignInvestors(campaignId, page) : getCampaignInvestors(campaignId, page), [campaignId,page,isAdmin]);
   const resource = useAsyncResource(load);
@@ -71,7 +113,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
             <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Registro de Donadores</h3>
           </div>
           <p className="text-slate-500 text-[14px] font-medium max-w-md">
-            Gestiona la relación con tus respaldos financieros. Pronto podrás enviar mensajes personalizados.
+            Consulta los aportes y abre una conversación con cada donador.
           </p>
         </div>
 
@@ -93,7 +135,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
           investors.map((inv) => (
             <div 
               key={inv.userId}
-              onClick={() => setSelectedInvestor(inv)}
+              onClick={() => selectInvestor(inv)}
               className="bg-white border border-slate-100 rounded-[32px] p-6 hover:shadow-2xl hover:border-gray-100 transition-all cursor-pointer group relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#f0f9e0]/30 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[#f0f9e0]/50 transition-colors"></div>
@@ -149,7 +191,7 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
                         {formatCampaignCurrency(inv.totalInvested, currency)}
                       </span>
                     </div>
-                    <button className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-[#72B626] group-hover:text-white transition-all flex items-center justify-center">
+                    <button type="button" aria-label={`Ver detalle de ${inv.displayName || `${inv.firstName} ${inv.lastName}`}`} className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-[#72B626] group-hover:text-white transition-all flex items-center justify-center">
                       <ChevronRight size={20} />
                     </button>
                   </div>
@@ -192,14 +234,16 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
       {/* Investor Profile Modal (Preview) */}
       {selectedInvestor && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-[#1c2b1e]/60 backdrop-blur-sm" onClick={() => setSelectedInvestor(null)}></div>
+          <div className="absolute inset-0 bg-[#1c2b1e]/60 backdrop-blur-sm" onClick={() => selectInvestor(null)}></div>
           
-          <div className="bg-white rounded-[40px] w-full max-w-[500px] overflow-hidden relative z-10 shadow-2xl animate-in zoom-in-95 duration-300 border border-white">
+          <div role="dialog" aria-modal="true" aria-label={`Detalle del donador ${selectedInvestor.displayName || `${selectedInvestor.firstName} ${selectedInvestor.lastName}`}`} className="bg-white rounded-[40px] w-full max-w-[500px] max-h-[90vh] overflow-y-auto relative z-10 shadow-2xl animate-in zoom-in-95 duration-300 border border-white">
             
             {/* Modal Header/Cover */}
             <div className="h-32 bg-gradient-to-br from-[#1c2b1e] to-[#72B626] relative">
               <button 
-                onClick={() => setSelectedInvestor(null)}
+                type="button"
+                aria-label="Cerrar detalle del donador"
+                onClick={() => selectInvestor(null)}
                 className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-md transition-all flex items-center justify-center border-none cursor-pointer"
               >
                 <X size={20} strokeWidth={2.5} />
@@ -263,15 +307,17 @@ export function CampaignInvestorsTab({ campaignId, currency, isAdmin = false }: 
                 </div>
               </div>
 
+              {Boolean(chatError) && <RequestErrorNotice error={chatError} fallback="No se pudo abrir la conversación con este donador." onRetry={() => { void openChat(); }} retrying={openingChat} />}
+              {isSelf && <p className="mt-6 text-sm text-slate-500">Este es tu propio perfil. Elige otro donador para iniciar una conversación.</p>}
+              {openingChat && <p role="status" className="mt-6 text-sm text-slate-500">Abriendo conversación...</p>}
               <div className="mt-10 flex gap-4">
                 <button 
-                  className="flex-1 h-14 bg-[#1c2b1e] hover:bg-[#72B626] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-3 shadow-lg shadow-[#1c2b1e]/20/10"
-                  onClick={() => alert('Próximamente: Chat con donador')}
+                  type="button"
+                  disabled={openingChat || isSelf}
+                  className="flex-1 h-14 bg-[#1c2b1e] hover:bg-[#72B626] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-3 shadow-lg shadow-[#1c2b1e]/20/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => { void openChat(); }}
                 >
-                  <MessageSquare size={18} /> Enviar Mensaje
-                </button>
-                <button className="w-14 h-14 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-2xl transition-all active:scale-95 flex items-center justify-center border-none cursor-pointer">
-                  <ExternalLink size={20} />
+                  {openingChat ? <Loader2 size={18} className="animate-spin" /> : <MessageSquare size={18} />} {openingChat ? 'Abriendo conversación...' : 'Enviar Mensaje'}
                 </button>
               </div>
             </div>

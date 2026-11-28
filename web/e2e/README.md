@@ -47,6 +47,12 @@ la recarga y la navegación hacia atrás y adelante. También comprueba que camb
 modalidad reinicie la página conservando los demás filtros y que limpiar filtros
 actualice la URL y el campo de búsqueda. Usa ambas modalidades en la base temporal
 y también forma parte de CI.
+`npm run test:e2e -- campaign-donor-chat.spec.ts` comprueba el acceso al chat desde
+los donadores en las vistas del emprendedor y de consulta administrativa. Incluye
+fallos con reintento, clics repetidos, destinatario y campaña correctos, reutilización
+de conversaciones y rechazos reales por destinatario inactivo o campaña privada.
+Usa aportes y cuentas sintéticos en la base temporal; no envía mensajes. También
+forma parte de CI.
 No ejecuta PHPUnit como sustituto de Playwright. Los casos funcionales conservan la HU y,
 cuando corresponde, el criterio verificable; la matriz del plan distingue una
 prueba de servicio de la aceptación completa de interfaz.
