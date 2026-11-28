@@ -1,5 +1,6 @@
 import { useAsyncResource } from '../../hooks/useAsyncResource.ts';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { RequestErrorNotice } from '../RequestErrorNotice';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ThumbsUp, MessageCircle, Send, Loader2, LogIn } from 'lucide-react';
 import { getImageUrl } from '../../utils/image.utils';
@@ -42,7 +43,11 @@ function Avatar({ name, avatarUrl }: { name: string | null | undefined; avatarUr
   return <span className="text-[13px] font-black text-white">{initials || '?'}</span>;
 }
 
-export function CampaignComments({ campaignId, readOnly = false }: Props) {
+export function CampaignComments(props: Props) {
+  return <CampaignCommentsContent key={props.campaignId} {...props} />;
+}
+
+function CampaignCommentsContent({ campaignId, readOnly = false }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -51,69 +56,89 @@ export function CampaignComments({ campaignId, readOnly = false }: Props) {
   const [commentText, setCommentText] = useState('');
   const [posting, setPosting] = useState(false);
   const [likingId, setLikingId] = useState<string | null>(null);
+  const [postError, setPostError] = useState<unknown>(null);
+  const [likeError, setLikeError] = useState<{ id: string; error: unknown } | null>(null);
+  const mutationPending = useRef(false);
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+  const busy = posting || likingId !== null;
 
   const isLoggedIn = !!localStorage.getItem('accessToken');
 
   const load = useCallback(() => getComments(campaignId), [campaignId]);
-  const {data, loading, setData: updateComments} = useAsyncResource(load);
-  const comments = data ?? [];
+  const {data, loading, error, retry, setData: updateComments} = useAsyncResource(load);
+  const comments = !loading && !error ? data ?? [] : [];
   const setComments = (update: (previous: CampaignComment[]) => CampaignComment[]) => updateComments(previous => update(previous ?? []));
   const handlePost = async () => {
-    if (readOnly) return;
+    if (readOnly || mutationPending.current || loading || error) return;
     if (!isLoggedIn) {
       navigate('/login', { state: { from: location.pathname } });
       return;
     }
     if (!commentText.trim()) return;
+    mutationPending.current = true;
+    setPostError(null);
     try {
       setPosting(true);
       const created = await postComment(campaignId, commentText.trim());
+      if (!mounted.current) return;
       // Enrich with likedByMe = false so UI is consistent
-      setComments((prev) => [{ ...created, likedByMe: false }, ...prev]);
+      setComments((prev) => [{ ...created, likedByMe: false }, ...prev.filter(comment => comment.id !== created.id)]);
       setCommentText('');
-    } catch {
-      // Could show a toast here
+    } catch (failure) {
+      if (mounted.current) setPostError(failure);
     } finally {
-      setPosting(false);
+      mutationPending.current = false;
+      if (mounted.current) setPosting(false);
     }
   };
 
   const handleLike = async (commentId: string) => {
-    if (readOnly) return;
+    if (readOnly || mutationPending.current || loading || error) return;
     if (!isLoggedIn) {
       navigate('/login', { state: { from: location.pathname } });
       return;
     }
-    if (likingId === commentId) return;
+    const original = comments.find(comment => comment.id === commentId);
+    if (!original) return;
+    mutationPending.current = true;
     setLikingId(commentId);
+    setLikeError(null);
 
     // Optimistic update
     setComments((prev) =>
       prev.map((c) =>
         c.id === commentId
-          ? { ...c, likedByMe: !c.likedByMe, likesCount: c.likedByMe ? c.likesCount - 1 : c.likesCount + 1 }
+          ? { ...c, likedByMe: !original.likedByMe, likesCount: Math.max(0, original.likesCount + (original.likedByMe ? -1 : 1)) }
           : c,
       ),
     );
 
     try {
       const result = await toggleCommentLike(campaignId, commentId);
+      if (!mounted.current) return;
       setComments((prev) =>
         prev.map((c) =>
           c.id === commentId ? { ...c, likedByMe: result.liked, likesCount: result.likesCount } : c,
         ),
       );
-    } catch {
+    } catch (failure) {
+      if (!mounted.current) return;
       // Revert optimistic update on error
       setComments((prev) =>
         prev.map((c) =>
           c.id === commentId
-            ? { ...c, likedByMe: !c.likedByMe, likesCount: c.likedByMe ? c.likesCount - 1 : c.likesCount + 1 }
+            ? { ...c, likedByMe: original.likedByMe, likesCount: original.likesCount }
             : c,
         ),
       );
+      setLikeError({ id: commentId, error: failure });
     } finally {
-      setLikingId(null);
+      mutationPending.current = false;
+      if (mounted.current) setLikingId(null);
     }
   };
 
@@ -128,7 +153,7 @@ export function CampaignComments({ campaignId, readOnly = false }: Props) {
           <MessageCircle size={20} strokeWidth={2.5} className="text-[#72B626]" />
         </div>
         Comentarios
-        {!loading && (
+        {!loading && !error && (
           <span className="ml-1 text-[14px] font-bold text-slate-400">({comments.length})</span>
         )}
       </h2>
@@ -167,8 +192,10 @@ export function CampaignComments({ campaignId, readOnly = false }: Props) {
             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           />
           <button
+            type="button"
+            aria-label="Publicar comentario"
             onClick={handlePost}
-            disabled={posting || !commentText.trim()}
+            disabled={busy || loading || Boolean(error) || !commentText.trim()}
             className="absolute right-3 bottom-3 w-8 h-8 rounded-xl bg-[#72B626] hover:bg-[#1c2b1e] text-white flex items-center justify-center transition-all active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed border-none cursor-pointer shadow-sm"
           >
             {posting ? (
@@ -179,6 +206,8 @@ export function CampaignComments({ campaignId, readOnly = false }: Props) {
           </button>
         </div>
       </div>}
+      {posting && <p role="status" className="mb-4 text-sm text-slate-500">Publicando comentario...</p>}
+      {!readOnly && Boolean(postError) && <RequestErrorNotice error={postError} fallback="No se pudo publicar tu comentario. El texto se conserva para que puedas reintentarlo." onRetry={() => { void handlePost(); }} retrying={busy || loading || Boolean(error)} />}
 
       {/* ── Login nudge for non-authenticated ── */}
       {!readOnly && !isLoggedIn && (
@@ -198,10 +227,12 @@ export function CampaignComments({ campaignId, readOnly = false }: Props) {
 
       {/* ── Comments list ── */}
       {loading ? (
-        <div className="flex items-center justify-center py-12 gap-3 text-slate-400">
+        <div role="status" className="flex items-center justify-center py-12 gap-3 text-slate-400">
           <Loader2 size={20} strokeWidth={2} className="animate-spin" />
           <span className="text-[13px] font-bold uppercase tracking-widest">Cargando comentarios...</span>
         </div>
+      ) : error ? (
+        <RequestErrorNotice error={error} fallback="No se pudieron cargar los comentarios." onRetry={retry} retrying={busy} />
       ) : comments.length === 0 ? (
         <div className="text-center py-12">
           <MessageCircle size={40} strokeWidth={1} className="text-slate-200 mx-auto mb-3" />
@@ -230,8 +261,11 @@ export function CampaignComments({ campaignId, readOnly = false }: Props) {
 
                 {/* Like button — YouTube style */}
                 <button
+                  type="button"
+                  aria-label={`${comment.likedByMe ? 'Quitar me gusta' : 'Dar me gusta'} al comentario de ${comment.authorName || 'Usuario'}`}
+                  aria-pressed={comment.likedByMe}
                   onClick={() => handleLike(comment.id)}
-                  disabled={readOnly || likingId === comment.id}
+                  disabled={readOnly || busy}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-black transition-all active:scale-90 border-none cursor-pointer disabled:opacity-60 ${
                     comment.likedByMe
                       ? 'bg-[#72B626]/10 text-[#72B626] hover:bg-[#72B626]/15'
@@ -248,6 +282,8 @@ export function CampaignComments({ campaignId, readOnly = false }: Props) {
                   )}
                   {comment.likesCount === 0 && <span>Me gusta</span>}
                 </button>
+                {likingId === comment.id && <p role="status" className="mt-2 text-sm text-slate-500">Actualizando me gusta...</p>}
+                {!readOnly && likeError?.id === comment.id && <RequestErrorNotice error={likeError.error} fallback="No se pudo actualizar el me gusta. Se restauró el estado anterior." onRetry={() => { void handleLike(comment.id); }} retrying={busy} />}
               </div>
             </div>
           ))}
