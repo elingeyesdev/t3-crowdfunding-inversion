@@ -56,4 +56,4 @@ jobs:
       - name: Install Chromium for production navigation checks
         run: npx playwright install --with-deps chromium
       - name: Production routes, sessions and web flows
-        run: npm run test:e2e -- bundle-loading.spec.ts oauth-session.spec.ts campaign-saving.spec.ts campaign-upload-recovery.spec.ts campaign-existing-documents.spec.ts donor-query-states.spec.ts
+        run: npm run test:e2e -- bundle-loading.spec.ts oauth-session.spec.ts campaign-saving.spec.ts campaign-upload-recovery.spec.ts campaign-existing-documents.spec.ts donor-query-states.spec.ts campaign-comments.spec.ts

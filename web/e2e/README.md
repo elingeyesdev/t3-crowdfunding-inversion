@@ -37,6 +37,10 @@ contra Laravel real; estos casos también forman parte de CI.
 y sesión vencida en el dashboard y el historial del perfil. Incluye reintentos
 con respuestas reales de Laravel, errores del perfil que no disparan la creación
 y la ausencia confirmada de perfil. Estos casos también se ejecutan en CI.
+`npm run test:e2e -- campaign-comments.spec.ts` comprueba consultas fallidas con
+recuperación, conservación del borrador, bloqueo de publicaciones duplicadas y
+restauración de likes y sus contadores. Los reintentos usan Laravel y verifican
+los comentarios y likes guardados en la base temporal. También forma parte de CI.
 No ejecuta PHPUnit como sustituto de Playwright. Los casos funcionales conservan la HU y,
 cuando corresponde, el criterio verificable; la matriz del plan distingue una
 prueba de servicio de la aceptación completa de interfaz.
