@@ -10,6 +10,7 @@ abstract final class AppRoutes {
 
   static const exploreName = 'explore';
   static const trackingName = 'tracking';
+  static const trackingCampaignName = 'trackingCampaign';
   static const notificationsName = 'notifications';
   static const accountName = 'account';
   static const accessName = 'access';
@@ -26,18 +27,31 @@ abstract final class AppRoutes {
       RegExp('^/explorar/campanas/$_uuid/aportar\$').hasMatch(path);
   static bool _receipt(String path) =>
       RegExp('^/comprobantes/$_uuid\$').hasMatch(path);
+  static bool _trackingCampaign(String path) =>
+      RegExp('^/seguimiento/campanas/$_uuid\$').hasMatch(path);
 
   static bool isPrivate(String path) =>
       path == tracking ||
       path == notifications ||
       path == receipts ||
+      _trackingCampaign(path) ||
+      _contribution(path) ||
+      _receipt(path);
+
+  static bool requiresDonor(String path) =>
+      path == tracking ||
+      path == receipts ||
+      _trackingCampaign(path) ||
       _contribution(path) ||
       _receipt(path);
 
   // Nunca aceptar URLs externas, rutas arbitrarias ni consultas anidadas.
   static String safeReturn(String? value) =>
       ([explore, account, tracking, notifications, receipts].contains(value) ||
-          (value != null && (_contribution(value) || _receipt(value))) ||
+          (value != null &&
+              (_contribution(value) ||
+                  _receipt(value) ||
+                  _trackingCampaign(value))) ||
           (value != null &&
               RegExp(
                 r'^/explorar/campanas/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',

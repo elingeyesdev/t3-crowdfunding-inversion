@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/router/app_routes.dart';
 import '../../auth/application/app_dependencies.dart';
+import '../../auth/application/session_state.dart';
 import '../application/catalog_controller.dart';
 import '../data/catalog_repository.dart';
 import 'campaign_widgets.dart';
@@ -61,7 +62,7 @@ class _CampaignDetailPageState extends State<CampaignDetailPage> {
     ),
     body: SafeArea(
       child: ListenableBuilder(
-        listenable: controller,
+        listenable: Listenable.merge([controller, widget.dependencies.session]),
         builder: (context, _) {
           if (controller.status == CampaignDetailStatus.loading) {
             return const Center(child: CircularProgressIndicator());
@@ -91,6 +92,11 @@ class _CampaignDetailPageState extends State<CampaignDetailPage> {
           }
           final campaign = controller.campaign!;
           final date = campaign.endDate?.toLocal();
+          final session = widget.dependencies.session;
+          final canContribute =
+              session.state.status == SessionStatus.guest ||
+              (session.accessToken != null &&
+                  (session.state.user?.roles.contains('investor') ?? false));
           return RefreshIndicator(
             onRefresh: () => controller.load(widget.campaignId),
             child: ListView(
@@ -113,7 +119,8 @@ class _CampaignDetailPageState extends State<CampaignDetailPage> {
                   Text(campaign.category!),
                 const SizedBox(height: 16),
                 CampaignProgress(campaign: campaign),
-                if ([
+                if (canContribute &&
+                    [
                       'published',
                       'partially_funded',
                     ].contains(campaign.status) &&

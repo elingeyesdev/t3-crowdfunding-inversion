@@ -2,8 +2,8 @@
 
 Aplicación Android de UniFundMe. Incluye acceso, perfiles por rol, catálogo
 público y detalle de campañas, aportes con saldo simulado, recompensas y
-comprobantes PDF. El seguimiento, las actualizaciones del emprendedor y las
-notificaciones corresponden a los issues siguientes.
+comprobantes PDF y seguimiento del donante. Las actualizaciones del emprendedor
+y las notificaciones corresponden a los issues #29 y #30.
 El issue [#24](https://github.com/elingeyesdev/t3-crowdfunding-inversion/issues/24)
 aportó la estructura, navegación, componentes comunes y cliente de API.
 
@@ -20,11 +20,18 @@ de esta versión sigue pendiente; consultar
 [el seguimiento del #26](docs/issue-26-catalogo-detalle.md).
 La [matriz del issue #24](docs/issue-24-cierre-tecnico.md) conserva evidencia histórica.
 
-El #27 está implementado en su rama desde Develop 116ef7b. La suite pasa con
+El #27 fue integrado en Develop mediante el PR #122 (`4af83fb`). Su evidencia histórica: La suite pasa con
 359 pruebas correctas y siete HTTP omitidas; sus tres HTTP se ejecutaron aparte:
 tres correctas. El APK debug ARM64 compila. La prueba nativa del PDF pasó en Samsung SM-N986N, Android 13.
 El recorrido completo de la app contra Laravel sigue pendiente. Consultar
 [el seguimiento del #27](docs/issue-27-aporte-recompensa-comprobante.md).
+
+El #28 está implementado desde Develop `4503f2c`, incluidos los cambios web de
+verificación de correo, preferencias y cierre automático con reembolsos. Su
+validación comprende 391 pruebas convencionales correctas, diez HTTP omitidas
+en la suite general y tres HTTP del #28 correctas por separado. El APK debug
+ARM64 compila; la aplicación en Windows y el recorrido en teléfono de esta
+versión quedan pendientes. Consultar [el seguimiento del #28](docs/issue-28-seguimiento-donante.md).
 
 El alcance de este producto son los issues #25–#30. Las modificaciones de
 Laravel/React corresponden al responsable web. Sus cambios se incorporan
@@ -64,7 +71,7 @@ y controladores; el cliente HTTP y el almacenamiento seguro son compartidos.
 | `lib/app/shell/main_shell.dart` | Contenedor y barra inferior Material 3 |
 | `lib/app/theme/app_theme.dart` | Único tema claro; morado provisional y fuente del sistema |
 | `lib/features/catalog/` | Contratos públicos, repositorio, controladores, catálogo, imágenes y detalle |
-| `lib/features/tracking/presentation/` | Seguimiento provisional |
+| `lib/features/tracking/` | Historial privado, recompensas, novedades paginadas y avances de campañas apoyadas |
 | `lib/features/notifications/presentation/` | Notificaciones provisionales |
 | `lib/features/account/` | Cuenta, consulta y edición de perfiles por rol, repositorio y controlador |
 | `lib/features/auth/` | Registro, login, sesión, validaciones y errores |
@@ -86,7 +93,8 @@ y controladores; el cliente HTTP y el almacenamiento seguro son compartidos.
 | `/` | Redirige a `/explorar` |
 | `/explorar` | Catálogo público con búsqueda, categoría, refresco y paginación |
 | `/explorar/campanas/:id` | Detalle público fuera de las pestañas; retorno al catálogo |
-| `/seguimiento` | Sección provisional |
+| `/seguimiento` | Aportes, recompensas y novedades del donante |
+| `/seguimiento/campanas/:id` | Recaudación, hitos y aportes propios de una campaña apoyada |
 | `/notificaciones` | Sección provisional |
 | `/cuenta` | Identidad, acceso a perfiles de los roles existentes y cierre de sesión |
 | `/acceso` | Inicio de sesión fuera de las pestañas |
@@ -234,9 +242,9 @@ y perfiles pasaron contra Laravel actualizado y una base temporal independiente.
   definitiva de distribución**. Firma y APK release siguen pendientes.
 - Acceso incluye autenticación y sesiones; el perfil tiene consulta y edición.
   Catálogo y detalle están implementados en #26. El #27 añade aportes con saldo
-  simulado, recompensas y PDF. Seguimiento, actualizaciones y notificaciones
-  corresponden a entregas posteriores.
-- El último resultado convencional reportado por el usuario es **301 pruebas
+  simulado, recompensas y PDF. El #28 añade seguimiento del donante. Las
+  actualizaciones del emprendedor y notificaciones corresponden a #29 y #30.
+- La evidencia histórica del #25 reportada por el usuario incluye **301 pruebas
   superadas**, más dos HTTP y recorridos de perfiles en Samsung SM-N986N,
   Android 13. La ejecución independiente del #25 dentro del motor Flutter
   también obtuvo **301 correctas y dos omitidas**; no sustituye la validación nativa.
@@ -257,3 +265,33 @@ adiciones del catálogo deben revisarse e incorporarse a Git después de su vali
 No interpretar un commit previo como evidencia de los cambios actuales sin commit.
 La publicación de la rama y del PR no equivale al cierre del issue ni actualiza
 automáticamente el Contexto Maestro o los demás chats del proyecto.
+
+## Validación del seguimiento móvil (#28)
+
+Desde `movil/`, con las dependencias preparadas:
+
+```powershell
+flutter analyze --no-pub
+flutter test test --no-pub
+```
+
+Con PHP 8.3 o superior, sus extensiones requeridas y las dependencias Laravel
+ya instaladas mediante Composer, el ejecutor prepara una base SQLite temporal,
+caches aisladas y cuentas exclusivamente de prueba. Limpia esos datos al acabar:
+
+```powershell
+& .\integration_test\run_laravel_tracking_http.ps1
+```
+
+Para revisar juntos los recorridos móviles de #27 y #28:
+
+```powershell
+& .\integration_test\run_laravel_tracking_http.ps1 -ServeOnly
+```
+
+Mantener esa terminal abierta, seguir sus comandos `adb reverse` y `flutter run`
+en otra terminal y pulsar Enter al terminar para limpiar. Las cuentas y su clave
+mostradas pertenecen únicamente a la base temporal; no usar credenciales reales.
+El ejecutor no instala herramientas ni cambia `.env` o archivos de Laravel.
+Las fixtures permanecen como soporte reproducible de pruebas; no son assets de
+la aplicación ni una base de datos incluida en el APK.

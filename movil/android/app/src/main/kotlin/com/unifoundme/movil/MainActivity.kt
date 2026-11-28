@@ -10,6 +10,8 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
+import android.content.Intent
+import android.net.Uri
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -18,6 +20,23 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         // Cola nativa serial: parsear y renderizar PDF nunca bloquea el hilo de UI.
         val messenger = flutterEngine.dartExecutor.binaryMessenger
+        // Solo enlaces web iniciados por un toque; nunca adjuntar el token API.
+        MethodChannel(messenger, "unifundme/external").setMethodCallHandler { call, result ->
+            if (call.method != "open") {
+                result.notImplemented()
+                return@setMethodCallHandler
+            }
+            try {
+                val raw = call.argument<String>("url") ?: throw IllegalArgumentException()
+                val uri = Uri.parse(raw)
+                require(raw.length <= 4096 && !raw.any { it <= ' ' || it == '\\' || it == '\u007f' })
+                require(uri.scheme in listOf("http", "https") && !uri.host.isNullOrEmpty() && uri.userInfo == null)
+                startActivity(Intent(Intent.ACTION_VIEW, uri).addCategory(Intent.CATEGORY_BROWSABLE))
+                result.success(true)
+            } catch (_: Exception) {
+                result.success(false)
+            }
+        }
         MethodChannel(messenger, "unifundme/receipt", StandardMethodCodec.INSTANCE, messenger.makeBackgroundTaskQueue())
             .setMethodCallHandler { call, result ->
                 if (call.method != "render") {
