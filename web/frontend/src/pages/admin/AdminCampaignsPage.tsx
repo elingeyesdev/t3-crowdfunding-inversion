@@ -262,6 +262,7 @@ export function AdminCampaignsPage() {
               setSelectedDetail(null);
             }}
             isAdmin={false} // Make it read-only for general campaign monitoring
+            adminView
             campaign={{
               id: selectedDetail.id,
               title: selectedDetail.title,
