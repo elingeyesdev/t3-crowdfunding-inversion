@@ -41,6 +41,12 @@ y la ausencia confirmada de perfil. Estos casos también se ejecutan en CI.
 recuperación, conservación del borrador, bloqueo de publicaciones duplicadas y
 restauración de likes y sus contadores. Los reintentos usan Laravel y verifican
 los comentarios y likes guardados en la base temporal. También forma parte de CI.
+`npm run test:e2e -- catalog-modality-links.spec.ts` verifica los enlaces del pie
+de página para donaciones y recompensas, su consulta real a Laravel, el selector,
+la recarga y la navegación hacia atrás y adelante. También comprueba que cambiar
+modalidad reinicie la página conservando los demás filtros y que limpiar filtros
+actualice la URL y el campo de búsqueda. Usa ambas modalidades en la base temporal
+y también forma parte de CI.
 No ejecuta PHPUnit como sustituto de Playwright. Los casos funcionales conservan la HU y,
 cuando corresponde, el criterio verificable; la matriz del plan distingue una
 prueba de servicio de la aceptación completa de interfaz.
