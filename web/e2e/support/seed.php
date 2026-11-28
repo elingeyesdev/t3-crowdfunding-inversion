@@ -13,8 +13,9 @@ if (DB::connection()->getDatabaseName() !== $runtime.'/runtime.sqlite') {
 Artisan::call('migrate:fresh', ['--force' => true]);
 Artisan::call('db:seed', ['--force' => true]);
 $accounts = [];
-foreach (['donor' => 'investor', 'otherDonor' => 'investor', 'owner' => 'entrepreneur', 'otherOwner' => 'entrepreneur', 'admin' => 'admin', 'superadmin' => 'super_admin'] as $name => $role) {
-    $u = User::create(['email' => $name.'@example.test', 'password_hash' => Hash::make('Password123')]);
+foreach (['donor' => 'investor', 'otherDonor' => 'investor', 'owner' => 'entrepreneur', 'otherOwner' => 'entrepreneur', 'admin' => 'admin', 'superadmin' => 'super_admin', 'unverifiedDonor' => 'investor', 'unverifiedOwner' => 'entrepreneur'] as $name => $role) {
+    $verified = ! in_array($name, ['unverifiedDonor', 'unverifiedOwner'], true);
+    $u = User::create(['email' => $name.'@example.test', 'password_hash' => Hash::make('Password123'), 'email_verified' => $verified]);
     $u->assignRole($role);
     if ($role === 'investor') {
         InvestorProfile::create(['user_id' => $u->id, 'first_name' => 'Ana', 'last_name' => 'Prueba', 'max_investment' => 500]);
@@ -23,12 +24,18 @@ foreach (['donor' => 'investor', 'otherDonor' => 'investor', 'owner' => 'entrepr
     } else {
         AdminProfile::create(['user_id' => $u->id, 'first_name' => 'Admin', 'last_name' => 'Prueba', 'access_level' => $role]);
     }
-    $accounts[$name] = ['id' => $u->id, 'email' => $u->email, 'token' => $u->createToken('e2e')->plainTextToken];
+    $accounts[$name] = ['id' => $u->id, 'email' => $u->email, 'emailVerified' => $verified, 'token' => $u->createToken('e2e')->plainTextToken];
 }
 $campaigns = [];
-foreach (['published', 'draft', 'approved', 'pending_review', 'rejected', 'funded', 'completed', 'failed', 'expired', 'kycPending'] as $name) {
-    $status = in_array($name, ['expired', 'kycPending']) ? ($name === 'expired' ? 'published' : 'approved') : $name;
-    $campaign = Campaign::create(['creator_id' => $accounts[$name === 'kycPending' ? 'otherOwner' : 'owner']['id'], 'category_id' => Category::first()->id, 'title' => 'QA '.$name, 'slug' => 'qa-'.$name, 'short_description' => 'Campaña sintética de aceptación', 'description' => str_repeat('Descripción de prueba de UniFundMe. ', 5), 'goal_amount' => 1000, 'current_amount' => 0, 'min_investment' => 10, 'max_investment' => 300, 'currency' => 'BOB', 'status' => $status, 'end_date' => $name === 'expired' ? now()->subDay() : now()->addDays(30), 'published_at' => in_array($status, ['published', 'funded', 'completed', 'failed']) ? now() : null]);
+foreach (['published', 'draft', 'approved', 'pending_review', 'rejected', 'funded', 'completed', 'failed', 'expired', 'kycPending', 'unverifiedDraft', 'unverifiedApproved'] as $name) {
+    $status = match ($name) {
+        'expired' => 'published',
+        'kycPending', 'unverifiedApproved' => 'approved',
+        'unverifiedDraft' => 'draft',
+        default => $name,
+    };
+    $owner = str_starts_with($name, 'unverified') ? 'unverifiedOwner' : ($name === 'kycPending' ? 'otherOwner' : 'owner');
+    $campaign = Campaign::create(['creator_id' => $accounts[$owner]['id'], 'category_id' => Category::first()->id, 'title' => 'QA '.$name, 'slug' => 'qa-'.$name, 'short_description' => 'Campaña sintética de aceptación', 'description' => str_repeat('Descripción de prueba de UniFundMe. ', 5), 'goal_amount' => 1000, 'current_amount' => 0, 'min_investment' => 10, 'max_investment' => 300, 'currency' => 'BOB', 'status' => $status, 'end_date' => $name === 'expired' ? now()->subDay() : now()->addDays(30), 'published_at' => in_array($status, ['published', 'funded', 'completed', 'failed']) ? now() : null]);
     $campaigns[$name] = $campaign->id;
 }
 EntrepreneurProfile::where('user_id', $accounts['otherOwner']['id'])->update(['identity_verified' => false, 'kyc_status' => 'pending']);

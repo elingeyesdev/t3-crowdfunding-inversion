@@ -1,6 +1,4 @@
 import type { Page, APIRequestContext } from '@playwright/test';
-import { DatabaseSync } from 'node:sqlite';
-import { resolve } from 'node:path';
 import { test, expect, fixtures as f, headers, data } from './fixtures';
 
 const base = '/api/v1/entrepreneurs/me/campaigns/' + f.campaigns.draft;
@@ -52,15 +50,6 @@ for (const entry of ['/entrepreneur-campaigns','/entrepreneur-profile']) {
       file:{name:'saved.pdf',mimeType:'application/pdf',buffer:pdf}, justification:'Respaldo guardado previamente',
     }}),201);
     const approved = entry === '/entrepreneur-profile';
-    if (approved) {
-      // The isolated fixture owner must satisfy the existing email-verification middleware.
-      const database = new DatabaseSync(resolve(process.env.UFM_E2E_RUNTIME!, 'runtime.sqlite'));
-      try {
-        expect(database.prepare('UPDATE users SET email_verified = 1 WHERE id = ?').run(f.accounts.owner.id).changes).toBe(1);
-      } finally {
-        database.close();
-      }
-    }
     if (approved) await data(await request.patch(`/api/v1/admin/campaigns/${f.campaigns.draft}/documents/${saved.id}/review`, {
       headers:headers('admin'), data:{status:'approved',reviewerNotes:'Revisado para la prueba'},
     }));

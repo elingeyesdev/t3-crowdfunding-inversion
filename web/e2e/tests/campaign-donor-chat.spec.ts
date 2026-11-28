@@ -10,7 +10,6 @@ function updateFixture(sql:string,...values:string[]) {
 }
 test.beforeEach(async({page,baseURL,request})=>{
   await page.route('**/*',route=>route.request().url().startsWith(baseURL!)?route.continue():route.abort());
-  updateFixture('UPDATE users SET email_verified = 1 WHERE id = ?',f.accounts.donor.id);
   await data(await request.post('/api/v1/investments',{headers:headers(),data:{campaignId:f.campaigns.published,amount:100}}),201);
 });
 async function session(page:Page,role:'owner'|'admin') {

@@ -3,6 +3,10 @@ import { test, expect, fixtures as f, headers, data, invest } from './fixtures';
 test('HU-C01-CA01 registro por correo asigna rol público', async ({ request }) => {
   const account = await data(await request.post('/api/v1/users/register', { data: { email: 'new@example.test', password: 'Password123', signupRole: 'entrepreneur' } }), 201);
   expect(account.roles).toContain('entrepreneur');
+  const session = await data(await request.post('/api/v1/auth/login', { data: { email: 'new@example.test', password: 'Password123' } }));
+  const identity = await data(await request.get('/api/v1/auth/me', { headers: { Authorization: `Bearer ${session.accessToken}` } }));
+  expect(identity.id).toBe(account.id);
+  expect(identity.emailVerified).toBe(false);
 });
 for (const password of ['short', 'password123', 'Password']) {
   test(`HU-C01-CA02 rechaza contraseña inválida ${password}`, async ({ request }) => {

@@ -10,6 +10,24 @@ npm run test:e2e
 ```
 
 La suite usa Playwright Test para interfaz Chromium y API HTTP real de Laravel.
+GitHub Actions ejecuta `npm run test:e2e` sin filtrar archivos: incluye todos los
+casos de `e2e/tests`, tanto la aceptación por API de `acceptance.spec.ts` como los
+recorridos de navegador y las nuevas regresiones que se incorporen a esa carpeta.
+La aceptación por API comprueba contratos y efectos de negocio; los recorridos
+Chromium aportan evidencia de interfaz para los flujos que ejercitan.
+
+Las cuentas sintéticas habituales tienen correo verificado para alcanzar las
+operaciones autorizadas y sus validaciones de negocio. `otherOwner` conserva su
+KYC pendiente aunque su correo esté verificado. Las cuentas `unverifiedDonor` y
+`unverifiedOwner` conservan correo pendiente; esta última tiene KYC aprobado y
+campañas propias con fechas válidas para aislar la restricción de correo.
+`email-verification-policy.spec.ts` comprueba estos estados contra la identidad
+autenticada de Laravel, el rechazo de aportes y de envío/publicación de campañas,
+y la conservación de saldos, aportes, contadores, estados e historial tras los
+rechazos. El registro de una cuenta nueva sigue esperando correo sin verificar.
+Estas condiciones se definen en `support/seed.php`, sin cambios puntuales de
+verificación dentro de cada prueba, y se restauran desde la instantánea por caso.
+
 Para comprobar únicamente la carga del frontend compilado, ejecuta
 `npm run test:e2e -- bundle-loading.spec.ts` después de `npm run build`.
 Estos casos verifican aislamiento de módulos, rutas directas, recargas, descarga
