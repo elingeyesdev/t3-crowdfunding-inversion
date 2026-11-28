@@ -125,7 +125,9 @@ test('a failed page chunk offers recovery and reloads the same URL successfully'
   await expect(page.getByRole('alert')).toContainText('No pudimos mostrar esta sección');
   fail = false;
   await page.getByRole('button', { name: 'Recargar página', exact: true }).click();
-  await expect(page.getByText('QA published', { exact: true })).toBeVisible();
+  // The restored query can also show the title in autocomplete suggestions.
+  await expect(page.getByRole('heading', { name: 'QA published', exact: true })).toBeVisible();
+  await expect(page.getByPlaceholder('Buscar campañas...', { exact: true })).toHaveValue('QA');
   await expect(page).toHaveURL(/\/explore\?q=QA$/);
 });
 

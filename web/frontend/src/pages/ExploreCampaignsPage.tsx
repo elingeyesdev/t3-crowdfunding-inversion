@@ -202,11 +202,16 @@ function CampaignCard({ campaign, onClick }: { campaign: PublicCampaign; onClick
 
 export function ExploreCampaignsPage() {
   const { campaigns, meta, loading, error, filters, updateFilters, goToPage } = usePublicCampaigns();
-  const [searchInput, setSearchInput] = useState('');
+  const location = useLocation();
+  const [searchInput, setSearchInput] = useState(filters.q ?? '');
+  const [previousLocationKey, setPreviousLocationKey] = useState(location.key);
+  if (previousLocationKey !== location.key) {
+    setPreviousLocationKey(location.key);
+    setSearchInput(filters.q ?? '');
+  }
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation();
 
   // ── Search suggestions state ──
   const [suggestions, setSuggestions] = useState<PublicCampaign[]>([]);

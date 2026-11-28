@@ -1,12 +1,11 @@
 import { useAsyncResource } from './useAsyncResource.ts';
 import { getApiErrorMessage } from '../utils/apiError.ts';
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { fetchPublicCampaigns, type PublicCampaignFilters } from '../api/public-campaigns.api';
 
 /**
- * Reads initial filter values from URL search params so that
- * navigating back from CampaignDetailPage restores the previous state.
+ * The current URL determines the filters, including browser history navigation.
  */
 function filtersFromSearchParams(sp: URLSearchParams): PublicCampaignFilters {
   return {
@@ -36,19 +35,9 @@ function filtersToSearchParams(f: PublicCampaignFilters): URLSearchParams {
   return params;
 }
 
-export function usePublicCampaigns(initialFilters: PublicCampaignFilters = {}) {
+export function usePublicCampaigns() {
   const [searchParams, setSearchParams] = useSearchParams();
-
-  // Initialize filters from URL on first render
-  const [filters, setFilters] = useState<PublicCampaignFilters>(() => ({
-    ...filtersFromSearchParams(searchParams),
-    ...initialFilters,
-  }));
-
-  // Sync filters → URL (replace, don't push, to avoid polluting history)
-  useEffect(() => {
-    setSearchParams(filtersToSearchParams(filters), { replace: true });
-  }, [filters, setSearchParams]);
+  const filters = useMemo(() => filtersFromSearchParams(searchParams), [searchParams]);
 
   const load = useCallback(() => fetchPublicCampaigns(filters), [filters]);
   const resource = useAsyncResource(load);
@@ -57,16 +46,16 @@ export function usePublicCampaigns(initialFilters: PublicCampaignFilters = {}) {
   const loading = resource.loading;
   const error = resource.error ? getApiErrorMessage(resource.error, 'Error al cargar campañas') : null;
   const updateFilters = useCallback((partial: Partial<PublicCampaignFilters>) => {
-    setFilters(prev => ({
-      ...prev,
+    setSearchParams(previous => filtersToSearchParams({
+      ...filtersFromSearchParams(previous),
       ...partial,
       page: partial.page ?? 1, // reset page on filter change unless specified
     }));
-  }, []);
+  }, [setSearchParams]);
 
   const goToPage = useCallback((page: number) => {
-    setFilters(prev => ({ ...prev, page }));
-  }, []);
+    updateFilters({ page });
+  }, [updateFilters]);
 
   const refresh = resource.retry;
 

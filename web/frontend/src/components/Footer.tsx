@@ -7,8 +7,8 @@ export function Footer() {
     {
       title: 'Explorar',
       links: [
-        { label: 'Campañas de Donación', to: '/explore?type=donation' },
-        { label: 'Campañas de Recompensa', to: '/explore?type=reward' },
+        { label: 'Campañas de Donación', to: '/explore?campaignType=donation' },
+        { label: 'Campañas de Recompensa', to: '/explore?campaignType=reward' },
         { label: 'DonaTok', to: '/donatok' },
         { label: 'Categorías', to: '/explore' },
       ],
